@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: libconio.h,v 1.3 2003/04/15 21:23:08 adamdunkels Exp $
+ * $Id: libconio.h,v 1.4 2003/07/04 12:18:08 adamdunkels Exp $
  *
  */
 
@@ -41,11 +41,13 @@
 
 #include "libconio-conf.h"
 
-/* This function must be implemented specifically for the architecure: */
+/* This function must be implemented specifically for the
+   architecure: */
 void ctk_arch_draw_char(char c,
 			unsigned char xpos,
 			unsigned char ypos,
-			unsigned char reversedflag);
+			unsigned char reversedflag,
+			unsigned char color);
 
 /* Default definitions that should be overridden by calling module. */
 #ifndef LIBCONIO_CONF_SCREEN_WIDTH
