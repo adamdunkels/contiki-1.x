@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.22 2004/08/09 21:44:28 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.23 2004/08/09 21:54:13 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -45,7 +45,7 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      rrnet.drv rrnet.dsc \
      tfe.drv tfe.dsc \
      lan91c96.drv lan91c96.dsc \
-     config.prg configedit.prg configedit.dsc \
+     config.prg configedit.prg configedit.dsc config.cfg \
      shell.prg shell.dsc \
      telnetd.prg telnetd.dsc \
      ftp.prg ftp.dsc \
@@ -73,6 +73,11 @@ CFLAGS:=$(CFLAGSCOMMON) \
         -DCTK_HIRES \
 	-DWITH_LOADER_ARCH \
         -DWITH_UIP -DWITH_ETHERNET
+
+config.cfg:
+	echo T CFS-CBM.DRV > config.cfg
+	echo T CTK-DEFAULT.DRV >> config.cfg
+	echo . >> config.cfg
 
 directory.prg: directory.o
 
