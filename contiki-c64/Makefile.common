@@ -74,5 +74,5 @@ WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o
 EMAIL=email.o smtp.o smtp-strings.o
 WEBSERVER=webserver.o http-strings.o 
 TELNET=simpletelnet.o telnet.o
-
+VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
 
