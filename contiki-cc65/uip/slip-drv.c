@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS fpr the C64
  *
- * $Id: slip-drv.c,v 1.2 2003/07/31 23:17:07 adamdunkels Exp $
+ * $Id: slip-drv.c,v 1.3 2003/08/06 23:16:17 adamdunkels Exp $
  *
  */
 
@@ -114,7 +114,8 @@ LOADER_INIT_FUNC(slip_drv_init)
     
     arptimer = 0;
     start = ek_clock();
-    
+
+    dispatcher_listen(uip_signal_uninstall);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -123,7 +124,8 @@ DISPATCHER_SIGHANDLER(slip_drv_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == dispatcher_signal_quit) {
+  if(s == dispatcher_signal_quit ||
+     s == uip_signal_uninstall) {
     dispatcher_exit(&p);
     id = EK_ID_NONE;
     LOADER_UNLOAD();   
