@@ -9,10 +9,7 @@
 # 2. Redistributions in binary form must reproduce the above copyright 
 #    notice, this list of conditions and the following disclaimer in the 
 #    documentation and/or other materials provided with the distribution. 
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#      This product includes software developed by Adam Dunkels.
-# 4. The name of the author may not be used to endorse or promote
+# 3. The name of the author may not be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.  
 #
@@ -30,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.2 2003/09/07 18:11:56 adamdunkels Exp $
+# $Id: Makefile,v 1.3 2004/07/04 19:51:19 adamdunkels Exp $
 #
 
 all: contiki loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -46,7 +43,7 @@ include Makefile.depend
 
 CFLAGS=$(CFLAGSCOMMON) -DWITH_LOADER_ARCH
 
-UIP=uip.o uip_arch.o uip_main.o resolv.o
+UIP=uip.o uip_arch.o uiplib.o resolv.o tcpip.o
 
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 
 EMAIL=email.o smtp.o smtp-strings.o
@@ -54,7 +51,7 @@ WEBSERVER=webserver.o http-strings.o
 TELNET=simpletelnet.o telnet.o
 
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
- ctk-conio.o ctk.o arg.o dispatcher.o \
+ ctk-conio.o ctk.o arg.o ek.o timer.o \
  program-handler.o loader-arch.o \
  about-dsc.o netconf-dsc.o processes-dsc.o memstat-dsc.o
 	$(CL) $(CLFLAGS) -o contiki -t $(SYS) $^

@@ -32,13 +32,13 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.3 2004/06/06 06:35:12 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.4 2004/07/04 19:51:19 adamdunkels Exp $
  *
  */
 
-#include "ctk.h"
+#include "contiki.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 
 #include "program-handler.h"
 #include "processes-dsc.h"
@@ -58,14 +58,15 @@
 
 /*-----------------------------------------------------------------------------------*/
 int
-main(int argc, char **argv)
+main(void)
 {
   /*  toggle_videomode(); */ /* Turn on 80 column mode */
 
-  dispatcher_init();
+  ek_init();
   
 #ifdef WITH_UIP
   uip_init();
+  tcpip_init();
   resolv_init();
 
 #ifdef WITH_TFE
@@ -93,19 +94,17 @@ main(int argc, char **argv)
   program_handler_add(&memstat_dsc, "Memory stats", 1);  
 
 
-  
-  dispatcher_run();
+  while(1) {
+    ek_run();
+  }
 
   clrscr();
   
   return 0;
-
-  argv = argv;
-  argc = argc;
 }
 /*-----------------------------------------------------------------------------------*/
-ek_clock_t
-ek_clock(void)
+clock_time_t
+clock_time(void)
 {
   return clock();
 }
