@@ -427,14 +427,6 @@ SOURCE=..\contiki\uip\tcpip.h
 # End Source File
 # Begin Source File
 
-SOURCE="..\contiki\uip\uip-event.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\contiki\uip\uip-event.h"
-# End Source File
-# Begin Source File
-
 SOURCE="..\contiki\uip\uip-fw.c"
 # End Source File
 # Begin Source File

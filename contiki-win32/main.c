@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.3 2004/08/12 22:53:42 oliverschmidt Exp $
+ * $Id: main.c,v 1.4 2004/09/12 20:03:56 oliverschmidt Exp $
  *
  */
 
@@ -44,7 +44,6 @@
 
 #include "program-handler.h"
 
-#include "uip-event.h"
 #include "uip.h"
 #include "uip_arp.h"
 
@@ -67,6 +66,8 @@ clock_time(void)
   return clock();
 }
 /*-----------------------------------------------------------------------------------*/
+void ppp_arch_putchar(void) {}
+void ppp_arch_getchar(void) {}
 void
 main(int argc)
 {
@@ -100,11 +101,9 @@ main(int argc)
 
   resolv_init(NULL);
 
-  uip_event_init();
-
   program_handler_init();
 
-#if 0
+#if 1
   uip_ipaddr(addr, 192,168,0,3);
   uip_sethostaddr(addr);
  
