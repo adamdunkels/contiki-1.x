@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.18 2003/04/28 23:21:42 adamdunkels Exp $
+ * $Id: ctk.c,v 1.19 2003/06/30 20:44:57 adamdunkels Exp $
  *
  */
 
@@ -204,7 +204,8 @@ ctk_init(void)
 
   iconx = ICONX_START;
   icony = ICONY_START;
-  
+
+  redraw = REDRAW_ALL;
 }
 /*-----------------------------------------------------------------------------------*/
 /* void ctk_mode_set()
@@ -242,12 +243,14 @@ void
 ctk_dialog_open(struct ctk_window *d)
 {
   dialog = d;
+  redraw |= REDRAW_ALL;
 }
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_dialog_close(void)
 {
   dialog = NULL;
+  redraw |= REDRAW_ALL;
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -287,6 +290,8 @@ ctk_window_open(CC_REGISTER_ARG struct ctk_window *w)
   /* Recreate the Desktop menu's window entries.*/
   make_desktopmenu();
 #endif /* CTK_CONF_MENUS */
+
+  redraw |= REDRAW_ALL;
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -330,6 +335,7 @@ ctk_window_close(struct ctk_window *w)
   /* Recreate the Desktop menu's window entries.*/
   make_desktopmenu();
 #endif /* CTK_CONF_MENUS */
+  redraw |= REDRAW_ALL;
 }
 /*-----------------------------------------------------------------------------------*/
 static void 
@@ -439,7 +445,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_redraw(void)
+ctk_desktop_redraw(struct ctk_desktop *d)
 {
   if(DISPATCHER_CURRENT() == ctkid) {
     if(mode == CTK_MODE_NORMAL ||
@@ -627,13 +633,13 @@ ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-ctk_desktop_width(struct ctk_window *w)
+ctk_desktop_width(struct ctk_desktop *w)
 {
   return ctk_draw_width();
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-ctk_desktop_height(struct ctk_window *w)
+ctk_desktop_height(struct ctk_desktop *w)
 {
   return ctk_draw_height();
 }
@@ -758,7 +764,7 @@ switch_open_menu(unsigned char rightleft)
     maxnitems = menus.open->nitems;
     }*/
 
-  /*  ctk_redraw();*/
+  /*  ctk_desktop_redraw();*/
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -1070,7 +1076,7 @@ ctk_idle(void)
       dispatcher_emit(ctk_signal_screensaver_stop, NULL, DISPATCHER_BROADCAST);
       mode = CTK_MODE_NORMAL;
       /*      ctk_draw_init();
-	      ctk_redraw();*/
+	      ctk_desktop_redraw();*/
     }
   } else
 #endif /* CTK_CONF_SCREENSAVER */
@@ -1126,11 +1132,16 @@ ctk_idle(void)
 	  }
 
 	  if(mxc >= menux && mxc <= menux + CTK_CONF_MENUWIDTH) {
-	    menus.open->active = myc;
+	    if(myc <= menus.open->nitems) {
+	      menus.open->active = myc;
+	    } else {
+	      menus.open->active = menus.open->nitems - 1;
+	    }
 	  }
 	  
 	  if(mouse_clicked) {
-	    if(mxc >= menux && mxc <= menux + CTK_CONF_MENUWIDTH) {
+	    if(mxc >= menux && mxc <= menux + CTK_CONF_MENUWIDTH &&
+	       myc <= menus.open->nitems) {
 	      redraw |= activate_menu();
 	    } else {
 	      lastmenu = menus.open;
@@ -1142,8 +1153,8 @@ ctk_idle(void)
 	  }
 	} else {
 
-	  /* Walk through the windows from top to bottom to see in which
-	     window the mouse pointer is. */
+	  /* Walk through the windows from top to bottom to see in
+	     which window the mouse pointer is. */
 	  if(dialog != NULL) {
 	    window = dialog;
 	  } else {	  	 	  
@@ -1166,10 +1177,10 @@ ctk_idle(void)
 	    window = &desktop_window;
 	  }
 
-	  /* If the mouse pointer moves around outside of the currently
-	     focused window (or dialog), we should not have any focused
-	     widgets in the focused window so we make sure that there
-	     are none. */
+	  /* If the mouse pointer moves around outside of the
+	     currently focused window (or dialog), we should not have
+	     any focused widgets in the focused window so we make sure
+	     that there are none. */
 	  if(windows != NULL &&
 	     window != windows &&
 	     windows->focused != NULL){	  
@@ -1179,8 +1190,8 @@ ctk_idle(void)
 	  }
 
 	  if(window != NULL) {
-	    /* If the mouse was clicked outside of the current window, we
-	       bring the clicked window to front. */
+	    /* If the mouse was clicked outside of the current window,
+	       we bring the clicked window to front. */
 	    if(dialog == NULL &&
 	       window != &desktop_window &&	   
 	       window != windows &&
@@ -1190,13 +1201,15 @@ ctk_idle(void)
 	      redraw |= REDRAW_ALL;
 	    } else {
 	  
-	      /* Find out which widget currently is under the mouse pointer
-		 and give it focus, unless it already has focus. */
+	      /* Find out which widget currently is under the mouse
+		 pointer and give it focus, unless it already has
+		 focus. */
 	      mxc = mxc - window->x - 1;
 	      myc = myc - window->y - 1;      
 	    
-	      /* See if the mouse pointer is on a widget. If so, it should be
-		 selected and, if the button is clicked, activated. */
+	      /* See if the mouse pointer is on a widget. If so, it
+		 should be selected and, if the button is clicked,
+		 activated. */
 	      for(widget = window->active; widget != NULL;
 		  widget = widget->next) {
 		if(mxc >= widget->x &&
@@ -1314,7 +1327,7 @@ ctk_idle(void)
 	    for(window = windows; window->next != NULL;
 		window = window->next);
 	    ctk_window_open(window);
-	    ctk_redraw();
+	    ctk_desktop_redraw(NULL);
 	  }
 	  break;
 	default:
