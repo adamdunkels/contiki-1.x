@@ -31,13 +31,13 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.3 2003/08/24 22:57:48 adamdunkels Exp $
+ * $Id: shell-gui.c,v 1.4 2003/09/01 22:22:36 adamdunkels Exp $
  *
  */
 
 #include "program-handler.h"
 #include "loader.h"
-#include "c64-fs.h"
+
 #include "uip.h"
 #include "uip_main.h"
 #include "uip_arp.h"
