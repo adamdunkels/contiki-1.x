@@ -32,12 +32,12 @@
  *
  * This file is part of the Contiki VNC server
  *
- * $Id: ctk-vncfont.h,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: ctk-vncfont.h,v 1.2 2003/08/05 13:50:38 adamdunkels Exp $
  *
  */
 #ifndef __CTK_VNCFONT_H__
 #define __CTK_VNCFONT_H__
 
-unsigned char ctk_vncfont[6*8*128];
+extern unsigned char ctk_vncfont[6*8*128];
 
 #endif /* __CTK_VNCFONT_H__ */
