@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.2 2003/09/05 21:22:48 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.3 2003/11/27 15:56:57 adamdunkels Exp $
  *
  */
 
@@ -53,18 +53,17 @@
 #include "about-dsc.h"
 #include "netconf-dsc.h"
 #include "processes-dsc.h"
-#include "calc-dsc.h"
 #include "www-dsc.h"
 #include "webserver-dsc.h"
 
 #include "sensorview-dsc.h"
 
-#include "weblinks-dsc.h"
-
 #include "sensors.h"
 
 #include "uip.h"
 #include "uip_arp.h"
+
+#include "msp430.h"
 
 
 #include "rs232.h"
@@ -72,95 +71,14 @@ void slip_drv_init(char *arg);
 
 
 
-
 static u16_t addr[2];
-static unsigned short count;
-
 /*-----------------------------------------------------------------------------------*/
-unsigned short
-clock(void)
-{
-  return count++;
-}
-/*-----------------------------------------------------------------------------------*/
-void
-beep(void)
-{
-  unsigned int i, j;
-  
-  /* Beep. */
-  P2OUT &= 0xFE;
-  P2OUT |= 8;
-  for(i = 0; i < 140; ++i) {
-    j = j * j;
-  }
-  P2OUT &= 0xf7;
-  P2OUT |= 0x01;  
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-rs232_print(char *cptr)
-{
-  while(*cptr != 0) {
-    rs232_put(*cptr);
-    ++cptr;
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-init_hardware(void)
-{
-  int j;
-  char c;
 
-    ////////// Port 1 ////
-  P1SEL = 0x00;
-  P1DIR = 0x81;       // Outputs: P10=IRSend, P17=RS232RTS
-                      // Inputs: P11=Light, P12=IRRec, P13=PIR, P14=Vibration, 
-                      //         P15=Clockalarm, P16=RS232CTS
-  P1OUT = 0x00;
-
-  ////////// Port 2 ////
-  P2SEL = 0x00;       // No Sels
-  P2DIR = 0x7F;       // Outpus: P20..P23=Leds+Beeper, P24..P26=Poti
-                      // Inputs: P27=Taster
-  P2OUT = 0x77;
-  
-  ////////// Port 3 ////
-  P3SEL = 0xE0;       // Sels for P34..P37 to activate UART, 
-  P3DIR = 0x5F;       // Inputs: P30..P33=CON4, P35/P37=RXD Transceiver/RS232
-                      // OutPuts: P36/P38=TXD Transceiver/RS232
-  P3OUT = 0xE0;       // Output a Zero on P34(TXD Transceiver) and turn SELECT off when receiving!!!
-
-  ////////// Port 4 ////
-  P4SEL = 0x00;       // CON5 Stecker
-  P4DIR = 0xFF;
-  P4OUT = 0x00;
-  
-  ////////// Port 5 ////
-  P5SEL = 0x00;       // P50/P51= Clock SDA/SCL, P52/P53/P54=EEPROM SDA/SCL/WP
-  P5DIR = 0xDA;       // P56/P57=Transceiver CNTRL0/1
-  P5OUT = 0x0F;
-  
-  ////////// Port 6 ////
-  P6SEL = 0x00;       // P60=Microphone, P61=PIR digital (same as P13), P62=PIR analog
-  P6DIR = 0x00;       // P63=extern voltage, P64=battery voltage, P65=Receive power
-  P6OUT = 0x00;
-
-  /* Red led on */
-  P2OUT &= 0xfd;  
-  
-  eint();   /* Enable interrupts. */
-
-  beep();
-}
-/*-----------------------------------------------------------------------------------*/
-extern  const unsigned char data_index_html[];
 int
 main(int argc, char **argv)
 {
 
-  init_hardware();
+  msp430_init();
 
   rs232_init(0);
   
@@ -169,25 +87,25 @@ main(int argc, char **argv)
   rs232_print("uip_init()...\n"); 
   uip_init();
 
-  rs232_print("resolv_init()...\n");
-  resolv_init();
+  /*  rs232_print("resolv_init()...\n");
+      resolv_init();*/
   
 
   
-#if 1
+#if 0
   uip_ipaddr(addr, 193,10,67,150);
   uip_sethostaddr(addr);
  
-  uip_ipaddr(addr, 193,10,66,195);
-  resolv_conf(addr);
+  /*  uip_ipaddr(addr, 193,10,66,195);
+      resolv_conf(addr);*/
 
 #else
 
   uip_ipaddr(addr, 172,16,0,2);
   uip_sethostaddr(addr);
  
-  uip_ipaddr(addr, 193,10,66,195);
-  resolv_conf(addr);
+  /*  uip_ipaddr(addr, 193,10,66,195);
+      resolv_conf(addr);*/
 #endif
 
   
@@ -200,20 +118,22 @@ main(int argc, char **argv)
 
 
   rs232_print("ctk_init()...\n");  
-  ctk_init();
+  /*  ctk_init();*/
 
   rs232_print("ctk_vncserver_init()...\n");  
-  ctk_vncserver_init(NULL);  
+  /*  ctk_vncserver_init(NULL);  */
 
   rs232_print("program_handler_init()...\n");  
-  program_handler_init();
+  /*  program_handler_init();*/
 
   /*  rs232_print("processes_init()...\n");  
       processes_init(NULL);*/
 
   rs232_print("webserver_init()...\n");  
-  webserver_init(NULL);
+  /*  webserver_init(NULL);*/
 
+  sensorcheck_init(NULL);
+  
   
   /*  program_handler_add(&directory_dsc, "Directory", 1);*/
   /*  program_handler_add(&about_dsc, "About", 1);*/
@@ -223,7 +143,7 @@ main(int argc, char **argv)
   /*  program_handler_add(&processes_dsc, "Processes", 0);*/
 
   rs232_print("program_handler_addd()...\n");  
-  program_handler_add(&sensorview_dsc, "Sensors", 1);
+  /*  program_handler_add(&sensorview_dsc, "Sensors", 1);*/
   
 
   rs232_print("dispatcher_run()...\n");
