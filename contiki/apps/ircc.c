@@ -6,6 +6,8 @@
 
 #include "ircc-strings.h"
 
+#include "petsciiconv.h"
+
 #include <string.h>
 
 #define PORT 6667
@@ -328,9 +330,10 @@ PT_THREAD(handle_input(struct ircc_state *s))
 	  if(ptr != NULL) {
 	    *ptr = 0;
 	  }
-	  
-	  ircc_text_output(s, r.name,
-			   &r.trailing[strlen(ircc_strings_action)]);
+	  ptr = &r.trailing[strlen(ircc_strings_action)];
+	  petsciiconv_topetscii(r.name, strlen(r.name));
+	  petsciiconv_topetscii(ptr, strlen(ptr));
+	  ircc_text_output(s, r.name, ptr);
 	} else if(strncmp(r.trailing, ircc_strings_version_query,
 			  strlen(ircc_strings_version_query)) == 0) {
 	  if(r.name != NULL) {
@@ -345,6 +348,8 @@ PT_THREAD(handle_input(struct ircc_state *s))
 	    SEND_STRING(&s->s, ircc_strings_ctcpcrnl);
 	  }
 	} else {
+	  petsciiconv_topetscii(r.name, strlen(r.name));
+	  petsciiconv_topetscii(r.trailing, strlen(r.trailing));
 	  ircc_text_output(s, r.name, r.trailing);
 	}
       }
