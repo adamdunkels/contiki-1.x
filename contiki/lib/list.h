@@ -46,6 +46,12 @@ void *list_head(void **list);
 void *list_tail(void **list);
 void *list_pop (void **list);
 void  list_push(void **list, void *item);
+
+void *list_chop(void **list);
+
+void  list_add(void **list, void *item);
+
+
 void  list_copy(void **dest, void **src);
 
 #endif /* __LIST_H__ */

@@ -39,8 +39,12 @@ list_tail(void **list)
   return l;
 }
 /*------------------------------------------------------------------------------*/
+/**
+ * Add an item at the end of the list.
+ *
+ */
 void
-list_push(void **list, void *item)
+list_add(void **list, void *item)
 {
   struct list *l;
 
@@ -56,6 +60,46 @@ list_push(void **list, void *item)
 }
 /*------------------------------------------------------------------------------*/
 /**
+ * Add an item to the start of the list.
+ */
+void
+list_push(void **list, void *item)
+{
+  struct list *l;
+
+  ((struct list *)item)->next = *list;
+  *list = item;
+}
+/*------------------------------------------------------------------------------*/
+/**
+ * Remove the last object on the list.
+ *
+ * @return The removed object
+ */
+void *
+list_chop(void **list)
+{
+  struct list *l, *r;
+  
+  if(*list == NULL) {
+    return NULL;
+  }
+  if(((struct list *)*list)->next == NULL) {
+    l = *list;
+    *list = NULL;
+    return l;
+  }
+  
+  for(l = *list; l->next->next != NULL; l = l->next);
+
+  r = l->next;
+  l->next = NULL;
+  
+  return r;
+}
+/*------------------------------------------------------------------------------*/
+/**
+ * Remove the first object on the list.
  *
  * @return The new head of the list.
  */
