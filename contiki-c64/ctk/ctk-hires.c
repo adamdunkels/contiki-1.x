@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.1 2003/04/17 15:09:45 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.2 2003/04/24 17:05:41 adamdunkels Exp $
  *
  */
 
@@ -429,6 +429,7 @@ ctk_draw_init(void)
   return;
 }
 /*-----------------------------------------------------------------------------------*/
+#if 0
 static void
 draw_bitmap_icon(unsigned char *bitmap)
 {
@@ -543,8 +544,9 @@ draw_bitmap_icon(unsigned char *bitmap)
   
   asm("lda _tmp01");
   asm("sta $01");  
-  asm("cli"); 
+  asm("cli");
 }
+#endif /* 0 */
 /*-----------------------------------------------------------------------------------*/
 static void
 draw_widget(struct ctk_widget *w,
@@ -651,19 +653,33 @@ draw_widget(struct ctk_widget *w,
   case CTK_WIDGET_ICON:
     if(ypos >= clipy1 && ypos < clipy2) {
       hires_color(ctk_hires_theme.iconcolors[focus]);
-      hires_gotoxy(xpos, ypos);
-      if(w->widget.icon.bitmap != NULL) {
-	draw_bitmap_icon(w->widget.icon.bitmap);
-      }
-      x = xpos;
 
+      x = xpos;
       len = strlen(w->widget.icon.title);
       if(x + len >= SCREEN_WIDTH) {
 	x = SCREEN_WIDTH - len;
       }
       
-      hires_gotoxy(x, ypos + 3);
-      ctk_hires_cputsn(w->widget.icon.title, len);
+      if(ypos + 3 < clipy2) {
+	hires_gotoxy(x, ypos + 3);
+	ctk_hires_cputsn(w->widget.icon.title, len);
+      }
+
+      hires_gotoxy(xpos, ypos);
+      if(w->widget.icon.bitmap != NULL) {
+	ctk_hires_bitmapptr = w->widget.icon.bitmap;
+	for(i = 0; i < 3; ++i) {
+	  if(ypos >= clipy1 && ypos < clipy2) {
+	    hires_gotoxy(xpos, ypos);
+	    ctk_hires_draw_bitmapline(3);
+	  }
+	  ctk_hires_bitmapptr += 3 * 8;
+	  ++ypos;
+	}
+	
+	/*	draw_bitmap_icon(w->widget.icon.bitmap);*/
+      }
+
     }
     break;
   case CTK_WIDGET_BITMAP:
@@ -718,7 +734,7 @@ ctk_draw_clear_window(struct ctk_window *window,
   h = window->y + 2 + window->h;
   /* Clear window contents. */
   for(i = window->y + 2; i < h; ++i) {
-    if(i >= clipy1 && i < clipy2) {
+    if(i >= clipy1 && i <= clipy2) {
       hires_cclearxy(window->x + 1, i, window->w);
     }
   }
@@ -736,17 +752,16 @@ ctk_draw_window(register struct ctk_window *window,
 
   ++clipy2;
   
-  if(clipy2 < y) {
+  if(clipy2 <= y) {
     return;
   }
   
-  hires_color(ctk_hires_theme.windowcolors[focus+1]);
+  /*  hires_color(ctk_hires_theme.windowcolors[focus+1]);*/
   
   x1 = x + 1;
   y1 = y + 1;
-  x2 = x1 + window->w;
-  y2 = y1 + window->h;
-
+  /*  x2 = x1 + window->w;
+      y2 = y1 + window->h;*/
     
   hires_gotoxy(x, y);
   ctk_hires_windowparams.w = window->w;
@@ -762,56 +777,10 @@ ctk_draw_window(register struct ctk_window *window,
   ctk_hires_windowparams.title = window->title;
   ctk_hires_windowparams.titlelen = window->titlelen;
 
-  ctk_hires_draw_windowborders();
-  
-#if 0
-  /* Draw window frame. */  
-  if(y >= clipy1) {
-    windowulcorner(x, y);
-    windowupperborder(x + 3 + strlen(window->title),
-		      y, window->w - 5 - strlen(window->title));
-    windowurcorner(x + window->w + 1, y);
-    hires_gotoxy(x + 1, y);
-    hires_color(ctk_hires_theme.windowcolors[focus]);
-    ctk_hires_cputc(' ');
-    ctk_hires_cputsn(window->title, window->titlelen);
-    ctk_hires_cputc(' ');
+  if(ctk_hires_windowparams.clipy1 < ctk_hires_windowparams.clipy2 &&
+     ctk_hires_windowparams.clipy2 > 0) {
+    ctk_hires_draw_windowborders();
   }
-
-  h = window->h;
-  
-  if(clipy1 > y1) {
-    if(clipy1 - y1 < h) {
-      h = clipy1 - y1;
-      y1 = clipy1;
-    } else {
-      h = 0;
-    }
-  }
-
-  if(y1 + h >= clipy2) {
-    if(y1 >= clipy2) {
-      h = 0;
-    } else {
-      h = clipy2 - y1;
-    }
-  }
-
-  if(h == 0) {
-    return;
-  }
-  
-  hires_color(ctk_hires_theme.windowcolors[focus+1]);  
-  windowsideborder(x, y1, h+1, 0xc0);
-  hires_color(ctk_hires_theme.windowcolors[focus]);
-  windowsideborder(x2, y+1, h, 0x0b);
-
-  if(y + window->h >= clipy1 &&
-     y + window->h < clipy2) {
-    windowlowerborder(x1, y2, window->w);
-  }
-
-#endif /* 0 */
   
   focus = focus & CTK_FOCUS_WINDOW;
   
