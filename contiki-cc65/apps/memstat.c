@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.2 2003/08/24 22:41:55 adamdunkels Exp $
+ * $Id: memstat.c,v 1.3 2003/09/07 18:09:57 adamdunkels Exp $
  *
  */
 
@@ -122,7 +122,6 @@ quit(void)
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
-  ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
 static
