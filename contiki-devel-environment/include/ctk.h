@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.1 2003/04/09 12:55:06 adamdunkels Exp $
+ * $Id: ctk.h,v 1.2 2003/04/09 19:15:27 adamdunkels Exp $
  *
  */
 
@@ -41,6 +41,8 @@
 
 #include "ctk-conf.h"
 #include "ek.h"
+
+#include "cc.h"
 
 /* Defintions for the CTK widget types. */
 #define CTK_WIDGET_SEPARATOR 1
@@ -238,8 +240,13 @@ struct ctk_menu {
   struct ctk_menu *next;
   char *title;
   unsigned char titlelen;
+#if CC_UNSIGNED_CHAR_BUGS
   unsigned char nitems;
   unsigned char active;
+#else /* CC_UNSIGNED_CHAR_BUGS */
+  unsigned char nitems;
+  unsigned char active;
+#endif /* CC_UNSIGNED_CHAR_BUGS */
   struct ctk_menuitem items[CTK_CONF_MAXMENUITEMS];
 };
 

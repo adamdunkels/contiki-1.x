@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-draw.h,v 1.1 2003/04/09 12:55:06 adamdunkels Exp $
+ * $Id: ctk-draw.h,v 1.2 2003/04/09 19:15:26 adamdunkels Exp $
  *
  */
 

@@ -32,10 +32,14 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: hello.c,v 1.1 2003/04/09 12:55:06 adamdunkels Exp $
+ * $Id: hello.c,v 1.2 2003/04/09 19:15:25 adamdunkels Exp $
  *
  */
 
+/* This is an example of how to write programs for Contiki. It
+   displays a window with the famous message "Hello world" and two
+   buttons; one which changes the message slightly and one which quits
+   the application. */
 
 #include "ctk.h"
 #include "dispatcher.h"
@@ -53,7 +57,7 @@ static struct ctk_button updatebutton =
 static struct ctk_button closebutton =
   {CTK_BUTTON(8, 3, 5, "Close")};
 
-static void hello_sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(hello_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Hello world", NULL, hello_sighandler, NULL)};
 static ek_id_t id;
@@ -90,9 +94,10 @@ hello_quit(void)
   ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-hello_sighandler(ek_signal_t s, ek_data_t data)
+static DISPATCHER_SIGHANDLER(hello_sighandler, s, data)
 {
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
+    
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&updatebutton) {
       ctk_label_set_text(&hellolabel, "Good bye");

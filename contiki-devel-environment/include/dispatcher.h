@@ -32,13 +32,14 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.h,v 1.1 2003/04/09 12:55:06 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.2 2003/04/09 19:15:27 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
 #define __DISPATCHER_H__
 
 #include "ek.h"
+#include "cc.h"
 
 void dispatcher_init(void);
 
@@ -51,7 +52,11 @@ struct dispatcher_proc {
   ek_id_t id;
   char *name;
   void (* idle)(void);
+#if CC_FUNCTION_POINTER_ARGS  
   void (* signalhandler)(ek_signal_t s, ek_data_t data);
+#else /* CC_FUNCTION_POINTER_ARGS */
+  void (* signalhandler)(void);
+#endif /* CC_FUNCTION_POINTER_ARGS */
   void (* uiphandler)(void *state);
 };
 
@@ -73,6 +78,25 @@ struct dispatcher_uipstate {
   void *state;
 };
 
+/* We must do some C macro trickery to make things work with sdcc,
+   which doesn't support passing arguments to functions called as
+   function pointers. */
+#if CC_FUNCTION_POINTER_ARGS
+#define DISPATCHER_SIGHANDLER(name, s, data) \
+        void name(ek_signal_t s, ek_data_t data)
+
+#define DISPATCHER_SIGHANDLER_ARGS(s, data)
+
+#else /* CC_FUNCTION_POINTER_ARGS */
+#define DISPATCHER_SIGHANDLER(name, s, data) \
+        void name(void)
+
+#define DISPATCHER_SIGHANDLER_ARGS(s, data) ek_signal_t s = dispatcher_sighandler_s; \
+                                            ek_data_t data = dispatcher_sighandler_data
+
+extern ek_signal_t dispatcher_sighandler_s;
+extern ek_data_t dispatcher_sighandler_data;
+#endif /* CC_FUNCTION_POINTER_ARGS */
 
 #define UIP_APPCALL dispatcher_uipcall
 #define UIP_APPSTATE_SIZE sizeof(struct dispatcher_uipstate)
@@ -89,5 +113,6 @@ void dispatcher_markconn(struct uip_conn *conn,
 void dispatcher_uiplisten(u16_t port);
 
 extern ek_id_t dispatcher_current;
+
 
 #endif /* __DISPATCHER_H__ */
