@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tcpip.c,v 1.3 2004/09/12 20:24:56 adamdunkels Exp $
+ * $Id: tcpip.c,v 1.4 2005/02/07 07:05:29 adamdunkels Exp $
  */
 #include "tcpip.h"
 
@@ -128,12 +128,13 @@ void
 tcpip_output(void)
 {
   struct packet_service_state *state;
-  u16_t hdrlen, datalen;
+  u16_t hdrlen, datalen;  
   
   state = (struct packet_service_state *)ek_service_state(&packetservice);
+
   if(state != NULL &&
      state->version == PACKET_SERVICE_VERSION) {
-    
+
     hdrlen = UIP_TCPIP_HLEN;
     if(uip_len < UIP_TCPIP_HLEN) {
       hdrlen = uip_len;
@@ -304,15 +305,19 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 #endif /* UIP_UDP */
     break;
   case TCP_POLL:
-    uip_periodic_conn(data);
-    if(uip_len > 0) {
-      tcpip_output();
+    if(data != NULL) {
+      uip_periodic_conn(data);
+      if(uip_len > 0) {
+	tcpip_output();
+      }
     }
     break;
   case UDP_POLL:
-    uip_udp_periodic_conn(data);
-    if(uip_len > 0) {
-      tcpip_output();
+    if(data != NULL) {
+      uip_udp_periodic_conn(data);
+      if(uip_len > 0) {
+	tcpip_output();
+      }
     }
     break;
   };
@@ -368,7 +373,7 @@ EK_POLLHANDLER(pollhandler)
   /* Check the clock so see if we should call the periodic uIP
      processing. */
   if(timer_expired(&periodic)) {
-    timer_reset(&periodic);
+    timer_restart(&periodic);
     for(i = 0; i < UIP_CONNS; ++i) {
       uip_periodic(i);
       if(uip_len > 0) {
