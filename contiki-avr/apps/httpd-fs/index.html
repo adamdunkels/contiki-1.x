@@ -2,55 +2,37 @@
 <html>
   <head>
     <title>Welcome to the Contiki-demo server!</title>
-    <link rel="stylesheet" type="text/css" href="/contiki.css">  
+    <link rel="stylesheet" type="text/css" href="/style.css">  
   </head>
-  <body bgcolor="#e0e0e0" text="black">
-    <table width="100%" cellspacing=0 cellpadding=0 border=0>
-      <tr valign="top">
-	<td width="25%" valign="top">
-	  <br>
-	  <table width="100%" cellspacing=0 cellpadding=0 border=0>
-	    <tr>
-	      <td class="btl" width=16 height=16>&nbsp;</td>
-	      <td class="bt" height=16>&nbsp;</td>
-	      <td class="btr" width=16 height=16>&nbsp;</td>
-	    </tr>
-	    <tr>
-	      <td class="bl" width=16>&nbsp;</td>
-	      <td class="menu">
-		<br>
-		<a href="/">Front page</a><br>
-		<br>		      
-		<a href="/vnc.html">Remote display</a><br>
-		<br>		      
-		<a href="/cgi/files">File statistics</a><br>
-		<br>		      			  
-		<a href="/cgi/tcp">Network connections</a><br>
-		<br>			
-		<a href="/cgi/processes">System processes</a><br>
-		<br>			
-	      </td>
-	      <td class="br" width=16>&nbsp;</td>
-	    </tr>
-	    <tr>
-	      <td class="bbl" width=16 height=16>&nbsp;</td>
-	      <td class="bb" height=16>&nbsp;</td>
-	      <td class="bbr" width=16 height=16>&nbsp;</td>
-	    </tr>
-	  </table>
-	</td>
-	<td class="content">
-	  <h1>Welcome to the <a
-	      href="http://dunkels.com/adam/contiki/">Contiki</a>
-	      demo server!</h1>
-	  <p>
-	    <center><a href="http://contiki-demo.sics.se"><b><tt>http://contiki-demo.sics.se/</tt></b></a></center>
-	  </p>
+  <body bgcolor="#fffeec" text="black">
+
+  <div class="menublock">
+
+  <div class="menu">
+  <p class="border-title">Menu</p>
+  <p class="menu">
+  
+  <a href="/">Front page</a><br>
+  <a href="/vnc.html">Remote display</a><br>
+  <a href="/cgi/files">File statistics</a><br>
+  <a href="/cgi/tcp">Network connections</a><br>
+  <a href="/cgi/processes">System processes</a><br>
+
+  </p>
+  </div>
+  </div>
+
+  <div class="contentblock">
+  <p class="border-title">
+  Welcome to the <a href="http://www.sics.se/~adam/contiki/">Contiki</a> 
+  demo server!
+  </p>
+	      
 	  <p class="intro">
 	    The web pages you are watching are served by a <a
-	    href="http://dunkels.com/adam/contiki/apps/webserver.html">web
+	    href="http://www.sics.se/~adam/contiki/apps/webserver.html">web
 	    server</a> running under the <a
-	    href="http://dunkels.com/adam/contiki/">Contiki operating
+	    href="http://www.sics.se/~adam/contiki/">Contiki operating
 	    system</a> on an an <a
 	    href="http://www.ethernut.de/en/">Ethernut</a> embedded
 	    Ethernet board, which consists of a 14 MHz AVR Atmega128
@@ -58,7 +40,12 @@
 	    of flash ROM, and a RealTek RTL8019AS Ethernet chip.
 	  </p>
 
-	  <h2>Remote display!</h2>
+	      <p class="clink">
+	    <a href="http://contiki-demo.sics.se"><b><tt>http://contiki-demo.sics.se/</tt></b></a>
+	  </p>
+	  
+	  
+	  <h2>Remote display</h2>
 	  <p>
 	    It it possible to remotely access the Contiki desktop of
 	    this server directly from your web browser! See the <a
@@ -76,15 +63,12 @@
 	  <p>
 	    The entire Contiki AVR system uses slightly more than 20 k
 	    RAM, of which 6 k is used for the virtual display 8 k for
-	    the web browser. All code and these web pages are stored
+	    	    the web browser. All code and these web pages are stored
 	    in the microcontroller's on-chip flash ROM.
 	  </p>
 	  <p align="right">
 	    /<a href="http://www.sics.se/%7eadam/">Adam Dunkels</a>
 	  </p>
-	</td>
-      </tr>
-    </table>
     
   </body>
 </html>

@@ -34,7 +34,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd-fs.c,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: httpd-fs.c,v 1.2 2004/08/09 22:19:35 adamdunkels Exp $
  */
 
 #define HTTPD_FS_STATISTICS 1
@@ -49,7 +49,7 @@
 #include "httpd-fsdata.c"
 
 #if HTTPD_FS_STATISTICS
-static u32_t count[HTTPD_FS_NUMFILES];
+static unsigned long count[HTTPD_FS_NUMFILES];
 #endif /* HTTPD_FS_STATISTICS */
 
 /*-----------------------------------------------------------------------------------*/
@@ -119,7 +119,7 @@ httpd_fs_init(void)
 }
 /*-----------------------------------------------------------------------------------*/
 #if HTTPD_FS_STATISTICS
-u32_t httpd_fs_count
+unsigned long httpd_fs_count
 (char *name)
 {
   struct httpd_fsdata_file_noconst *f;
@@ -137,8 +137,8 @@ u32_t httpd_fs_count
   }
   return 0;
 }
-static u32_t total;
-u32_t
+static unsigned long total;
+unsigned long
 httpd_fs_total(void)
 {
   return total;
