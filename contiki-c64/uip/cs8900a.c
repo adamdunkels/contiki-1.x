@@ -31,7 +31,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.3 2003/09/04 19:41:02 adamdunkels Exp $
+ * $Id: cs8900a.c,v 1.4 2004/02/24 09:51:50 adamdunkels Exp $
  *
  */
 
@@ -42,9 +42,12 @@
 #include "uip.h"
 #include "uip_arp.h"
 
-#define RXTXREG (*(u16_t *)0xde00)
-#define PACKETPP (*(u16_t *)0xde0a)
-#define PPDATA (*(u16_t *)0xde0c)
+#define UIP_ETHADDR0 0x00
+#define UIP_ETHADDR1 0x00
+#define UIP_ETHADDR2 0x00
+#define UIP_ETHADDR3 0x64
+#define UIP_ETHADDR4 0x64
+#define UIP_ETHADDR5 0x64
 
 extern u8_t *cs8900a_rxtxreg,
   *cs8900a_txcmd,
