@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.h,v 1.2 2003/08/24 22:41:55 adamdunkels Exp $
+ * $Id: loader-arch.h,v 1.3 2004/09/12 20:28:47 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_ARCH_H__
