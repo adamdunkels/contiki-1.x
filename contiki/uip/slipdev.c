@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: slipdev.c,v 1.1 2003/10/14 11:12:50 adamdunkels Exp $
+ * $Id: slipdev.c,v 1.2 2003/11/27 15:54:20 adamdunkels Exp $
  *
  */
 
@@ -67,6 +67,7 @@
  */
 
 #include "uip.h"
+#include "uip-fw.h"
 #include "slipdev.h"
 #include <string.h>  /* For memcpy() */
 
@@ -89,9 +90,10 @@ static u8_t lastc;
  * from the uip_buf buffer, and the following bytes (the application
  * data) are read from the uip_appdata buffer.
  *
+ * \return This function will always return UIP_FW_OK.
  */
 /*-----------------------------------------------------------------------------------*/
-void
+u8_t
 slipdev_send(void)
 {
   u16_t i;
@@ -121,6 +123,8 @@ slipdev_send(void)
     }
   }
   slipdev_char_put(SLIP_END);
+
+  return UIP_FW_OK;
 }
 /*-----------------------------------------------------------------------------------*/
 /** 

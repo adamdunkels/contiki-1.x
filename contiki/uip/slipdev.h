@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: slipdev.h,v 1.1 2003/10/14 11:12:50 adamdunkels Exp $
+ * $Id: slipdev.h,v 1.2 2003/11/27 15:54:20 adamdunkels Exp $
  *
  */
 
@@ -80,7 +80,7 @@ void slipdev_char_put(u8_t c);
 u8_t slipdev_char_poll(u8_t *c);
 
 void slipdev_init(void);
-void slipdev_send(void);
+u8_t slipdev_send(void);
 u16_t slipdev_poll(void);
 
 #endif /* __SLIPDEV_H__ */
