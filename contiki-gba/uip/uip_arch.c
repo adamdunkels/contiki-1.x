@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.1 2003/05/19 09:13:42 gpz Exp $
+ * $Id: uip_arch.c,v 1.2 2005/01/26 23:36:36 oliverschmidt Exp $
  *
  */
 
@@ -42,8 +42,6 @@
 #define BUF ((uip_tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define IP_PROTO_TCP    6
 
-/*-----------------------------------------------------------------------------------*/
-#if UIP_BUFSIZE > 255
 /*-----------------------------------------------------------------------------------*/
 void
 uip_add_rcv_nxt(u16_t n)
@@ -98,43 +96,6 @@ uip_add32(u8_t *op32, u16_t op16)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-#else /* UIP_BUFSIZE > 255 */
-/*-----------------------------------------------------------------------------------*/
-void
-uip_add_rcv_nxt(u8_t n)
-{
-  uip_conn->rcv_nxt[3] += n;
-  if(uip_conn->rcv_nxt[3] < n) {
-    ++uip_conn->rcv_nxt[2];  
-    if(uip_conn->rcv_nxt[2] == 0) {
-      ++uip_conn->rcv_nxt[1];    
-      if(uip_conn->rcv_nxt[1] == 0) {
-	++uip_conn->rcv_nxt[0];
-      }
-    }
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-void
-uip_add32(u8_t *op32, u8_t op8)
-{
-  uip_acc32[3] = op32[3] + op8;
-  uip_acc32[2] = op32[2];
-  uip_acc32[1] = op32[1];
-  uip_acc32[0] = op32[0];
-  
-  if(uip_acc32[3] < op8) {
-    ++uip_acc32[2];  
-    if(uip_acc32[2] == 0) {
-      ++uip_acc32[1];    
-      if(uip_acc32[1] == 0) {
-	++uip_acc32[0];
-      }
-    }
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-#endif /* UIP_BUFSIZE > 255 */
 u16_t
 uip_chksum(u16_t *sdata, u16_t len)
 {
