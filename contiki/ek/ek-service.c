@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ek-service.c,v 1.5 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: ek-service.c,v 1.6 2005/02/07 07:50:35 adamdunkels Exp $
  */
 
 #include "ek-service.h"
