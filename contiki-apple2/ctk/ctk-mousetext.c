@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.5 2004/06/27 22:51:27 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.6 2004/07/11 12:24:53 oliverschmidt Exp $
  *
  */
 
@@ -41,12 +41,18 @@
 
 #include "ctk-conio-conf.h"
 #include <string.h>
+#include <ctype.h>
 
 #ifndef NULL
 #define NULL (void *)0
 #endif /* NULL */
 
 static unsigned char sizex, sizey;
+
+unsigned char ctk_draw_windowborder_height = 1;
+unsigned char ctk_draw_windowborder_width = 1;
+unsigned char ctk_draw_windowtitle_height = 1;
+
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -474,3 +480,8 @@ ctk_draw_width(void)
   return sizex;
 }
 /*-----------------------------------------------------------------------------------*/
+int
+ctk_arch_isprint(char c)
+{
+  return isprint(c);
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -32,17 +32,17 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.2 2004/06/14 22:30:32 oliverschmidt Exp $
+ * $Id: main.c,v 1.3 2004/07/11 12:24:52 oliverschmidt Exp $
  *
  */
 
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 
 #include "program-handler.h"
 
-#include "uip-signal.h"
+#include "uip-event.h"
 #include "uip.h"
 #include "uip_arp.h"
 
@@ -56,24 +56,40 @@
 #include "processes-dsc.h"
 #include "about-dsc.h"
 
+#include "clock.h"
+
 /*-----------------------------------------------------------------------------------*/
-ek_clock_t
-ek_clock(void)
+unsigned char
+uip_fw_forward(void)
 {
-  return clock();
+  return 0;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+uip_fw_periodic(void)
+{
+  return;
+}
+/*-----------------------------------------------------------------------------------*/
+clock_time_t
+clock_time(void)
+{
+  static clock_time_t counter;
+
+  return ++counter;
 }
 /*-----------------------------------------------------------------------------------*/
 void
 main(void)
 {
-  dispatcher_init();
-  uip_init();
+  ek_init();
+  tcpip_init(NULL);
   
   ctk_init();
 
   resolv_init(NULL);
   
-  uip_signal_init();
+  uip_event_init();
   
   program_handler_init();
 
@@ -85,6 +101,8 @@ main(void)
 
   config_apply();
 
-  dispatcher_run();
+  while(1) {
+    ek_run();
+  }
 }
 /*-----------------------------------------------------------------------------------*/

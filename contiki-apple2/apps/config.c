@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,7 +11,10 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. The name of the author may not be used to endorse or promote
+ * 3. All advertising materials mentioning features or use of this
+ *    software must display the following acknowledgement:
+ *        This product includes software developed by Adam Dunkels. 
+ * 4. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -29,22 +32,18 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.1 2004/06/14 22:30:33 oliverschmidt Exp $
+ * $Id: config.c,v 1.2 2004/07/11 12:24:52 oliverschmidt Exp $
  *
  */
 
-#include "uip.h"
-#include "uiplib.h"
-#include "uip_arp.h"
-#include "resolv.h"
-#include "ctk.h"
-#include "ctk-draw.h"
-#include "dispatcher.h"
-#include "config.h"
-
-#include "loader.h"
 
 #include <string.h>
+
+#include "uiplib.h"
+#include "resolv.h"
+#include "ctk.h"
+
+#include "config.h"
 
 
 #pragma dataseg(push, "CONF");
@@ -101,11 +100,10 @@ static struct ctk_button okbutton =
 static struct ctk_button cancelbutton =
   {CTK_BUTTON(21, 13, 6, "Cancel")};
 
-static DISPATCHER_SIGHANDLER(config_sighandler, s, data);
-static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Configuration", NULL, config_sighandler, NULL)};
-static ek_id_t id;
-
+EK_EVENTHANDLER(config_eventhandler, ev, data);
+EK_PROCESS(p, "Configuration", EK_PRIO_NORMAL,
+	   config_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(config_init, arg)
@@ -113,44 +111,8 @@ LOADER_INIT_FUNC(config_init, arg)
   arg_free(arg);
     
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
-    ctk_window_new(&window, 29, 14, "Configuration");
-    
-#ifdef __APPLE2ENH__
-    CTK_WIDGET_ADD(&window, &backgroundlabel);
-    CTK_WIDGET_ADD(&window, &backgroundtextentry);
-    CTK_WIDGET_ADD(&window, &backgrounddescr);
-#endif /* __APPLE2ENH__ */
-    CTK_WIDGET_ADD(&window, &slotlabel);
-    CTK_WIDGET_ADD(&window, &slottextentry);
-    CTK_WIDGET_ADD(&window, &slotdescr);
-    CTK_WIDGET_ADD(&window, &ipaddrlabel);  
-    CTK_WIDGET_ADD(&window, &ipaddrtextentry);
-#ifdef WITH_ETHERNET
-    CTK_WIDGET_ADD(&window, &netmasklabel);
-    CTK_WIDGET_ADD(&window, &netmasktextentry);
-    CTK_WIDGET_ADD(&window, &gatewaylabel);
-    CTK_WIDGET_ADD(&window, &gatewaytextentry);
-#endif /* WITH_ETHERNET */
-    CTK_WIDGET_ADD(&window, &dnsserverlabel);
-    CTK_WIDGET_ADD(&window, &dnsservertextentry);
-    
-    CTK_WIDGET_ADD(&window, &okbutton);
-    CTK_WIDGET_ADD(&window, &cancelbutton);
-    
-#ifdef __APPLE2ENH__
-    CTK_WIDGET_FOCUS(&window, &backgroundtextentry);
-#else /* __APPLE2ENH__ */
-    CTK_WIDGET_FOCUS(&window, &slottextentry);
-#endif /* __APPLE2ENH__ */
-
-    memcpy(&screen, &config, sizeof(config));
-    
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
+    id = ek_start(&p);
   }
-  ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -192,20 +154,41 @@ config_apply(void)
 #endif /* WITH_UIP */
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-config_quit(void)
+EK_EVENTHANDLER(config_eventhandler, ev, data)
 {
-  dispatcher_exit(&p);
-  id = EK_ID_NONE;
-  LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(config_sighandler, s, data)
-{
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  EK_EVENTHANDLER_ARGS(ev, data);
   
-  if(s == ctk_signal_button_activate) {   
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&window, 29, 14, "Configuration");
+#ifdef __APPLE2ENH__
+    CTK_WIDGET_ADD(&window, &backgroundlabel);
+    CTK_WIDGET_ADD(&window, &backgroundtextentry);
+    CTK_WIDGET_ADD(&window, &backgrounddescr);
+#endif /* __APPLE2ENH__ */
+    CTK_WIDGET_ADD(&window, &slotlabel);
+    CTK_WIDGET_ADD(&window, &slottextentry);
+    CTK_WIDGET_ADD(&window, &slotdescr);
+    CTK_WIDGET_ADD(&window, &ipaddrlabel);  
+    CTK_WIDGET_ADD(&window, &ipaddrtextentry);
+#ifdef WITH_ETHERNET
+    CTK_WIDGET_ADD(&window, &netmasklabel);
+    CTK_WIDGET_ADD(&window, &netmasktextentry);
+    CTK_WIDGET_ADD(&window, &gatewaylabel);
+    CTK_WIDGET_ADD(&window, &gatewaytextentry);
+#endif /* WITH_ETHERNET */
+    CTK_WIDGET_ADD(&window, &dnsserverlabel);
+    CTK_WIDGET_ADD(&window, &dnsservertextentry);
+    CTK_WIDGET_ADD(&window, &okbutton);
+    CTK_WIDGET_ADD(&window, &cancelbutton);
+#ifdef __APPLE2ENH__
+    CTK_WIDGET_FOCUS(&window, &backgroundtextentry);
+#else /* __APPLE2ENH__ */
+    CTK_WIDGET_FOCUS(&window, &slottextentry);
+#endif /* __APPLE2ENH__ */
+    memcpy(&screen, &config, sizeof(config));
+    ctk_window_open(&window);
+
+  } else if(ev == ctk_signal_button_activate) {   
     if(data == (ek_data_t)&okbutton) {
       memcpy(&config, &screen, sizeof(screen));
       config_apply();
@@ -213,14 +196,17 @@ DISPATCHER_SIGHANDLER(config_sighandler, s, data)
     } else if(data == (ek_data_t)&cancelbutton) {
       goto quit;
     }
-  } else if(s == ctk_signal_window_close ||
-	    s == dispatcher_signal_quit) {
+
+  } else if(ev == ctk_signal_window_close ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     goto quit;
   }
   return;
 
 quit:
   ctk_window_close(&window);
-  config_quit();
+  ek_exit();
+  id = EK_ID_NONE;
+  LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
