@@ -53,7 +53,7 @@ CLOSE_FD:	.byte	$00		;REF_NUM
 
 ; ------------------------------------------------------------------------
 
-	.segment	"CONTIKI"
+	.segment	"INIT"
 
 initprefix:
 	lda	PATHNAME
@@ -61,6 +61,10 @@ initprefix:
 	sbc	#.strlen("CONTIKI")
 	sta	PREFIX
 	rts
+
+; ------------------------------------------------------------------------
+
+	.segment	"CONTIKI"
 
 _open:
 	; Pop flags and name
