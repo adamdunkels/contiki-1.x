@@ -136,7 +136,8 @@ static void
 s_ctk_draw_window(struct ctk_window *window,
 		  unsigned char focus,
 		  unsigned char clipy1,
-		  unsigned char clipy2)
+		  unsigned char clipy2,
+		  unsigned char draw_borders)
 {
   struct ctk_widget *w;
   unsigned char wfocus;
