@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-80col.c,v 1.11 2004/12/27 22:04:30 oliverschmidt Exp $
+ * $Id: ctk-80col.c,v 1.12 2005/03/15 15:56:07 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -873,7 +873,8 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
 /*-----------------------------------------------------------------------------------*/
 static void
 s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
-		  unsigned char clipy1, unsigned char clipy2)
+		  unsigned char clipy1, unsigned char clipy2,
+		  unsigned char draw_borders)
 {
   unsigned char x, y;
   unsigned char h;

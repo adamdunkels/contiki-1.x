@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires-service.c,v 1.3 2004/12/27 22:04:30 oliverschmidt Exp $
+ * $Id: ctk-hires-service.c,v 1.4 2005/03/15 15:56:08 oliverschmidt Exp $
  *
  */
 
@@ -666,7 +666,8 @@ s_ctk_draw_clear_window(register struct ctk_window *window,
 static void
 s_ctk_draw_window(register struct ctk_window *window,
 		unsigned char focus,
-		unsigned char clipy1, unsigned char clipy2)
+		unsigned char clipy1, unsigned char clipy2,
+		unsigned char draw_borders)
 {
   register struct ctk_widget *w;
 
