@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.20 2003/08/01 00:07:19 adamdunkels Exp $
+ * $Id: ctk.c,v 1.21 2003/08/05 13:50:51 adamdunkels Exp $
  *
  */
 
@@ -852,7 +852,7 @@ static void
 textentry_input(ctk_arch_key_t c,
 		CC_REGISTER_ARG struct ctk_textentry *t)
 {
-  static char *cptr, *cptr2;
+  register char *cptr, *cptr2;
   static unsigned char len, txpos, typos, tlen;
 
   txpos = t->xpos;
@@ -1026,7 +1026,7 @@ ctk_idle(void)
   static unsigned char mxc, myc, mouse_button_changed, mouse_moved,
     mouse_clicked;
   static unsigned char menux;
-  struct ctk_menu *menu;
+  register struct ctk_menu *menu;
 
 #endif /* CTK_CONF_MOUSE_SUPPORT */
   

@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.8 2003/06/30 21:28:52 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.9 2003/08/05 13:51:08 adamdunkels Exp $
  *
  */
 
@@ -75,7 +75,7 @@ dispatcher_sigalloc(void)
 }
 /*-----------------------------------------------------------------------------------*/
 ek_id_t
-dispatcher_start(struct dispatcher_proc *p)
+dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
 {
   ek_id_t id;
   struct dispatcher_proc *q;
@@ -106,7 +106,7 @@ dispatcher_start(struct dispatcher_proc *p)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-dispatcher_exit(struct dispatcher_proc *p)
+dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
 {
   struct dispatcher_proc *q;
   unsigned char i;
@@ -176,8 +176,8 @@ ek_dispatcher(ek_signal_t s, ek_data_t data, ek_id_t id)
 void
 dispatcher_uipcall(void)     
 {
-  struct dispatcher_proc *p;
-  struct dispatcher_uipstate *s;
+  register struct dispatcher_proc *p;
+  register struct dispatcher_uipstate *s;
   u8_t i;
 
   s = (struct dispatcher_uipstate *)uip_conn->appstate;
@@ -273,11 +273,13 @@ void
 dispatcher_init(void)
 {
   unsigned char i;
-  /*  listenportsptr = 0;*/
+
   for(i = 0; i < UIP_LISTENPORTS; ++i) {
     listenports[i].port = 0;
   }
 
+  lastsig = 1;
   dispatcher_signal_quit = dispatcher_sigalloc();
+  
 }
 /*-----------------------------------------------------------------------------------*/
