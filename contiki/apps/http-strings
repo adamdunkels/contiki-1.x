@@ -10,5 +10,3 @@ http_texthtml "text/html"
 http_location "Location: "
 http_host "Host: "
 http_crnl "\r\n"
-http_webserver_d64_headers "HTTP/1.0 200 OK\r\nServer: Contiki/1.0\r\nContent-Type: application/octet-stream\r\nContent-Length: 174848\r\n\r\n"
-
