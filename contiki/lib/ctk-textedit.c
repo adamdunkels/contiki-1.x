@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-textedit.c,v 1.3 2004/07/04 15:12:56 adamdunkels Exp $
+ * $Id: ctk-textedit.c,v 1.4 2004/09/01 18:26:55 adamdunkels Exp $
  *
  */
 
@@ -52,6 +52,12 @@
 
 #include <string.h>
 
+/*-----------------------------------------------------------------------------------*/
+void
+ctk_textedit_init(struct ctk_textedit *t)
+{
+  t->xpos = t->ypos = 0;
+}
 /*-----------------------------------------------------------------------------------*/
 /**
  * Add a CTK textedit widget to a window.
@@ -64,6 +70,7 @@ void
 ctk_textedit_add(struct ctk_window *w,
 		 struct ctk_textedit *t)
 {
+  CTK_WIDGET_SET_FLAG(t, CTK_WIDGET_FLAG_MONOSPACE);
   CTK_WIDGET_ADD(w, t);
 }
 /*-----------------------------------------------------------------------------------*/
@@ -92,7 +99,7 @@ ctk_textedit_eventhandler(struct ctk_textedit *t,
     *textptr &= 0x7f;
     switch((ctk_arch_key_t)data) {
     case CH_CURS_DOWN:
-      if(t->ypos < t->label.h) {
+      if(t->ypos < t->label.h - 1) {
 	++t->ypos;
       }
       break; 
@@ -102,8 +109,12 @@ ctk_textedit_eventhandler(struct ctk_textedit *t,
       }
       break; 
     case CH_CURS_RIGHT:
-      if(t->xpos < t->label.w) {
+      len = strlen(&t->label.text[t->ypos * t->label.w]);
+      if(t->xpos < len) {
+	/*      if(t->xpos < t->label.w) {*/
 	++t->xpos;
+      } else {
+	t->xpos = len;
       }
       break; 
     case CH_CURS_LEFT:
@@ -118,7 +129,7 @@ ctk_textedit_eventhandler(struct ctk_textedit *t,
       break;
     case CH_ENTER:
       t->xpos = 0;
-      if(t->ypos < t->label.h) {
+      if(t->ypos < t->label.h - 1) {
 	++t->ypos;
       }
       break;
