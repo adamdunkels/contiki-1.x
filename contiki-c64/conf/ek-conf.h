@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek-conf.h,v 1.1 2003/03/19 16:26:18 adamdunkels Exp $
+ * $Id: ek-conf.h,v 1.2 2003/04/18 00:13:16 adamdunkels Exp $
  *
  */
 
@@ -66,7 +66,5 @@ typedef unsigned char ek_num_timers_t;
 
 #define EK_CONF_NUMLISTENERS  32    /* Must be 2^n */
 typedef unsigned char ek_num_listeners_t;
-
-#define EK_CONF_UNLISTEN 0
 
 #endif /* __EK_CONF_H__ */
