@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: contiki.c,v 1.1 2003/03/19 14:13:32 adamdunkels Exp $
+ * $Id: contiki.c,v 1.2 2003/03/28 12:07:33 adamdunkels Exp $
  *
  */
 
@@ -43,6 +43,8 @@
 #include "dispatcher.h"
 #include "resolv.h"
 #include "email.h"
+
+#include "petsciiconv.h"
 
 static struct ctk_menu menu;
 unsigned char menuitem_about, menuitem_processes, menuitem_tcpip;
