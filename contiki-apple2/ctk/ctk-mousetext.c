@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.10 2004/12/27 22:03:44 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.11 2005/02/17 23:50:04 oliverschmidt Exp $
  *
  */
 
@@ -82,7 +82,6 @@ draw_widget(struct ctk_widget *w,
 	    unsigned char x, unsigned char y,
 	    unsigned char clipx,
 	    unsigned char clipy,
-	    unsigned char clipy1, unsigned char clipy2,
 	    unsigned char focus)
 {
   unsigned char xpos, ypos, xscroll;
@@ -106,48 +105,40 @@ draw_widget(struct ctk_widget *w,
     
   switch(w->type) {
   case CTK_WIDGET_SEPARATOR:
-    if(ypos >= clipy1 && ypos < clipy2) {
-      chlinexy(xpos, ypos, w->w);
-    }
+    chlinexy(xpos, ypos, w->w);
     break;
   case CTK_WIDGET_LABEL:
     text = w->widget.label.text;
     for(i = 0; i < w->h; ++i) {
-      if(ypos >= clipy1 && ypos < clipy2) {
-	gotoxy(xpos, ypos);
-	cputsn(text, w->w);
-	if(w->w - (wherex() - xpos) > 0) {
-	  cclear(w->w - (wherex() - xpos));
-	}
+      gotoxy(xpos, ypos);
+      cputsn(text, w->w);
+      if(w->w - (wherex() - xpos) > 0) {
+	cclear(w->w - (wherex() - xpos));
       }
       ++ypos;
       text += w->w;
     }
     break;
   case CTK_WIDGET_BUTTON:
-    if(ypos >= clipy1 && ypos < clipy2) {
-      if(wfocus != 0) {
-	revers(1);
-      } else {
-	revers(0);
-      }
-      cputcxy(xpos, ypos, '[');
-      cputsn(w->widget.button.text, w->w);
-      cputc(']');
+    if(wfocus != 0) {
+      revers(1);
+    } else {
       revers(0);
     }
+    cputcxy(xpos, ypos, '[');
+    cputsn(w->widget.button.text, w->w);
+    cputc(']');
+    revers(0);
     break;
   case CTK_WIDGET_HYPERLINK:
-    if(ypos >= clipy1 && ypos < clipy2) {
-      if(wfocus != 0) {
-	revers(0);
-      } else {
-	revers(1);
-      }
-      gotoxy(xpos, ypos);
-      cputsn(w->widget.button.text, w->w);
+    if(wfocus != 0) {
       revers(0);
+    } else {
+      revers(1);
     }
+    gotoxy(xpos, ypos);
+    cputsn(w->widget.button.text, w->w);
+    revers(0);
     break;
   case CTK_WIDGET_TEXTENTRY:
     text = w->widget.textentry.text;
@@ -161,36 +152,34 @@ draw_widget(struct ctk_widget *w,
       xscroll = w->widget.textentry.xpos - w->w + 1;
     }
     for(j = 0; j < w->h; ++j) {
-      if(ypos >= clipy1 && ypos < clipy2) {
-	if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT &&
-	   w->widget.textentry.ypos == j) {
-	  revers(0);
-	  cputcxy(xpos, ypos, '>');
-	  for(i = 0; i < w->w; ++i) {
-	    c = text[i + xscroll];
-	    if(i == w->widget.textentry.xpos - xscroll) {
-	      revers(1);
-	    } else {
-	      revers(0);
-	    }
-	    if(c == 0) {
-	      cputc(' ');
-	    } else {
-	      cputc(c);
-	    }
+      if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT &&
+	 w->widget.textentry.ypos == j) {
+	revers(0);
+	cputcxy(xpos, ypos, '>');
+	for(i = 0; i < w->w; ++i) {
+	  c = text[i + xscroll];
+	  if(i == w->widget.textentry.xpos - xscroll) {
+	    revers(1);
+	  } else {
 	    revers(0);
 	  }
-	  cputc('<');
-	} else {
-	  cvlinexy(xpos, ypos, 1);
-	  gotoxy(xpos + 1, ypos);          
-	  cputsn(text, w->w);
-	  i = wherex();
-	  if(i - xpos - 1 < w->w) {
-	    cclear(w->w - (i - xpos) + 1);
+	  if(c == 0) {
+	    cputc(' ');
+	  } else {
+	    cputc(c);
 	  }
-	  cvline(1);
+	  revers(0);
 	}
+	cputc('<');
+      } else {
+	cvlinexy(xpos, ypos, 1);
+	gotoxy(xpos + 1, ypos);          
+	cputsn(text, w->w);
+	i = wherex();
+	if(i - xpos - 1 < w->w) {
+	  cclear(w->w - (i - xpos) + 1);
+	}
+	cvline(1);
       }
       ++ypos;
       text += w->w;
@@ -199,37 +188,31 @@ draw_widget(struct ctk_widget *w,
     break;
 #if CTK_CONF_ICONS
   case CTK_WIDGET_ICON:
-    if(ypos >= clipy1 && ypos < clipy2) {
-      if(wfocus != 0) {
-	revers(1);
-      } else {
-	revers(0);
-      }
-#if CTK_CONF_ICON_TEXTMAPS
-      if(w->widget.icon.textmap != NULL) {
-	for(i = 0; i < 3; ++i) {
-	  gotoxy(xpos, ypos);
-	  if(ypos >= clipy1 && ypos < clipy2) {
-	    cputc(w->widget.icon.textmap[0 + 3 * i]);
-	    cputc(w->widget.icon.textmap[1 + 3 * i]);
-	    cputc(w->widget.icon.textmap[2 + 3 * i]);
-	  }
-	  ++ypos;
-	}
-      }
-#endif /* CTK_CONF_ICON_TEXTMAPS */
-  
-      len = strlen(w->widget.icon.title);
-      if(xpos + len >= 80) {
-	xpos = 80 - len;
-      }
-
-      gotoxy(xpos, ypos);
-      if(ypos >= clipy1 && ypos < clipy2) {
-	cputs(w->widget.icon.title);
-      }
+    if(wfocus != 0) {
+      revers(1);
+    } else {
       revers(0);
     }
+#if CTK_CONF_ICON_TEXTMAPS
+    if(w->widget.icon.textmap != NULL) {
+      for(i = 0; i < 3; ++i) {
+	gotoxy(xpos, ypos);
+	cputc(w->widget.icon.textmap[0 + 3 * i]);
+	cputc(w->widget.icon.textmap[1 + 3 * i]);
+	cputc(w->widget.icon.textmap[2 + 3 * i]);
+	++ypos;
+      }
+    }
+#endif /* CTK_CONF_ICON_TEXTMAPS */
+
+    len = strlen(w->widget.icon.title);
+    if(xpos + len >= 80) {
+      xpos = 80 - len;
+    }
+
+    gotoxy(xpos, ypos);
+    cputs(w->widget.icon.title);
+    revers(0);
     break;
 #endif /* CTK_CONF_ICONS */
 
@@ -254,11 +237,7 @@ ctk_draw_widget(struct ctk_widget *w,
     focus |= CTK_FOCUS_WIDGET;
   }
   
-  draw_widget(w, posx, posy,
-	      posx + win->w,
-	      posy + win->h,
-	      clipy1, clipy2,
-	      focus);
+  draw_widget(w, posx, posy, posx + win->w, posy + win->h, focus);
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -273,15 +252,12 @@ ctk_draw_clear_window(struct ctk_window *window,
   h = window->y + 2 + window->h;
   /* Clear window contents. */
   for(i = window->y + 2; i < h; ++i) {
-    if(i >= clipy1 && i < clipy2) {
-      cclearxy(window->x + 1, i, window->w);
-    }
+    cclearxy(window->x + 1, i, window->w);
   }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 draw_window_contents(struct ctk_window *window, unsigned char focus,
-		     unsigned char clipy1, unsigned char clipy2,
 		     unsigned char x1, unsigned char x2,
 		     unsigned char y1, unsigned char y2)
 {
@@ -290,9 +266,7 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
   
   /* Draw inactive widgets. */
   for(w = window->inactive; w != NULL; w = w->next) {
-    draw_widget(w, x1, y1, x2, y2,
-		clipy1, clipy2,
-		focus);
+    draw_widget(w, x1, y1, x2, y2, focus);
   }
   
   /* Draw active widgets. */
@@ -302,9 +276,7 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
       wfocus |= CTK_FOCUS_WIDGET;
     }
 
-   draw_widget(w, x1, y1, x2, y2, 
-	       clipy1, clipy2,
-	       wfocus);
+   draw_widget(w, x1, y1, x2, y2, wfocus);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -315,10 +287,6 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
   unsigned char x, y;
   unsigned char x1, y1, x2, y2;
 
-  if(window->y + 1 >= clipy2) {
-    return;
-  }
-    
   x = window->x;
   y = window->y + 1;
   
@@ -330,8 +298,7 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
   /* Draw window frame. */  
   _textframexy(x, y, window->w + 2, window->h + 2, _TEXTFRAME_TALL);
 
-  draw_window_contents(window, focus, clipy1, clipy2,
-		       x1, x2, y + 1, y2);
+  draw_window_contents(window, focus, x1, x2, y1, y2);
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -357,8 +324,7 @@ ctk_draw_dialog(struct ctk_window *dialog)
     cclearxy(x1, i, dialog->w);
   }
 
-  draw_window_contents(dialog, CTK_FOCUS_DIALOG, 0, 24,
-		       x1, x2, y1, y2);
+  draw_window_contents(dialog, CTK_FOCUS_DIALOG, x1, x2, y1, y2);
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -375,7 +341,7 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
     c2 = ' ' | 0x80;
   }
 
-  for(i = y1; i < y2; ++i) {
+  for(i = 1; i < 24; ++i) {
     gotoxy(0, i);
     *(char *)0xC055 = 0;
     memset(*(char **)0x28, c1, 40);
