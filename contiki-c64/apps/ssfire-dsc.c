@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire-dsc.c,v 1.1 2003/08/09 23:29:01 adamdunkels Exp $
+ * $Id: ssfire-dsc.c,v 1.2 2003/08/20 19:53:29 adamdunkels Exp $
  *
  */
 
@@ -39,7 +39,7 @@ extern struct ctk_icon ssfire_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(ssfire_dsc,
     "Screensaver with two fires",
-    "ssfire.prg",
+    "ssfire.sav",
     ssfire_init,
     &ssfire_icon);
 /*-----------------------------------------------------------------------------------*/
@@ -64,5 +64,5 @@ static char ssfireicon_textmap[9] = {
 };
 
 static struct ctk_icon ssfire_icon =
-  {CTK_ICON("Fire Screensaver", ssfireicon_bitmap, ssfireicon_textmap)};
+  {CTK_ICON("Fire", ssfireicon_bitmap, ssfireicon_textmap)};
 /*-----------------------------------------------------------------------------------*/
