@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.7 2004/07/12 21:36:00 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.8 2004/07/29 11:50:24 oliverschmidt Exp $
  *
  */
 
@@ -388,6 +388,7 @@ draw_menu(struct ctk_menu *m)
 {
   unsigned char x, x2, y;
 
+  revers(0);
   x = wherex();
   cputs(m->title);
   cputc(' ');
@@ -399,6 +400,8 @@ draw_menu(struct ctk_menu *m)
   for(y = 0; y < m->nitems; ++y) {
     if(y == m->active) {
       revers(0);
+    } else {
+      revers(1);
     }
     gotoxy(x, y + 1);
     if(m->items[y].title[0] == '-') {
@@ -409,9 +412,9 @@ draw_menu(struct ctk_menu *m)
     if(x + CTK_CONF_MENUWIDTH > wherex()) {
       cclear(x + CTK_CONF_MENUWIDTH - wherex());
     }
-    revers(1);
   }
   gotoxy(x2, 0);
+  revers(1);
 }
 /*-----------------------------------------------------------------------------------*/
 void
