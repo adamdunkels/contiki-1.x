@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.3 2003/04/15 21:19:47 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.4 2003/04/17 20:07:24 adamdunkels Exp $
  *
  */
 
@@ -47,6 +47,12 @@
 #include "uip.h"
 #include "uip_arp.h"
 
+#include "about-dsc.h"
+#include "netconf-dsc.h"
+#include "processes-dsc.h"
+
+#include "www-dsc.h"
+
 static gint
 idle_callback(gpointer data)
 {
@@ -58,19 +64,40 @@ idle_callback(gpointer data)
 int
 main(int argc, char **argv)
 {
+  u16_t addr[2];
+
   uip_init();
   uip_main_init();
   resolv_init();
 
+  /* XXX: just for making it easier to test. */
+  uip_ipaddr(addr, 192,168,1,2);
+  uip_sethostaddr(addr);
+
+  uip_ipaddr(addr, 192,168,1,1);
+  uip_setdraddr(addr);
+
+  uip_ipaddr(addr, 255,255,255,0);
+  uip_setnetmask(addr);
+
+  
   tapdev_init();
   
   ek_init();
   ctk_gtksim_init();
   ctk_init();
-
+  
   program_handler_init();
   
   gtk_timeout_add(20, idle_callback, NULL);
+
+  /*  vnc_init();*/
+  program_handler_add(&about_dsc, "About", 1);
+  program_handler_add(&netconf_dsc, "Network setup", 1);
+  program_handler_add(&processes_dsc, "Processes", 0);
+  
+  program_handler_add(&www_dsc, "Web browser", 1);
+
   
   ctk_redraw();
   gtk_main();
