@@ -29,12 +29,13 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.3 2004/08/09 22:26:46 adamdunkels Exp $
+ * $Id: webserver.c,v 1.4 2004/09/13 23:21:36 adamdunkels Exp $
  *
  */
 
 
 #include "contiki.h"
+#include "ctk.h"
 #include "http-strings.h"
 
 #include "petsciiconv.h"
