@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, Swedish Institute of Computer Science.
+ * Copyright (c) 2004-2005, Swedish Institute of Computer Science.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -30,47 +30,12 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: pt.h,v 1.6 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: pt.h,v 1.7 2005/02/22 22:41:05 adamdunkels Exp $
  */
 
 /**
- * \defgroup pt Protothreads 
- * @{ 
- *
- * Protothreads are lightweight stackless threads that is used to
- * provide blocking contexts in event-driven systems. This is useful
- * for implementing sequential control flow, without requiring
- * ordinary threads and multiple stacks. Protothreads provides
- * conditional blocking inside a C function.
- *
- * The advantage of protothreads over ordinary threads is that a
- * protothread do not require a separate stack. In memory constrained
- * systems, the overhead of allocating multiple stacks can consume
- * large amounts of the available memory. In contrast, each
- * protothread only requires between two and twelve bytes of state,
- * depending on the architecture.
- *
- * Because protothreads are stackless, a protothread can only run
- * within a single C function. A protothread may call normal C
- * functions, but cannot block inside a called function. Blocking
- * inside nested function calls are made by spawning a separate
- * protothread for each potentially blocking function.
- *
- * A protothread is driven by repeated calls to the function in which
- * the protothread is running. Each time the function is called, the
- * protothread will run until it blocks or exits.
- *
- * Protothreads are implemented using <i>local continuations</i>. A
- * local continuation represents the current state of execution at a
- * particular place in the program, but does not provide any call
- * history or local variables.
- *
- * The protothreads API consists of four basic operations:
- * initialization: PT_INIT(), execution: PT_BEGIN(), conditional
- * blocking: PT_WAIT_UNTIL() and exit: PT_END(). On top of these, two
- * convenience functions are built: reversed condition blocking:
- * PT_WAIT_WHILE() and protothread blocking: PT_WAIT_THREAD().
- *
+ * \addtogroup pt
+ * @{
  */
 
 /**
@@ -96,19 +61,25 @@ struct pt {
 /**
  * Declaration of a protothread.
  *
- * This macro is used to declare a protothread.
+ * This macro is used to declare a protothread. All protothreads must
+ * be declared with this macro.
  *
  * Example:
  \code
  PT_THREAD(consumer(struct pt *p, int event)) {
    PT_BEGIN(p);
-   PT_WAIT_UNTIL(event == AVAILABLE);
-   consume();
-   PT_WAIT_UNTIL(event == CONSUMED);
-   acknowledge_consumed();
+   while(1) {
+     PT_WAIT_UNTIL(event == AVAILABLE);
+     consume();
+     PT_WAIT_UNTIL(event == CONSUMED);
+     acknowledge_consumed();
+   }
    PT_END(p);
  }
  \endcode
+ *
+ * \param name_args The name and arguments of the C function
+ * implementing the protothread.
  *
  * \hideinitializer
  */
@@ -125,12 +96,12 @@ struct pt {
  * Example:
  *
  \code
- int main(void) {
+ void main(void) {
    struct pt p;
    int event;
    
    PT_INIT(&p);
-   while(PT_RUNNING(consumer(&p, event))) {
+   while(PT_SCHEDULE(consumer(&p, event))) {
      event = get_event();
    }
  }
@@ -142,12 +113,13 @@ struct pt {
   LC_INIT((pt)->lc)
 
 /**
- * Start a protothread.
+ * Declare the start of a protothread inside the C function
+ * implementing the protothread.
  *
- * This macro is used to set the starting point of a protothread. It
- * should be placed at the start of the function in which the
- * protothread runs. All C statements above the PT_BEGIN() invokation
- * will be executed each time the protothread is scheduled.
+ * This macro is used to declare the starting point of a
+ * protothread. It should be placed at the start of the function in
+ * which the protothread runs. All C statements above the PT_BEGIN()
+ * invokation will be executed each time the protothread is scheduled.
  *
  * \param pt A pointer to the protothread control structure.
  *
@@ -155,16 +127,14 @@ struct pt {
  *
  \code
  PT_THREAD(producer(struct pt *p, int event)) {
-   int empty;
-   empty = (event == CONSUMED || event == DROPPED);
- 
    PT_BEGIN(p);
-
-   PT_WAIT_UNTIL(empty);
-   produce();
-   PT_WAIT_UNTIL(event == PRODUCED);   
+   while(1) {
+     PT_WAIT_UNTIL(event == CONSUMED || event == DROPPED);
+     produce();
+     PT_WAIT_UNTIL(event == PRODUCED);
+   }
    
-   PT_EXIT(p);
+   PT_END(p);
  }
  \endcode
  *
@@ -195,7 +165,7 @@ struct pt {
    PT_WAIT_UNTIL(p, time >= 2 * SECOND);
    printf("Two seconds have passed\n");
    
-   PT_EXIT(p);
+   PT_END(p);
  }
  \endcode
  *
@@ -282,8 +252,8 @@ struct pt {
 /**
  * Restart the protothread.
  *
- * This macro will block and cause the protothread to restart its
- * execution at the place of the PT_BEGIN() call.
+ * This macro will block and cause the running protothread to restart
+ * its execution at the place of the PT_BEGIN() call.
  *
  * \param pt A pointer to the protothread control structure.
  *
@@ -324,78 +294,35 @@ struct pt {
  */
 #define PT_END(pt) LC_END((pt)->lc); PT_EXIT(pt)
 
-#define PT_RUNNING(f) (f == PT_THREAD_WAITING)
+
+/**
+ * Schedule a protothread.
+ *
+ * This function shedules a protothread. The return value of the
+ * function is non-zero if the protothread is running or zero if the
+ * protothread has exited.
+ *
+ * Example
+ \code
+ void main(void) {
+   struct pt p;
+   int event;
+   
+   PT_INIT(&p);
+   while(PT_SCHEDULE(consumer(&p, event))) {
+     event = get_event();
+   }   
+ }
+ \endcode
+ *
+ * \param f The call to the C function implementing the protothread to
+ * be scheduled
+ *
+ * \hideinitializer
+ */
+#define PT_SCHEDULE(f) (f == PT_THREAD_WAITING)
 
 #endif /* __PT_H__ */
 
-/**
- * \defgroup lc Local continuations
- * @{
- *
- * Local continuations form the basis for implementing protothreads. A
- * local continuation can be <i>set</i> in a specific function to
- * capture the state of the function. After a local continuation has
- * been set can be <i>resumed</i> in order to restore the state of the
- * function at the point where the local continuation was set.
- *
- *
- */
 
-/**
- * \file lc.h
- *
- */
-
-/**
- * \def LC_INIT(lc)
- *
- * Initialize a local continuation.
- *
- * This operation initializes the local continuation, thereby
- * unsetting any previously set continuation state. 
- */
-
-/**
- * \def LC_SET(lc)
- *
- * Set a local continuation.
- *
- * The set operation saves the state of the function at the point
- * where the operation is executed. As far as the set operation is
- * concerned, the state of the function does <b>not</b> include the
- * call-stack or local (automatic) variables, but only the program
- * counter and such CPU registers that needs to be saved.
- */
-
-/**
- * \def LC_RESUME(lc)
- *
- * Resume a local continuation.
- *
- * The resume operation resumes a previously set local continuation, thus
- * restoring the state in which the function was when the local
- * continuation was set. If the local continuation has not been
- * previously set, the resume operation does nothing.
- *
- */
-
-/**
- * \def LC_END(lc)
- *
- * Mark the end of local continuation usage.
- *
- * The end operation signifies that local continuations should not be
- * used any more in the function. This operation is not needed for
- * most implementations of local continuation, but is required by a
- * few implementations.
- *
- */
-
-/**
- * \var typedef lc_t;
- *
- * The local continuation type.
- */
-
-/** @} */
 /** @} */

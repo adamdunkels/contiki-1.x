@@ -17,7 +17,7 @@
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = "Contiki 1.2-devel0"
+PROJECT_NAME           = "Contiki 1.2-devel1"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
@@ -378,7 +378,11 @@ INPUT                  = ../ek/ek.c \
                          ../ek/ek-service.h \
                          ../ek/dsc.h \
                          ../ek/loader.h \
+			 pt-doc.txt \
                          ../ek/pt.h \
+                         ../ek/lc.h \
+                         ../ek/lc-switch.h \
+                         ../ek/lc-addrlabels.h \
                          ../ek/pt-sem.h \
                          ../apps/program-handler.c \
                          ../ctk/ctk.h \
@@ -397,7 +401,7 @@ INPUT                  = ../ek/ek.c \
                          ../uip/uiplib.c \
                          ../uip/resolv.h \
                          ../uip/resolv.c \
-                         ../uip/socket.h \
+                         ../uip/psock.h \
                          ../uip/tcpip.h \
                          ../lib/cc.h \
                          ../lib/petsciiconv.h \
@@ -939,7 +943,8 @@ INCLUDE_FILE_PATTERNS  =
 
 PREDEFINED             = CC_FUNCTION_POINTER_ARGS \
                          UIP_UDP \
-                         WITH_LOADER_ARCH
+                         WITH_LOADER_ARCH \
+			 DOXYGEN
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then 
 # this tag can be used to specify a list of macro names that should be expanded. 
