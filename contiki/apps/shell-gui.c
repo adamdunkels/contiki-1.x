@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.8 2004/07/04 11:35:07 adamdunkels Exp $
+ * $Id: shell-gui.c,v 1.9 2004/07/04 21:48:20 adamdunkels Exp $
  *
  */
 
@@ -42,8 +42,6 @@
 #include "resolv.h"
 
 #include "shell.h"
-
-#include "uip-signal.h"
 
 #include "shell-gui-conf.h"
 
