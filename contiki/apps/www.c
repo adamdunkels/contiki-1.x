@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.14 2003/08/11 22:25:07 adamdunkels Exp $
+ * $Id: www.c,v 1.15 2003/08/13 22:51:07 adamdunkels Exp $
  *
  */
 
@@ -442,6 +442,9 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
       CTK_WIDGET_FOCUS(&mainwindow, &downbutton);
     } else if(w == (struct ctk_widget *)&gobutton) {
       scrolly = 0;
+#if WWW_CONF_PAGEVIEW
+      starty = 0;
+#endif /* WWW_CONF_PAGEVIEW */
 
       run = 1;
       log_back();
@@ -820,10 +823,10 @@ static void *
 add_pagewidget(char *text, unsigned char type,
 	       unsigned char border)
 {  
-  static unsigned char len, maxwidth;
+  struct ctk_widget *lptr;
   register unsigned char *webpageptr;
+  static unsigned char len, maxwidth;
   static void *dataptr;
-  register struct ctk_widget *lptr;
 
   len = strlen(text);
 
