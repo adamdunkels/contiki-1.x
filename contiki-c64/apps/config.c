@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.3 2003/08/12 21:06:41 adamdunkels Exp $
+ * $Id: config.c,v 1.4 2003/08/20 19:51:00 adamdunkels Exp $
  *
  */
 
@@ -42,6 +42,8 @@
 #include "uip_main.h"
 #include "uip_arp.h"
 #include "resolv.h"
+
+#include "uip-signal.h"
 
 struct ptentry {
   char c;
@@ -102,6 +104,12 @@ nullterminate(char *str)
   /* Replace newline with a null char. */
   *nt = 0;
 
+  /* Remove trailing spaces. */
+  while(nt > str && *(nt - 1) == ' ') {
+    *(nt - 1) = 0;
+    --nt;
+  }
+  
   /* Return pointer to null char. */
   return nt;
 }
@@ -112,6 +120,23 @@ loadfile(char *str)
   char *nt;
 
   nt = nullterminate(str);
+  
+  /* Call loader function. */
+  program_handler_load(str);
+
+  return nt + 1;
+}
+/*-----------------------------------------------------------------------------------*/
+static char *
+loaddriver(char *str)
+{
+  char *nt;
+
+  nt = nullterminate(str);
+
+  /* Uninstall old driver. */
+  dispatcher_emit(uip_signal_uninstall, NULL,
+		  DISPATCHER_BROADCAST);
   
   /* Call loader function. */
   program_handler_load(str);
@@ -184,12 +209,11 @@ dnsconf(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static struct ptentry configparsetab[] =
-  {{'l', loadfile},
-   {'m', loadfile},   
+  {{'n', loaddriver},
    {'t', loadfile},
    {'s', screensaverconf},   
    {'i', ipaddrconf},
-   {'n', netmaskconf},
+   {'m', netmaskconf},
    {'r', drconf},
    {'d', dnsconf},
    {'#', skipnewline},
