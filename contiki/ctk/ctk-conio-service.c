@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-service.c,v 1.2 2004/08/12 21:52:03 oliverschmidt Exp $
+ * $Id: ctk-conio-service.c,v 1.3 2004/09/12 17:54:12 adamdunkels Exp $
  *
  */
 
@@ -580,7 +580,8 @@ EK_PROCESS(proc, CTK_DRAW_SERVICE_NAME ": text", EK_PRIO_NORMAL,
 
 /*--------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(ctk_conio_service_init, arg)
-{ 
+{
+  s_ctk_draw_init();
   ek_service_start(CTK_DRAW_SERVICE_NAME, &proc);
 }
 /*--------------------------------------------------------------------------*/
@@ -591,6 +592,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
+    s_ctk_draw_init();
     ctk_restore();
     break;
   case EK_EVENT_REQUEST_REPLACE:
