@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.11 2004/08/20 21:31:53 adamdunkels Exp $
+ * $Id: processes.c,v 1.12 2004/09/05 07:16:22 adamdunkels Exp $
  *
  */
 
@@ -158,6 +158,7 @@ killproc(void)
   if(p != NULL) {
     ek_post(procnum, EK_EVENT_REQUEST_EXIT, NULL);
     ek_post(id, EVENT_UPDATE, NULL);
+    CTK_TEXTENTRY_CLEAR(&killtextentry);
     CTK_WIDGET_REDRAW(&killtextentry);
     CTK_WIDGET_FOCUS(&processwindow, &processupdatebutton);
     CTK_WIDGET_REDRAW(&killbutton);
