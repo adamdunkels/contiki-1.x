@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.1 2003/08/20 19:50:10 adamdunkels Exp $
+ * $Id: shell.c,v 1.2 2003/08/21 22:25:03 adamdunkels Exp $
  *
  */
 
@@ -45,25 +42,9 @@
 
 #include "uip-signal.h"
 
+#include "shell.h"
+
 #include <string.h>
-
-#define XSIZE 36
-#define YSIZE 12
-
-static struct ctk_window window;
-static char log[XSIZE * YSIZE];
-static struct ctk_label loglabel =
-  {CTK_LABEL(0, 0, XSIZE, YSIZE, log)};
-static char command[XSIZE + 1];
-static struct ctk_textentry commandentry =
-  {CTK_TEXTENTRY(0, YSIZE, XSIZE - 2, 1, command, XSIZE)};
-
-static DISPATCHER_SIGHANDLER(sighandler, s, data);
-static void idle(void);
-static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Command shell", idle, sighandler,
-		   NULL)};
-static ek_id_t id;
 
 static char showingdir = 0;
 static struct c64_fs_dir dir;
@@ -75,35 +56,6 @@ struct ptentry {
 };
 
 /*-----------------------------------------------------------------------------------*/
-static void
-quit(char *str)
-{
-  ctk_window_close(&window);
-  dispatcher_exit(&p);
-  id = EK_ID_NONE;
-  LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-logf(char *str1, char *str2)
-{
-  static unsigned char i, len;
-  
-  for(i = 1; i < YSIZE; ++i) {
-    memcpy(&log[(i - 1) * XSIZE], &log[i * XSIZE], XSIZE);
-  }
-  memset(&log[(YSIZE - 1) * XSIZE], 0, XSIZE);
-
-  len = strlen(str1);
-
-  strncpy(&log[(YSIZE - 1) * XSIZE], str1, XSIZE);
-  if(len < XSIZE) {
-    strncpy(&log[(YSIZE - 1) * XSIZE] + len, str2, XSIZE - len);
-  }
-
-  CTK_WIDGET_REDRAW(&loglabel);
-}
-
 static void
 parse(register char *str, struct ptentry *t)
 {
@@ -126,7 +78,7 @@ parse(register char *str, struct ptentry *t)
 	++str;
       }
 
-      logf("> ", sstr);
+      shell_output("> ", sstr);
       /* Call parse table entry function and return. */
       p->pfunc(str);
       return;
@@ -160,12 +112,12 @@ processes(char *str)
   static char idstr[5];
   struct dispatcher_proc *p;
 
-  logf("Processes:", "");
+  shell_output("Processes:", "");
   /* Step through each possible process ID and see if there is a
      matching process. */
   for(p = DISPATCHER_PROCS(); p != NULL; p = p->next) {
     inttostr(idstr, p->id);
-    logf(idstr, p->name);
+    shell_output(idstr, p->name);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -199,14 +151,14 @@ runfile(char *str)
   /* Call loader function. */
   program_handler_load(str);
 
-  logf("Starting program ", str);  
+  shell_output("Starting program ", str);  
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 execfile(char *str)
 {
   runfile(str);
-  quit(NULL);
+  shell_quit(NULL);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -229,10 +181,10 @@ killproc(char *str)
   }
   if(procnum != 0) {
     inttostr(procstr, procnum);
-    logf("Killing process ", procstr);
+    shell_output("Killing process ", procstr);
     dispatcher_emit(dispatcher_signal_quit, NULL, procnum);
   } else {
-    logf("Could not parse process number", "");
+    shell_output("Could not parse process number", "");
   }
   
 }
@@ -240,24 +192,24 @@ killproc(char *str)
 static void
 help(char *str)
 {
-  logf("Available commands:", "");
-  logf("run  - start program", "");
-  logf("exec - start program & exit shell", "");  
-  logf("ps   - show processes", "");
-  logf("kill - kill process", "");
-  logf("ls   - display directory", "");
-  logf("quit - quit shell", "");
-  logf("?    - show this help", "");      
+  shell_output("Available commands:", "");
+  shell_output("run  - start program", "");
+  shell_output("exec - start program & exit shell", "");  
+  shell_output("ps   - show processes", "");
+  shell_output("kill - kill process", "");
+  shell_output("ls   - display directory", "");
+  shell_output("quit - quit shell", "");
+  shell_output("?    - show this help", "");      
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 directory(char *str)
 {
   if(c64_fs_opendir(&dir) != 0) {
-    logf("Cannot open directory", "");
+    shell_output("Cannot open directory", "");
     showingdir = 0;
   } else {
-    logf("Disk directory:", "");
+    shell_output("Disk directory:", "");
     showingdir = 1;
     totsize = 0;
   }
@@ -275,54 +227,25 @@ static struct ptentry configparsetab[] =
    {'k', killproc},   
    {'p', processes},
    {'l', directory},
-   {'q', quit},
+   {'q', shell_quit},
    {'?', help},
 
    /* Default action */
    {0, none}};
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(config_init)
+void
+shell_input(char *cmd)
 {
-  if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_widget_activate);    
-
-    ctk_window_new(&window, XSIZE, YSIZE+1, "Command shell");
-    CTK_WIDGET_ADD(&window, &loglabel);
-    CTK_WIDGET_ADD(&window, &commandentry);
-    CTK_WIDGET_FOCUS(&window, &commandentry);
-    memset(log, ' ', sizeof(log));
-
-    logf("Contiki command shell", "");
-    help(NULL);
-  }
-  ctk_window_open(&window);
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(sighandler, s, data)
-{
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-
-  if(s == ctk_signal_widget_activate &&
-     data == (ek_data_t)&commandentry) {
-    if(showingdir != 0) {
-      showingdir = 0;
-      logf("Directory stopped", "");
-      c64_fs_closedir(&dir);
+  if(showingdir != 0) {
+    showingdir = 0;
+    shell_output("Directory stopped", "");
+    c64_fs_closedir(&dir);
     }
-    parse(command, configparsetab);
-    CTK_TEXTENTRY_CLEAR(&commandentry);
-    CTK_WIDGET_REDRAW(&commandentry);
-  } else if(s == ctk_signal_window_close ||
-     s == dispatcher_signal_quit) {
-    quit(NULL);
-  }
+  parse(cmd, configparsetab);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-idle(void)
+void
+shell_idle(void)
 {
   static struct c64_fs_dirent dirent;
   static char size[10];
@@ -330,12 +253,12 @@ idle(void)
     c64_fs_readdir_dirent(&dir, &dirent);
     totsize += dirent.size;
     inttostr(size, dirent.size);
-    logf(size, dirent.name);
+    shell_output(size, dirent.name);
     if(c64_fs_readdir_next(&dir) != 0) {
       c64_fs_closedir(&dir);
       showingdir = 0;
       inttostr(size, totsize);
-      logf("Total number of blocks: ", size);
+      shell_output("Total number of blocks: ", size);
     }
   }
 }
