@@ -1,8 +1,5 @@
 
 ;---------------------------------------------------------------------
-	;; The 1351 mouse code was taken from the CC65 libraries,
-	;; written by Ullrich von Bassewitz 
-;---------------------------------------------------------------------	
 
         .macpack        generic
 
@@ -20,8 +17,12 @@ joydxcnt:	.res 1
 .code
 
 ;---------------------------------------------------------------------
-_ctk_mouse_joy:	
-	  lda $dc00
+_ctk_mouse_joy:
+	  ldy $dc02
+	  lda #0
+          sta $dc02
+          lda $dc00
+          sty $dc02
 	  ldy #0
 	  ldx #0
 	  lsr
