@@ -38,11 +38,11 @@ while($file = <FILES>) {
     print(HEADER "\r\n");
     close(HEADER);
 
-    unless($file =~ /\.plain$/ || $file =~ /cgi/) {
-	system("cat /tmp/header $file > /tmp/file");
-    } else {
+#    unless($file =~ /\.plain$/ || $file =~ /cgi/) {
+#	system("cat /tmp/header $file > /tmp/file");
+#    } else {
 	system("cp $file /tmp/file");
-    }
+#    }
     
     open(FILE, "/tmp/file");
     unlink("/tmp/file");
