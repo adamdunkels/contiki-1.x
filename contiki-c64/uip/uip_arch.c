@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.6 2004/09/12 14:07:32 adamdunkels Exp $
+ * $Id: uip_arch.c,v 1.7 2004/09/18 20:47:08 adamdunkels Exp $
  *
  */
 
@@ -308,4 +308,106 @@ uip_tcpchksum(void)
   return chksum_tmp;
 }
 #pragma optimize(pop)
+/*-----------------------------------------------------------------------------------*/
+#if UIP_UDP_CHECKSUMS
+#pragma optimize(push, off)
+u16_t
+uip_udpchksum(void)
+{  
+  chksum_ptr = (u16_t)&uip_buf[20 + UIP_LLH_LEN];
+  chksum_len = 20;  
+  chksum_tmp = chksum();
+
+  chksum_ptr = (u16_t)uip_appdata;
+  asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
+  asm("sec");
+  asm("sbc #40");
+  asm("sta _chksum_len");
+  asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
+  asm("sbc #0");
+  asm("sta _chksum_len+1");
+
+  asm("jsr %v", chksum);
+
+  asm("clc");
+  asm("adc _chksum_tmp");
+  asm("sta _chksum_tmp");
+  asm("txa");
+  asm("adc _chksum_tmp+1");
+  asm("sta _chksum_tmp+1");
+
+  /* Fold carry */
+  /*  asm("bcc noinc");
+  asm("inc _chksum_tmp");
+  asm("noinc:");*/
+  
+  asm("tcpchksum_loop1:");
+  asm("lda _chksum_tmp");
+  asm("adc #0");
+  asm("sta _chksum_tmp");
+  asm("lda _chksum_tmp+1");
+  asm("adc #0");
+  asm("sta _chksum_tmp+1");
+  asm("bcs tcpchksum_loop1");
+
+
+  asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
+  asm("sec");
+  asm("sbc #20");
+  asm("sta _chksum_len");
+  asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
+  asm("sbc #0");
+  asm("sta _chksum_len+1");
+  
+  
+  asm("ldy #$0c");
+  asm("clc");
+  asm("php");
+  asm("tcpchksum_loop2:");
+  asm("plp");
+  asm("lda _uip_buf+%b,y", UIP_LLH_LEN);
+  asm("adc _chksum_tmp");
+  asm("sta _chksum_tmp");
+  asm("iny");
+  asm("lda _uip_buf+%b,y", UIP_LLH_LEN);
+  asm("adc _chksum_tmp+1");
+  asm("sta _chksum_tmp+1");
+  asm("iny");
+  asm("php");
+  asm("cpy #$14");
+  asm("bne tcpchksum_loop2");
+
+  asm("plp");
+  
+  asm("lda _chksum_tmp");
+  asm("adc #0");
+  asm("sta _chksum_tmp");
+  asm("lda _chksum_tmp+1");
+  asm("adc #17");  /* IP_PROTO_UDP */
+  asm("sta _chksum_tmp+1");
+
+  
+  asm("lda _chksum_tmp");
+  asm("adc _chksum_len+1");
+  asm("sta _chksum_tmp");
+  asm("lda _chksum_tmp+1");
+  asm("adc _chksum_len");
+  asm("sta _chksum_tmp+1");
+
+  
+
+  asm("tcpchksum_loop3:");
+  asm("lda _chksum_tmp");
+  asm("adc #0");
+  asm("sta _chksum_tmp");
+  asm("lda _chksum_tmp+1");
+  asm("adc #0");
+  asm("sta _chksum_tmp+1");
+  asm("bcs tcpchksum_loop3");
+
+
+  return chksum_tmp;
+}
+#pragma optimize(pop)
+#endif /* UIP_UDP_CHECKSUMS */
 /*-----------------------------------------------------------------------------------*/
