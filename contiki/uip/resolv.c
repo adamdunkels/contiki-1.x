@@ -1,18 +1,31 @@
 /**
- * \file
- * DNS host name to IP address resolver.
- * \author Adam Dunkels <adam@dunkels.com>
- * 
- * This file implements a DNS host name to IP address resolver. It
- * maintains a list of resolved hostnames that can be queried with the
- * resolv_lookup() function. New hostnames can be resolved using the
- * resolv_query() function.
+ * \addtogroup uip
+ * @{
+ */
+
+/**
+ * \defgroup uipdns uIP hostname resolver functions
+ * @{
+ *
+ * The uIP DNS resolver functions are used to lookup a hostname and
+ * map it to a numerical IP address. It maintains a list of resolved
+ * hostnames that can be queried with the resolv_lookup()
+ * function. New hostnames can be resolved using the resolv_query()
+ * function.
  *
  * The signal resolv_signal_found is emitted when a hostname has been
  * resolved. The signal is emitted to all processes listening for the
  * signal, and it is up to the receiving process to determine if the
  * correct hostname has been found by calling the resolv_lookup()
  * function with the hostname.
+ */
+
+/**
+ * \file
+ * DNS host name to IP address resolver.
+ * \author Adam Dunkels <adam@dunkels.com>
+ * 
+ * This file implements a DNS host name to IP address resolver.
  */
 
 /*
@@ -45,7 +58,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.8 2003/09/04 19:38:46 adamdunkels Exp $
+ * $Id: resolv.c,v 1.9 2003/10/01 11:25:37 adamdunkels Exp $
  *
  */
 
@@ -120,10 +133,8 @@ static u8_t seqno;
 
 static struct uip_udp_conn *resolv_conn = NULL;
 
-/**
- * Signal that is sent when a name has been resolved.
- */
-ek_signal_t resolv_signal_found = EK_SIGNAL_NONE;
+ek_signal_t resolv_signal_found;
+
 
 /*-----------------------------------------------------------------------------------*/
 /** \internal
@@ -467,3 +478,6 @@ resolv_found(char *name, u16_t *ipaddr)
   dispatcher_emit(resolv_signal_found, name, DISPATCHER_BROADCAST);
 }
 /*-----------------------------------------------------------------------------------*/
+
+/** @} */
+/** @} */

@@ -1,5 +1,11 @@
+/**
+ * \file
+ * uIP DNS resolver code header file.
+ * \author Adam Dunkels <adam@dunkels.com>
+ */
+
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -10,10 +16,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +34,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.h,v 1.2 2003/04/16 18:28:16 adamdunkels Exp $
+ * $Id: resolv.h,v 1.3 2003/10/01 11:25:37 adamdunkels Exp $
  *
  */
 #ifndef __RESOLV_H__
@@ -40,8 +43,16 @@
 #include "uip.h"
 #include "ek.h"
 
-/* Signals */
+/**
+ * \addtogroup signals
+ * @{
+ */
+
+/**
+ * Signal that is sent when a DNS name has been resolved.
+ */
 extern ek_signal_t resolv_signal_found;
+/** @} */
 
 /* Callbacks. */
 void resolv_found(char *name, u16_t *ipaddr);

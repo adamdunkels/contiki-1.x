@@ -1,4 +1,14 @@
 /**
+ * \addtogroup uip
+ * @{
+ */
+
+/**
+ * \addtogroup uiparp 
+ * @{
+ */
+ 
+/**
  * \file
  * Macros and definitions for the ARP module.
  * \author Adam Dunkels <adam@dunkels.com>
@@ -35,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.h,v 1.4 2003/09/05 21:03:36 adamdunkels Exp $
+ * $Id: uip_arp.h,v 1.5 2003/10/01 11:25:37 adamdunkels Exp $
  *
  */
 
@@ -103,6 +113,12 @@ void uip_arp_out(void);
    is responsible for flushing old entries in the ARP table. */
 void uip_arp_timer(void);
 
+/** @} */
+
+/**
+ * \addtogroup uipconffunc
+ * @{
+ */
 
 /**
  * Set the default router's IP address.
@@ -163,7 +179,7 @@ void uip_arp_timer(void);
                               uip_ethaddr.addr[4] = eaddr.addr[4];\
                               uip_ethaddr.addr[5] = eaddr.addr[5];} while(0)
 
-
+/** @} */
 
 /**
  * \internal Internal variables that are set using the macros
@@ -171,3 +187,5 @@ void uip_arp_timer(void);
  */
 extern u16_t uip_arp_draddr[2], uip_arp_netmask[2];
 #endif /* __UIP_ARP_H__ */
+
+

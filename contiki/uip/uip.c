@@ -1,5 +1,16 @@
+/**
+ * \addtogroup uip
+ * @{
+ */
+
+/**
+ * \file
+ * The uIP TCP/IP stack code.
+ * \author Adam Dunkels <adam@dunkels.com>
+ */
+
 /*
- * Copyright (c) 2001-2002, Adam Dunkels.
+ * Copyright (c) 2001-2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -10,10 +21,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.10 2003/09/02 21:47:29 adamdunkels Exp $
+ * $Id: uip.c,v 1.11 2003/10/01 11:25:37 adamdunkels Exp $
  *
  */
 
@@ -76,6 +84,8 @@ u8_t uip_buf[UIP_BUFSIZE+2];   /* The packet buffer that contains
 				incoming packets. */
 volatile u8_t *uip_appdata;  /* The uip_appdata pointer points to
 				application data. */
+volatile u8_t *uip_sappdata;  /* The uip_appdata pointer points to the
+				 application data which is to be sent. */
 #if UIP_URGDATA > 0
 volatile u8_t *uip_urgdata;  /* The uip_urgdata pointer points to
 				urgent data (out-of-band data), if
@@ -125,7 +135,7 @@ static u8_t iss[4];          /* The iss variable is used for the TCP
 /* Temporary variables. */
 volatile u8_t uip_acc32[4];
 static u8_t c, opt;
-static u16_t tmpport;
+static u16_t tmp16;
 
 /* Structures and definitions. */
 #define TCP_FIN 0x01
@@ -239,7 +249,7 @@ uip_connect(u16_t *ripaddr, u16_t rport)
   conn->snd_nxt[2] = iss[2];
   conn->snd_nxt[3] = iss[3];
 
-  conn->mss = UIP_TCP_MSS;
+  conn->initialmss = conn->mss = UIP_TCP_MSS;
   
   conn->len = 1;   /* TCP length of the SYN is one. */
   conn->nrtx = 0;
@@ -697,12 +707,12 @@ uip_process(u8_t flag)
   }
   
   /* Swap IP addresses. */
-  tmpport = BUF->destipaddr[0];
+  tmp16 = BUF->destipaddr[0];
   BUF->destipaddr[0] = BUF->srcipaddr[0];
-  BUF->srcipaddr[0] = tmpport;
-  tmpport = BUF->destipaddr[1];
+  BUF->srcipaddr[0] = tmp16;
+  tmp16 = BUF->destipaddr[1];
   BUF->destipaddr[1] = BUF->srcipaddr[1];
-  BUF->srcipaddr[1] = tmpport;
+  BUF->srcipaddr[1] = tmp16;
 
   UIP_STAT(++uip_stat.icmp.sent);
   goto send;
@@ -817,10 +827,10 @@ uip_process(u8_t flag)
   if((BUF->flags & TCP_CTL) != TCP_SYN)
     goto reset;
   
-  tmpport = BUF->destport;
+  tmp16 = BUF->destport;
   /* Next, check listening connections. */  
   for(c = 0; c < UIP_LISTENPORTS; ++c) {
-    if(tmpport == uip_listenports[c])
+    if(tmp16 == uip_listenports[c])
       goto found_listen;
   }
   
@@ -867,17 +877,17 @@ uip_process(u8_t flag)
   }
  
   /* Swap port numbers. */
-  tmpport = BUF->srcport;
+  tmp16 = BUF->srcport;
   BUF->srcport = BUF->destport;
-  BUF->destport = tmpport;
+  BUF->destport = tmp16;
   
   /* Swap IP addresses. */
-  tmpport = BUF->destipaddr[0];
+  tmp16 = BUF->destipaddr[0];
   BUF->destipaddr[0] = BUF->srcipaddr[0];
-  BUF->srcipaddr[0] = tmpport;
-  tmpport = BUF->destipaddr[1];
+  BUF->srcipaddr[0] = tmp16;
+  tmp16 = BUF->destipaddr[1];
   BUF->destipaddr[1] = BUF->srcipaddr[1];
-  BUF->srcipaddr[1] = tmpport;
+  BUF->srcipaddr[1] = tmp16;
 
   
   /* And send out the RST packet! */
@@ -952,9 +962,10 @@ uip_process(u8_t flag)
       } else if(opt == 0x02 &&
 		uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + c] == 0x04) {
 	/* An MSS option with the right option length. */	
-	tmpport = (uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + c] << 8) |
-	  uip_buf[40 + UIP_LLH_LEN + 3 + c];
-	uip_connr->mss = tmpport > UIP_TCP_MSS? UIP_TCP_MSS: tmpport;
+	tmp16 = ((u16_t)uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + c] << 8) |
+	  (u16_t)uip_buf[40 + UIP_LLH_LEN + 3 + c];
+	uip_connr->initialmss = uip_connr->mss =
+	  tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
 	
 	/* And we are done processing options. */
 	break;
@@ -1115,9 +1126,10 @@ uip_process(u8_t flag)
 	  } else if(opt == 0x02 &&
 		    uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + c] == 0x04) {
 	    /* An MSS option with the right option length. */
-	    tmpport = (uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + c] << 8) |
+	    tmp16 = (uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + c] << 8) |
 	      uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 3 + c];
-	    uip_connr->mss = tmpport > UIP_TCP_MSS? UIP_TCP_MSS: tmpport;
+	    uip_connr->initialmss =
+	      uip_connr->mss = tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
 
 	    /* And we are done processing options. */
 	    break;
@@ -1208,7 +1220,25 @@ uip_process(u8_t flag)
       uip_flags |= UIP_NEWDATA;
       uip_add_rcv_nxt(uip_len);
     }
-    
+
+    /* Check if the available buffer space advertised by the other end
+       is smaller than the initial MSS for this connection. If so, we
+       set the current MSS to the window size to ensure that the
+       application does not send more data than the other end can
+       handle.
+
+       If the remote host advertises a zero window, we set the MSS to
+       the initial MSS so that the application will send an entire MSS
+       of data. This data will not be acknowledged by the receiver,
+       and the application will retransmit it. This is called the
+       "persistent timer" and uses the retransmission mechanim.
+    */
+    tmp16 = ((u16_t)BUF->wnd[0] << 8) + (u16_t)BUF->wnd[1];
+    if(tmp16 > uip_connr->initialmss ||
+       tmp16 == 0) {
+      tmp16 = uip_connr->initialmss;
+    }
+    uip_connr->mss = tmp16;
 
     /* If this packet constitutes an ACK for outstanding data (flagged
        by the UIP_ACKDATA flag, we should call the application since it
@@ -1231,6 +1261,7 @@ uip_process(u8_t flag)
       UIP_APPCALL();
 
     appsend:
+      
       if(uip_flags & UIP_ABORT) {
 	uip_slen = 0;
 	uip_connr->tcpstateflags = CLOSED;
@@ -1259,6 +1290,8 @@ uip_process(u8_t flag)
 	uip_slen = uip_connr->len;
       }
     apprexmit:
+      uip_appdata = uip_sappdata;
+      
       /* If the application has data to be sent, or if the incoming
          packet had new data in it, we must send out a packet. */
       if(uip_slen > 0 && uip_connr->len > 0) {
@@ -1386,11 +1419,11 @@ uip_process(u8_t flag)
     BUF->wnd[0] = BUF->wnd[1] = 0;
   } else {
 #if (UIP_TCP_MSS) > 255
-    BUF->wnd[0] = (uip_connr->mss >> 8);
+    BUF->wnd[0] = (uip_connr->initialmss >> 8);
 #else
     BUF->wnd[0] = 0;
 #endif /* UIP_MSS */
-    BUF->wnd[1] = (uip_connr->mss & 0xff); 
+    BUF->wnd[1] = (uip_connr->initialmss & 0xff); 
   }
 
  tcp_send_noconn:
@@ -1437,3 +1470,4 @@ htons(u16_t val)
   return HTONS(val);
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */

@@ -48,7 +48,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: uip-signal.h,v 1.5 2003/09/02 21:47:29 adamdunkels Exp $
+ * $Id: uip-signal.h,v 1.6 2003/10/01 11:25:37 adamdunkels Exp $
  *
  */
 
@@ -56,6 +56,11 @@
 #define __UIP_SIGNAL_H__
 
 #include "ek.h"
+
+/**
+ * \addtogroup signals
+ * @{
+ */
 
 extern ek_signal_t
  uip_signal_uninstall,  /**< Cause a network device driver to unload itself. */
@@ -69,6 +74,8 @@ extern ek_signal_t
 			   place. A pointer to the uip_udp_conn struct
 			   must be passed as signal data with the
 			   signal. */
+
+/** @} */
 
 /**
  * Initialize the uIP signal module.

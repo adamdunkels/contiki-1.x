@@ -1,8 +1,12 @@
 /**
- * \file
- * Implementation of the ARP Address Resolution Protocol.
- * \author Adam Dunkels <adam@dunkels.com>
- *
+ * \addtogroup uip
+ * @{
+ */
+
+/**
+ * \defgroup uiparp uIP Address Resolution Protocol
+ * @{
+ * 
  * The Address Resolution Protocol ARP is used for mapping between IP
  * addresses and link level addresses such as the Ethernet MAC
  * addresses. ARP uses broadcast queries to ask for the link level
@@ -11,6 +15,13 @@
  * link level address.
  *
  * \note This ARP implementation only supports Ethernet.
+ */
+ 
+/**
+ * \file
+ * Implementation of the ARP Address Resolution Protocol.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
  */
 
 /*
@@ -43,7 +54,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.7 2003/09/05 21:03:36 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.8 2003/10/01 11:25:37 adamdunkels Exp $
  *
  */
 
@@ -405,6 +416,5 @@ uip_arp_out(void)
 }
 /*-----------------------------------------------------------------------------------*/
 
-
-
-
+/** @} */
+/** @} */
