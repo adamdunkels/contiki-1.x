@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-out.h,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: vnc-out.h,v 1.2 2003/08/12 21:13:24 adamdunkels Exp $
  *
  */
 
@@ -65,6 +65,19 @@ void vnc_out_update_area(struct vnc_server_state *vs,
 
 unsigned char vnc_out_add_icon(struct ctk_icon *icon);
 
+#if 1
+#define VNC_OUT_BACKGROUNDCOLOR 0
+#define VNC_OUT_WINDOWCOLOR    1
+#define VNC_OUT_SEPARATORCOLOR 7 /*(VNC_OUT_WINDOWCOLOR + 6)*/
+#define VNC_OUT_LABELCOLOR     13 /*(VNC_OUT_SEPARATORCOLOR + 6)*/
+#define VNC_OUT_BUTTONCOLOR    19 /*(VNC_OUT_LABELCOLOR + 6)*/
+#define VNC_OUT_HYPERLINKCOLOR 25 /*(VNC_OUT_BUTTONCOLOR + 6)*/
+#define VNC_OUT_TEXTENTRYCOLOR 31 /*(VNC_OUT_HYPERLINKCOLOR + 6)*/
+#define VNC_OUT_ICONCOLOR      37 /*(VNC_OUT_TEXTENTRYCOLOR + 6)*/
+#define VNC_OUT_MENUCOLOR      43 /*(VNC_OUT_ICONCOLOR + 6)*/
+#define VNC_OUT_OPENMENUCOLOR  44/*(VNC_OUT_MENUCOLOR + 1)*/
+#define VNC_OUT_ACTIVEMENUCOLOR 45 /*(VNC_OUT_OPENMENUCOLOR + 1) */
+#else
 #define VNC_OUT_BACKGROUNDCOLOR 0
 #define VNC_OUT_WINDOWCOLOR    1
 #define VNC_OUT_SEPARATORCOLOR (VNC_OUT_WINDOWCOLOR + 6)
@@ -76,5 +89,7 @@ unsigned char vnc_out_add_icon(struct ctk_icon *icon);
 #define VNC_OUT_MENUCOLOR      (VNC_OUT_ICONCOLOR + 6)
 #define VNC_OUT_OPENMENUCOLOR  (VNC_OUT_MENUCOLOR + 1)
 #define VNC_OUT_ACTIVEMENUCOLOR (VNC_OUT_OPENMENUCOLOR + 1)
+
+#endif
 
 #endif /* __VNC_OUT_H__ */
