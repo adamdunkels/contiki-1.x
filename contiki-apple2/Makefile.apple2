@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.1 2004/06/08 20:28:33 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.2 2004/06/14 22:30:32 oliverschmidt Exp $
 #
 
 all: contiki
@@ -44,10 +44,14 @@ AFLAGS:=-t $(SYS)
 CFLAGS:=$(CFLAGSCOMMON) \
         -DWITH_ASCII -DWITH_UIP -DWITH_ETHERNET
 
+ifeq ($(SYS),apple2enh)
+CTK=ctk.o ctk-mousetext.o
+else
 CTK=ctk.o ctk-conio.o
+endif
 
 contiki:crt0.o main.o clock.o dispatcher.o program-handler.o arg.o $(CTK) $(UIP) \
-	netconf.o netconf-dsc.o \
+	config.o config-dsc.o \
 	$(WWW) www-dsc.o \
 	$(TELNET) telnet-dsc.o \
 	processes.o processes-dsc.o \

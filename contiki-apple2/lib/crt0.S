@@ -8,10 +8,20 @@
 .export 	_exit, SETWND, BASCALC
 .importzp	sp
 .import 	zerobss, initlib, callmain, donelib
+.import 	__CONF_MEM_START__, __CONF_MEM_LAST__
 .import 	__CODE_MEM_START__, __CODE_MEM_LAST__
 .import 	__DATA_MEM_START__, __DATA_MEM_LAST__
 .import		__RODATA_LOAD__, __RODATA_RUN__, __RODATA_SIZE__
 .import		__DATA_SIZE__, __BSS_SIZE__, __STACKLAST__
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+.segment	"CONF_HDR"
+
+	.word	__CONF_MEM_START__
+	.word	__CONF_MEM_LAST__ - __CONF_MEM_START__
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

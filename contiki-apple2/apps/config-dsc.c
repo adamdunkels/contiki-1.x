@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -30,61 +27,29 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki desktop environment
  *
- * $Id: main.c,v 1.2 2004/06/14 22:30:32 oliverschmidt Exp $
+ * $Id: config-dsc.c,v 1.1 2004/06/14 22:30:33 oliverschmidt Exp $
  *
  */
 
-#include "ctk.h"
-#include "ctk-draw.h"
-#include "dispatcher.h"
+#include "dsc.h"
 
-#include "program-handler.h"
-
-#include "uip-signal.h"
-#include "uip.h"
-#include "uip_arp.h"
-
-#include "resolv.h"
-
-#include "config.h"
-
-#include "config-dsc.h"
-#include "www-dsc.h"
-#include "telnet-dsc.h"
-#include "processes-dsc.h"
-#include "about-dsc.h"
-
+extern struct ctk_icon config_icon;
 /*-----------------------------------------------------------------------------------*/
-ek_clock_t
-ek_clock(void)
-{
-  return clock();
-}
+DSC(config_dsc,
+    NULL,
+    NULL,
+    config_init,
+    &config_icon);
 /*-----------------------------------------------------------------------------------*/
-void
-main(void)
-{
-  dispatcher_init();
-  uip_init();
-  
-  ctk_init();
+static char configicon_textmap[9] = {
+  'c', 'o', 'n',
+  'f', 'i', 'g',
+  '-', '-', '-'
+};
 
-  resolv_init(NULL);
-  
-  uip_signal_init();
-  
-  program_handler_init();
 
-  program_handler_add(&config_dsc,    "Configuration", 1);
-  program_handler_add(&www_dsc,       "Web browser",   1);
-  program_handler_add(&telnet_dsc,    "Telnet",        1);
-  program_handler_add(&processes_dsc, "Processes",     1);
-  program_handler_add(&about_dsc,     "About Contiki", 0);
-
-  config_apply();
-
-  dispatcher_run();
-}
+static struct ctk_icon config_icon =
+  {CTK_ICON("Configuration", NULL, configicon_textmap)};
 /*-----------------------------------------------------------------------------------*/
