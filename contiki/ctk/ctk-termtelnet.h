@@ -3,4 +3,4 @@
 
 void ctk_termtelnet_init(char *arg);
 
-#endif /* __CTK_VNCSERVER_H__ */
+#endif /* __CTK_TERMTELNET_H__ */

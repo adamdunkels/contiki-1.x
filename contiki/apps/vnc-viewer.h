@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki VNC client.
  *
- * $Id: vnc-viewer.h,v 1.6 2004/07/04 11:35:08 adamdunkels Exp $
+ * $Id: vnc-viewer.h,v 1.7 2004/08/22 12:35:12 oliverschmidt Exp $
  *
  */
 
@@ -325,4 +325,4 @@ struct rfb_pointer_event {
   u16_t y;
 };
 
-#endif /* __VNC_H__ */
+#endif /* __VNC_VIEWER_H__ */

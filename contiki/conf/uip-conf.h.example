@@ -40,10 +40,11 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h.example,v 1.4 2004/07/04 11:37:34 adamdunkels Exp $
+ * $Id: uip-conf.h.example,v 1.5 2004/08/22 12:35:37 oliverschmidt Exp $
  *
  */
 #ifndef __UIP_CONF_H__
+#define __UIP_CONF_H__
 
 /**
  * The maximum number of TCP connections.

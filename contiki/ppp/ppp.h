@@ -42,7 +42,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp.h,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: ppp.h,v 1.2 2004/08/22 12:37:00 oliverschmidt Exp $
  *
  */
 #include "uip.h"
@@ -129,4 +129,4 @@ void ppp_poll(void);
 void ppp_upcall(u16_t, u8_t *, u16_t);
 u16_t scan_packet(u16_t, u8_t *list, u8_t *buffer, u8_t *options, u16_t len);
 
-#endif 
+#endif /* __PPP_H__ */

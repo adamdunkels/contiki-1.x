@@ -1,5 +1,5 @@
-#ifndef __ILCP_H__
-#define __ILCP_H__
+#ifndef __LCP_H__
+#define __LCP_H__
 /* www.mycal.com
    ---------------------------------------------------------------------------
    LCP.h - LCP header file
@@ -43,7 +43,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: lcp.h,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: lcp.h,v 1.2 2004/08/22 12:37:00 oliverschmidt Exp $
  *
  */
 
@@ -92,4 +92,4 @@ void	lcp_init(void);
 void	lcp_rx(u8_t *, u16_t);
 void	lcp_task(u8_t *buffer);
 
-#endif
+#endif /* __LCP_H__ */

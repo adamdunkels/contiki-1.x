@@ -44,7 +44,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: pap.h,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: pap.h,v 1.2 2004/08/22 12:37:00 oliverschmidt Exp $
  *
  */
 
@@ -76,5 +76,5 @@ void	pap_init(void);
 void	pap_rx(u8_t *, u16_t);
 void	pap_task(u8_t *buffer, u8_t *username, u8_t *password);	
 
-#endif
+#endif /* __PAP_H__ */
 

@@ -42,7 +42,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ahdlc.h,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: ahdlc.h,v 1.2 2004/08/22 12:37:00 oliverschmidt Exp $
  *
  */
 
@@ -54,4 +54,4 @@ u8_t ahdlc_rx(u8_t);
 u8_t ahdlc_tx(u16_t protocol, u8_t *header, u8_t *buffer,
 	      u16_t headerlen, u16_t datalen);
 
-#endif 
+#endif /* __AHDLC_H__ */

@@ -29,10 +29,11 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: telnetd-conf.h.example,v 1.2 2004/07/04 11:37:34 adamdunkels Exp $
+ * $Id: telnetd-conf.h.example,v 1.3 2004/08/22 12:35:37 oliverschmidt Exp $
  *
  */
 #ifndef __TELNETD_CONF_H__
+#define __TELNETD_CONF_H__
 
 #define TELNETD_CONF_LINELEN 36
 #define TELNETD_CONF_NUMLINES 24
