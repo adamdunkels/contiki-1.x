@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.1 2003/04/08 18:08:26 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.2 2003/09/07 18:13:16 adamdunkels Exp $
  *
  */
 
@@ -41,6 +41,10 @@
 #include "dispatcher.h"
 
 #include "program-handler.h"
+#include "processes-dsc.h"
+#include "about-dsc.h"
+#include "netconf-dsc.h"
+#include "memstat-dsc.h"
 
 #include "uip_main.h"
 #include "uip.h"
@@ -56,8 +60,10 @@
 int
 main(int argc, char **argv)
 {
-  toggle_videomode();
+  /*  toggle_videomode(); */ /* Turn on 80 column mode */
 
+  dispatcher_init();
+  
 #ifdef WITH_UIP
   uip_init();
   uip_main_init();
@@ -79,14 +85,17 @@ main(int argc, char **argv)
 
 #endif /* WITH_UIP */
 	    
-  ek_init();
-  dispatcher_init();
   ctk_init();
      
   program_handler_init();
+  program_handler_add(&about_dsc, "About", 1);
+  program_handler_add(&netconf_dsc, "Netconf", 1);  
+  program_handler_add(&processes_dsc, "Processes", 1);
+  program_handler_add(&memstat_dsc, "Memory stats", 1);  
+
+
   
-  ctk_redraw();
-  ek_run();
+  dispatcher_run();
 
   clrscr();
   
