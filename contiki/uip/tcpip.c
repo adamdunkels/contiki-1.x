@@ -11,6 +11,8 @@
 
 #include "packet-service.h"
 
+#include "uip-split.h"
+
 #include <string.h>
 
 ek_event_t tcpip_event;
@@ -40,7 +42,7 @@ enum {
   UDP_POLL
 };
 
-static unsigned char forwarding;
+static unsigned char forwarding = 0;
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
@@ -51,7 +53,7 @@ EK_PROCESS_INIT(tcpip_init, arg)
 {
   uip_init();
   ek_start(&proc);
-  
+  forwarding = 0;
 }
 /*---------------------------------------------------------------------------*/
 void
@@ -68,15 +70,21 @@ tcpip_input(void)
       if(uip_fw_forward() == 0) {
 	uip_input();
 	if(uip_len > 0) {
+#if UIP_CONF_TCP_SPLIT
+	  uip_split_output();
+#else
 	  tcpip_output();
-	  return;
+#endif
 	}
       }
     } else {
       uip_input();
       if(uip_len > 0) {
+#if UIP_CONF_TCP_SPLIT
+	uip_split_output();
+#else
 	tcpip_output();
-	return;
+#endif
       }
     }
   }
@@ -108,7 +116,7 @@ struct uip_conn *
 tcp_connect(u16_t *ripaddr, u16_t port, void *appstate)
 {
   struct uip_conn *c;
-
+  
   c = uip_connect(ripaddr, port);
   if(c == NULL) {
     return NULL;
@@ -120,6 +128,24 @@ tcp_connect(u16_t *ripaddr, u16_t port, void *appstate)
   ek_post(s.id, TCP_POLL, c);
   
   return c;
+}
+/*---------------------------------------------------------------------------*/
+void
+tcp_unlisten(u16_t port)
+{
+  static unsigned char i;
+  struct listenport *l;
+
+  l = s.listenports;
+  for(i = 0; i < UIP_LISTENPORTS; ++i) {
+    if(l->port == port &&
+       l->id == EK_PROC_ID(EK_CURRENT())) {
+      l->port = 0;      
+      uip_unlisten(port);
+      break;
+    }
+    ++l;
+  }
 }
 /*---------------------------------------------------------------------------*/
 void
@@ -144,7 +170,7 @@ void
 tcp_markconn(struct uip_conn *conn,
              void *appstate)
 {
-  struct tcpip_uipstate *s;
+  register struct tcpip_uipstate *s;
 
   s = (struct tcpip_uipstate *)conn->appstate;
   s->id = ek_current->id;
@@ -171,8 +197,8 @@ udp_new(u16_t *ripaddr, u16_t port, void *appstate)
 /*---------------------------------------------------------------------------*/
 EK_EVENTHANDLER(eventhandler, ev, data)
 {
-  int i;
-  struct listenport *l;
+  static unsigned char i;
+  register struct listenport *l;
   ek_id_t id;
   struct internal_state *state;
   
@@ -207,18 +233,40 @@ EK_EVENTHANDLER(eventhandler, ev, data)
       }
       ++l;
     }
-    for(i = 0; i < UIP_CONNS; ++i) {
+    /*    for(i = 0; i < UIP_CONNS; ++i) {
       if(((struct tcpip_uipstate *)uip_conns[i].appstate)->id == id) {
-	((struct tcpip_uipstate *)uip_conns[i].appstate)->id = EK_ID_NONE;
+      ((struct tcpip_uipstate *)uip_conns[i].appstate)->id = EK_ID_NONE;
 	uip_conns[i].tcpstateflags = CLOSED;
       }
+      }*/
+    {
+      register struct uip_conn *cptr;
+     
+      for(cptr = &uip_conns[0]; cptr < &uip_conns[UIP_CONNS]; ++cptr) {
+	if(((struct tcpip_uipstate *)cptr->appstate)->id == id) {
+	  ((struct tcpip_uipstate *)cptr->appstate)->id = EK_ID_NONE;
+	  cptr->tcpstateflags = CLOSED;
+	}
+      
+      }
+      
     }
 #if UIP_UDP
-    for(i = 0; i < UIP_UDP_CONNS; ++i) {
+    {
+      register struct uip_udp_conn *cptr;
+      for(cptr = &uip_udp_conns[0];
+	  cptr < &uip_udp_conns[UIP_UDP_CONNS]; ++cptr) {
+	if(((struct tcpip_uipstate *)cptr->appstate)->id == id) {
+	  cptr->lport = 0;
+	}
+      }
+      
+    }
+    /*    for(i = 0; i < UIP_UDP_CONNS; ++i) {
       if(((struct tcpip_uipstate *)uip_udp_conns[i].appstate)->id == id) {
 	uip_udp_conns[i].lport = 0;
       }
-    }
+      }*/
 #endif /* UIP_UDP */
     break;
   case TCP_POLL:
@@ -252,8 +300,8 @@ void
 tcpip_uipcall(void)     
 {
   register struct tcpip_uipstate *ts;
-  static u8_t i;
-  struct listenport *l;
+  static unsigned char i;
+  register struct listenport *l;
 
   if(uip_conn != NULL) {
     ts = (struct tcpip_uipstate *)uip_conn->appstate;
@@ -281,7 +329,7 @@ tcpip_uipcall(void)
 /*---------------------------------------------------------------------------*/
 EK_POLLHANDLER(pollhandler)
 {
-  int i;
+  static unsigned char i;
   
   /* Check the clock so see if we should call the periodic uIP
      processing. */
