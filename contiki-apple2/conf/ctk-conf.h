@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.4 2004/12/26 14:13:34 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.5 2005/03/18 00:37:48 oliverschmidt Exp $
  *
  */
 
@@ -64,16 +64,28 @@ architecture specific files to work). */
 #define CTK_CONF_MOUSE_SUPPORT        0 /* 1342 bytes */
 
 /* Toggles support for icons. */
+#ifdef __APPLE2__
+#define CTK_CONF_ICONS                0 /* 107 bytes */
+#else /* __APPLE2__ */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
+#endif /* __APPLE2__ */
 
 /* Toggles support for icon bitmaps. */
 #define CTK_CONF_ICON_BITMAPS         0
 
 /* Toggles support for icon textmaps. */
+#ifdef __APPLE2__
+#define CTK_CONF_ICON_TEXTMAPS        0
+#else /* __APPLE2__ */
 #define CTK_CONF_ICON_TEXTMAPS        1
+#endif /* __APPLE2__ */
 
 /* Toggles support for movable windows. */
+#ifdef __APPLE2__
+#define CTK_CONF_WINDOWMOVE           0 /* 333 bytes */
+#else /* __APPLE2__ */
 #define CTK_CONF_WINDOWMOVE           1 /* 333 bytes */
+#endif /* __APPLE2__ */
 
 /* Toggles support for closable windows. */
 #define CTK_CONF_WINDOWCLOSE          1 /* 14 bytes */
@@ -82,9 +94,9 @@ architecture specific files to work). */
 #define CTK_CONF_MENUS                1 /* 1384 bytes */
 
 /* Defines the default width of a menu. */
-#define CTK_CONF_MENUWIDTH            16
+#define CTK_CONF_MENUWIDTH            14
 /* The maximum number of menu items in each menu. */
-#define CTK_CONF_MAXMENUITEMS         11
+#define CTK_CONF_MAXMENUITEMS         10
 
 /* Toggles support for screen savers. */
 #define CTK_CONF_SCREENSAVER          0
