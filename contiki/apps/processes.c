@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.4 2003/04/09 19:25:37 adamdunkels Exp $
+ * $Id: processes.c,v 1.5 2003/04/28 23:20:57 adamdunkels Exp $
  *
  */
 
@@ -124,7 +124,7 @@ DISPATCHER_SIGHANDLER(processes_sighandler, s, data)
     if(data == (ek_data_t)&processupdatebutton) {
       ctk_window_clear(&processwindow);
       update_processwindow();
-      ctk_redraw();
+      ctk_window_redraw(&processwindow);
     } else if(data == (ek_data_t)&processclosebutton) {
       ctk_window_close(&processwindow);
       processes_quit();
