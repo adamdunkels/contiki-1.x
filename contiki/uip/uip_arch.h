@@ -1,4 +1,9 @@
 /**
+ * \addtogroup uip
+ * {@
+ */
+
+/**
  * \defgroup uiparch Architecture specific uIP functions
  * @{
  *
@@ -49,7 +54,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.h,v 1.1 2004/02/16 21:17:13 adamdunkels Exp $
+ * $Id: uip_arch.h,v 1.2 2004/07/04 16:58:35 adamdunkels Exp $
  *
  */
 
@@ -125,6 +130,7 @@ u16_t uip_ipchksum(void);
  */
 u16_t uip_tcpchksum(void);
 
+/** @} */
 /** @} */
 
 #endif /* __UIP_ARCH_H__ */
