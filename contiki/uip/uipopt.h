@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.10 2004/03/25 09:46:32 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.11 2004/06/06 06:17:28 adamdunkels Exp $
  *
  */
 
@@ -320,7 +320,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_URGDATA      1
+#define UIP_URGDATA      0
 
 /**
  * The initial retransmission timeout counted in timer pulses.
@@ -439,6 +439,21 @@ typedef unsigned short uip_stats_t;
 #else /* UIP_CONF_LOGGING */
 #define UIP_LOGGING     UIP_CONF_LOGGING
 #endif /* UIP_CONF_LOGGING */
+
+/**
+ * Broadcast support.
+ *
+ * This flag configures IP broadcast support. This is useful only
+ * together with UDP.
+ *
+ * \hideinitializer
+ *
+ */
+#ifndef UIP_CONF_BROADCAST
+#define UIP_BROADCAST 0
+#else /* UIP_CONF_BROADCAST */
+#define UIP_BROADCAST UIP_CONF_BROADCAST
+#endif /* UIP_CONF_BROADCAST */
 
 /**
  * Print out a uIP log message.
