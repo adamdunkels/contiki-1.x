@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.2 2003/03/28 12:09:13 adamdunkels Exp $
+ * $Id: www.c,v 1.3 2003/04/02 09:54:39 adamdunkels Exp $
  *
  */
 
@@ -61,9 +61,7 @@ static char url[WWW_CONF_MAX_URLLEN + 1];
 static char tmpurl[WWW_CONF_MAX_URLLEN + 1];
 
 /* The array that holds the web page text. */
-#define WEBPAGE_WIDTH 36
-#define WEBPAGE_HEIGHT 17
-static char webpage[WEBPAGE_WIDTH * WEBPAGE_HEIGHT + 1];
+static char webpage[WWW_CONF_WEBPAGE_WIDTH * WWW_CONF_WEBPAGE_HEIGHT + 1];
 
 /* The CTK widgets for the main window. */
 static struct ctk_window mainwindow;
@@ -84,7 +82,7 @@ static char editurl[WWW_CONF_MAX_URLLEN + 1];
 static struct ctk_textentry urlentry =
   {CTK_TEXTENTRY(0, 1, 34, 1, editurl, WWW_CONF_MAX_URLLEN)};
 static struct ctk_label webpagelabel =
-  {CTK_LABEL(0, 3, WEBPAGE_WIDTH, WEBPAGE_HEIGHT, webpage)};
+  {CTK_LABEL(0, 3, WWW_CONF_WEBPAGE_WIDTH, WWW_CONF_WEBPAGE_HEIGHT, webpage)};
 
 static char statustexturl[36];
 static struct ctk_label statustext =
@@ -93,8 +91,7 @@ static struct ctk_separator sep2 =
   {CTK_SEPARATOR(0, 20, 36)};
 
 /* The char arrays that hold the history of visited URLs. */
-#define HISTORY_SIZE 4
-static char history[HISTORY_SIZE][WWW_CONF_MAX_URLLEN];
+static char history[WWW_CONF_HISTORY_SIZE][WWW_CONF_MAX_URLLEN];
 static char history_last, history_first;
 
 
@@ -114,9 +111,8 @@ union pagewidgetattrib {
   char url[WWW_CONF_MAX_URLLEN];
   struct formattribs form;
 };
-#define MAX_NUMPAGEWIDGETS 20
-static struct ctk_widget pagewidgets[MAX_NUMPAGEWIDGETS];
-static union pagewidgetattrib pagewidgetattribs[MAX_NUMPAGEWIDGETS];
+static struct ctk_widget pagewidgets[WWW_CONF_MAX_NUMPAGEWIDGETS];
+static union pagewidgetattrib pagewidgetattribs[WWW_CONF_MAX_NUMPAGEWIDGETS];
 static unsigned char pagewidgetptr;
 
 
@@ -143,7 +139,7 @@ static unsigned char run;
 /* The state of the rendering code. */
 static u8_t x;
 static u16_t starty;
-static char nextword[WEBPAGE_WIDTH + 1];
+static char nextword[WWW_CONF_WEBPAGE_WIDTH + 1];
 static unsigned char nextwordptr;
 
 static unsigned char count;
@@ -233,7 +229,7 @@ clear_page(void)
   ctk_window_clear(&mainwindow);
   make_window();
   ctk_window_open(&mainwindow);
-  memset(webpage, 0, WEBPAGE_WIDTH * WEBPAGE_HEIGHT);  
+  memset(webpage, 0, WWW_CONF_WEBPAGE_WIDTH * WWW_CONF_WEBPAGE_HEIGHT);  
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -392,7 +388,7 @@ log_back(void)
 {
   memcpy(history[history_last], url, WWW_CONF_MAX_URLLEN);
   ++history_last;
-  if(history_last > HISTORY_SIZE) {
+  if(history_last > WWW_CONF_HISTORY_SIZE) {
     history_last = 0;
   }
 }
@@ -416,8 +412,8 @@ sighandler(ek_signal_t s, ek_data_t data)
       run = 1;
 
       --history_last;
-      if(history_last > HISTORY_SIZE) {
-	history_last = HISTORY_SIZE - 1;
+      if(history_last > WWW_CONF_HISTORY_SIZE) {
+	history_last = WWW_CONF_HISTORY_SIZE - 1;
       }
       memcpy(url, history[history_last], WWW_CONF_MAX_URLLEN);
       open_url();
@@ -533,8 +529,8 @@ void
 webclient_closed(void)
 {  
   show_statustext("Stopped.");
-  petsciiconv_topetscii(&webpage[(WEBPAGE_HEIGHT - 1) *
-				 WEBPAGE_WIDTH], WEBPAGE_WIDTH);
+  petsciiconv_topetscii(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+				 WWW_CONF_WEBPAGE_WIDTH], WWW_CONF_WEBPAGE_WIDTH);
   redraw_window();
 }
 /*-----------------------------------------------------------------------------------*/
@@ -579,12 +575,12 @@ scroll(void)
   struct ctk_widget *focuswidget;
   
   /* Scroll text up. */
-  memcpy(webpage, &webpage[WEBPAGE_WIDTH],
-	 (WEBPAGE_HEIGHT - 1) * WEBPAGE_WIDTH);
+  memcpy(webpage, &webpage[WWW_CONF_WEBPAGE_WIDTH],
+	 (WWW_CONF_WEBPAGE_HEIGHT - 1) * WWW_CONF_WEBPAGE_WIDTH);
   
   /* Clear last line of text. */
-  memset(&webpage[(WEBPAGE_HEIGHT - 1) * WEBPAGE_WIDTH],
-	 ' ', WEBPAGE_WIDTH);
+  memset(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) * WWW_CONF_WEBPAGE_WIDTH],
+	 ' ', WWW_CONF_WEBPAGE_WIDTH);
   
   /* Scroll links up. */
 
@@ -601,7 +597,7 @@ scroll(void)
       /* XXX: this is really a hack! These values should not be used
 	 like this, but should be obtained and set using some CTK API
 	 function. */
-      linksptr->widget.hyperlink.text -= WEBPAGE_WIDTH;
+      linksptr->widget.hyperlink.text -= WWW_CONF_WEBPAGE_WIDTH;
 
       --(linksptr->y);
     }
@@ -611,9 +607,9 @@ scroll(void)
   /* See if there are any links that scroll off the top. */
   if(lptr != 0) {
     memcpy(pagewidgets, &pagewidgets[lptr],
-	   sizeof(struct ctk_widget) * (MAX_NUMPAGEWIDGETS - lptr));
+	   sizeof(struct ctk_widget) * (WWW_CONF_MAX_NUMPAGEWIDGETS - lptr));
     memcpy(pagewidgetattribs, &pagewidgetattribs[lptr],
-	   sizeof(union pagewidgetattrib) * (MAX_NUMPAGEWIDGETS - lptr));    
+	   sizeof(union pagewidgetattrib) * (WWW_CONF_MAX_NUMPAGEWIDGETS - lptr));    
 
     /* Compute new value of linkptr and tuck it away in
        linkptrtmp. make_window() destroys linkptr, so we need to
@@ -643,7 +639,7 @@ scroll(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static char tmpcenterline[WEBPAGE_WIDTH];
+static char tmpcenterline[WWW_CONF_WEBPAGE_WIDTH];
 /* inc_y():
  *
  * Called from the rendering code when it is time to move on line
@@ -663,8 +659,8 @@ inc_y(void)
     /* Check if current line should be centered and if so, center
        it. */
     if(renderstate & HTMLPARSER_RENDERSTATE_CENTER) {
-      cptr = &webpage[(WEBPAGE_HEIGHT - 0) * WEBPAGE_WIDTH - 1];
-      for(spaces = 0; spaces < WEBPAGE_WIDTH; ++spaces) {
+      cptr = &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 0) * WWW_CONF_WEBPAGE_WIDTH - 1];
+      for(spaces = 0; spaces < WWW_CONF_WEBPAGE_WIDTH; ++spaces) {
 	if(*cptr-- != ' ') {
 	  break;
 	}
@@ -673,19 +669,19 @@ inc_y(void)
       spaces = spaces / 2;
 
       strncpy(tmpcenterline,
-	      &webpage[(WEBPAGE_HEIGHT - 1) *
-		       WEBPAGE_WIDTH],
-	      WEBPAGE_WIDTH);
-      strncpy(&webpage[(WEBPAGE_HEIGHT - 1) *
-		       WEBPAGE_WIDTH] + spaces,
+	      &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+		       WWW_CONF_WEBPAGE_WIDTH],
+	      WWW_CONF_WEBPAGE_WIDTH);
+      strncpy(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+		       WWW_CONF_WEBPAGE_WIDTH] + spaces,
 	      tmpcenterline,
-	      WEBPAGE_WIDTH - spaces);
-      memset(&webpage[(WEBPAGE_HEIGHT - 1) *
-		      WEBPAGE_WIDTH], ' ', spaces);
+	      WWW_CONF_WEBPAGE_WIDTH - spaces);
+      memset(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+		      WWW_CONF_WEBPAGE_WIDTH], ' ', spaces);
       
       linksptr = pagewidgets;
       for(i = 0; i < pagewidgetptr; ++i) {
-	if(CTK_WIDGET_YPOS(linksptr) == 3 + WEBPAGE_HEIGHT - 1) {
+	if(CTK_WIDGET_YPOS(linksptr) == 3 + WWW_CONF_WEBPAGE_HEIGHT - 1) {
 	  linksptr->x += spaces;
 	  linksptr->widget.hyperlink.text += spaces;
 	}
@@ -694,8 +690,8 @@ inc_y(void)
     }
 #endif /* WWW_CONF_RENDERSTATE */
         
-    petsciiconv_topetscii(&webpage[(WEBPAGE_HEIGHT - 1) *
-				   WEBPAGE_WIDTH], WEBPAGE_WIDTH);
+    petsciiconv_topetscii(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+				   WWW_CONF_WEBPAGE_WIDTH], WWW_CONF_WEBPAGE_WIDTH);
     redraw_window();
     scroll();
     ++scrolly;
@@ -726,8 +722,8 @@ webclient_datahandler(char *data, u16_t len)
   if(data == NULL) {
     run = 0;
     show_statustext("Done.");
-    petsciiconv_topetscii(&webpage[(WEBPAGE_HEIGHT - 1) *
-				   WEBPAGE_WIDTH], WEBPAGE_WIDTH);
+    petsciiconv_topetscii(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+				   WWW_CONF_WEBPAGE_WIDTH], WWW_CONF_WEBPAGE_WIDTH);
     redraw_window();
   }
 }
@@ -750,14 +746,14 @@ output_word(char c)
     return;
   }
   
-  if(x + nextwordptr > WEBPAGE_WIDTH) {
+  if(x + nextwordptr > WWW_CONF_WEBPAGE_WIDTH) {
     inc_y();
     x = 0;
   }
 
   nextword[nextwordptr] = 0;
   if(starty == 0) {
-    webpageptr = &webpage[(WEBPAGE_HEIGHT - 1) * WEBPAGE_WIDTH + x];
+    webpageptr = &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) * WWW_CONF_WEBPAGE_WIDTH + x];
     if(nextwordptr > 0) {
       strcpy(webpageptr, nextword);
     }
@@ -787,7 +783,7 @@ add_pagewidget(char *text, unsigned char type,
     return NULL;
   }
   
-  maxwidth = WEBPAGE_WIDTH - (1 + 2 * border);
+  maxwidth = WWW_CONF_WEBPAGE_WIDTH - (1 + 2 * border);
   
   /* If the text of the link is too long so that it does not fit into
      the width of the current window, counting from the current x
@@ -808,7 +804,7 @@ add_pagewidget(char *text, unsigned char type,
   dataptr = NULL;
   
   if(starty == 0) {
-    webpageptr = &webpage[(WEBPAGE_HEIGHT - 1) * WEBPAGE_WIDTH + x];
+    webpageptr = &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) * WWW_CONF_WEBPAGE_WIDTH + x];
     /* To save memory, we'll copy the widget text to the web page
        drawing area and reference it from there. */
     webpageptr[0] = 0;
@@ -816,25 +812,25 @@ add_pagewidget(char *text, unsigned char type,
     strncpy(webpageptr, text, len);
     webpageptr[len] = 0;
     webpageptr[len + border] = ' ';
-    if(pagewidgetptr < MAX_NUMPAGEWIDGETS) {
+    if(pagewidgetptr < WWW_CONF_MAX_NUMPAGEWIDGETS) {
       dataptr = &pagewidgetattribs[pagewidgetptr];
       lptr = &pagewidgets[pagewidgetptr];
       
       switch(type) {
       case CTK_WIDGET_HYPERLINK:
 	CTK_HYPERLINK_NEW((struct ctk_hyperlink *)lptr, x,
-			  WEBPAGE_HEIGHT + 2, len,
+			  WWW_CONF_WEBPAGE_HEIGHT + 2, len,
 			  webpageptr, dataptr);
 	break;
       case CTK_WIDGET_BUTTON:
 	CTK_BUTTON_NEW((struct ctk_button *)lptr, x,
-		       WEBPAGE_HEIGHT + 2, len,
+		       WWW_CONF_WEBPAGE_HEIGHT + 2, len,
 		       webpageptr);
 	((struct formattribs *)dataptr)->inputvalue = webpageptr;
 	break;
       case CTK_WIDGET_TEXTENTRY:
 	CTK_TEXTENTRY_NEW((struct ctk_textentry *)lptr,
-			  x, WEBPAGE_HEIGHT + 2, len, 1,
+			  x, WWW_CONF_WEBPAGE_HEIGHT + 2, len, 1,
 			  webpageptr, len);
 	((struct formattribs *)dataptr)->inputvalue = webpageptr;
 	break;	
@@ -848,7 +844,7 @@ add_pagewidget(char *text, unsigned char type,
      the extra space behind it and the CTK button markers. */
   x += len + 1 + 2 * border;
 
-  if(x >= WEBPAGE_WIDTH) {
+  if(x >= WWW_CONF_WEBPAGE_WIDTH) {
     inc_y();
     x = 0;
   }
@@ -887,7 +883,7 @@ htmlparser_char(char c)
     output_word(c);
   } else if(c != 0) {    
     nextword[nextwordptr] = c;
-    if(nextwordptr < WEBPAGE_WIDTH) {
+    if(nextwordptr < WWW_CONF_WEBPAGE_WIDTH) {
       ++nextwordptr;
     }
   }
