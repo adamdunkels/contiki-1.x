@@ -31,7 +31,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.2 2003/07/30 22:40:36 adamdunkels Exp $
+ * $Id: cs8900a.c,v 1.3 2003/09/04 19:41:02 adamdunkels Exp $
  *
  */
 
@@ -123,7 +123,7 @@ cs8900a_init(void)
 void
 cs8900a_send(void)
 {
-  if(uip_len >= UIP_BUFSIZE) {
+  if(uip_len > UIP_BUFSIZE) {
     asm("inc $d020");
     return;
   }
