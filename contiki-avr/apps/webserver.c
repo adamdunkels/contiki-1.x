@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,15 +29,14 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.2 2003/08/25 12:42:41 adamdunkels Exp $
+ * $Id: webserver.c,v 1.3 2004/08/09 22:26:46 adamdunkels Exp $
  *
  */
 
 
-#include "ctk.h"
-#include "dispatcher.h"
+#include "contiki.h"
 #include "http-strings.h"
-#include "uip_main.h"
+
 #include "petsciiconv.h"
 
 #include "loader.h"
@@ -48,18 +44,20 @@
 #include "webserver.h"
 #include "httpd.h"
 
+#include <string.h>
+#include <stdio.h>
+
 /* The main window. */
 static struct ctk_window mainwindow;
 
 static struct ctk_label message =
   {CTK_LABEL(0, 0, 15, 1, "Latest requests")};
 
-static DISPATCHER_SIGHANDLER(webserver_sighandler, s, data);
 
-static struct dispatcher_proc p =
-{DISPATCHER_PROC("Web server", NULL, webserver_sighandler,
-		 httpd_appcall)};
-static ek_id_t id;
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "Web server", EK_PRIO_NORMAL,
+	   eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 
 #define LOG_WIDTH  30
@@ -73,30 +71,29 @@ LOADER_INIT_FUNC(webserver_init, arg)
 {
   arg_free(arg);
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-
+    id = ek_start(&p);
+  } else {
+    ctk_window_open(&mainwindow);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  if(ev == EK_EVENT_INIT) {
     ctk_window_new(&mainwindow, LOG_WIDTH, LOG_HEIGHT+1, "Web server");
-
+    
     
     CTK_WIDGET_ADD(&mainwindow, &message);
     CTK_WIDGET_ADD(&mainwindow, &loglabel);
- 
+    
     /* Attach listeners to signals. */
     /*    dispatcher_listen(ctk_signal_button_activate);*/
-
+    
     httpd_init();
-  }
-
-  ctk_window_open(&mainwindow);
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(webserver_sighandler, s, data)
-{
-  unsigned char i;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_button_activate) {
+    
+    ctk_window_open(&mainwindow);
+  } else if(ev == tcpip_event) {
+    httpd_appcall(data);
   }
 }
 /*-----------------------------------------------------------------------------------*/

@@ -31,12 +31,12 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.c,v 1.2 2003/09/04 19:43:11 adamdunkels Exp $
+ * $Id: httpd.c,v 1.3 2004/08/09 22:25:06 adamdunkels Exp $
  *
  */
 
 
-#include "uip.h"
+#include "contiki.h"
 #include "httpd.h"
 #include "httpd-fs.h"
 #include "httpd-fsdata.h"
@@ -122,19 +122,19 @@ httpd_init(void)
   httpd_fs_init();
   
   /* Listen to port 80. */
-  dispatcher_uiplisten(HTONS(80));
+  tcp_listen(HTONS(80));
 
   for(i = 0; i < HTTPD_CONF_NUMCONNS; ++i) {
     conns[i].state = HTTP_DEALLOCATED;
   }
 }
 /*-----------------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(httpd_appcall, state)
+void
+httpd_appcall(void *state)
 {
   struct httpd_fs_file fsfile;  
   u8_t i;
   char c;
-  DISPATCHER_UIPCALL_ARG(state);
 
   hs = (struct httpd_state *)(state);
   
@@ -157,7 +157,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
 	uip_close();
 	return;
       }
-      dispatcher_markconn(uip_conn, (void *)hs);
+      tcp_markconn(uip_conn, (void *)hs);
     }
     /* Since we have just been connected with the remote host, we
        reset the state for this connection. The ->count variable
@@ -355,7 +355,8 @@ next_scriptstate(void)
     hs->state = HTTP_FUNC;
     hs->dataptr = NULL;
     hs->count = 0;
-    uip_reset_acked();
+    /*    uip_reset_acked();*/
+    uip_flags &= ~UIP_ACKDATA;
     break;
   case ISO_i:   
     /* Include a file. */

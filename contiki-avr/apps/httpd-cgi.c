@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: httpd-cgi.c,v 1.2 2004/08/09 22:22:47 adamdunkels Exp $
  *
  */
 
@@ -52,11 +49,6 @@
 #include "httpd-fs.h"
 
 #include "petsciiconv.h"
-
-#ifdef __CBM__
-#include <cbm.h>
-#include <c64.h>
-#endif /* __CBM__ */
 
 #include <stdio.h>
 #include <string.h>
@@ -194,10 +186,10 @@ static u8_t
 processes(void)
 {
   u8_t i;
-  struct dispatcher_proc *p;
+  struct ek_proc *p;
   char name[40];
 
-  p = DISPATCHER_PROCS();
+  p = EK_PROCS();
   for(i = 0; i < hs->count; ++i) {
     if(p != NULL) {
       p = p->next;
@@ -222,110 +214,15 @@ processes(void)
   petsciiconv_toascii(name, 40);
   uip_send(uip_appdata,
 	   sprintf((char *)uip_appdata,
-		   "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%04x</td><td>0x%04x</td><td>0x%04x</td></tr>\r\n",
-		   p->id, name,
-		   p->idle, p->signalhandler, p->uiphandler));
+		   "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%02x</td><td>0x%04x</td><td>0x%04x</td></tr>\r\n",
+		   p->id, name, p->prio,
+		   p->pollhandler, p->eventhandler));
   return 0;
 }
 /*-----------------------------------------------------------------------------------*/
-#ifdef __CBM__
-struct drv_state {
-  u8_t track;
-  u8_t sect;
-};
-
-static struct drv_state ds;
-
-
-static void
-x_open(u8_t f, u8_t d, u8_t cmd, u8_t *fname)
-{
-  u8_t ret;
-  
-  ret = cbm_open(f, d, cmd, fname);
-  if(ret != 0) {
-    /*    show_statustext("Open error");*/
-  }
-  
-}
-
-static u8_t cmd[32];
-static void
-read_sector(void)
-{  
-  int ret;
-  
-  x_open(15, 8, 15, NULL);
-  x_open(2, 8, 2, "#");
-
-  sprintf(cmd, "u1: 2 0 %d %d", ds.track, ds.sect);  
-  cbm_write(15, cmd, strlen(cmd));
-    
-  ret = cbm_read(2, uip_appdata, 256);
-  if(ret == -1) {
-    /*    ctk_label_set_text(&statuslabel, "Read err");
-	  CTK_WIDGET_REDRAW(&statuslabel);*/
-  }
-  cbm_close(2);
-  cbm_close(15);
-}
-
-static u8_t
-next_sector(void)
-{
-  ++ds.sect;
-  if(ds.track < 18) {
-    if(ds.sect == 21) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  } else if(ds.track < 25) {
-    if(ds.sect == 19) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  } else if(ds.track < 31) {
-    if(ds.sect == 18) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  } else if(ds.track < 36) {
-    if(ds.sect == 17) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  }
-
-  if(ds.track == 36) {
-    return 1;
-  }
-  return 0;
-}
-
-static u8_t
-d64output(void)
-{
-  if(hs->count == 0) {
-    ds.track = 1;
-    ds.sect = 0;
-  }
-  
-  if(uip_acked()) {
-    ++hs->count;
-    if(next_sector()) {
-      return 1;
-    }
-  }
-
-  read_sector();
-  uip_send(uip_appdata, 256);
-  return 0;
-}
-#else /* __CBM__ */
 static u8_t
 d64output(void)
 {
 
 }
-#endif /* __CBM__ */
 /*-----------------------------------------------------------------------------------*/
