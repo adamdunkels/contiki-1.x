@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-conf.h,v 1.2 2004/08/12 21:53:16 oliverschmidt Exp $
+ * $Id: ctk-conio-conf.h,v 1.1 2005/02/17 22:36:19 oliverschmidt Exp $
  *
  */
 
