@@ -45,12 +45,13 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.7 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: resolv.c,v 1.8 2003/09/04 19:38:46 adamdunkels Exp $
  *
  */
 
 #include "resolv.h"
 #include "dispatcher.h"
+#include "uip-signal.h"
 
 #ifndef NULL
 #define NULL (void *)0
@@ -106,7 +107,12 @@ struct namemap {
   u16_t ipaddr[2];
 };
 
+#ifndef UIP_CONF_RESOLV_ENTRIES
 #define RESOLV_ENTRIES 4
+#else /* UIP_CONF_RESOLV_ENTRIES */
+#define RESOLV_ENTRIES UIP_CONF_RESOLV_ENTRIES
+#endif /* UIP_CONF_RESOLV_ENTRIES */
+
 
 static struct namemap names[RESOLV_ENTRIES];
 
@@ -365,7 +371,7 @@ resolv_query(char *name)
   ++seqno;
 
   if(resolv_conn != NULL) {
-    dispatcher_emit(uip_signal_poll_udp, resolv_conn);
+    dispatcher_emit(uip_signal_poll_udp, resolv_conn, DISPATCHER_BROADCAST);
   }
 }
 /*-----------------------------------------------------------------------------------*/
