@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,13 +29,15 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h,v 1.1 2003/07/04 10:54:52 adamdunkels Exp $
+ * $Id: uip-conf.h,v 1.2 2004/08/09 22:28:01 adamdunkels Exp $
  *
  */
 #ifndef __UIP_CONF_H__
 
 #define UIP_CONF_MAX_CONNECTIONS 40
 #define UIP_CONF_MAX_LISTENPORTS 40
-#define UIP_CONF_BUFFER_SIZE     400
+#define UIP_CONF_BUFFER_SIZE     1500
+
+#define UIP_CONF_TCP_SPLIT       1
 
 #endif /* __UIP_CONF_H__ */
