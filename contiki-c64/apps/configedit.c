@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.7 2003/08/24 22:35:22 adamdunkels Exp $
+ * $Id: configedit.c,v 1.8 2003/08/29 20:31:12 adamdunkels Exp $
  *
  */
 
@@ -99,12 +99,10 @@ static char dnsserver[25];
 static struct ctk_textentry dnsservertextentry =
   {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 13, 16, 1, dnsserver, 24)};
 
-static struct ctk_button cancelbutton =
-  {CTK_BUTTON(0, 15, 6, "Cancel")};
-
-
 static struct ctk_button savebutton =
-  {CTK_BUTTON(18, 15, 12, "Save & close")};
+  {CTK_BUTTON(0, 15, 12, "Save & close")};
+static struct ctk_button cancelbutton =
+  {CTK_BUTTON(24, 15, 6, "Cancel")};
 
 static DISPATCHER_SIGHANDLER(configedit_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -362,8 +360,8 @@ LOADER_INIT_FUNC(configedit_init, arg)
     CTK_WIDGET_ADD(&window, &dnsserverlabel);
     CTK_WIDGET_ADD(&window, &dnsservertextentry);
 
-    CTK_WIDGET_ADD(&window, &cancelbutton);    
     CTK_WIDGET_ADD(&window, &savebutton);
+    CTK_WIDGET_ADD(&window, &cancelbutton);    
     
     CTK_WIDGET_FOCUS(&window, &themetextentry);  
 
