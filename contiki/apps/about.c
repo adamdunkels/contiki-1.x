@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.13 2004/08/09 20:04:08 adamdunkels Exp $
+ * $Id: about.c,v 1.14 2004/09/12 17:52:58 adamdunkels Exp $
  *
  */
 
@@ -88,7 +88,7 @@ about_quit(void)
   ctk_dialog_close();
   ek_exit();
   id = EK_ID_NONE;
-  /*  LOADER_UNLOAD();*/
+  LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
 /*static DISPATCHER_SIGHANDLER(about_sighandler, s, data)*/
