@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.4 2003/04/09 19:23:27 adamdunkels Exp $
+ * $Id: netconf.c,v 1.5 2003/04/16 18:27:33 adamdunkels Exp $
  *
  */
 
@@ -90,6 +90,8 @@ static struct dispatcher_proc p =
 static ek_id_t id;
 
 
+static void makestrings(void);
+
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(netconf_init)
 {
@@ -128,11 +130,66 @@ LOADER_INIT_FUNC(netconf_init)
     CTK_WIDGET_ADD(&tcpipwindow, &tcpipclosebutton);
     
     CTK_WIDGET_FOCUS(&tcpipwindow, &ipaddrtextentry);  
+
+    /* Fill the configuration strings with values from the current
+       configuration */
+    makestrings();
     
     dispatcher_listen(ctk_signal_button_activate);
     dispatcher_listen(ctk_signal_window_close);
   }
   ctk_window_open(&tcpipwindow);
+}
+/*-----------------------------------------------------------------------------------*/
+static char *
+makebyte(u8_t byte, char *str)
+{
+  if(byte >= 100) {
+    *str++ = (byte / 100 ) % 10 + '0';
+  }
+  if(byte >= 10) {
+    *str++ = (byte / 10) % 10 + '0';
+  }
+  *str++ = (byte % 10) + '0';
+
+  return str;
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+makeaddr(u16_t *addr, char *str)
+{
+  str = makebyte(HTONS(addr[0]) >> 8, str);
+  *str++ = '.';
+  str = makebyte(HTONS(addr[0]) & 0xff, str);
+  *str++ = '.';
+  str = makebyte(HTONS(addr[1]) >> 8, str);
+  *str++ = '.';
+  str = makebyte(HTONS(addr[1]) & 0xff, str);
+  *str++ = 0;
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+makestrings(void)
+{
+  u16_t addr[2], *addrptr;
+  
+  uip_gethostaddr(addr);
+  makeaddr(addr, ipaddr);
+  
+#ifdef WITH_ETHERNET  
+  uip_getnetmask(addr);
+  makeaddr(addr, netmask);
+  
+  uip_getdraddr(addr);
+  makeaddr(addr, gateway);
+#endif /* WITH_ETHERNET */
+
+  addrptr = resolv_getserver();
+  if(addrptr != NULL) {
+    makeaddr(addrptr, dnsserver);
+  }
+  
+  
 }
 /*-----------------------------------------------------------------------------------*/
 static void
