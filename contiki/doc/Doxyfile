@@ -375,6 +375,7 @@ WARN_LOGFILE           =
 INPUT                  = ../ek/ek.c \
                          ../ek/arg.c \
                          ../ek/ek.h \
+                         ../ek/ek-service.h \
                          ../ek/dsc.h \
                          ../ek/loader.h \
                          ../ek/pt.h \
@@ -390,17 +391,25 @@ INPUT                  = ../ek/ek.c \
                          ../uip/uip_arp.c \
                          ../uip/uip-split.h \
                          ../uip/uip-split.c \
+                         ../uip/uip-fw.h \
+                         ../uip/uip-fw.c \
                          ../uip/uiplib.h \
                          ../uip/uiplib.c \
                          ../uip/resolv.h \
                          ../uip/resolv.c \
                          ../uip/socket.h \
+                         ../uip/tcpip.h \
                          ../lib/cc.h \
                          ../lib/petsciiconv.h \
                          ../lib/ctk-textedit.h \
                          ../lib/ctk-textedit.c \
                          ../lib/memb.h \
                          ../lib/memb.c \
+                         ../lib/timer.h \
+                         ../lib/timer.c \
+                         ../lib/list.h \
+                         ../lib/list.c \
+                         ../lib/clock.h \
                          ../ek/mt.h \
                          ../ek/mt.c \
                          ../conf/uip-conf.h.example \

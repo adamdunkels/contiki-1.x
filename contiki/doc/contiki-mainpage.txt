@@ -20,4 +20,33 @@ available as open source under a BSD-style license. More information
 about Contiki can be found at the Contiki home page:
 http://www.sics.se/~adam/contiki/
 
+\section contiki-mainpage-tcpip TCP/IP support
+
+Contiki includes the uIP TCP/IP stack (http://www.sics.se/~adam/uip/)
+that provides Contiki with TCP/IP networking support. uIP provides the
+protocols TCP, UDP, IP, and ARP.
+
+\sa \ref uip "The uIP TCP/IP stack documentation"
+\sa \ref tcpip "The Contiki/uIP interface"
+\sa \ref socket "Socket-like library"
+
+\section contiki-mainpage-threads Multi-threading and protothreads
+
+Contiki is based on an event-driven kernel but provides support for
+both multi-threading and a lightweight stackless thread-like construct
+called protothreads.
+
+\sa \ref ek "The Contiki event-driven kernel"
+\sa \ref mt "Contiki multi-threading"
+\sa \ref pt "Protothreads"
+
+\section contiki-mainpage-lib Libraries
+
+Contiki provides a set of convenience libraries for memory management
+and linked list operations.
+
+\sa \ref timer "Timer library"
+\sa \ref memb "Memory block management"
+\sa \ref list "Linked list library"
+
 */
