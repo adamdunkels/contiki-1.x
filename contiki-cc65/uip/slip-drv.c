@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS fpr the C64
  *
- * $Id: slip-drv.c,v 1.5 2003/08/24 22:41:55 adamdunkels Exp $
+ * $Id: slip-drv.c,v 1.6 2003/09/05 21:04:37 adamdunkels Exp $
  *
  */
 
@@ -85,7 +85,7 @@ slip_drv_idle(void)
 {
   uip_len = rs232dev_poll();
   if(uip_len > 0) {
-    uip_process(UIP_DATA);
+    uip_input();
     if(uip_len > 0) {
       rs232dev_send();
     }
