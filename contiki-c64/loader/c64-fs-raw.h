@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs-raw.h,v 1.1 2003/08/09 13:15:58 adamdunkels Exp $
+ * $Id: c64-fs-raw.h,v 1.2 2003/08/20 19:56:29 adamdunkels Exp $
  *
  */
 #ifndef __C64_FS_RAW_H__
@@ -44,11 +44,6 @@ int __fastcall__ c64_fs_read_raw(struct c64_fs_file *f,
 				 char *buf, int len);
 
 int c64_fs_read_next(struct c64_fs_file *f, int len);
-
-void c64_fs_readdir_raw(struct c64_fs_dir *d,
-			struct c64_fs_dirent *f);
-
-unsigned char c64_fs_readdir_next(struct c64_fs_dir *d);
 
 
 #endif /* __C64_FS_H__ */

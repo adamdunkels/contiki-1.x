@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs-raw.c,v 1.1 2003/08/09 13:15:58 adamdunkels Exp $
+ * $Id: c64-fs-raw.c,v 1.2 2003/08/20 19:56:16 adamdunkels Exp $
  *
  */
 
@@ -152,53 +152,5 @@ c64_fs_read_next(register struct c64_fs_file *f, int len)
     }    
   }
   return i;
-}
-/*-----------------------------------------------------------------------------------*/
-void
-c64_fs_readdir_raw(register struct c64_fs_dir *d,
-	       register struct c64_fs_dirent *f)
-{
-  struct directory_entry *de;
-  int i;
-  register char *nameptr;
-  
-  _c64_fs_readdirbuf(d->track, d->sect);
-  de = (struct directory_entry *)&_c64_fs_dirbuf[d->ptr];
-  nameptr = de->name;
-  for(i = 0; i < 16; ++i) {
-    if(*nameptr == 0xa0) {
-      *nameptr = 0;
-      break;
-    }
-    ++nameptr;
-  }
-  strncpy(f->name, de->name, 16);
-  f->track = de->track;
-  f->sect = de->sect;
-  f->size = de->blockslo + (de->blockshi >> 8);
-}
-/*-----------------------------------------------------------------------------------*/
-unsigned char
-c64_fs_readdir_next(struct c64_fs_dir *d)
-{
-  struct directory_entry *de;
- again:
-  _c64_fs_readdirbuf(d->track, d->sect);
-  if(d->ptr == 226) {
-    if(_c64_fs_dirbuf[0] == 0) {
-      return 1;
-    }
-    d->track = _c64_fs_dirbuf[0];
-    d->sect = _c64_fs_dirbuf[1];
-    d->ptr = 2;
-  } else {
-    d->ptr += 32;
-  }
-
-  de = (struct directory_entry *)&_c64_fs_dirbuf[d->ptr];
-  if(de->type == 0) {
-    goto again;
-  }
-  return 0;
 }
 /*-----------------------------------------------------------------------------------*/
