@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.3 2003/06/30 20:38:05 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.4 2003/07/31 23:41:56 adamdunkels Exp $
  *
  */
 
@@ -52,7 +52,6 @@
 
 #include "uip-conf.h"
 
-
 /*-----------------------------------------------------------------------------------*/
 /* First, two typedefs that may have to be tweaked for your particular
    compiler. The uX_t types are unsigned integer types, where the X is
@@ -64,7 +63,7 @@ typedef unsigned short u16_t;
 typedef unsigned long u32_t;
 typedef unsigned long uip_stats_t;
 
-/*#include <string.h>*/
+#include <string.h>
 #define bcopy(s,d,l) memcpy(d,s,l)
 
 /*-----------------------------------------------------------------------------------*/
