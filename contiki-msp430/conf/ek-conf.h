@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek-conf.h,v 1.1 2003/09/04 19:46:33 adamdunkels Exp $
+ * $Id: ek-conf.h,v 1.2 2003/11/27 15:57:32 adamdunkels Exp $
  *
  */
 
@@ -40,23 +40,15 @@
 #ifndef __EK_CONF_H__
 #define __EK_CONF_H__
 
-/*#include <time.h>*/
 
 typedef void *ek_data_t;
 
 typedef unsigned char ek_signal_t;
 typedef unsigned char ek_id_t;
 
-/* ek_ticks_t: should be defined to be the largest type that fits the
-   highest timeout value used by the system. For example, if all
-   timeouts are between 1 and 150, the ek_ticks_t can be typedef'd as
-   "unsigned char", but if the maximum timeout is over 256, "unsigned
-   short" is a better choise. */
-typedef unsigned short ek_ticks_t;
-
 /* ek_clock_t: should be defined to be the native clock ticks type
    used by the underlying system. (Look for time_t or similar.) */
-typedef unsigned long ek_clock_t; 
+typedef unsigned short ek_clock_t; 
 
 #define EK_CONF_NUMSIGNALS   16    /* Must be 2^n */
 typedef unsigned char ek_num_signals_t;
@@ -69,7 +61,7 @@ typedef unsigned char ek_num_listeners_t;
 
 #define EK_CONF_UNLISTEN 0
 
-#define CLK_TCK 10000
+#define CLK_TCK 20U
 
 #ifndef NULL
 #define NULL (void *)0
