@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.6 2003/04/08 19:26:13 adamdunkels Exp $
+ * $Id: www.c,v 1.7 2003/04/08 19:37:35 adamdunkels Exp $
  *
  */
 
@@ -472,7 +472,7 @@ sighandler(ek_signal_t s, ek_data_t data)
     }
   } else if(s == ctk_signal_window_close) {
     dispatcher_exit(&p);
-    id = 0;
+    id = EK_ID_NONE;
     LOADER_UNLOAD();
   }
 }
