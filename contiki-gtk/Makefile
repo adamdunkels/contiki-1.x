@@ -30,18 +30,20 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.6 2003/08/11 22:19:19 adamdunkels Exp $
+# $Id: Makefile,v 1.7 2003/08/20 22:37:45 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
 CC=gcc
-CFLAGS=-Wall -g -pg\
+CFLAGS=-Wall -Wstrict-prototypes -Wmissing-prototypes \
+	-g -pg -fpack-struct \
        -Iapps -Ictk -Iuip -Iconf \
        -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
 	`gtk12-config --cflags`\
 	-DWITH_ETHERNET -DWITH_TAPDEV -DWITH_ASCII \
-	-DWITH_WWW -DWITH_EMAIL -DWITH_UIP
+	-DWITH_WWW -DWITH_EMAIL -DWITH_UIP \
+	-DWITH_CTKVNC 
 LDFLAGS=-pg `gtk12-config --libs`
 
 %.o: %.c
@@ -68,20 +70,22 @@ WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o http-
 EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
 WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-cgi.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
-PRESENTER=presenter.o presenter-dsc.o
+
+CTKGTK=ctk-gtksim.o ctk-conio.o libconio.o
+CTKVNC=ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o 
 
 contiki: contiki-main.o \
  program-handler.o about.o netconf.o processes.o \
  about-dsc.o netconf-dsc.o processes-dsc.o  \
- ctk-gtksim.o ctk-conio.o libconio.o \
- ctk.o ek.o dispatcher.o \
+ $(CTKVNC) \
+ ctk.o dispatcher.o \
  uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o \
  uip_main.o tapdev.o tapdev-drv.o \
  $(EMAIL) email-dsc.o $(WEBSERVER) $(TELNET) telnet-dsc.o \
  vnc.o vnc-viewer.o vnc-draw.o \
  calc.o calc-dsc.o \
  $(WWW) \
- $(PRESENTER)
+# maze.o maze-dsc.o
 	gcc $(LDFLAGS) -o $@ $^
 
 clean:
