@@ -32,6 +32,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
   case EK_EVENT_INIT:
+  case EK_EVENT_REPLACE:
     break;
   case EK_EVENT_REQUEST_REPLACE:
     ek_replace((struct ek_proc *)data, NULL);
