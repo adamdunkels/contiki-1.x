@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.h,v 1.1 2003/08/04 00:12:50 adamdunkels Exp $
+ * $Id: c64-fs.h,v 1.2 2003/08/06 23:12:06 adamdunkels Exp $
  *
  */
 #ifndef __C64_FS_H__
@@ -48,6 +48,9 @@ int c64_fs_open(const char *name, struct c64_fs_file *f);
 void c64_fs_close(struct c64_fs_file *f);
 int __fastcall__ c64_fs_read(struct c64_fs_file *f,
 			     char *buf, int len);
+
+int __fastcall__ c64_fs_write(struct c64_fs_file *f,
+			      char *buf, int len);
 
 struct c64_fs_dir {
   unsigned char track, sect, ptr;
