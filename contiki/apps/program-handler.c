@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.5 2003/04/10 07:05:18 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.6 2003/04/11 20:11:40 adamdunkels Exp $
  *
  */
 
@@ -201,7 +201,7 @@ static struct ctk_button loadbutton =
 
 static DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Program loader", NULL, program_handler_sighandler, NULL)};
+  {DISPATCHER_PROC("Program handler", NULL, program_handler_sighandler, NULL)};
 static ek_id_t id;
 
 
@@ -316,16 +316,19 @@ program_handler_init(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
-#ifdef WITH_LOADER_ARCH
-#define RUN(prg, name) load(prg)
-static void
-load(char *name)
+void
+program_handler_load(char *name)
 {
+#ifdef WITH_LOADER_ARCH
   dispatcher_emit(loader_signal_load, name, DISPATCHER_CURRENT());
   ctk_label_set_text(&loadingname, name);
   ctk_dialog_open(&loadingdialog);
   ctk_redraw();
+#endif /* WITH_LOADER_ARCH */
 }
+
+#ifdef WITH_LOADER_ARCH
+#define RUN(prg, name) program_handler_load(prg)
 #else /* WITH_LOADER_ARCH */
 #define RUN(prg, initfunc) initfunc(); ctk_redraw()
 #endif /* WITH_LOADER_ARCH */
@@ -340,7 +343,7 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
     if(data == (ek_data_t)&loadbutton) {
       ctk_window_close(&runwindow);
 #ifdef WITH_LOADER_ARCH
-      load(name);
+      program_handler_load(name);
 #endif /* WITH_LOADER_ARCH */
     } else if(data == (ek_data_t)&errorokbutton) {
       ctk_dialog_close();
