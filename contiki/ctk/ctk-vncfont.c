@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC server
  *
- * $Id: ctk-vncfont.c,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: ctk-vncfont.c,v 1.2 2003/08/12 21:11:09 adamdunkels Exp $
  *
  */
 
@@ -40,7 +40,7 @@
 #define o 0x01 /* 1001 0010 */
 #define X 0x02 /* 1111 0110 */
 
-#ifndef NOT_AVR
+#ifdef WITH_AVR
 #include <avr/pgmspace.h>
 #else
 #define prog_char unsigned char

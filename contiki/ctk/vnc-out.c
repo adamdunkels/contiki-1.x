@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-out.c,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: vnc-out.c,v 1.2 2003/08/12 21:11:09 adamdunkels Exp $
  *
  */
 
@@ -47,11 +47,11 @@
 
 #include "ctk-mouse.h"
 
-#ifndef NOT_AVR
+#ifdef WITH_AVR
 #include <avr/pgmspace.h>
 #else
 #define memcpy_P memcpy
-#endif /* NOT_AVR */
+#endif /* WITH_AVR */
 
 #define CHARS_WIDTH    LIBCONIO_CONF_SCREEN_WIDTH
 #define CHARS_HEIGHT   LIBCONIO_CONF_SCREEN_HEIGHT
@@ -403,10 +403,10 @@ check_updates(struct vnc_server_state *vs)
 /*-----------------------------------------------------------------------------------*/
 static u8_t tmp[FONT_WIDTH * FONT_HEIGHT];
 static void
-makechar(char *ptr, u8_t x, u8_t y)
+makechar(CC_REGISTER_ARG char *ptr, u8_t x, u8_t y)
 {
   u8_t i, *tmpptr;
-  u8_t *colorscheme;
+  register u8_t *colorscheme;
   unsigned char *bitmap;
   u8_t b, b2;
   u8_t xmove, ymove;
@@ -430,8 +430,11 @@ makechar(char *ptr, u8_t x, u8_t y)
     ymove = (c & 0x30) >> 4;
     
     c = colorscreen[x + y * CHARS_WIDTH];
-    bitmap = icons[c & 0x3f]->bitmap + ymove * 8*3;
-
+    if(icons[c % MAX_ICONS] == NULL) {
+      c = 0;
+    }
+    bitmap = icons[c % MAX_ICONS]->bitmap + ymove * 8*3;
+ 
     colorscheme = colortheme[VNC_OUT_ICONCOLOR + (c >> 6)];
     switch(xmove) {
     case 0:
@@ -712,7 +715,7 @@ vnc_out_send_update(struct vnc_server_state *vs)
 	  recthdr->encoding[1] =
 	  recthdr->encoding[2] = 0;
 	recthdr->encoding[3] = RFB_ENC_RAW;
-	
+
 	makechar((u8_t *)recthdr +
 		 sizeof(struct rfb_fb_update_rect_hdr),
 		 x, y);
