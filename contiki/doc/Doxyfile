@@ -66,6 +66,8 @@ INPUT                  = ../ek/arg.c \
                          ../ctk/ctk-draw.h \
                          ../ctk/ctk-vncserver.c \
                          ../uip/uip.h \
+                         ../uip/uip_arp.h \
+                         ../uip/uip_arp.c \
                          ../ek/loader.h \
                          ../ek/dispatcher.h \
                          ../lib/cc.h \
