@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.24 2003/08/09 23:32:37 adamdunkels Exp $
+ * $Id: ctk.c,v 1.25 2003/08/11 22:27:13 adamdunkels Exp $
  *
  */
 
@@ -379,6 +379,8 @@ ctk_menu_add(struct ctk_menu *menu)
   }
   m->next = menu;
   menu->next = NULL;
+
+  redraw |= REDRAW_MENUPART;
 #endif /* CTK_CONF_MENUS */
 }
 /*-----------------------------------------------------------------------------------*/
@@ -391,13 +393,14 @@ ctk_menu_remove(struct ctk_menu *menu)
   for(m = menus.menus; m->next != NULL; m = m->next) {
     if(m->next == menu) {
       m->next = menu->next;
+      redraw |= REDRAW_MENUPART;
       return;
     }
   }
 #endif /* CTK_CONF_MENUS */
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void CC_FASTCALL 
 do_redraw_all(unsigned char clipy1, unsigned char clipy2)
 {
   struct ctk_window *w;
@@ -475,7 +478,7 @@ ctk_window_redraw(struct ctk_window *w)
   }  
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void 
 window_new(CC_REGISTER_ARG struct ctk_window *window,
 	   unsigned char w, unsigned char h,
 	   char *title)
@@ -521,7 +524,8 @@ ctk_dialog_new(CC_REGISTER_ARG struct ctk_window *window,
 {
   window_new(window, w, h, NULL);
 }
-/*-----------------------------------------------------------------------------------*/void
+/*-----------------------------------------------------------------------------------*/
+void 
 ctk_menu_new(CC_REGISTER_ARG struct ctk_menu *menu,
 	     char *title)
 {
@@ -550,7 +554,7 @@ ctk_menuitem_add(CC_REGISTER_ARG struct ctk_menu *menu,
 #endif /* CTK_CONF_MENUS */
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void CC_FASTCALL 
 add_redrawwidget(struct ctk_widget *w)
 {
   static unsigned char i;
@@ -610,7 +614,7 @@ ctk_widget_redraw(struct ctk_widget *widget)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void 
+void CC_FASTCALL
 ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
 	       CC_REGISTER_ARG struct ctk_widget *widget)
 {  
@@ -641,7 +645,7 @@ ctk_desktop_height(struct ctk_desktop *w)
   return ctk_draw_height();
 }
 /*-----------------------------------------------------------------------------------*/
-static void 
+static void CC_FASTCALL 
 select_widget(struct ctk_widget *focus)
 {
   struct ctk_window *window;
@@ -674,7 +678,7 @@ select_widget(struct ctk_widget *focus)
 #define DOWN 1
 #define LEFT 2
 #define RIGHT 3
-static void 
+static void CC_FASTCALL 
 switch_focus_widget(unsigned char direction)
 {
   register struct ctk_window *window;
@@ -796,7 +800,7 @@ switch_menu_item(unsigned char updown)
 }
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
-static unsigned char 
+static unsigned char CC_FASTCALL 
 activate(CC_REGISTER_ARG struct ctk_widget *w)
 {
   static unsigned char len;
@@ -843,7 +847,7 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
   return REDRAW_NONE;
 }
 /*-----------------------------------------------------------------------------------*/
-static void 
+static void CC_FASTCALL 
 textentry_input(ctk_arch_key_t c,
 		CC_REGISTER_ARG struct ctk_textentry *t)
 {
@@ -871,52 +875,15 @@ textentry_input(ctk_arch_key_t c,
     break;
 
   case CH_CURS_UP:
-#if CTK_CONF_TEXTENTRY_MULTILINE
-    if(t->h == 1) {
-      txpos = 0;
-    } else {
-      if(typos > 0) {
-	--typos;
-      } else {
-	t->state = CTK_TEXTENTRY_NORMAL;
-      }
-    }
-#else
     txpos = 0;
-#endif /* CTK_CONF_TEXTENTRY_MULTILINE */
     break;
     
   case CH_CURS_DOWN:
-#if CTK_CONF_TEXTENTRY_MULTILINE
-    if(t->h == 1) {
-      txpos = strlen(t->text);
-    } else {
-      if(typos < t->h - 1) {
-	++typos;
-      } else {
-	t->state = CTK_TEXTENTRY_NORMAL;
-      }
-    }
-#else
     txpos = strlen(t->text);
-#endif /* CTK_CONF_TEXTENTRY_MULTILINE */
     break;
     
   case CH_ENTER:
-#if CTK_CONF_TEXTENTRY_MULTILINE
-    if(t->h == 1) {
-      t->state = CTK_TEXTENTRY_NORMAL;
-    } else {
-      if(typos < t->h - 1) {
-	++typos;
-	txpos = 0;
-      } else {
-	t->state = CTK_TEXTENTRY_NORMAL;
-      }
-    }
-#else
     t->state = CTK_TEXTENTRY_NORMAL;
-#endif /* CTK_CONF_TEXTENTRY_MULTILINE */
     break;
     
   case CTK_CONF_WIDGETDOWN_KEY:
@@ -979,7 +946,7 @@ activate_menu(void)
   return REDRAW_MENUPART;
 }
 /*-----------------------------------------------------------------------------------*/
-static unsigned char
+static unsigned char 
 menus_input(ctk_arch_key_t c)
 {
 
@@ -1330,11 +1297,6 @@ ctk_idle(void)
 	case CTK_CONF_WIDGETUP_KEY:
 	  switch_focus_widget(UP);
 	  break;
-	case CH_ENTER:
-	  if(widget != NULL) {
-	    redraw |= activate(widget);
-	  }
-	  break;
 #if CTK_CONF_MENUS
 	case CTK_CONF_MENU_KEY:
 	  if(dialog == NULL) {
@@ -1356,14 +1318,20 @@ ctk_idle(void)
 	  }
 	  break;
 	default:
-	  if(widget != NULL &&
-	     widget->type == CTK_WIDGET_TEXTENTRY) {
-	    widget->widget.textentry.state = CTK_TEXTENTRY_EDIT;
-	    textentry_input(c, (struct ctk_textentry *)widget);
-	    add_redrawwidget(widget);
+	  if(c == CH_ENTER &&
+	     widget != NULL) {
+	    redraw |= activate(widget);
 	  } else {
-	    dispatcher_emit(ctk_signal_keypress, (void *)c,
-			    window->owner);
+	    add_redrawwidget(widget);
+	    if(widget != NULL &&
+	       widget->type == CTK_WIDGET_TEXTENTRY) {
+	      widget->widget.textentry.state = CTK_TEXTENTRY_EDIT;
+	      textentry_input(c, (struct ctk_textentry *)widget);
+	    } else {
+	      window->focused = NULL;
+	      dispatcher_emit(ctk_signal_keypress, (void *)c,
+			      window->owner);
+	    }
 	  }
 	  break;
 	}
