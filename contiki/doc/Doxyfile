@@ -21,8 +21,7 @@ REPEAT_BRIEF           = YES
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
-STRIP_FROM_PATH        = /usr/home/adam/contiki/ \
-                         ../
+STRIP_FROM_PATH        = ../
 INTERNAL_DOCS          = NO
 CASE_SENSE_NAMES       = YES
 SHORT_NAMES            = NO
@@ -77,7 +76,8 @@ INPUT                  = ../ek/arg.c \
                          ../lib/ctk-textedit.c \
                          ../ek/dsc.h \
                          ../conf/uip-conf.h.example \
-                         ../conf/www-conf.h.example
+                         ../conf/www-conf.h.example \
+                         contiki-mainpage.txt
 FILE_PATTERNS          = 
 RECURSIVE              = NO
 EXCLUDE                = 
@@ -88,7 +88,7 @@ EXAMPLE_PATTERNS       =
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = 
 INPUT_FILTER           = 
-FILTER_SOURCE_FILES    = YES
+FILTER_SOURCE_FILES    = NO
 #---------------------------------------------------------------------------
 # configuration options related to source browsing
 #---------------------------------------------------------------------------

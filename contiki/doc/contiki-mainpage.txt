@@ -1,0 +1,18 @@
+/**
+
+\mainpage
+
+Contiki is a TCP/IP-enabled operating system for small systems such as
+8-bit microcontrollers and 8-bit homecomputers from the 80's. It
+features the following, among others:
+
+ - TCP/IP support using the uIP TCP/IP stack
+ - Cooperative multitasking kernel
+ - Message passing using signals
+ - GUI toolkit with keyboard and mouse navigation
+ - VNC server
+
+More information about Contiki can be found at the Contiki home page:
+http://dunkels.com/adam/contiki/
+
+*/
