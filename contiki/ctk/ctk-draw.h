@@ -45,7 +45,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk-draw.h,v 1.4 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: ctk-draw.h,v 1.5 2004/06/06 05:52:21 adamdunkels Exp $
  *
  */
 
