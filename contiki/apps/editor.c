@@ -3,6 +3,8 @@
 #define EDITOR_CONF_MAX_FILENAME_LEN 16
 
 #include "contiki.h"
+#include "ctk.h"
+#include "cfs.h"
 
 #include "ctk-filedialog.h"
 

@@ -1,6 +1,8 @@
 
 #include "contiki.h"
 #include "ctk-filedialog.h"
+#include "ctk.h"
+#include "cfs.h"
 
 #include <string.h>
 

@@ -2,6 +2,8 @@
 
 #include "ftpc.h"
 #include "contiki.h"
+#include "ctk.h"
+#include "cfs.h"
 #include <string.h>
 
 #define MAX_USERNAMELEN 16
