@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.c,v 1.2 2003/04/05 12:21:37 adamdunkels Exp $
+ * $Id: htmlparser.c,v 1.3 2003/08/09 13:29:53 adamdunkels Exp $
  *
  */
 
@@ -296,7 +296,7 @@ parse_char(unsigned char c)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void CC_FASTCALL
 switch_majorstate(unsigned char newstate)
 {
   if(s.majorstate != newstate) {
@@ -427,7 +427,7 @@ parse_tag(void)
 				s.formname, s.formaction);
 	  break;
 	case HTMLPARSER_INPUTTYPE_SUBMIT:
-	case HTMLPARSER_INPUTTYPE_IMAGE:	  
+	case HTMLPARSER_INPUTTYPE_IMAGE:
 	  htmlparser_submitbutton(s.inputvalue, s.inputname,
 				  s.formname, s.formaction);
 	  break;
