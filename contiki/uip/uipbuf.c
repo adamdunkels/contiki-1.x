@@ -42,8 +42,8 @@ uipbuf_bufdata(struct uipbuf_buffer *buf, u16_t len,
 }
 /*---------------------------------------------------------------------------*/
 u8_t
-uipbuf_bufdata_endmarker(struct uipbuf_buffer *buf, u8_t endmarker,
-			 u8_t **dataptr, u16_t *datalen)
+uipbuf_bufto(struct uipbuf_buffer *buf, u8_t endmarker,
+	     u8_t **dataptr, u16_t *datalen)
 {
   u8_t c;
     
