@@ -39,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.8 2004/02/16 21:00:14 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.9 2004/08/09 21:33:40 adamdunkels Exp $
  *
  */
 
@@ -50,17 +50,22 @@
 #define NULL (void *)0
 #endif /* NULL */
 
-#include "c64-fs.h"
+#include "cfs.h"
 
 #include "loader.h"
 
 #include "loader-arch.h"
 
+static int __fastcall__
+do_read(int f, char *buf, unsigned int len)
+{
+  return cfs_read(f, buf, len);
+}
+  
 static struct mod_ctrl ctrl = {
-  (void *)c64_fs_read            /* Read from disk */
+  (void *)do_read            /* Read from disk */
 };
 
-static struct c64_fs_file file;
 
 struct loader_arch_hdr {
   char arch[8];
@@ -81,22 +86,20 @@ static unsigned char
 load(const char *name)
 {
   unsigned char res;
-  int ret;
   
   /* Now open the file */
-  ret = c64_fs_open(name, &file);
-  if(ret < 0) {
+  ctrl.callerdata = cfs_open(name, 0);
+  if(ctrl.callerdata < 0) {
     /* Could not open the file, display an error and return */
     /* ### */
     return LOADER_ERR_OPEN;
   }
-  ctrl.callerdata = (int)&file;
   
   /* Load the module */
   res = mod_load(&ctrl);
   
   /* Close the input file */
-  c64_fs_close(&file);
+  cfs_close(ctrl.callerdata);
   
   /* Check the return code */
   if(res != MLOAD_OK) {
@@ -135,7 +138,6 @@ loader_arch_load(const char *name, char *arg)
      matches. */
   
   /* Call the init function. */
-
   ((void (*)(char *))hdr->initfunc)(arg);
 
   return LOADER_OK;
@@ -160,7 +162,7 @@ loader_arch_load_dsc(const char *name)
 
   r = load(name);
   if(r == MLOAD_OK) {
-    return (struct dsc *)ctrl.module;    
+    return (struct dsc *)ctrl.module;
   }
   return NULL;
 }
