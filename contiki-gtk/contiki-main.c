@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.5 2003/05/28 05:22:39 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.6 2003/08/11 22:19:42 adamdunkels Exp $
  *
  */
 
@@ -52,9 +52,17 @@
 #include "about-dsc.h"
 #include "netconf-dsc.h"
 #include "processes-dsc.h"
+#include "calc-dsc.h"
 
+#include "telnet-dsc.h"
 #include "www-dsc.h"
 #include "webserver-dsc.h"
+
+#include "presenter-dsc.h"
+
+#include "wget-dsc.h"
+
+#include "email-dsc.h"
 
 static gint
 idle_callback(gpointer data)
@@ -69,6 +77,10 @@ main(int argc, char **argv)
 {
   u16_t addr[2];
 
+  ek_init();
+  dispatcher_init();
+
+  
   uip_init();
   uip_main_init();
   resolv_init();
@@ -86,7 +98,6 @@ main(int argc, char **argv)
   
   tapdev_drv_init();
   
-  ek_init();
   ctk_gtksim_init();
   ctk_init();
   
@@ -100,11 +111,20 @@ main(int argc, char **argv)
   program_handler_add(&processes_dsc, "Processes", 0);
   
   program_handler_add(&www_dsc, "Web browser", 1);
-
+  
   program_handler_add(&webserver_dsc, "Web server", 1);
+  program_handler_add(&telnet_dsc, "Telnet", 1);
+  
+  program_handler_add(&calc_dsc, "Calculator", 0);
+
+  /*  program_handler_add(&presenter_dsc, "Presenter", 1);*/
+
+  program_handler_add(&email_dsc, "E-mail", 1);
+
+  /*program_handler_add(&wget_dsc, "Web downloader", 1);*/
 
   
-  ctk_redraw();
+  /*  ctk_redraw();*/
   gtk_main();
     
   return 0;

@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.5 2003/05/28 05:22:39 adamdunkels Exp $
+# $Id: Makefile,v 1.6 2003/08/11 22:19:19 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -64,10 +64,11 @@ LDFLAGS=-pg `gtk12-config --libs`
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
 
 
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o
-EMAIL=email.o smtp.o smtp-strings.o
+WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o http-user-agent-string.o
+EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
 WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-cgi.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
+PRESENTER=presenter.o presenter-dsc.o
 
 contiki: contiki-main.o \
  program-handler.o about.o netconf.o processes.o \
@@ -76,8 +77,11 @@ contiki: contiki-main.o \
  ctk.o ek.o dispatcher.o \
  uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o \
  uip_main.o tapdev.o tapdev-drv.o \
- $(WWW) $(EMAIL) $(WEBSERVER) \
- vnc.o vnc-viewer.o vnc-draw.o
+ $(EMAIL) email-dsc.o $(WEBSERVER) $(TELNET) telnet-dsc.o \
+ vnc.o vnc-viewer.o vnc-draw.o \
+ calc.o calc-dsc.o \
+ $(WWW) \
+ $(PRESENTER)
 	gcc $(LDFLAGS) -o $@ $^
 
 clean:
