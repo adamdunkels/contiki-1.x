@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.10 2004/07/04 18:33:07 adamdunkels Exp $
+ * $Id: main.c,v 1.11 2004/07/04 19:53:07 adamdunkels Exp $
  *
  */
 
@@ -43,7 +43,7 @@
 #include "program-handler.h"
 
 
-#include "uip-signal.h"
+#include "uip-event.h"
 #include "uip.h"
 #include "uip_arp.h"
 
