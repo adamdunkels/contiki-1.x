@@ -40,7 +40,7 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h.example,v 1.2 2003/09/02 21:47:27 adamdunkels Exp $
+ * $Id: uip-conf.h.example,v 1.3 2003/10/01 11:33:43 adamdunkels Exp $
  *
  */
 #ifndef __UIP_CONF_H__
@@ -80,4 +80,13 @@
  */
 #define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
 
+
+/**
+ * IP address configuration through ping.
+ *
+ * uIP features IP address configuration using an ICMP echo (ping)
+ * packet. In this mode, the destination IP address of the first ICMP
+ * echo packet that is received is used to set the host IP address.  
+ */
+#define UIP_CONF_PINGADDRCONF    0
 #endif /* __UIP_CONF_H__ */

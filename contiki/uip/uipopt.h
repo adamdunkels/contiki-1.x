@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.5 2003/08/21 22:26:57 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.6 2003/10/01 11:33:43 adamdunkels Exp $
  *
  */
 
@@ -75,7 +75,12 @@ typedef unsigned long uip_stats_t;
  * All of these should be changed to suit your project.
 */
 #define UIP_URGDATA 0
+
+#ifdef UIP_CONF_PINGADDRCONF
+#define UIP_PINGADDRCONF UIP_CONF_PINGADDRCONF
+#else /* UIP_CONF_PINGADDRCONF */
 #define UIP_PINGADDRCONF 0
+#endif /* UIP_CONF_PINGADDRCONF */
 
 #define UIP_UDP 1
 #define UIP_UDP_CHECKSUMS 0
