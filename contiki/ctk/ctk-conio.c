@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.13 2004/07/04 11:38:43 adamdunkels Exp $
+ * $Id: ctk-conio.c,v 1.14 2004/07/29 11:49:45 oliverschmidt Exp $
  *
  */
 
@@ -455,6 +455,7 @@ draw_menu(struct ctk_menu *m)
 {
   unsigned char x, x2, y;
   textcolor(OPENMENUCOLOR);
+  revers(0);
   x = wherex();
   cputs(m->title);
   cputc(' ');
@@ -470,6 +471,7 @@ draw_menu(struct ctk_menu *m)
       revers(0);
     } else {
       textcolor(MENUCOLOR);	  
+      revers(1);
     }
     gotoxy(x, y + 1);
     if(m->items[y].title[0] == '-') {
@@ -480,10 +482,10 @@ draw_menu(struct ctk_menu *m)
     if(x + CTK_CONF_MENUWIDTH > wherex()) {
       cclear(x + CTK_CONF_MENUWIDTH - wherex());
     }
-    revers(1);
   }
   gotoxy(x2, 0);
   textcolor(MENUCOLOR);  
+  revers(1);
 }
 /*-----------------------------------------------------------------------------------*/
 void
