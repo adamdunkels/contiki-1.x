@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget-dsc.c,v 1.2 2004/06/27 12:49:04 oliverschmidt Exp $
+ * $Id: wget-dsc.c,v 1.3 2005/03/18 00:52:08 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char wgeticon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon icon =
   {CTK_ICON("Web downloader", wgeticon_bitmap, wgeticon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
