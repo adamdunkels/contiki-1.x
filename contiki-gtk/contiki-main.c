@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.7 2003/08/31 22:20:52 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.8 2003/09/01 22:24:52 adamdunkels Exp $
  *
  */
 
@@ -58,7 +58,7 @@
 #include "www-dsc.h"
 #include "webserver-dsc.h"
 
-#include "presenter-dsc.h"
+/*#include "presenter-dsc.h"*/
 
 #include "wget-dsc.h"
 
