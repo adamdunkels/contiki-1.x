@@ -177,7 +177,7 @@ smtp_uipcall(void *state)
 struct socket {
   struct pt pt, socketpt;
   unsigned char state;
-  u8_t *sendptr;
+  const u8_t *sendptr;
   u16_t sendlen;
   u8_t *readptr;
   u16_t readlen;
@@ -219,9 +219,9 @@ void socket_init(struct socket *socket, char *buffer, unsigned int buffersize);
  *
  * \hideinitializer
  */
-#define SOCKET_BEGIN(socket) PT_BEGIN(&(socket)->pt)
+#define SOCKET_BEGIN(socket) PT_BEGIN(&((socket)->pt))
 
-PT_THREAD(socket_send(struct socket *socket, char *buf, unsigned int len));
+PT_THREAD(socket_send(struct socket *socket, const char *buf, unsigned int len));
 /**
  * Send data.
  *
@@ -240,7 +240,7 @@ PT_THREAD(socket_send(struct socket *socket, char *buf, unsigned int len));
  * \hideinitializer
  */
 #define SOCKET_SEND(socket, data, datalen)		\
-    PT_WAIT_THREAD(&(socket)->pt, socket_send(socket, data, datalen));	
+    PT_WAIT_THREAD(&((socket)->pt), socket_send(socket, data, datalen));	
 
 /*
 #define SOCKET_SEND_DYNAMIC(socket, dataptr, function_call)
@@ -281,7 +281,7 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c));
  * \hideinitializer
  */
 #define SOCKET_READTO(socket, c)				\
-  PT_WAIT_THREAD(&(socket)->pt, socket_readto(socket, c))
+  PT_WAIT_THREAD(&((socket)->pt), socket_readto(socket, c))
 
 /**
  * The length of the data that was previously read.
@@ -307,7 +307,7 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c));
  *
  * \hideinitializer
  */
-#define SOCKET_EXIT(socket) PT_EXIT(&(socket)->pt)
+#define SOCKET_EXIT(socket) PT_EXIT(&((socket)->pt))
 
 /**
  * Close a socket and exit the socket's protothread.
@@ -324,7 +324,7 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c));
     SOCKET_EXIT(socket);			\
   } while(0)
 
-#define SOCKET_END(socket) PT_END(&(socket)->pt)
+#define SOCKET_END(socket) PT_END(&((socket)->pt))
 
 char socket_newdata(struct socket *s);
 
@@ -374,6 +374,6 @@ char socket_newdata(struct socket *s);
  * \hideinitializer
  */
 #define SOCKET_WAIT_UNTIL(socket, condition)    \
-  PT_WAIT_UNTIL(&(socket)->pt, socket_newdata(socket) || (condition));
+  PT_WAIT_UNTIL(&((socket)->pt), socket_newdata(socket) || (condition));
 
 #endif /* __SOCKET_H__ */
