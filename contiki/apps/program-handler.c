@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.7 2003/04/17 19:00:00 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.8 2003/04/24 17:21:12 adamdunkels Exp $
  *
  */
 
@@ -155,7 +155,8 @@ program_handler_load(char *name)
   dispatcher_emit(loader_signal_load, name, id);
   ctk_label_set_text(&loadingname, name);
   ctk_dialog_open(&loadingdialog);
-  ctk_redraw();
+  /*  ctk_redraw(); */
+  ctk_window_redraw(&loadingdialog);
 #endif /* WITH_LOADER_ARCH */
 }
 
