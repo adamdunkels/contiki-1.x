@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config-dsc.c,v 1.1 2004/06/14 22:30:33 oliverschmidt Exp $
+ * $Id: config-dsc.c,v 1.2 2004/06/27 12:35:37 oliverschmidt Exp $
  *
  */
 
@@ -43,12 +43,13 @@ DSC(config_dsc,
     config_init,
     &config_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_TEXTMAPS
 static char configicon_textmap[9] = {
   'c', 'o', 'n',
   'f', 'i', 'g',
   '-', '-', '-'
 };
-
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon config_icon =
   {CTK_ICON("Configuration", NULL, configicon_textmap)};
