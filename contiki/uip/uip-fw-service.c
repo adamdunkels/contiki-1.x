@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: uip-fw-service.c,v 1.3 2004/09/12 20:24:56 adamdunkels Exp $
+ * $Id: uip-fw-service.c,v 1.4 2005/02/07 07:06:59 adamdunkels Exp $
  */
 
 #include "packet-service.h"
@@ -47,12 +47,12 @@ static const struct packet_service_state state =
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
-EK_PROCESS(proc, PACKET_SERVICE_NAME, EK_PRIO_NORMAL,
-	   eventhandler, pollhandler, (void *)&state);
+EK_PROCESS(proc, PACKET_SERVICE_NAME ": IP forwarding", EK_PRIO_NORMAL,
+	   eventhandler, NULL, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
 EK_PROCESS_INIT(uip_fw_service_init, arg)
-{
+{  
   ek_service_start(PACKET_SERVICE_NAME, &proc);
 }
 /*---------------------------------------------------------------------------*/
@@ -79,11 +79,6 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   default:
     break;
   }
-
-}
-/*---------------------------------------------------------------------------*/
-EK_POLLHANDLER(pollhandler)
-{
 
 }
 /*---------------------------------------------------------------------------*/
