@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.6 2003/04/11 20:13:33 adamdunkels Exp $
+ * $Id: email.c,v 1.7 2003/06/30 20:39:53 adamdunkels Exp $
  *
  */
 
@@ -333,7 +333,7 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
       /* XXX Fiddle in the from and subject fields into the new
 	 mail. */
       ctk_window_open(&composerwindow);
-      ctk_redraw();
+      /*      ctk_redraw();*/
 #endif 
     } else if(w == (struct ctk_widget *)&checkbutton) {
       /* XXX Should actually check email. */
@@ -343,21 +343,17 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
       prepare_message();
       smtp_send(to, fromaddress, subject, mail, sizeof(mail));
       ctk_label_set_text(&statuslabel, "Sending message...");
-      ctk_redraw();
+      CTK_WIDGET_REDRAW(&statuslabel);
     } else if(w == (struct ctk_widget *)&erasebutton) {
       ctk_dialog_open(&canceldialog);      
-      ctk_redraw();
     } else if(w == (struct ctk_widget *)&cancelyesbutton) {
       ctk_dialog_close();
-      ctk_redraw();     
     } else if(w == (struct ctk_widget *)&cancelnobutton) {
       ctk_dialog_close();
-      ctk_redraw();
     } else if(w == (struct ctk_widget *)&setupokbutton) {
       applyconfig();
       ctk_window_close(&setupwindow);
       ctk_window_open(&mainwindow);
-      ctk_redraw();
     } else {
       for(i = 0; i < MAXNUMMSGS; ++i) {
 	if(w == (struct ctk_widget *)&msgbuttons[i]) {
@@ -379,7 +375,6 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
       } else if(menu.active == menuitem_quit) {
 	email_quit();
       }
-      ctk_redraw();
     }
   } else if(s == ctk_signal_window_close &&
 	    data == (ek_data_t)&mainwindow) {
@@ -391,6 +386,6 @@ void
 smtp_done(unsigned char error)
 {
   ctk_label_set_text(&statuslabel, "SMTP done");
-  ctk_redraw();  
+  CTK_WIDGET_REDRAW(&statuslabel);  
 }
 /*-----------------------------------------------------------------------------------*/
