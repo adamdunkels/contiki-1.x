@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.5 2003/08/15 18:44:26 adamdunkels Exp $
+ * $Id: configedit.c,v 1.6 2003/08/20 19:51:47 adamdunkels Exp $
  *
  */
 
@@ -99,12 +99,12 @@ static char dnsserver[25];
 static struct ctk_textentry dnsservertextentry =
   {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 13, 16, 1, dnsserver, 24)};
 
+static struct ctk_button cancelbutton =
+  {CTK_BUTTON(0, 15, 6, "Cancel")};
+
+
 static struct ctk_button savebutton =
-  {CTK_BUTTON(0, 15, 12, "Save & close")};
-
-
-static struct ctk_button applybutton =
-  {CTK_BUTTON(17, 15, 13, "Apply & close")};
+  {CTK_BUTTON(18, 15, 12, "Save & close")};
 
 static DISPATCHER_SIGHANDLER(configedit_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -174,6 +174,12 @@ nullterminate(char *str)
   /* Replace newline with a null char. */
   *nt = 0;
 
+  /* Remove trailing spaces. */
+  while(nt > str && *(nt - 1) == ' ') {
+    *(nt - 1) = 0;
+    --nt;
+  }
+    
   /* Return pointer to null char. */
   return nt;
 }
@@ -229,11 +235,11 @@ dnsconf(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static struct ptentry initparsetab[] =
-  {{'l', loaddriver},
+  {{'n', loaddriver},
    {'t', loadtheme},
    {'s', loadscreensaver},
    {'i', ipaddrconf},
-   {'n', netmaskconf},
+   {'m', netmaskconf},
    {'r', drconf},
    {'d', dnsconf},
    {'#', skipnewline},
@@ -302,13 +308,13 @@ savescript(void)
     c64_fs_write(&f, line, makeline(line, 't', theme));
   }
   if(driver[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 'l', driver));
+    c64_fs_write(&f, line, makeline(line, 'n', driver));
   }
   if(ipaddr[0] != 0) {
     c64_fs_write(&f, line, makeline(line, 'i', ipaddr));
   }
   if(netmask[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 'n', netmask));
+    c64_fs_write(&f, line, makeline(line, 'm', netmask));
   }
   if(gateway[0] != 0) {
     c64_fs_write(&f, line, makeline(line, 'r', gateway));
@@ -354,8 +360,8 @@ LOADER_INIT_FUNC(configedit_init)
     CTK_WIDGET_ADD(&window, &dnsserverlabel);
     CTK_WIDGET_ADD(&window, &dnsservertextentry);
 
+    CTK_WIDGET_ADD(&window, &cancelbutton);    
     CTK_WIDGET_ADD(&window, &savebutton);
-    CTK_WIDGET_ADD(&window, &applybutton);
     
     CTK_WIDGET_FOCUS(&window, &themetextentry);  
 
@@ -388,14 +394,11 @@ DISPATCHER_SIGHANDLER(configedit_sighandler, s, data)
     if(data == (ek_data_t)&savebutton) {
       savescript();
       ctk_window_close(&window);
-      configedit_quit();      
-    } else if(data == (ek_data_t)&applybutton) {
-      savescript();
+      configedit_quit();
+      program_handler_load("config.prg");
+    } else if(data == (ek_data_t)&cancelbutton) {
       ctk_window_close(&window);
       configedit_quit();
-      dispatcher_emit(uip_signal_uninstall, NULL,
-		      DISPATCHER_BROADCAST);
-      program_handler_load("config.prg");
     }
   } else if(s == ctk_signal_window_close ||
 	    s == dispatcher_signal_quit) {
