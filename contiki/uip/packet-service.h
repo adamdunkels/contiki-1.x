@@ -7,7 +7,7 @@
 
 /* Packet service interface. */
 
-#define PACKET_SERVICE_NAME "TCP/IP packet service"
+#define PACKET_SERVICE_NAME "Packet driver"
 #define PACKET_SERVICE_VERSION 0x01
 struct packet_service_state {
   u8_t version;
