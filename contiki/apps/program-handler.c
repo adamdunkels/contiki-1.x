@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.24 2004/07/04 11:35:07 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.25 2004/08/20 21:32:41 adamdunkels Exp $
  *
  */
 
@@ -54,6 +54,8 @@
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-conf.h"
+
+#include "log.h"
 
 #include "loader.h"
 
@@ -162,11 +164,8 @@ program_handler_add(struct dsc *dsc, char *menuname,
 void
 program_handler_init(void)     
 {
-  if(id == EK_ID_NONE) {
-    id = ek_start(&p);
-    ctk_menu_new(&contikimenu, "Contiki");
-  }
-  
+  id = ek_start(&p);
+  ctk_menu_new(&contikimenu, "Contiki");  
 }
 /*-----------------------------------------------------------------------------------*/
 #ifdef WITH_LOADER_ARCH
@@ -254,6 +253,31 @@ program_handler_screensaver(char *name)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+static void
+make_windows(void)
+{
+#ifdef WITH_LOADER_ARCH
+  ctk_window_new(&runwindow, 16, 3, "Run");
+  
+  CTK_WIDGET_ADD(&runwindow, &namelabel);
+  CTK_WIDGET_ADD(&runwindow, &nameentry);
+  CTK_WIDGET_ADD(&runwindow, &loadbutton);
+  
+  CTK_WIDGET_FOCUS(&runwindow, &nameentry);
+  
+  ctk_dialog_new(&loadingdialog, 25, 1);
+  CTK_WIDGET_ADD(&loadingdialog, &loadingmsg);
+  CTK_WIDGET_ADD(&loadingdialog, &loadingname);
+  
+  ctk_dialog_new(&errordialog, 22, 8);
+  CTK_WIDGET_ADD(&errordialog, &errormsg);
+  CTK_WIDGET_ADD(&errordialog, &errorfilelabel);
+  CTK_WIDGET_ADD(&errordialog, &errortype);
+  CTK_WIDGET_ADD(&errordialog, &errorokbutton);
+  CTK_WIDGET_FOCUS(&errordialog, &errorokbutton);
+#endif /* WITH_LOADER_ARCH */
+}
+/*-----------------------------------------------------------------------------------*/
 /*static
   DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)*/
 EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
@@ -268,29 +292,12 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
   EK_EVENTHANDLER_ARGS(ev, data);
 
   if(ev == EK_EVENT_INIT) {
-        /* Create the menus */
+    /* Create the menus */
     ctk_menu_add(&contikimenu);
 #if WITH_LOADER_ARCH
     runmenuitem = ctk_menuitem_add(&contikimenu, "Run program...");
-    
-    ctk_window_new(&runwindow, 16, 3, "Run");
- 
-    CTK_WIDGET_ADD(&runwindow, &namelabel);
-    CTK_WIDGET_ADD(&runwindow, &nameentry);
-    CTK_WIDGET_ADD(&runwindow, &loadbutton);
 
-    CTK_WIDGET_FOCUS(&runwindow, &nameentry);
-
-    ctk_dialog_new(&loadingdialog, 25, 1);
-    CTK_WIDGET_ADD(&loadingdialog, &loadingmsg);
-    CTK_WIDGET_ADD(&loadingdialog, &loadingname);
-
-    ctk_dialog_new(&errordialog, 22, 8);
-    CTK_WIDGET_ADD(&errordialog, &errormsg);
-    CTK_WIDGET_ADD(&errordialog, &errorfilelabel);
-    CTK_WIDGET_ADD(&errordialog, &errortype);
-    CTK_WIDGET_ADD(&errordialog, &errorokbutton);
-    CTK_WIDGET_FOCUS(&errordialog, &errorokbutton);
+    make_windows();
 #endif /* WITH_LOADER_ARCH */
     
     
@@ -323,6 +330,7 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
       if(dsc != NULL) {
 	RUN(dsc->prgname, dsc->init, NULL);
       } else if(contikimenu.active == runmenuitem) {
+	make_windows();
 	ctk_window_open(&runwindow);
 	CTK_WIDGET_FOCUS(&runwindow, &nameentry);
       }
@@ -345,6 +353,8 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
   } else if(ev == LOADER_EVENT_DISPLAY_NAME) {
 #if WITH_LOADER_ARCH
     if(displayname == NULL) {
+      make_windows();
+
       ctk_label_set_text(&loadingname, ((struct pnarg *)data)->name);
       ctk_dialog_open(&loadingdialog);
       /*      dispatcher_emit(loader_signal_load, data, id);*/
@@ -361,15 +371,18 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
     if(displayname == data) {
       ctk_dialog_close();
       displayname = NULL;
+      log_message("Loading ", ((struct pnarg *)data)->name);
       err = LOADER_LOAD(((struct pnarg *)data)->name,
 			((struct pnarg *)data)->arg);
       if(err != LOADER_OK) {
+	make_windows();
 	errorfilename[0] = '"';
 	strncpy(errorfilename + 1, ((struct pnarg *)data)->name,
 		sizeof(errorfilename) - 2);
 	errorfilename[1 + strlen(((struct pnarg *)data)->name)] = '"';
 	ctk_label_set_text(&errortype, (char *)errormsgs[err]);
 	ctk_dialog_open(&errordialog);
+	log_message((char *)errormsgs[err], errorfilename);
       }
       pnarg_free(data);
     } else {
