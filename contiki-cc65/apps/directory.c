@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.2 2003/07/31 23:15:34 adamdunkels Exp $
+ * $Id: directory.c,v 1.3 2003/08/01 00:05:08 adamdunkels Exp $
  *
  */
 
@@ -47,7 +47,7 @@
 
 #include "program-handler.h"
 
-#define MAX_NUMFILES 200
+#define MAX_NUMFILES 40
 #define WIDTH 36
 #define HEIGHT 22
 
@@ -105,10 +105,12 @@ loaddirectory(void)
   } else {
     i = 0;
     while(cbm_readdir(LFN, &dirent) == 0) {
-      strncpy(filenames[i], dirent.name, 16);
-      ++i;
-      if(i == MAX_NUMFILES) {
-	break;
+      if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
+	strncpy(filenames[i], dirent.name, 16);
+	++i;
+	if(i == MAX_NUMFILES) {
+	  break;
+	}
       }
     }
     cbm_closedir(LFN);
@@ -117,11 +119,9 @@ loaddirectory(void)
 
     j = 0;
     for(i = 0; i < numfiles; ++i) {
-      if(strcmp(&filenames[i][strlen(filenames[i]) - 4], ".dsc") == 0) {
-	dscs[j] = LOADER_LOAD_DSC(filenames[i]);
-	if(dscs[j] != NULL) {
-	  ++j;
-	}
+      dscs[j] = LOADER_LOAD_DSC(filenames[i]);
+      if(dscs[j] != NULL) {
+	++j;
       }
     }
     show_statustext("Directory loaded");
