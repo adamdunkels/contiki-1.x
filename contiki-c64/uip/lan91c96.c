@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.9 2005/03/10 00:53:07 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.10 2005/03/13 21:21:15 oliverschmidt Exp $
  *
  */
 
@@ -92,7 +92,7 @@
 #define ETHREV     ETHBASE+0x0a  /* Revision register                R/W (2B) */
 #define ETHERCV    ETHBASE+0x0c  /* Early RCV register               R/W (2B) */
 
-#define BANK(num) asm("lda #%b",num); asm("sta %w",ETHBSR);
+#define BANK(num) asm("lda #%b", num); asm("sta %w", ETHBSR);
 
 #ifdef DEBUG
 static void print_packet(u8_t *, u16_t);
@@ -114,7 +114,6 @@ void lan91c96_init(void)
   asm("inc $d021");              /* Error */
 
 L1:
-
   /* Reset ETH card */
   BANK(0);
   asm("lda #%%10000000");        /* Software reset */
@@ -125,11 +124,11 @@ L1:
   asm("sta %w", ETHRCR+1);
 
   /* delay */
-  asm("ldx #0");
+  asm("ldy #0");
 L2:
   asm("cmp ($ff,x)");            /* 6 cycles */
   asm("cmp ($ff,x)");            /* 6 cycles */
-  asm("dex");                    /* 2 cycles */
+  asm("dey");                    /* 2 cycles */
   asm("bne %g", L2);             /* 3 cycles */
                                  /* 17*256=4352 => 4,4 ms */
 
@@ -242,25 +241,21 @@ L2:
   asm("lda #>%v", uip_buf);
   asm("sta ptr1+1");
 
+  asm("lda %v+1", packet_length);
+  asm("sta tmp1");
+
   asm("ldy #0");
-  asm("ldx %v+1", packet_length);
-  asm("beq %g", RE1);               /* packet_length < 256 */
-
-RL1:
+L3:
   asm("lda %w", ETHDATA);
   asm("sta (ptr1),y");
   asm("iny");
-  asm("bne %g", RL1);
+  asm("bne %g", L4);
   asm("inc ptr1+1");
-  asm("dex");
-  asm("bne %g", RL1);
-
-RE1:
-  asm("lda %w", ETHDATA);
-  asm("sta (ptr1),y");
-  asm("iny");
+L4:
   asm("cpy %v", packet_length);
-  asm("bne %g", RE1);
+  asm("bne %g", L3);
+  asm("dec tmp1");
+  asm("bpl %g", L3);
 
   /* Remove and release RX packet from FIFO */ 
   asm("lda #%%10000000");
@@ -288,12 +283,12 @@ void lan91c96_send(void)
   asm("ora #%%00100000");        /* Allocate memory for TX */
   asm("sta %w", ETHMMUCR);
 
-  asm("ldx #8");                 /* Wait... */
+  asm("ldy #8");                 /* Wait... */
 L1:                              /* Wait for allocation ready */
   asm("lda %w", ETHIST);
   asm("and #%%00001000");        /* ALLOC INT */
-  asm("bne %g", X1);
-  asm("dex");
+  asm("bne %g", L2);
+  asm("dey");
   asm("bne %g", L1);
 
 #ifdef DEBUG
@@ -302,7 +297,8 @@ L1:                              /* Wait for allocation ready */
 
     return;
 
-X1:
+L2:
+
 #ifdef DEBUG
   printf("SND: packet memory allocated\n");
 #endif
@@ -328,16 +324,15 @@ X1:
 
   asm("lda %v", uip_len);
   asm("and #$01");
-  asm("beq %g", SD1);
+  asm("beq %g", L3);
 
   packet_length = uip_len + 5;
-  asm("jmp %g", LC1);
+  asm("jmp %g", L4);
 
-SD1:
-
+L3:
   packet_length = uip_len + 6;   /* +6 for status word, length and ctl byte */
 
-LC1:
+L4:
 
 #ifdef DEBUG
   printf("SND: L:%d ", packet_length);
@@ -360,27 +355,25 @@ LC1:
     printf("SND: short packet sent.\n");
 #endif
 
-    asm("ldx %v", uip_len);
     asm("ldy #0");
-WL1:
+L5:
     asm("lda %v,y", uip_buf);
     asm("sta %w", ETHDATA);
     asm("iny");
-    asm("dex");
-    asm("bne %g", WL1);
+    asm("cpy %v", uip_len);
+    asm("bne %g", L5);
 
   } else {
 
-    asm("ldx #%b", UIP_LLH_LEN + UIP_TCPIP_HLEN);
     asm("ldy #0");
-WL2:
+L6:
     asm("lda %v,y", uip_buf);
     asm("sta %w", ETHDATA);
     asm("iny");
-    asm("dex");
-    asm("bne %g", WL2);
+    asm("cpy #%b", UIP_LLH_LEN + UIP_TCPIP_HLEN);
+    asm("bne %g", L6);
 
-    uip_len -= UIP_LLH_LEN + UIP_TCPIP_HLEN;
+    packet_length = uip_len - UIP_LLH_LEN + UIP_TCPIP_HLEN;
 
     asm("lda %v", uip_appdata);  /* uip_appdata is pointer */
     asm("sta ptr1");
@@ -388,30 +381,22 @@ WL2:
     asm("sta ptr1+1");
 
     asm("ldy #0");
-    asm("ldx %v+1", uip_len);
-    asm("beq %g", RE1);             /* packet_length < 256 */
-
-RL1:
+L7:
     asm("lda (ptr1),y");
     asm("sta %w", ETHDATA);
     asm("iny");
-    asm("bne %g", RL1);
+    asm("bne %g", L8);
     asm("inc ptr1+1");
-    asm("dex");
-    asm("bne %g", RL1);
-
-RE1:
-    asm("lda (ptr1),y");
-    asm("sta %w", ETHDATA);
-    asm("iny");
-    asm("cpy %v", uip_len);
-    asm("bne %g", RE1);
-
+L8:
+    asm("cpy %v", packet_length);
+    asm("bne %g", L7);
+    asm("dec %v+1", packet_length);
+    asm("bpl %g", L7);
   }
 
-  asm("lda %v", uip_len);
+  asm("lda %v", packet_length);
   asm("and #$01");
-  asm("beq %g", R3);
+  asm("beq %g", L9);
 
   asm("lda #%%00100000");
   asm("sta %w", ETHDATA);        /* Control byte */
@@ -425,8 +410,7 @@ RE1:
 
   return;
 
-R3:
-
+L9:
   asm("lda #0");
   asm("sta %w", ETHDATA);        /* Fill byte */
   asm("sta %w", ETHDATA);        /* Control byte */
