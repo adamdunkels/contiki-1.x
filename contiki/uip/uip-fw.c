@@ -123,7 +123,7 @@ struct fwcache_entry {
  * \internal
  * The number of packets to remember when looking for duplicates.
  */
-#define FWCACHE_SIZE 20
+#define FWCACHE_SIZE 2
 
 /**
  * \internal
@@ -389,7 +389,7 @@ uip_fw_forward(void)
   BUF->ttl = BUF->ttl - 1;
   
   /* Update the IP checksum. */
-  if(BUF->ipchksum >= htons(0xffff - 0x0100)) {
+  if(BUF->ipchksum >= HTONS(0xffff - 0x0100)) {
     BUF->ipchksum = BUF->ipchksum + HTONS(0x0100) + 1;
   } else {
     BUF->ipchksum = BUF->ipchksum + HTONS(0x0100);
