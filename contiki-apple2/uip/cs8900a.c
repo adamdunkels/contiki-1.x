@@ -28,7 +28,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.2 2005/01/26 21:33:30 oliverschmidt Exp $
+ * $Id: cs8900a.c,v 1.3 2005/02/23 22:41:30 oliverschmidt Exp $
  *
  */
 
@@ -167,7 +167,7 @@ cs8900a_send(void)
   /* Send the frame. */
   asm("send:");
 
-  /* First, send 40+14=54 bytes of header. */
+  /* First, send 14+40=54 bytes of header. */
   asm("ldy #0");
   asm("sendloop1:");
   asm("lda %v,y", uip_buf);
@@ -176,15 +176,15 @@ cs8900a_send(void)
   asm("lda %v,y", uip_buf);
   asm("sta %v+1,x", cs8900a_rxtxreg);
   asm("iny");
-  asm("cpy #54");
+  asm("cpy #%b", UIP_LLH_LEN + UIP_TCPIP_HLEN);
   asm("bne sendloop1");
 
-  if(uip_len <= 54) {
+  if(uip_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
     return;
   }
 
   /* Next, send rest of the packet. */
-  uip_len -= 54;
+  uip_len -= UIP_LLH_LEN + UIP_TCPIP_HLEN;
 
   asm("ldx %v", idx);
 
