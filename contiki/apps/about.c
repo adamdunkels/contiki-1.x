@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.5 2003/04/24 17:21:59 adamdunkels Exp $
+ * $Id: about.c,v 1.6 2003/04/28 23:20:23 adamdunkels Exp $
  *
  */
 
@@ -76,7 +76,7 @@ LOADER_INIT_FUNC(about_init)
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
 
-    width = ctk_draw_width();
+    width = ctk_desktop_width(NULL);
     
     strcpy(abouturl_ascii, abouturl_petscii);
     petsciiconv_toascii(abouturl_ascii, sizeof(abouturl_ascii));
