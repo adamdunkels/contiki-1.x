@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.5 2003/04/28 23:20:57 adamdunkels Exp $
+ * $Id: processes.c,v 1.6 2003/06/30 20:48:10 adamdunkels Exp $
  *
  */
 
@@ -63,31 +63,28 @@ update_processwindow(void)
   unsigned char i, j, *idsptr;
   struct dispatcher_proc *p;
 
-  i = 0;
-  j = 0;  
-  do {
-    p = dispatcher_process(i);
-    if(p != NULL) {
-      idsptr = ids[j];
-      idsptr[0] = '0' + i / 100;
-      if(idsptr[0] == '0') {
-	idsptr[0] = ' ';
-      }
-      idsptr[1] = '0' + i / 10;
-      idsptr[2] = '0' + i % 10;
-      idsptr[3] = 0;
-      CTK_LABEL_NEW(&processidlabels[j],
-		    0, j + 1, 3, 1, idsptr);
-      CTK_WIDGET_ADD(&processwindow, &processidlabels[j]);
-      
-      CTK_LABEL_NEW(&processnamelabels[j],
-		    4, j + 1, 16, 1, p->name);
-      CTK_WIDGET_ADD(&processwindow, &processnamelabels[j]);
-      ++j;
+  /* Step through each possible process ID and see if there is a
+     matching process. */
+  j = 0;
+  for(p = DISPATCHER_PROCS(); p != NULL; p = p->next) {
+    idsptr = ids[j];
+    i = p->id;
+    idsptr[0] = '0' + i / 100;
+    if(idsptr[0] == '0') {
+      idsptr[0] = ' ';
     }
-    ++i;
-  } while(i != 0);
-  
+    idsptr[1] = '0' + i / 10;
+    idsptr[2] = '0' + i % 10;
+    idsptr[3] = 0;
+    CTK_LABEL_NEW(&processidlabels[j],
+		  0, j + 1, 3, 1, idsptr);
+    CTK_WIDGET_ADD(&processwindow, &processidlabels[j]);
+    
+    CTK_LABEL_NEW(&processnamelabels[j],
+		  4, j + 1, 16, 1, p->name);
+    CTK_WIDGET_ADD(&processwindow, &processnamelabels[j]);
+    ++j;
+  }
 
   CTK_WIDGET_ADD(&processwindow, &processupdatebutton);
   CTK_WIDGET_ADD(&processwindow, &processclosebutton);
@@ -128,7 +125,7 @@ DISPATCHER_SIGHANDLER(processes_sighandler, s, data)
     } else if(data == (ek_data_t)&processclosebutton) {
       ctk_window_close(&processwindow);
       processes_quit();
-      ctk_redraw();
+      /*      ctk_desktop_redraw(processwindow.desktop);      */
     }
   } else if(s == ctk_signal_window_close &&
 	    data == (ek_data_t)&processwindow) {
