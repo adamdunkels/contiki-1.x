@@ -32,11 +32,11 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: petsciiconv.c,v 1.1 2003/03/19 14:16:05 adamdunkels Exp $
+ * $Id: petsciiconv.c,v 1.2 2003/08/24 22:39:15 adamdunkels Exp $
  *
  */
 
-
+/*
 static unsigned char petscii2ascii[128] = {
   0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
   0x14,0x09,0x0d,0x11,0x93,0x0a,0x0e,0x0f,
@@ -55,6 +55,7 @@ static unsigned char petscii2ascii[128] = {
   0xd0,0xd1,0xd2,0xd3,0xd4,0xd5,0xd6,0xd7,
   0xd8,0xd9,0xda,0xdb,0xdc,0xdd,0x7e,0xdf
 };
+*/
 
 static unsigned char ascii2petscii[128] = {
   0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,
@@ -82,9 +83,26 @@ static unsigned char *ptr;
 void
 petsciiconv_toascii(char *buf, unsigned int len)
 {
+  static char c;
+  
   ptr = buf;
   for(i = len; i > 0; --i) {
-    *ptr = petscii2ascii[*ptr & 0x7f];
+    c = *ptr;
+    if(c == 0x0a) {
+      c = 0x0d;
+    } else if(c == 0x0d) {
+      c = 0x0a;
+    } 
+    switch (c & 0xe0) {
+    case 0x40:                
+    case 0x60:
+      c ^= 0x20;
+      break;
+    case 0xc0:               
+      c ^= 0x80;
+      break;
+    }
+    *ptr = c & 0x7f;
     ++ptr;
   }
 }
