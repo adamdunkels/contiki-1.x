@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.2 2003/04/08 20:10:09 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.3 2003/04/24 17:25:26 adamdunkels Exp $
  *
  */
 
@@ -50,6 +50,10 @@
 #include "resolv.h"
 
 #include "program-handler.h"
+#include "about-dsc.h"
+#include "netconf-dsc.h"
+#include "processes-dsc.h"
+#include "directory-dsc.h"
 
 /*-----------------------------------------------------------------------------------*/
 int
@@ -73,6 +77,11 @@ main(int argc, char **argv)
   
   program_handler_init();
   
+  program_handler_add(&directory_dsc, "Directory", 1);
+  program_handler_add(&netconf_dsc, "Network setup", 1);
+  program_handler_add(&processes_dsc, "Processes", 0);
+  program_handler_add(&about_dsc, "About", 0);
+
   ctk_redraw();
   ek_run();
 
