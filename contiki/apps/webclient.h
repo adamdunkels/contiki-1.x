@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.h,v 1.4 2003/11/27 15:47:24 adamdunkels Exp $
+ * $Id: webclient.h,v 1.5 2004/06/06 06:03:03 adamdunkels Exp $
  *
  */
 #ifndef __WEBCLIENT_H__
