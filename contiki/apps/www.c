@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.10 2003/04/18 00:20:22 adamdunkels Exp $
+ * $Id: www.c,v 1.11 2003/07/31 23:12:05 adamdunkels Exp $
  *
  */
 
@@ -50,7 +50,7 @@
 
 #include "www-conf.h"
 
-#if 0
+#if 1
 #define PRINTF(x)
 #else
 #include <stdio.h>
@@ -121,6 +121,13 @@ static unsigned char pagewidgetptr;
 /* The "scrolly" variable holds the line number (in the web page) of
    the first line of text shown on screen. */
 static unsigned short scrolly;
+
+/* The "scrollend" variable contains the web page line number of the
+   last line that should be shown on screen, before the download
+   should stop. */
+#if WWW_CONF_PAGEVIEW
+static unsigned short scrollend;
+#endif /* WWW_CONF_PAGEVIEW */
 
 #if WWW_CONF_RENDERSTATE
 static unsigned char renderstate;
@@ -206,7 +213,7 @@ LOADER_INIT_FUNC(www_init)
     
     /* Create the main window. */
     memset(webpage, 0, sizeof(webpage));
-    ctk_window_new(&mainwindow, 36, 22, "WWW");
+    ctk_window_new(&mainwindow, 36, 22, "Web browser");
     make_window();
     CTK_WIDGET_FOCUS(&mainwindow, &urlentry);
     
@@ -388,7 +395,7 @@ open_link(char *link)
 static void
 log_back(void)
 {
-  memcpy(history[history_last], url, WWW_CONF_MAX_URLLEN);
+  memcpy(history[(int)history_last], url, WWW_CONF_MAX_URLLEN);
   ++history_last;
   if(history_last >= WWW_CONF_HISTORY_SIZE) {
     history_last = 0;
@@ -418,7 +425,7 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
       if(history_last > WWW_CONF_HISTORY_SIZE) {
 	history_last = WWW_CONF_HISTORY_SIZE - 1;
       }
-      memcpy(url, history[history_last], WWW_CONF_MAX_URLLEN);
+      memcpy(url, history[(int)history_last], WWW_CONF_MAX_URLLEN);
       open_url();
       CTK_WIDGET_FOCUS(&mainwindow, &backbutton);      
     } else if(w == (struct ctk_widget *)&downbutton) {
@@ -427,6 +434,7 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
       CTK_WIDGET_FOCUS(&mainwindow, &downbutton);
     } else if(w == (struct ctk_widget *)&gobutton) {
       scrolly = 0;
+
       run = 1;
       log_back();
       memcpy(url, editurl, WWW_CONF_MAX_URLLEN);
@@ -473,7 +481,9 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     } else {
       show_statustext("Host not found.");
     }
-  } else if(s == ctk_signal_window_close) {
+  } else if(s == ctk_signal_window_close ||
+	    s == dispatcher_signal_quit) {
+    ctk_window_close(&mainwindow);
     dispatcher_exit(&p);
     id = EK_ID_NONE;
     LOADER_UNLOAD();
@@ -553,13 +563,21 @@ webclient_connected(void)
 {
   x = nextwordptr = 0;
   starty = scrolly;
+#if WWW_CONF_PAGEVIEW
+  if(starty == 0) {
+    scrollend = WWW_CONF_WEBPAGE_HEIGHT - 4;
+  } else {
+    scrollend = starty + WWW_CONF_WEBPAGE_HEIGHT - 4;
+  }
+#endif /* WWW_CONF_PAGEVIEW */
+  
   nextword[0] = 0;
 
   if(scrolly == 0) {
     clear_page();
     redraw_window();
   }
-    
+  
   show_statustext("Request sent...");
   set_url(webclient_hostname(), webclient_port(), webclient_filename());
 
@@ -582,16 +600,17 @@ scroll(void)
   struct ctk_widget *linksptr;
   char *statustexttext;
   struct ctk_widget *focuswidget;
-  
+
   /* Scroll text up. */
   memcpy(webpage, &webpage[WWW_CONF_WEBPAGE_WIDTH],
 	 (WWW_CONF_WEBPAGE_HEIGHT - 1) * WWW_CONF_WEBPAGE_WIDTH);
   
   /* Clear last line of text. */
-  memset(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) * WWW_CONF_WEBPAGE_WIDTH],
+  memset(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+		  WWW_CONF_WEBPAGE_WIDTH],
 	 ' ', WWW_CONF_WEBPAGE_WIDTH);
   
-  /* Scroll links up. */
+  /* Scroll links and form widgets up. */
 
   lptr = 0;
   linksptr = pagewidgets;
@@ -668,7 +687,8 @@ inc_y(void)
     /* Check if current line should be centered and if so, center
        it. */
     if(renderstate & HTMLPARSER_RENDERSTATE_CENTER) {
-      cptr = &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 0) * WWW_CONF_WEBPAGE_WIDTH - 1];
+      cptr = &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 0) *
+		      WWW_CONF_WEBPAGE_WIDTH - 1];
       for(spaces = 0; spaces < WWW_CONF_WEBPAGE_WIDTH; ++spaces) {
 	if(*cptr-- != ' ') {
 	  break;
@@ -677,11 +697,11 @@ inc_y(void)
 
       spaces = spaces / 2;
 
-      strncpy(tmpcenterline,
+      memcpy(tmpcenterline,
 	      &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
 		       WWW_CONF_WEBPAGE_WIDTH],
 	      WWW_CONF_WEBPAGE_WIDTH);
-      strncpy(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+      memcpy(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
 		       WWW_CONF_WEBPAGE_WIDTH] + spaces,
 	      tmpcenterline,
 	      WWW_CONF_WEBPAGE_WIDTH - spaces);
@@ -701,9 +721,15 @@ inc_y(void)
         
     petsciiconv_topetscii(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
 				   WWW_CONF_WEBPAGE_WIDTH], WWW_CONF_WEBPAGE_WIDTH);
-    redraw_window();
+    /*    redraw_window();*/
     scroll();
     ++scrolly;
+#if WWW_CONF_PAGEVIEW
+    if(scrolly == scrollend) {
+      run = 0;
+      webclient_close();
+    }
+#endif /* WWW_CONF_PAGEVIEW */
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -717,12 +743,12 @@ webclient_datahandler(char *data, u16_t len)
 {
   if(len > 0) {
     /*    if(strcmp(webclient_mimetype(), http_texthtml) == 0) {*/
-      count = (count + 1) & 3;
-      show_statustext(receivingmsgs[count]);
-      htmlparser_parse(data, len);
-      /*    } else {
-      show_statustext("Receiving non-HTML data...");
-      }*/
+    count = (count + 1) & 3;
+    show_statustext(receivingmsgs[count]);
+    htmlparser_parse(data, len);
+    /*    } else {
+	  show_statustext("Receiving non-HTML data...");
+	  }*/
   } else {
     /* Clear remaining parts of page. */
     run = 0;
@@ -813,7 +839,8 @@ add_pagewidget(char *text, unsigned char type,
   dataptr = NULL;
   
   if(starty == 0) {
-    webpageptr = &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) * WWW_CONF_WEBPAGE_WIDTH + x];
+    webpageptr = &webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
+			  WWW_CONF_WEBPAGE_WIDTH + x];
     /* To save memory, we'll copy the widget text to the web page
        drawing area and reference it from there. */
     webpageptr[0] = 0;
@@ -890,7 +917,7 @@ htmlparser_char(char c)
   if(c == ' ' ||
      c == ISO_nl) {
     output_word(c);
-  } else if(c != 0) {    
+  } else if(c != 0 && (c & 0x80) == 0) {    
     nextword[nextwordptr] = c;
     if(nextwordptr < WWW_CONF_WEBPAGE_WIDTH) {
       ++nextwordptr;
@@ -918,6 +945,7 @@ htmlparser_submitbutton(char *text, char *name,
 			char *formname, char *formaction)
 {
   register struct formattribs *form;
+
   form = add_pagewidget(text, CTK_WIDGET_BUTTON, 1);
   if(form != NULL) {
     strncpy(form->formaction, formaction, WWW_CONF_MAX_FORMACTIONLEN);
@@ -925,6 +953,8 @@ htmlparser_submitbutton(char *text, char *name,
     strncpy(form->inputname, name, WWW_CONF_MAX_INPUTNAMELEN);
     form->inputtype = FORMINPUTTYPE_SUBMITBUTTON;
   }
+
+
 }
 /*-----------------------------------------------------------------------------------*/
 void
