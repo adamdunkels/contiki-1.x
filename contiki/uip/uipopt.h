@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.11 2004/06/06 06:17:28 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.12 2004/07/04 16:52:30 adamdunkels Exp $
  *
  */
 
@@ -101,7 +101,7 @@ typedef unsigned short uip_stats_t;
 
 /** @} */
 
-#include "dispatcher.h"
+#include "tcpip.h"
 
 /*------------------------------------------------------------------------------*/
 
@@ -246,7 +246,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_UDP_APPCALL  dispatcher_uipcall
+
 
 /** @} */
 /*------------------------------------------------------------------------------*/

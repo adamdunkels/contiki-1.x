@@ -58,15 +58,16 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.11 2004/02/24 09:54:52 adamdunkels Exp $
+ * $Id: resolv.c,v 1.12 2004/07/04 16:52:30 adamdunkels Exp $
  *
  */
 
-#include <string.h>
-
+#include "ek.h"
+#include "tcpip.h"
 #include "resolv.h"
-#include "dispatcher.h"
-#include "uip-signal.h"
+#include "uip-event.h"
+
+#include <string.h>
 
 #ifndef NULL
 #define NULL (void *)0
@@ -135,13 +136,18 @@ static u8_t seqno;
 
 static struct uip_udp_conn *resolv_conn = NULL;
 
-ek_signal_t resolv_signal_found;
+ek_event_t resolv_event_found;
 
-static DISPATCHER_UIPCALL(udp_appcall, arg);
+/*static DISPATCHER_UIPCALL(udp_appcall, arg);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("DNS resolver", NULL, NULL, udp_appcall)};
+{DISPATCHER_PROC("DNS resolver", NULL, NULL, udp_appcall)};*/
+EK_EVENTHANDLER(resolv_eventhandler, ev, data);
+EK_PROCESS(p, "DNS resolver", EK_PRIO_NORMAL, resolv_eventhandler, NULL, NULL);
 static ek_id_t id = EK_ID_NONE;
 
+enum {
+  EVENT_NEW_SERVER=0
+};
 
 /*-----------------------------------------------------------------------------------*/
 /** \internal
@@ -337,17 +343,26 @@ newdata(void)
  * The main UDP function.
  */
 /*-----------------------------------------------------------------------------------*/
-static void
-udp_appcall(void *arg)
+EK_EVENTHANDLER(resolv_eventhandler, ev, data)
 {
-  if(uip_udp_conn->rport == HTONS(53)) {
-    if(uip_poll()) {
-      check_entries();
+  EK_EVENTHANDLER_ARGS(ev, data);
+  if(ev == EVENT_NEW_SERVER) {
+    if(resolv_conn != NULL) {
+      uip_udp_remove(resolv_conn);
     }
-    if(uip_newdata()) {
-      newdata();
-    }       
-  }
+    
+    resolv_conn = udp_new((u16_t *)data, 53, NULL);
+
+  } else if(ev == tcpip_event) {
+    if(uip_udp_conn->rport == HTONS(53)) {
+      if(uip_poll()) {
+	check_entries();
+      }
+      if(uip_newdata()) {
+	newdata();
+      }       
+    }
+  } 
 }
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -387,7 +402,8 @@ resolv_query(char *name)
   ++seqno;
 
   if(resolv_conn != NULL) {
-    dispatcher_emit(uip_signal_poll_udp, resolv_conn, DISPATCHER_BROADCAST);
+    tcpip_poll_udp(resolv_conn);
+    /*ek_post(EK_BROADCAST, uip_event_poll_udp, resolv_conn);*/
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -449,11 +465,13 @@ resolv_getserver(void)
 void
 resolv_conf(u16_t *dnsserver)
 {
-  if(resolv_conn != NULL) {
+  ek_post_synch(id, EVENT_NEW_SERVER, dnsserver);
+  
+  /*  if(resolv_conn != NULL) {
     uip_udp_remove(resolv_conn);
   }
   
-  resolv_conn = dispatcher_udp_new(dnsserver, 53, NULL);
+  resolv_conn = udp_new(dnsserver, 53, NULL);*/
 }
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -468,13 +486,13 @@ resolv_init(char *arg)
  arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    id = ek_start(&p);
 	
     for(i = 0; i < RESOLV_ENTRIES; ++i) {
       names[i].state = STATE_UNUSED;
     }
     
-    resolv_signal_found = dispatcher_sigalloc();    
+    resolv_event_found = ek_alloc_event();    
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -486,7 +504,7 @@ resolv_init(char *arg)
 void
 resolv_found(char *name, u16_t *ipaddr)
 {
-  dispatcher_emit(resolv_signal_found, name, DISPATCHER_BROADCAST);
+  ek_post(EK_BROADCAST, resolv_event_found, name);
 }
 /*-----------------------------------------------------------------------------------*/
 
