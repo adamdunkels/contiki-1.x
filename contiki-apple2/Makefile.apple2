@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.6 2005/01/22 03:00:27 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.7 2005/03/18 00:35:26 oliverschmidt Exp $
 #
 
 all: contiki
@@ -56,7 +56,6 @@ contiki:crt0.o main.o ek.o ek-service.o timer.o program-handler.o arg.o \
 	calc-dsc.o \
 	configedit-dsc.o \
 	dhcp-dsc.o \
-	email-dsc.o \
 	irc-dsc.o \
 	memstat-dsc.o \
 	processes-dsc.o \
