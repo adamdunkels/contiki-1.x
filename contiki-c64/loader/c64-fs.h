@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.h,v 1.4 2003/08/20 19:56:29 adamdunkels Exp $
+ * $Id: c64-fs.h,v 1.5 2003/09/04 19:40:36 adamdunkels Exp $
  *
  */
 #ifndef __C64_FS_H__
@@ -59,8 +56,6 @@ struct c64_fs_dir {
 struct c64_fs_dirent {
   char name[17];
   unsigned short size;
-  /*    unsigned char type;
-	unsigned char access;*/
   unsigned char track,
     sect;
 };
