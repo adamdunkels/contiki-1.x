@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev.c,v 1.1 2003/04/12 01:52:44 sannyx Exp $
+ * $Id: rs232dev.c,v 1.2 2003/04/14 21:30:25 sannyx Exp $
  *
  */
 
@@ -240,7 +240,7 @@ rs232dev_init(void)
   
   err = rs232_init(0);
   rs232_err(err);
-  err = rs232_params(RS_BAUD_9600, RS_PAR_NONE);
+  err = rs232_params(RS_BAUD_9600 | RS_BITS_8 | RS_STOP_1, RS_PAR_NONE);
   rs232_err(err);
 
   len = 0;
