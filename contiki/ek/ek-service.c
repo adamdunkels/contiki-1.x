@@ -10,9 +10,11 @@ ek_service_start(const char *name, struct ek_proc *p)
   service = ek_find(name);
 
   if(service == EK_ID_NONE) {
+    log_message("ek-service: starting ", name);
     return ek_start(p);
   } else {
-    ek_post(service, EK_EVENT_REQUEST_REPLACE, p);
+    log_message("ek-service: replacing ", name);
+    ek_post_synch(service, EK_EVENT_REQUEST_REPLACE, p);
     return service;
   } 
 
@@ -41,16 +43,16 @@ ek_service_state(struct ek_service *s)
   return ek_procstate(s->id);  
 }
 /*---------------------------------------------------------------------------*/
-/*ek_err_t
-ek_service_call(struct ek_service *s, ek_event_t ev, ek_data_t data)
+#if 0
+unsigned char
+ek_service_ref(struct ek_service *s)
 {
-  if(s->id == EK_ID_NONE) {
-    if(ek_service_find(s) == EK_ERR_NOTFOUND) {
-      return EK_ERR_NOTFOUND;
-    }
-  }
-  ek_post_synch(s->id, ev, data);
-  return EK_ERR_OK;
-}*/
+}
+/*---------------------------------------------------------------------------*/
+unsigned char
+ek_service_unref(struct ek_service *s)
+{
+}
+#endif 
 /*---------------------------------------------------------------------------*/
 
