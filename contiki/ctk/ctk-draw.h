@@ -45,7 +45,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk-draw.h,v 1.5 2004/06/06 05:52:21 adamdunkels Exp $
+ * $Id: ctk-draw.h,v 1.6 2004/07/04 11:40:04 adamdunkels Exp $
  *
  */
 
@@ -275,6 +275,10 @@ unsigned char ctk_draw_width(void);
 unsigned char ctk_draw_height(void);
 
 
+extern unsigned char ctk_draw_windowborder_width,
+  ctk_draw_windowborder_height,
+  ctk_draw_windowtitle_height;
+
 
 #endif /* __CTK_DRAW_H__ */
 
@@ -324,6 +328,6 @@ unsigned char ctk_draw_height(void);
  * keyboard input queue that is queried using the two functions
  * ctk_arch_keyavail() and ctk_arch_getkey().
  */
- 
+
 /** @} */
 /** @} */
