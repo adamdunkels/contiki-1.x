@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.5 2005/03/18 00:37:48 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.6 2005/03/29 23:09:44 oliverschmidt Exp $
  *
  */
 
@@ -94,7 +94,7 @@ architecture specific files to work). */
 #define CTK_CONF_MENUS                1 /* 1384 bytes */
 
 /* Defines the default width of a menu. */
-#define CTK_CONF_MENUWIDTH            14
+#define CTK_CONF_MENUWIDTH            16
 /* The maximum number of menu items in each menu. */
 #define CTK_CONF_MAXMENUITEMS         10
 
