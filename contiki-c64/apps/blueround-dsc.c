@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: blueround-dsc.c,v 1.3 2004/06/27 12:43:33 oliverschmidt Exp $
+ * $Id: blueround-dsc.c,v 1.4 2005/03/18 00:51:17 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char blueroundicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon blueround_icon =
   {CTK_ICON("Blueround", blueroundicon_bitmap, blueroundicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: cgterm-dsc.c,v 1.1 2004/09/19 19:52:58 adamdunkels Exp $
+ * $Id: cgterm-dsc.c,v 1.2 2005/03/18 00:51:17 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char cgtermicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon icon =
   {CTK_ICON("C/G terminal", cgtermicon_bitmap, cgtermicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
