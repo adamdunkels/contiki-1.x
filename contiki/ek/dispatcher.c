@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.24 2004/03/25 09:53:13 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.25 2004/06/06 06:07:24 adamdunkels Exp $
  *
  */
 
@@ -857,6 +857,11 @@ dispatcher_process_signal(void)
   static ek_signal_t s;
   static ek_data_t data;
   static ek_id_t id;
+
+  if(dispatcher_poll_request) {
+    dispatcher_poll_request = 0;
+    dispatcher_process_idle();
+  }
   
   /* If there are any signals in the queue, take the first one and
      walk through the list of processes to see if the signal should be
@@ -889,13 +894,18 @@ void
 dispatcher_process_idle(void)
 {
   struct dispatcher_proc *p;
-  
+
+ again:
   /* Call idle handlers. */
   for(p = dispatcher_procs; p != NULL; p = p->next) {
     if(p->idle != NULL) {
       dispatcher_current = p->id;
       dispatcher_curproc = p;
       p->idle();
+    }
+    if(dispatcher_poll_request) {
+      dispatcher_poll_request = 0;
+      goto again;
     }
   }
   
@@ -957,4 +967,5 @@ dispatcher_emit(ek_signal_t s, ek_data_t data, ek_id_t id)
   return EK_ERR_OK;
 }
 /*-----------------------------------------------------------------------------------*/
+unsigned char dispatcher_poll_request;
 /** @} */

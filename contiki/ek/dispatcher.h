@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: dispatcher.h,v 1.16 2004/03/25 09:53:13 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.17 2004/06/06 06:07:24 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -299,6 +299,9 @@ void dispatcher_process_signal(void);
 void dispatcher_process_idle(void);
 
 void dispatcher_run(void);
+
+extern unsigned char dispatcher_poll_request;
+#define DISPATCHER_REQUEST_POLL() dispatcher_poll_request = 1
 
 /** @} */
 
