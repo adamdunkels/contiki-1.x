@@ -3,6 +3,7 @@
 
 
 void msp430_init(void);
+void msp430_timer_init(void);
 void beep(void);
 void blink(void);
 

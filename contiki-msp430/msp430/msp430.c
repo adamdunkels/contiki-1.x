@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: msp430.c,v 1.2 2003/10/01 08:04:03 adamdunkels Exp $
+ * $Id: msp430.c,v 1.3 2003/11/27 15:58:05 adamdunkels Exp $
  *
  */
 
@@ -68,16 +68,25 @@
 void slip_drv_init(char *arg);
 
 
+#define INTERVAL_5MS      52288U       // 12288 cycles @ 2,4756MHz = 5 ms
 
 
 static u16_t addr[2];
-static unsigned short count;
+static ek_clock_t count;
 
+interrupt(TIMERA1_VECTOR) timera1 (void) {
+
+  if(TAIV == 2) {
+    CCR1 += INTERVAL_5MS;
+    ++count;
+    P2OUT ^= 4;  
+  }
+}
 /*-----------------------------------------------------------------------------------*/
-unsigned short
-clock(void)
+ek_clock_t
+ek_clock(void)
 {
-  return count++;
+  return count;
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -118,6 +127,22 @@ rs232_print(char *cptr)
 }
 /*-----------------------------------------------------------------------------------*/
 void
+msp430_timer_init(void)
+{
+  TACTL = TASSEL1 | TACLR | ID_3;                // select SMCLK (2.4576MHz), clear TAR
+
+  // init ccr1 to create the 5 ms interval
+  TACCTL1 = CCIE;                           // CCR1 interrupt enabled, interrupt occurs when timer equals CCR1
+  TACCR1 = INTERVAL_5MS;                    // interrupt after 5ms
+
+  TACTL |= MC1;                         // Start Timer_A in continuous mode 
+
+  eint();   /* Enable interrupts. */
+
+
+}
+/*-----------------------------------------------------------------------------------*/
+void
 msp430_init(void)
 {
     ////////// Port 1 ////
@@ -154,11 +179,10 @@ msp430_init(void)
   P6DIR = 0x00;       // P63=extern voltage, P64=battery voltage, P65=Receive power
   P6OUT = 0x00;
 
+  
   /* Red led on */
   P2OUT &= 0xfd;  
   
-  eint();   /* Enable interrupts. */
-
   beep();
 }
 /*-----------------------------------------------------------------------------------*/
