@@ -19,9 +19,15 @@
  * \param num The total number of memory chunks in the block.
  *
  */
+#if CC_DOUBLE_HASH
 #define MEMB(name, size, num) \
         static char name##_memb_mem[(size + 1) * num]; \
         static struct memb_blocks name = {size, num, name##_memb_mem}
+#else /* CC_DOUBLE_HASH */
+#define MEMB(name, size, num) \
+        static char name_memb_mem[(size + 1) * num]; \
+        static struct memb_blocks name = {size, num, name_memb_mem}
+#endif /* CC_DOUBLE_HASH */
 
 struct memb_blocks {
   unsigned short size;

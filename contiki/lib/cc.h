@@ -39,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: cc.h,v 1.3 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: cc.h,v 1.4 2004/02/24 09:56:06 adamdunkels Exp $
  *
  */
 #ifndef __CC_H__
@@ -85,6 +85,15 @@
 #else /* CC_CONF_UNSIGNED_CHAR_BUGS */
 #define CC_UNSIGNED_CHAR_BUGS 0
 #endif /* CC_CONF_UNSIGNED_CHAR_BUGS */
+
+/**
+ * Configure if C compiler supports double hash marks in C macros.
+ */
+#if CC_CONF_DOUBLE_HASH
+#define CC_DOUBLE_HASH 1
+#else /* CC_CONF_DOUBLE_HASH */
+#define CC_DOUBLE_HASH 0
+#endif /* CC_CONF_DOUBLE_HASH */
 
 #endif /* __CC_H__ */
 
