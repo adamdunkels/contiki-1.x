@@ -27,57 +27,49 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.14 2004/09/01 20:43:19 adamdunkels Exp $
+# $Id: Makefile,v 1.15 2005/02/27 13:18:50 adamdunkels Exp $
 #
 
+all: contiki
+
 CONTIKI=../contiki
+SDIRS = apps conf ctk lib uip 
+CSDIRS = ${addprefix $(CONTIKI)/,apps ctk ek lib uip}
+
+-include Makefile.depend
+
 CC=gcc
 CFLAGS=-Wall -Wstrict-prototypes -Wmissing-prototypes \
-	-g \
-       -Iapps -Ictk -Iuip -Iconf -Ilib \
-       -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
-       -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
+	-g  \
+	${addprefix -I,$(CSDIRS)} \
+	${addprefix -I,$(SDIRS)} \
 	`pkg-config --cflags gtk+-2.0`\
 	-DWITH_ETHERNET -DWITH_TAPDEV -DWITH_ASCII \
 	-DWITH_WWW -DWITH_EMAIL -DWITH_UIP \
 	-DWITH_CTKGTK
 LDFLAGS= `pkg-config --libs gtk+-2.0`
 
+vpath %.c ${SDIRS} $(CSDIRS) ${filter-out CVS,${wildcard labs/*}}
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: apps/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: ctk/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: lib/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: uip/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: $(CONTIKI)/apps/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: $(CONTIKI)/ctk/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: $(CONTIKI)/ek/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: $(CONTIKI)/lib/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-%.o: $(CONTIKI)/uip/%.c
-	$(CC) $(CFLAGS) -c $(<:.o=.c)
-
 
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o http-user-agent-string.o
 EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o
-WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o http-strings.o
+WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o http-strings.o httpd-cgi.o
 TELNET=simpletelnet.o telnet.o
+VNCVIEWER=vnc.o vnc-viewer.o vnc-draw.o vnc-dsc.o
 
 CTKGTK=ctk-gtksim.o ctk-draw.o ctk-gtksim-service.o libconio.o ctk-gtksim-draw.o
 CTKVNC=ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o
 CTKTERM=libconio.o ctk-term.o ctk-term-in.o ctk-term-out.o ctk-termtelnet.o
 
+POP=pop.o popc.o popc-strings.o
+
 contiki: contiki-main.o ek.o arg.o ek-service.o \
  tcpip.o uip.o uip_arch.o uip-fw.o uip-split.o \
- timer.o uiplib.o resolv.o uip-event.o resolv.o uipbuf.o \
- cfs.o cfs-posix.o \
+ timer.o uiplib.o resolv.o resolv.o uipbuf.o \
+ cfs.o cfs-posix.o codeprop.o \
  tapdev-service.o tapdev.o uip_arp.o uip-fw.o uip-fw-service.o \
  ctk.o $(CTKGTK) \
  ftpc.o ftp.o ftp-dsc.o \
@@ -89,7 +81,8 @@ contiki: contiki-main.o ek.o arg.o ek-service.o \
  shell-dsc.o shell.o shell-gui.o \
  calc-dsc.o calc.o \
  email.o email-dsc.o smtp-socket.o smtp-strings.o ctk-textedit.o \
- ircc.o irc.o irc-dsc.o socket.o \
+ ircc.o irc.o irc-dsc.o psock.o ircc-strings.o $(VNCVIEWER) $(WEBSERVER) \
+ dhcpc.o dhcp.o dhcp-dsc.o  \
 # sock-httpd.o socket.o list.o filecache.o \
 # program-handler.o about.o netconf.o processes.o \
 # about-dsc.o netconf-dsc.o processes-dsc.o  \
@@ -112,9 +105,10 @@ clean:
 	rm -f *.o *~ *core contiki *.s
 
 depend:
-	gcc -MM -Iapps -Ictk -Ilib -Iuip -Iconf \
-	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
-	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
-	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
+	gcc $(CCDEPFLAGS) -MM \
+	${addprefix -I,$(CSDIRS)} \
+	${addprefix -I,$(SDIRS)} \
+	${addsuffix /*.c, $(CSDIRS)} \
+	${addsuffix /*.c, $(SDIRS)} \
+	*.c > Makefile.depend
 
-include Makefile.depend
