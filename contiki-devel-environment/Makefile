@@ -30,13 +30,12 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/04/09 12:55:06 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2003/04/09 19:15:14 adamdunkels Exp $
 #
 
 all: programs
 
 include Makefile.cfg
-include Makefile.prg
 
 CC=cc65
 AS=ca65
