@@ -18,11 +18,11 @@ Installation
 
    a2 in b      dos33.dsk CONTIKI.SYSTEM loader~1.sys
    a2 in -r b   dos33.dsk CONTIKI        contiki
+   a2 in b.0000 dos33.dsk LANCEGS.DRV    lancegs.drv
    a2 in b.0000 dos33.dsk TFE.DRV        tfe.drv
    a2 in b.0000 dos33.dsk ABOUT.PRG      about.prg
    a2 in b.0000 dos33.dsk CALC.PRG       calc.prg
    a2 in b.0000 dos33.dsk DHCP.PRG       dhcp.prg
-   a2 in b.0000 dos33.dsk EMAIL.PRG      email.prg
    a2 in b.0000 dos33.dsk IRC.PRG        irc.prg
    a2 in b.0000 dos33.dsk MEMSTAT.PRG    memstat.prg
    a2 in b.0000 dos33.dsk CONFIG.PRG     config.prg
@@ -43,11 +43,6 @@ Installation
    DELETE CONTIKI.SYSTEM
    CREATE CONTIKI.SYSTEM,TSYS
    BSAVE  CONTIKI.SYSTEM,TSYS,A$2000,L350
-
-
-6. Use BASIC.SYSTEM to create an empty configuration file:
-
-   CREATE CONTIKI.CFG,TBIN
 
 
 Usage

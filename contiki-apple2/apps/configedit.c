@@ -32,14 +32,12 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.3 2005/02/01 00:21:36 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.4 2005/03/20 00:23:28 oliverschmidt Exp $
  *
  */
 
 
 #include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 #include "uiplib.h"
 #include "resolv.h"
@@ -47,6 +45,7 @@
 
 #include "program-handler.h"
 #include "packet-service.h"
+#include "cfs.h"
 
 #include "config.h"
 
@@ -332,12 +331,12 @@ config_save(void)
 {
   int fd;
 
-  fd = open("contiki.cfg", 0);
+  fd = cfs_open("contiki.cfg", CFS_WRITE);
   if(fd == -1) {
     return;
   }
-  write(fd, &config, sizeof(config));
-  close(fd);
+  cfs_write(fd, &config, sizeof(config));
+  cfs_close(fd);
 }
 /*-----------------------------------------------------------------------------------*/
 EK_EVENTHANDLER(config_eventhandler, ev, data)
