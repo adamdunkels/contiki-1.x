@@ -20,8 +20,9 @@ BRIEF_MEMBER_DESC      = YES
 REPEAT_BRIEF           = YES
 ALWAYS_DETAILED_SEC    = NO
 INLINE_INHERITED_MEMB  = NO
-FULL_PATH_NAMES        = NO
-STRIP_FROM_PATH        = 
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = /usr/home/adam/contiki/ \
+                         ../
 INTERNAL_DOCS          = NO
 CASE_SENSE_NAMES       = YES
 SHORT_NAMES            = NO
@@ -60,8 +61,11 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = ../ek/arg.c \
                          ../ek/dispatcher.c \
+                         ../apps/program-handler.c \
+                         ../ctk/ctk.h \
                          ../ctk/ctk.c \
-                         ../apps/program-handler.c
+                         ../ctk/ctk-draw.h \
+                         ../ctk/ctk-vncserver.c
 FILE_PATTERNS          = 
 RECURSIVE              = NO
 EXCLUDE                = 
@@ -72,7 +76,7 @@ EXAMPLE_PATTERNS       =
 EXAMPLE_RECURSIVE      = NO
 IMAGE_PATH             = 
 INPUT_FILTER           = 
-FILTER_SOURCE_FILES    = NO
+FILTER_SOURCE_FILES    = YES
 #---------------------------------------------------------------------------
 # configuration options related to source browsing
 #---------------------------------------------------------------------------
@@ -85,7 +89,7 @@ VERBATIM_HEADERS       = YES
 #---------------------------------------------------------------------------
 # configuration options related to the alphabetical class index
 #---------------------------------------------------------------------------
-ALPHABETICAL_INDEX     = NO
+ALPHABETICAL_INDEX     = YES
 COLS_IN_ALPHA_INDEX    = 5
 IGNORE_PREFIX          = 
 #---------------------------------------------------------------------------
@@ -106,7 +110,7 @@ BINARY_TOC             = NO
 TOC_EXPAND             = NO
 DISABLE_INDEX          = NO
 ENUM_VALUES_PER_LINE   = 4
-GENERATE_TREEVIEW      = NO
+GENERATE_TREEVIEW      = YES
 TREEVIEW_WIDTH         = 250
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
@@ -119,7 +123,7 @@ COMPACT_LATEX          = NO
 PAPER_TYPE             = a4wide
 EXTRA_PACKAGES         = 
 LATEX_HEADER           = 
-PDF_HYPERLINKS         = NO
+PDF_HYPERLINKS         = YES
 USE_PDFLATEX           = NO
 LATEX_BATCHMODE        = NO
 LATEX_HIDE_INDICES     = NO
@@ -183,12 +187,12 @@ PERL_PATH              = /usr/bin/perl
 #---------------------------------------------------------------------------
 CLASS_DIAGRAMS         = YES
 HIDE_UNDOC_RELATIONS   = YES
-HAVE_DOT               = NO
-CLASS_GRAPH            = YES
+HAVE_DOT               = YES
+CLASS_GRAPH            = NO
 COLLABORATION_GRAPH    = YES
 UML_LOOK               = NO
 TEMPLATE_RELATIONS     = NO
-INCLUDE_GRAPH          = YES
+INCLUDE_GRAPH          = NO
 INCLUDED_BY_GRAPH      = YES
 CALL_GRAPH             = NO
 GRAPHICAL_HIERARCHY    = YES
