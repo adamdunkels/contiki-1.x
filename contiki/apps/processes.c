@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.6 2003/06/30 20:48:10 adamdunkels Exp $
+ * $Id: processes.c,v 1.7 2003/07/31 23:45:52 adamdunkels Exp $
  *
  */
 
@@ -46,10 +46,17 @@ static unsigned char ids[MAX_PROCESSLABELS][4];
 static struct ctk_label processidlabels[MAX_PROCESSLABELS];
 static struct ctk_label processnamelabels[MAX_PROCESSLABELS];
 
+static struct ctk_label killlabel =
+  {CTK_LABEL(0, 14, 12, 1, "Kill process")};
+static char killprocnum[5];
+static struct ctk_textentry killtextentry =
+  {CTK_TEXTENTRY(13, 14, 3, 1, killprocnum, 4)};
+static struct ctk_button killbutton =
+  {CTK_BUTTON(19, 14, 2, "Ok")};
 static struct ctk_button processupdatebutton =
-  {CTK_BUTTON(0, 14, 6, "Update")};
+  {CTK_BUTTON(0, 15, 6, "Update")};
 static struct ctk_button processclosebutton =
-  {CTK_BUTTON(13, 14, 5, "Close")};
+  {CTK_BUTTON(16, 15, 5, "Close")};
 
 static DISPATCHER_SIGHANDLER(processes_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -73,7 +80,7 @@ update_processwindow(void)
     if(idsptr[0] == '0') {
       idsptr[0] = ' ';
     }
-    idsptr[1] = '0' + i / 10;
+    idsptr[1] = '0' + (i / 10) % 10;
     idsptr[2] = '0' + i % 10;
     idsptr[3] = 0;
     CTK_LABEL_NEW(&processidlabels[j],
@@ -81,11 +88,17 @@ update_processwindow(void)
     CTK_WIDGET_ADD(&processwindow, &processidlabels[j]);
     
     CTK_LABEL_NEW(&processnamelabels[j],
-		  4, j + 1, 16, 1, p->name);
+		  4, j + 1, 19, 1, p->name);
     CTK_WIDGET_ADD(&processwindow, &processnamelabels[j]);
+
     ++j;
   }
 
+  CTK_WIDGET_ADD(&processwindow, &killlabel);
+
+  CTK_WIDGET_ADD(&processwindow, &killtextentry);
+  CTK_WIDGET_ADD(&processwindow, &killbutton);  
+  
   CTK_WIDGET_ADD(&processwindow, &processupdatebutton);
   CTK_WIDGET_ADD(&processwindow, &processclosebutton);
   CTK_WIDGET_FOCUS(&processwindow, &processupdatebutton);
@@ -96,7 +109,7 @@ LOADER_INIT_FUNC(processes_init)
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
-    ctk_window_new(&processwindow, 20, 15, "Processes");
+    ctk_window_new(&processwindow, 23, 16, "Processes");
     update_processwindow();
     
     dispatcher_listen(ctk_signal_button_activate);
@@ -113,6 +126,34 @@ processes_quit(void)
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
+static void
+killproc(void)
+{
+  int procnum;
+  u8_t i, j;
+
+  /* Find first zero char in killprocnum string. */
+  for(i = 0; killprocnum[i] != 0 &&
+	i < sizeof(killprocnum); ++i);
+
+  if(i == 0) {
+    return;
+  }
+  
+  procnum = 0;
+  
+  for(j = 0; j < i; ++j) {
+    procnum = procnum * 10 + (killprocnum[j] - '0');
+    killprocnum[j] = 0;
+  }
+
+  dispatcher_emit(dispatcher_signal_quit, NULL, procnum);
+  CTK_WIDGET_REDRAW(&killtextentry);
+  CTK_WIDGET_FOCUS(&processwindow, &processupdatebutton);
+  CTK_WIDGET_REDRAW(&killbutton);
+  CTK_WIDGET_REDRAW(&processupdatebutton);
+}
+/*-----------------------------------------------------------------------------------*/
 static
 DISPATCHER_SIGHANDLER(processes_sighandler, s, data)
 {
@@ -121,14 +162,18 @@ DISPATCHER_SIGHANDLER(processes_sighandler, s, data)
     if(data == (ek_data_t)&processupdatebutton) {
       ctk_window_clear(&processwindow);
       update_processwindow();
-      ctk_window_redraw(&processwindow);
+      ctk_window_open(&processwindow);
     } else if(data == (ek_data_t)&processclosebutton) {
       ctk_window_close(&processwindow);
       processes_quit();
       /*      ctk_desktop_redraw(processwindow.desktop);      */
+    } else if(data == (ek_data_t)&killbutton) {
+      killproc();
     }
-  } else if(s == ctk_signal_window_close &&
-	    data == (ek_data_t)&processwindow) {
+  } else if(s == dispatcher_signal_quit ||
+	    (s == ctk_signal_window_close &&
+	     data == (ek_data_t)&processwindow)) {
+    ctk_window_close(&processwindow);
     processes_quit();
   }
 }
