@@ -1,3 +1,24 @@
+/**
+ * \file
+ * Argument buffer for passing arguments when starting processes
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * The argument buffer can be used when passing an argument from an
+ * exiting process to a process that has not been created yet. Since
+ * the exiting process will have exited when the new process is
+ * started, the argument cannot be passed in any of the processes'
+ * addres spaces. In such situations, the argument buffer can be used.
+ *
+ * The argument buffer is statically allocated in memory and is
+ * globally accessible to all processes.
+ *
+ * An argument buffer is allocated with the arg_alloc() function and
+ * deallocated with the arg_free() function. The arg_free() function
+ * is designed so that it can take any pointer, not just an argument
+ * buffer pointer. If the pointer to arg_free() is not an argument
+ * buffer, the function does nothing.
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +32,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,12 +50,15 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: arg.c,v 1.1 2003/08/27 12:01:46 adamdunkels Exp $
+ * $Id: arg.c,v 1.2 2003/08/31 22:18:31 adamdunkels Exp $
  *
  */
 
 #include "arg.h"
 
+/**
+ * \internal Structure used for holding an argument buffer.
+ */
 struct argbuf {
   char buf[128];
   char used;
@@ -46,11 +67,28 @@ struct argbuf {
 static struct argbuf bufs[1];
 
 /*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Initalizer, called by the dispatcher module.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 arg_init(void)
 {
   bufs[0].used = 0;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Allocates an argument buffer.
+ *
+ * \param size The requested size of the buffer, in bytes.
+ *
+ * \return Pointer to allocated buffer, or NULL if no buffer could be
+ * allocated.
+ *
+ * \note It currently is not possible to allocate argument buffers of
+ * any other size than 128 bytes.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 char *
 arg_alloc(char size)
@@ -61,6 +99,17 @@ arg_alloc(char size)
   } 
   return 0;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Deallocates an argument buffer.
+ *
+ * This function deallocates the argument buffer pointed to by the
+ * parameter, but only if the buffer actually is an argument buffer
+ * and is allocated. It is perfectly safe to call this function with
+ * any pointer.
+ *
+ * \param arg A pointer.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 arg_free(char *arg)

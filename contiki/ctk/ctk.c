@@ -1,5 +1,16 @@
+/**
+ * \file
+ * The Contiki Toolkit, CTK, the Contiki GUI.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * The Contiki Toolkit (CTK) provides the graphical user interface for
+ * the Contiki system.
+ *
+ * 
+ */
+
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +22,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +40,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.30 2003/08/29 20:38:54 adamdunkels Exp $
+ * $Id: ctk.c,v 1.31 2003/08/31 22:17:09 adamdunkels Exp $
  *
  */
 
@@ -64,7 +72,6 @@ static struct ctk_menu desktopmenu;
 #define NULL (void *)0
 #endif /* NULL */
 
-
 #define REDRAW_NONE         0
 #define REDRAW_ALL          1
 #define REDRAW_FOCUS        2
@@ -90,16 +97,46 @@ static struct dispatcher_proc p =
   {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, NULL, NULL)};
 static ek_id_t ctkid;
 
-ek_signal_t ctk_signal_keypress,
-  ctk_signal_button_activate,
+ek_signal_t
+
+  /** Emitted for every key being pressed. The key is passed as signal
+      data.*/
+  ctk_signal_keypress,
+  
+  /** Emitted when a widget is activated (pressed). A pointer to the
+      widget is passed as signal data. */
   ctk_signal_widget_activate,
-  ctk_signal_button_hover,
+  /** Same as ctk_signal_widget_activate. */
+  ctk_signal_button_activate,
+
+  /** Emitted when a widget is selected. A pointer to the widget is
+      passed as signal data. */
   ctk_signal_widget_select,
+  /** Same as ctk_signal_widget_select. */  
+  ctk_signal_button_hover,
+
+  /** Emitted when a hyperlink is activated. The signal is broadcast
+      to all listeners. */
   ctk_signal_hyperlink_activate,
+
+  /** Same as ctk_signal_widget_select.. */  
   ctk_signal_hyperlink_hover,
+
+  /** Emitted when a menu item is activated. The number of the menu
+      item is passed as signal data. */
   ctk_signal_menu_activate,
+
+  /** Emitted when a window is closed. A pointer to the window is
+      passed as signal data. */
   ctk_signal_window_close,
+
+  /** Emitted when the mouse pointer is moved. A NULL pointer is
+      passed as signal data and it is up to the listening process to
+      check the position of the mouse using the CTK mouse API.*/
   ctk_signal_pointer_move,
+
+  /** Emitted when a mouse button is pressed. The button is passed as
+      signal data to the listening process. */
   ctk_signal_pointer_button;
 
 #if CTK_CONF_SCREENSAVER
@@ -118,12 +155,14 @@ static ek_clock_t start, current;
 
 #if CTK_CONF_MENUS
 /*-----------------------------------------------------------------------------------*/
-/* make_desktopmenu(void)
+/**
+ * \internal Creates the Desktop menu.
  *
  * Creates the leftmost menu, "Desktop". Since the desktop menu
  * contains the list of all open windows, this function will be called
  * whenever a window is opened or closed.
  */
+/*-----------------------------------------------------------------------------------*/
 static void
 make_desktopmenu(void)
 {
@@ -141,10 +180,13 @@ make_desktopmenu(void)
 }
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
-/* ctk_init(void)
+/**
+ * Initializes the Contiki Toolkit.
  *
- * Initializes CTK. Must be called before any other CTK function.
+ * This function must be called before any other CTK function, but
+ * after the inizialitation of the dispatcher module.
  */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_init(void)
 {
@@ -205,26 +247,50 @@ ctk_init(void)
   start = ek_clock();
 }
 /*-----------------------------------------------------------------------------------*/
-/* void ctk_mode_set()
+/**
+ * Sets the current CTK mode.
+ *
+ * The CTK mode can be either CTK_MODE_NORMAL, CTK_MODE_SCREENSAVER or
+ * CTK_MODE_EXTERNAL. CTK_MODE_NORMAL is the normal mode, in which
+ * keypresses and mouse pointer movements are processed and the screen
+ * is redrawn. In CTK_MODE_SCREENSAVER, no screen redraws are
+ * performed and the first key press or pointer movement will cause
+ * the ctk_signal_screensaver_stop to be emitted. In the
+ * CTK_MODE_EXTERNAL mode, key presses and pointer movements are
+ * ignored and no screen redraws are made.
+ *
+ * \param m The mode. 
  */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_mode_set(unsigned char m) {
   mode = m;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Retrieves the current CTK mode.
+ *
+ * \return The current CTK mode.
+ */
 /*-----------------------------------------------------------------------------------*/
 unsigned char
 ctk_mode_get(void) {
   return mode;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Add an icon to the desktop.
+ *
+ * \param icon The icon to be added.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
-ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon,
-	     ek_id_t id)
+ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon)
 {
 #if CTK_CONF_ICONS
   icon->x = iconx;
   icon->y = icony;
-  icon->widget.icon.owner = id;
+  icon->widget.icon.owner = DISPATCHER_CURRENT();
 
   icony += ICONY_DELTA;
   if(icony >= ICONY_MAX) {
@@ -236,12 +302,23 @@ ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon,
 #endif /* CTK_CONF_ICONS */
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Open a dialog box.
+ *
+ * \param d The dialog to be opened.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_dialog_open(struct ctk_window *d)
 {
   dialog = d;
   redraw |= REDRAW_FOCUS;
-}
+} 
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Close the dialog box, if one is open.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_dialog_close(void)
@@ -249,6 +326,12 @@ ctk_dialog_close(void)
   dialog = NULL;
   redraw |= REDRAW_ALL;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Open a window, or bring window to front if already open.
+ *
+ * \param w The window to be opened.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_window_open(CC_REGISTER_ARG struct ctk_window *w)
@@ -290,6 +373,14 @@ ctk_window_open(CC_REGISTER_ARG struct ctk_window *w)
 
   redraw |= REDRAW_ALL;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Close a window if it is open.
+ *
+ * If the window is not open, this function does nothing.
+ *
+ * \param w The window to be closed.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_window_close(struct ctk_window *w)
@@ -335,6 +426,10 @@ ctk_window_close(struct ctk_window *w)
   redraw |= REDRAW_ALL;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Create the move and close buttons on the window titlebar.
+ */
+/*-----------------------------------------------------------------------------------*/
 static void 
 make_windowbuttons(CC_REGISTER_ARG struct ctk_window *window)
 {
@@ -354,13 +449,28 @@ make_windowbuttons(CC_REGISTER_ARG struct ctk_window *window)
   CTK_WIDGET_ADD(window, &window->closebutton);
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Remove all widgets from a window.
+ *
+ * \param w The window to be cleared.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
-ctk_window_clear(struct ctk_window *window)
+ctk_window_clear(struct ctk_window *w)
 {
-  window->active = window->inactive = window->focused = NULL;
+  w->active = w->inactive = w->focused = NULL;
   
-  make_windowbuttons(window);
+  make_windowbuttons(w);
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Add a menu to the menu bar.
+ *
+ * \param menu The menu to be added.
+ *
+ * \note Do not call this function multiple times for the same menu,
+ * as no check is made to see if the menu already is in the menu bar.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_menu_add(struct ctk_menu *menu)
@@ -384,6 +494,12 @@ ctk_menu_add(struct ctk_menu *menu)
 #endif /* CTK_CONF_MENUS */
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Remove a menu from the menu bar.
+ *
+ * \param menu The menu to be removed.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_menu_remove(struct ctk_menu *menu)
 {
@@ -402,6 +518,14 @@ ctk_menu_remove(struct ctk_menu *menu)
   }
 #endif /* CTK_CONF_MENUS */
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Redraws everything on the screen within the clip
+ * interval.
+ *
+ * \param clipy1 The upper bound of the clip interval
+ * \param clipy2 The lower bound of the clip interval 
+ */
 /*-----------------------------------------------------------------------------------*/
 static void CC_FASTCALL 
 do_redraw_all(unsigned char clipy1, unsigned char clipy2)
@@ -447,6 +571,15 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
 #endif /* CTK_CONF_MENUS */
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Redraw the entire desktop.
+ *
+ * \param d The desktop to be redrawn.
+ *
+ * \note Currently the parameter d is not used, but must be set to
+ * NULL.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_desktop_redraw(struct ctk_desktop *d)
 {
@@ -459,6 +592,15 @@ ctk_desktop_redraw(struct ctk_desktop *d)
     redraw |= REDRAW_ALL;
   }
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Redraw a window.
+ *
+ * This function redraws the window, but only if it is the foremost
+ * one on the desktop.
+ *
+ * \param w The window to be redrawn.
+ */
 /*-----------------------------------------------------------------------------------*/
 void 
 ctk_window_redraw(struct ctk_window *w)
@@ -480,6 +622,15 @@ ctk_window_redraw(struct ctk_window *w)
 		    0, height);
   }  
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Creates a new window.
+ *
+ * \param window The window to be created.
+ * \param w The width of the window.
+ * \param h The height of the window.
+ * \param title The title of the window.
+ */
 /*-----------------------------------------------------------------------------------*/
 static void 
 window_new(CC_REGISTER_ARG struct ctk_window *window,
@@ -511,6 +662,24 @@ window_new(CC_REGISTER_ARG struct ctk_window *window,
   window->active = window->inactive = window->focused = NULL;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Create a new window.
+ *
+ * Creates a new window. The memory for the window structure must
+ * already be allocated by the caller, and is usually done with a
+ * static declaration.
+ *
+ * This function sets up the internal structure of the ctk_window
+ * struct and creates the move and close buttons, but it does not open
+ * the window. The window must be explicitly opened by calling the
+ * ctk_window_open() function.
+ *
+ * \param window The window to be created.
+ * \param w The width of the new window.
+ * \param h The height of the new window.
+ * \param title The title of the new window.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_window_new(struct ctk_window *window,
 	       unsigned char w, unsigned char h,
@@ -521,12 +690,35 @@ ctk_window_new(struct ctk_window *window,
   make_windowbuttons(window);  
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Creates a new dialog.
+ *
+ * This function only sets up the internal structure of the ctk_window
+ * struct but does not open the dialog. The dialog must be explicitly
+ * opened by calling the ctk_dialog_open() function.
+ *
+ * \param dialog The dialog to be created.
+ * \param w The width of the dialog.
+ * \param h The height of the dialog.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
-ctk_dialog_new(CC_REGISTER_ARG struct ctk_window *window,
+ctk_dialog_new(CC_REGISTER_ARG struct ctk_window *dialog,
 	       unsigned char w, unsigned char h)
 {
-  window_new(window, w, h, NULL);
+  window_new(dialog, w, h, NULL);
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Creates a new menu.
+ *
+ * This function sets up the internal structure of the menu, but does
+ * not add it to the menubar. Use the function ctk_menu_add() for that
+ * purpose.
+ *
+ * \param menu The menu to be created.
+ * \param title The title of the menu.
+ */
 /*-----------------------------------------------------------------------------------*/
 void 
 ctk_menu_new(CC_REGISTER_ARG struct ctk_menu *menu,
@@ -540,6 +732,19 @@ ctk_menu_new(CC_REGISTER_ARG struct ctk_menu *menu,
   menu->nitems = 0;
 #endif /* CTK_CONF_MENUS */
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Adds a menu item to a menu.
+ *
+ * In CTK, each menu item is identified by a number which is unique
+ * within each menu. When a menu item is selected, a
+ * ctk_menuitem_activated signal is emitted and the menu item number
+ * is passed as signal data with the signal.
+ *
+ * \param menu The menu to which the menu item should be added.
+ * \param name The name of the menu item.
+ * \return The number of the menu item.
+ */
 /*-----------------------------------------------------------------------------------*/
 unsigned char
 ctk_menuitem_add(CC_REGISTER_ARG struct ctk_menu *menu,
@@ -556,6 +761,13 @@ ctk_menuitem_add(CC_REGISTER_ARG struct ctk_menu *menu,
   return 0;
 #endif /* CTK_CONF_MENUS */
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Adds a widget to the list of widgets that should be
+ * redrawn.
+ *
+ * \param w The widget that should be redrawn.
+ */
 /*-----------------------------------------------------------------------------------*/
 static void CC_FASTCALL 
 add_redrawwidget(struct ctk_widget *w)
@@ -576,6 +788,17 @@ add_redrawwidget(struct ctk_widget *w)
     redraw_widgets[redraw_widgetptr++] = w;
   }
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Checks if a widget redrawn and adds it to the list of
+ * widgets to be redrawn.
+ *
+ * A widget can be redrawn only if the current CTK mode is
+ * CTK_MODE_NORMAL, if no menu is open, and the widget is in the
+ * foremost window.
+ *
+ * \param widget The widget that should be redrawn.
+ */
 /*-----------------------------------------------------------------------------------*/
 static void
 widget_redraw(struct ctk_widget *widget)
@@ -609,6 +832,20 @@ widget_redraw(struct ctk_widget *widget)
     }
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Redraws a widget.
+ *
+ * This function will set a flag which causes the widget to be redrawn
+ * next time the CTK process is scheduled.
+ *
+ * \param widget The widget that is to be redrawn.
+ *
+ * \note This function should usually not be called directly since it
+ * requires typecasting of the widget parameter. The wrapper macro
+ * CTK_WIDGET_REDRAW() does the required typecast and should be used
+ * instead.
+ */
+/*-----------------------------------------------------------------------------------*/
 void 
 ctk_widget_redraw(struct ctk_widget *widget)
 {
@@ -622,6 +859,17 @@ ctk_widget_redraw(struct ctk_widget *widget)
      redraw request. */
   add_redrawwidget(widget);
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Adds a widget to a window.
+ *
+ * This function adds a widget to a window. The order of which the
+ * widgets are added is important, as it sets the order to which
+ * widgets are cycled with the widget selection keys.
+ *
+ * \param window The window to which the widhet should be added.
+ * \param widget The widget to be added.
+ */
 /*-----------------------------------------------------------------------------------*/
 void CC_FASTCALL
 ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
@@ -642,17 +890,41 @@ ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
   }
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Gets the width of the desktop.
+ *
+ * \param d The desktop.
+ * \return The width of the desktop, in characters.
+ *
+ * \note The d parameter is currently unused and must be set to NULL.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
-ctk_desktop_width(struct ctk_desktop *w)
+ctk_desktop_width(struct ctk_desktop *d)
 {
   return ctk_draw_width();
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Gets the height of the desktop.
+ *
+ * \param d The desktop.
+ * \return The height of the desktop, in characters.
+ *
+ * \note The d parameter is currently unused and must be set to NULL.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
-ctk_desktop_height(struct ctk_desktop *w)
+ctk_desktop_height(struct ctk_desktop *d)
 {
   return ctk_draw_height();
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Selects a widget in the window of the widget.
+ *
+ * \param focus The widget to be focused.
+ */
 /*-----------------------------------------------------------------------------------*/
 static void CC_FASTCALL 
 select_widget(struct ctk_widget *focus)

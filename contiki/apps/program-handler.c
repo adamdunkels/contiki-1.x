@@ -1,3 +1,17 @@
+/**
+ * \file
+ * The program handler, used for loading programs and starting the
+ * screensaver. 
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * The Contiki program handler is responsible for the Contiki menu and
+ * the desktop icons, as well as for loading programs and displaying a
+ * dialog with a message telling which program that is loading.
+ *
+ * The program handler also is responsible for starting the
+ * screensaver when the CTK detects that it should be started.
+ */
+ 
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +25,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.19 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.20 2003/08/31 22:16:49 adamdunkels Exp $
  *
  */
 
@@ -112,6 +123,18 @@ static char *displayname;
 static char screensaver[20];
 
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Add a program to the program handler.
+ *
+ * \param dsc The DSC description structure for the program to be added.
+ *
+ * \param menuname The name that the program should have in the
+ * Contiki menu.
+ *
+ * \param desktop Flag which specifies if the program should show up
+ * as an icon on the desktop or not.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 program_handler_add(struct dsc *dsc, char *menuname,
 		    unsigned char desktop)
@@ -119,9 +142,17 @@ program_handler_add(struct dsc *dsc, char *menuname,
   contikidsc[contikidsclast++] = dsc;
   ctk_menuitem_add(&contikimenu, menuname);
   if(desktop) {
-    CTK_ICON_ADD(dsc->icon, id);
+    CTK_ICON_ADD(dsc->icon);
   }
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Initializes the program handler.
+ *
+ * Is called by the initialization before any programs have been added
+ * with program_handler_add().
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 program_handler_init(void)     
@@ -208,6 +239,15 @@ pnarg_free(struct pnarg *pn)
 }
 #endif /* WITH_LOADER_ARCH */
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Loads a program and displays a dialog telling the user about it.
+ *
+ * \param name The name of the program to be loaded.
+ *
+ * \param arg An argument which is passed to the new process when it
+ * is loaded.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 program_handler_load(char *name, char *arg)
 {
@@ -231,6 +271,14 @@ program_handler_load(char *name, char *arg)
 #else /* WITH_LOADER_ARCH */
 #define RUN(prg, initfunc, arg) initfunc(arg)
 #endif /* WITH_LOADER_ARCH */
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Configures the name of the screensaver to be loaded when
+ * appropriate.
+ *
+ * \param name The name of the screensaver or NULL if no screensaver
+ * should be used.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 program_handler_screensaver(char *name)
