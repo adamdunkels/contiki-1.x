@@ -378,6 +378,7 @@ INPUT                  = ../ek/ek.c \
                          ../ek/dsc.h \
                          ../ek/loader.h \
                          ../ek/pt.h \
+                         ../ek/pt-sem.h \
                          ../apps/program-handler.c \
                          ../ctk/ctk.h \
                          ../ctk/ctk.c \
@@ -393,6 +394,7 @@ INPUT                  = ../ek/ek.c \
                          ../uip/uiplib.c \
                          ../uip/resolv.h \
                          ../uip/resolv.c \
+                         ../uip/socket.h \
                          ../lib/cc.h \
                          ../lib/petsciiconv.h \
                          ../lib/ctk-textedit.h \
