@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.10 2005/02/15 15:09:35 oliverschmidt Exp $
+ * $Id: main.c,v 1.11 2005/02/26 09:46:40 oliverschmidt Exp $
  *
  */
 
@@ -142,13 +142,14 @@ main(int argc)
   program_handler_add(&about_dsc,     "About Contiki", 0);
 
   while(1) {
-    ek_run();
+    if(ek_run() == 0) {
 
-    if(console_resize()) {
-      ctk_restore();
+      if(console_resize()) {
+	ctk_restore();
+      }
+
+      _sleep(0);
     }
-
-    _sleep(0);
   }
 }
 /*-----------------------------------------------------------------------------------*/
