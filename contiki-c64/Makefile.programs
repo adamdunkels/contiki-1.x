@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.16 2003/08/20 22:53:20 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.17 2003/08/21 22:27:29 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -59,7 +59,8 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      tfe.drv tfe.dsc \
      ssconfig.prg \
      config.prg configedit.prg configedit.dsc \
-     shell.prg shell.dsc
+     shell.prg shell.dsc \
+     telnetd.prg telnetd.dsc
 
 SYS=c64
 
@@ -72,7 +73,9 @@ CFLAGS:=$(CFLAGSCOMMON) \
 
 directory.prg: directory.o
 
-shell.prg: shell.o
+shell.prg: shell-gui.o shell.o
+
+telnetd.prg: telnetd.o shell.o
 
 configedit.prg: configedit.o c64-fs-write.o
 
