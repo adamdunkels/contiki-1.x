@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: lancegs-drv.c,v 1.1 2005/03/13 21:33:57 oliverschmidt Exp $
+ * $Id: lancegs-drv.c,v 1.2 2005/03/17 21:51:45 oliverschmidt Exp $
  *
  */
 
@@ -40,8 +40,9 @@
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
+/* 00:80:0F is the OUI of Standard Microsystems, A2:A2:A2 just means Apple2 */
 static const struct uip_eth_addr addr =
-  {{0x00,0x0d,0x60,0x80,0x3d,0xb9}};
+  {{0x00,0x80,0x0f,0xa2,0xa2,0xa2}};
 
 static const struct packet_service_state state =
   {
