@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: weblinks-dsc.c,v 1.2 2004/06/27 12:38:49 oliverschmidt Exp $
+ * $Id: weblinks-dsc.c,v 1.3 2005/03/18 00:50:50 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char weblinksicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon weblinks_icon =
   {CTK_ICON("Web links", weblinksicon_bitmap, weblinksicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
