@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.13 2003/08/09 13:14:33 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.14 2003/08/09 23:27:33 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -50,7 +50,7 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      enabler.prg enabler.dsc \
      springlight.prg springlight.dsc \
      default.prg default.dsc \
-     ssfire.sav \
+     ssfire.prg ssfire.dsc \
      rrnet.drv rrnet.dsc \
      slip.drv slip.dsc \
      tfe.drv tfe.dsc \
