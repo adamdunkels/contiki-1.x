@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.9 2003/10/14 11:12:50 adamdunkels Exp $
+ * $Id: uip.h,v 1.10 2004/02/16 20:52:07 adamdunkels Exp $
  *
  */
 
@@ -571,7 +571,7 @@ struct uip_conn *uip_connect(u16_t *ripaddr, u16_t port);
  *
  * \hideinitializer
  */
-#define uip_timedout()    (uip_flags & UIP_TIMEDOUT)
+#define uip_timedout()    (uip_flags & UIP_TIMEDOUT) 
 
 /**
  * Do we need to retransmit previously data?
@@ -824,6 +824,9 @@ struct uip_udp_conn {
   u16_t ripaddr[2];   /**< The IP address of the remote peer. */
   u16_t lport;        /**< The local port number in network byte order. */
   u16_t rport;        /**< The remote port number in network byte order. */
+  
+  /** The application state. */
+  u8_t appstate[UIP_APPSTATE_SIZE];    
 };
 
 extern struct uip_udp_conn *uip_udp_conn;

@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.12 2003/10/14 11:12:50 adamdunkels Exp $
+ * $Id: uip.c,v 1.13 2004/02/16 20:52:07 adamdunkels Exp $
  *
  */
 
@@ -224,7 +224,6 @@ uip_connect(u16_t *ripaddr, u16_t rport)
       goto again;
     }
   }
-
 
   conn = 0;
   for(c = 0; c < UIP_CONNS; ++c) {
@@ -482,7 +481,6 @@ uip_process(u8_t flag)
   register struct uip_conn *uip_connr = uip_conn;
   
   uip_appdata = &uip_buf[40 + UIP_LLH_LEN];
-
   
   /* Check if we were invoked because of the perodic timer fireing. */
   if(flag == UIP_TIMER) {
@@ -589,6 +587,7 @@ uip_process(u8_t flag)
 #if UIP_UDP 
   if(flag == UIP_UDP_TIMER) {
     if(uip_udp_conn->lport != 0) {
+      uip_conn = NULL;
       uip_appdata = &uip_buf[UIP_LLH_LEN + 28];
       uip_len = uip_slen = 0;
       uip_flags = UIP_POLL;
@@ -770,6 +769,7 @@ uip_process(u8_t flag)
   goto drop;
   
  udp_found:
+  uip_conn = NULL;
   uip_len = uip_len - 28;
   uip_appdata = &uip_buf[UIP_LLH_LEN + 28];
   uip_flags = UIP_NEWDATA;
