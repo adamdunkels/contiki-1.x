@@ -2,6 +2,9 @@
 #include <windows.h>
 #include <stdio.h>
 
+#include "uip.h"
+#include "log.h"
+
 void
 debug_printf(char *format, ...)
 {
@@ -19,4 +22,10 @@ void
 uip_log(char *message)
 {
   debug_printf("%s\n", message);
+}
+
+void
+log_message(char *part1, char *part2)
+{
+  debug_printf("%s%s\n", part1, part2);
 }
