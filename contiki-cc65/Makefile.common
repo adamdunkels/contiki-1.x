@@ -77,8 +77,12 @@ OPT=-Or
 %.sav:  %.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
+%.drv:  %-drv.o contiki-labels.o
+	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+
 %.dsc:  %-dsc.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-dsc.o $^
+
 
 
 
@@ -87,7 +91,7 @@ contiki-labels.o: contiki-labels.s
 contiki-labels.s: contiki
 	./$(CONTIKICC65)/make-labels
 
-UIP=uip.o uip_arch.o uip_main.o resolv.o
+UIP=uip.o uip_arch.o uip_main.o resolv.o uip-signal.o
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o
 EMAIL=email.o smtp.o smtp-strings.o
 WEBSERVER=webserver.o http-strings.o
