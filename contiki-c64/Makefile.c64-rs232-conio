@@ -30,24 +30,28 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-rs232-conio,v 1.1 2003/03/19 16:26:18 adamdunkels Exp $
+# $Id: Makefile.c64-rs232-conio,v 1.2 2003/04/08 19:10:12 adamdunkels Exp $
 #
 
-all: contiki
+all: contiki contiki-labels.o
 
 include Makefile.common
 
 CFLAGS:=$(CFLAGS) \
         -DCTK_CONIO \
-        -DWITH_UIP -DWITH_RS232 \
-        -DWITH_TELNET -DWITH_WWW 
+        -DWITH_UIP -DWITH_RS232 -DWITH_LOADER_ARCH \
+	-DWITH_WWW -DWITH_TELNET
+
+contiki-labels.o: contiki-labels.s
+	ca65 -o contiki-labels.o contiki-labels.s
+contiki-labels.s: contiki
+	./make-labels
+
 
 contiki:  contiki-main.o petsciiconv.o \
-ctk.o ek.o dispatcher.o \
- contiki.o programs.o \
+ ctk.o ek.o dispatcher.o loader-arch.o \
  fire.o \
  $(CTK_CONIO) \
  $(UIP) rs232dev.o \
- $(TELNET) $(WWW) 
-	cl65 -Ln labels -o contiki -t $(SYS) $^
-
+ program-loader.o
+	cl65 -C c64.cfg -Ln contiki-labels -o contiki -t $(SYS) $^

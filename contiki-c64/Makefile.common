@@ -2,17 +2,26 @@ SYS=c64
 
 CC=cc65
 AS=ca65
-CFLAGS=-I ctk -I uip -I conf \
+LD=ld65
+CFLAGS=-I apps -I ctk -I uip -I conf -I loader \
        -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
        -I $(CONTIKI)/lib -I $(CONTIKI)/uip \
-       -t $(SYS) --add-source 
+       -t $(SYS) --add-source
 OPT=-Or
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
+%.o: apps/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
 %.o: ctk/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: loader/%.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
@@ -44,7 +53,14 @@ OPT=-Or
 %.o: ctk/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
+%.o: apps/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
+%.o: loader/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
 include Makefile.depend
+
 
 UIP=uip.o uip_arch.o uip_main.o resolv.o
 
