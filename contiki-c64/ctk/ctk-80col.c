@@ -309,6 +309,26 @@ setup_nmi(void)
 }
 #pragma optimize(pop)
 /*---------------------------------------------------------------------------*/
+void reset(void);
+void
+quit(void)
+{
+  VIC.ctrl1 = 0x1b;  /* $D011 */
+  VIC.addr  = 0x17;  /* $D018 */
+  VIC.ctrl2 = 0xc8;  /* $D016 */
+  CIA2.pra  = 0x03;  /* $DD00 */
+
+  VIC.bordercolor = 0x0e; /* $D020 */
+  VIC.bgcolor0 = 0x06; /* $D021 */
+
+  memset((char *)0xd800, 0x0e, 40*25);
+
+  *(unsigned short *)0xfff8 = reset;
+  *(unsigned short *)0xfffa = reset;
+  *(unsigned short *)0xfffc = reset;
+  *(unsigned short *)0xfffe = reset;
+}
+/*-----------------------------------------------------------------------------------*/
 #pragma optimize(push, off)
 void
 ctk_80col_init(void)
@@ -335,7 +355,7 @@ ctk_80col_init(void)
   asm("lda #$30");
   asm("sta $01");
   asm("ldx #0");
-  asm("lda #$bf");
+  asm("lda #$0");
   asm("fillcolorloop:");
   asm("sta $dc00,x");
   asm("sta $dd00,x");
@@ -355,48 +375,7 @@ ctk_80col_init(void)
 
   /* Fill hires memory with 0. */
 
-  asm("lda $fd");
-  asm("pha");
-  asm("lda $fe");
-  asm("pha");
-  asm("lda #0");
-  asm("sta $fd");
-  asm("lda #$e0");
-  asm("sta $fe");
-  asm("ldy #0");
-  asm("lda #0");
-  asm("clrscrnloop:");
-  asm("lda #$55");
-  asm("sta ($fd),y");
-  asm("iny");
-  asm("lda #$aa");
-  asm("sta ($fd),y");
-  asm("iny");
-  asm("bne clrscrnloop");
-  asm("inc $fe");
-  asm("lda $fe");
-  asm("cmp #$ff");
-  asm("bne clrscrnloop");
-
-  asm("ldy #$00");
-  asm("clrscrnloop2:");
-  asm("lda #$55");
-  asm("sta $ff00,y");
-  asm("iny");
-  asm("lda #$aa");
-  asm("sta $ff00,y");
-  asm("iny");
-  asm("cpy #$40");
-  asm("bne clrscrnloop2");
-
-  
-  asm("pla");
-  asm("sta $fe");
-  asm("pla");
-  asm("sta $fd");
-
-  
-  /*  ctk_draw_clear(0, 24);*/
+  memset(0xe000, 0, 8000);
 
   for(i = 0; i < 256; ++i) {
 #if 0
@@ -1160,7 +1139,16 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     ctk_restore();
     break;
   case EK_EVENT_REQUEST_REPLACE:
+    VIC.ctrl1 = 0x1b;  /* $D011 */
+    VIC.addr  = 0x17;  /* $D018 */
+    VIC.ctrl2 = 0xc8;  /* $D016 */
+    CIA2.pra  = 0x03;  /* $DD00 */
     ek_replace((struct ek_proc *)data, NULL);
+    LOADER_UNLOAD();
+    break;
+  case EK_EVENT_REQUEST_EXIT:
+    quit();
+    ek_exit();
     LOADER_UNLOAD();
     break;    
   }
