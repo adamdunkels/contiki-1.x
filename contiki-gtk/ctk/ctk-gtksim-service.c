@@ -61,6 +61,17 @@ s_ctk_draw_init(void)
 
   ctk_gtksim_init();
   ctk_gtksim_draw_init();
+
+  
+  blue = get_color(0, 0, 0xffff);
+  white = get_color(0xffff, 0xffff, 0xffff);
+  lightgray = get_color(0xefff, 0xefff, 0xefff);
+  midgray = get_color(0xdfff, 0xdfff, 0xdfff);
+  darkgray = get_color(0xcfff, 0xcfff, 0xcfff);
+  ddarkgray = get_color(0xafff, 0xafff, 0xafff);
+  black = get_color(0, 0, 0);
+  
+  
 }
 /*--------------------------------------------------------------------------*/
 static void
@@ -293,13 +304,14 @@ draw_widget(struct ctk_widget *w,
 	    unsigned char clipy2,
 	    unsigned char focus)
 {
-  char text[1000];
+  unsigned char text[1000];
   unsigned char x, y;
   int width, xpos;
-  int i;
-  GdkGC *bgcol, *buttoncol;
+  int i, j;
+  GdkGC *bgcol, *buttoncol, *color, *inv_color;
   struct ctk_gtksim_draw_font *buttonfont, *textfont, *textfont_bold;
   int monospace;
+  unsigned char *bitmap;
   
   x = winx + w->x;
   y = winy + w->y;
@@ -344,12 +356,33 @@ draw_widget(struct ctk_widget *w,
 		       w->h * RASTER_Y);
     for(i = 0; i < w->h; ++i) {
       strncpy(text, &w->widget.label.text[i * w->w], w->w);
+      for(j = 0; j < w->w; ++j) {
+	if(text[j] >= 0x80) {
+	  text[j] = text[j] & 0x7f;
+	}
+	if(text[j] == 0) {
+	  text[j] = ' ';
+	}
+      }
       text[w->w] = 0;
       ctk_gtksim_draw_string(textfont,
 			     &ctk_gtksim_draw_color_black,
 			     RASTER_X * x,
 			     RASTER_Y * (y + i) + MENUBAR_HEIGHT,
 			     text, monospace);
+
+      strncpy(text, &w->widget.label.text[i * w->w], w->w);
+      for(j = 0; j < w->w; ++j) {
+	if(text[j] >= 0x80) {
+	  gdk_draw_rectangle(ctk_gtksim_pixmap,
+			     black,
+			     FALSE,
+			     (x + j) * RASTER_X - 2,
+			     y * RASTER_Y + MENUBAR_HEIGHT,
+			     RASTER_X + 2,
+			     BUTTON_HEIGHT + 1);
+	}
+      }
     }
 
     break;
@@ -411,13 +444,15 @@ draw_widget(struct ctk_widget *w,
 		  x * RASTER_X + w->w * RASTER_X + BUTTON_X_BORDER - 1,
 		  y * RASTER_Y + MENUBAR_HEIGHT);
 
-    ctk_gtksim_draw_string(buttonfont,
-			   &ctk_gtksim_draw_color_black,
-			   RASTER_X * x +
-			   (w->w * RASTER_X) / 2 - width / 2,
-			   RASTER_Y * y + MENUBAR_HEIGHT,
-			   w->widget.button.text,
-			   monospace);
+    if(w != &w->window->closebutton) {
+      ctk_gtksim_draw_string(buttonfont,
+			     &ctk_gtksim_draw_color_black,
+			     RASTER_X * x +
+			     (w->w * RASTER_X) / 2 - width / 2,
+			     RASTER_Y * y + MENUBAR_HEIGHT,
+			     w->widget.button.text,
+			     monospace);
+    }
     break;
   case CTK_WIDGET_HYPERLINK:
     strncpy(text, w->widget.hyperlink.text, w->w);
@@ -494,7 +529,43 @@ draw_widget(struct ctk_widget *w,
     } else {
       xpos = x * RASTER_X;
     }
+
     if((focus & CTK_FOCUS_WIDGET) == 0) {
+      color = black;
+      inv_color = bgcol;
+    } else {
+      color = bgcol;
+      inv_color = black;
+    }
+
+    bitmap = w->widget.icon.bitmap;
+    if (bitmap != NULL) {
+      int k, c;
+
+      for (c = 0; c < 9; ++c) {
+	for (i = 0; i < 8; ++i) {
+	  unsigned char b = bitmap[i + c * 8];
+	  for (k = 0; k < 8; k++) {
+	    gdk_draw_rectangle(ctk_gtksim_pixmap,
+			       (b >> k) & 1 > 0 ? color : inv_color,
+			       TRUE,
+			       x * RASTER_X + 8 * (c % 3) + (8 - k),
+			       y * RASTER_Y + MENUBAR_HEIGHT +
+			       8 * (c / 3) + i,
+			       1, 1);
+	  }
+	}
+      }
+    } else {
+      gdk_draw_rectangle(ctk_gtksim_pixmap,
+			 color,
+			 TRUE,
+			 x * RASTER_X,
+			 y * RASTER_Y + MENUBAR_HEIGHT,
+			 24, 24);
+    }
+
+    /*    if((focus & CTK_FOCUS_WIDGET) == 0) {
       gdk_draw_rectangle(ctk_gtksim_pixmap,
 			 bgcol,
 			 TRUE,
@@ -508,7 +579,7 @@ draw_widget(struct ctk_widget *w,
 			 x * RASTER_X,
 			 y * RASTER_Y + MENUBAR_HEIGHT,
 			 24, 24);
-    }
+			 }*/
     
     /*      gdk_draw_rectangle(ctk_gtksim_pixmap,
 	    white,
@@ -762,13 +833,6 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
-    blue = get_color(0, 0, 0xffff);
-    white = get_color(0xffff, 0xffff, 0xffff);
-    lightgray = get_color(0xefff, 0xefff, 0xefff);
-    midgray = get_color(0xdfff, 0xdfff, 0xdfff);
-    darkgray = get_color(0xcfff, 0xcfff, 0xcfff);
-    ddarkgray = get_color(0xafff, 0xafff, 0xafff);
-    black = get_color(0, 0, 0);
     break;
   case EK_EVENT_REQUEST_REPLACE:
     ek_replace((struct ek_proc *)data, NULL);
