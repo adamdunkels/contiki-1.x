@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.2 2003/08/04 00:13:47 adamdunkels Exp $
+ * $Id: wget.c,v 1.3 2003/08/06 23:15:31 adamdunkels Exp $
  *
  */
 
@@ -516,9 +516,7 @@ static void
 write_buffer(void)
 {
   /*  write_sector(8, ds.track, ds.sect, buffer);*/
-  asm("dec $d020");
   c64_dio_write_block(ds.track, ds.sect, buffer);
-  asm("inc $d020");
   if(next_sector() != 0) {
     dload_state = DLOAD_NONE;
   }
