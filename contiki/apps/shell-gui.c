@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.2 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: shell-gui.c,v 1.3 2003/08/24 22:57:48 adamdunkels Exp $
  *
  */
 
@@ -126,6 +126,7 @@ DISPATCHER_SIGHANDLER(sighandler, s, data)
      data == (ek_data_t)&commandentry) {
     shell_input(command);
     CTK_TEXTENTRY_CLEAR(&commandentry);
+    CTK_WIDGET_FOCUS(&window, &commandentry);
     CTK_WIDGET_REDRAW(&commandentry);
   } else if(s == ctk_signal_window_close ||
 	    s == dispatcher_signal_quit) {
