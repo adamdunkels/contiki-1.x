@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: dispatcher.h,v 1.15 2004/03/18 21:09:37 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.16 2004/03/25 09:53:13 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -113,7 +113,7 @@ struct dispatcher_proc {
   void (* uiphandler)(void);
 #endif /* CC_FUNCTION_POINTER_ARGS */
 
-  unsigned char signals[EK_CONF_NUMSIGNALS];
+  /*  unsigned char signals[EK_CONF_NUMSIGNALS];*/
 };
 
 /**
@@ -138,13 +138,15 @@ struct dispatcher_proc {
 ek_signal_t dispatcher_sigalloc(void);
 
 ek_id_t dispatcher_start(struct dispatcher_proc *p);
+ek_id_t dispatcher_start_id(struct dispatcher_proc *p, ek_id_t id);
 void dispatcher_exit(struct dispatcher_proc *p);
 
-void dispatcher_listen(ek_signal_t s);
+/*void dispatcher_listen(ek_signal_t s);*/
+#define dispatcher_listen(s)
 
 ek_err_t dispatcher_emit(ek_signal_t s, ek_data_t data, ek_id_t id);
 
-void dispatcher_fastemit(ek_signal_t s, ek_data_t data, ek_id_t id);
+void dispatcher_post_synch(ek_signal_t s, ek_data_t data, ek_id_t id);
 
 struct dispatcher_proc *dispatcher_process(ek_id_t id);
 

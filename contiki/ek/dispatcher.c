@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.23 2004/03/18 21:09:37 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.24 2004/03/25 09:53:13 adamdunkels Exp $
  *
  */
 
@@ -316,7 +316,8 @@ dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
 {
   ek_id_t id;
   struct dispatcher_proc *q;
-  
+
+#if 1
  again:
 
   do {
@@ -334,7 +335,7 @@ dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
       goto again;
     }
   }
-
+#endif /* 0 */
   /* Put first on the procs list.*/
   p->next = dispatcher_procs;
   dispatcher_procs = p;
@@ -721,13 +722,13 @@ dispatcher_udp_new(u16_t *ripaddr,
  *
  */
 /*-----------------------------------------------------------------------------------*/
-void
+/*void
 dispatcher_listen(ek_signal_t s)
 {
   if(dispatcher_curproc != NULL) {
     dispatcher_curproc->signals[s] = 1;
   }
-}
+  }*/
 /*-----------------------------------------------------------------------------------*/
 /**
  * Finds the process structure for a specific process ID.
@@ -791,7 +792,7 @@ deliver(ek_signal_t s, ek_data_t data,
   for(p = dispatcher_procs; p != NULL; p = p->next) {      
     if((id == DISPATCHER_BROADCAST ||
 	p->id == id) &&
-       p->signals[s] != 0 &&
+       /*       p->signals[s] != 0 &&*/
        p->signalhandler != NULL) {
       dispatcher_current = p->id;
       dispatcher_curproc = p;
@@ -829,8 +830,8 @@ deliver(ek_signal_t s, ek_data_t data,
  */
 /*-----------------------------------------------------------------------------------*/
 void
-dispatcher_fastemit(ek_signal_t s, ek_data_t data,
-		    ek_id_t id)
+dispatcher_post_synch(ek_signal_t s, ek_data_t data,
+		      ek_id_t id)
 {
   ek_id_t pid;
   struct dispatcher_proc *p;
