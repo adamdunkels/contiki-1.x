@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs-write.c,v 1.1 2003/08/06 22:58:21 adamdunkels Exp $
+ * $Id: c64-fs-write.c,v 1.2 2003/08/06 23:39:33 adamdunkels Exp $
  *
  */
 
@@ -77,6 +77,10 @@ c64_fs_write(register struct c64_fs_file *f, char *buf, int len)
   memcpy(&_c64_fs_filebuf[f->ptr], buf, i);
 
   f->ptr += i;
+  if(_c64_fs_filebuf[0] == 0 &&
+     f->ptr > _c64_fs_filebuf[1]) {
+    _c64_fs_filebuf[1] = f->ptr;    
+  }
 
   c64_dio_write_block(_c64_fs_filebuftrack,
 		      _c64_fs_filebufsect,
