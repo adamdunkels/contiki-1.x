@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-80col.c,v 1.12 2005/03/15 15:56:07 oliverschmidt Exp $
+ * $Id: ctk-80col.c,v 1.13 2005/03/18 01:09:15 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -920,7 +920,7 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
   /*  
   if(y >= clipy1) {
     cputcxy(x, y, CH_ULCORNER);
-    gotoxy(wherex() + window->titlelen + 2, wherey());
+    gotoxy(wherex() + window->titlelen + CTK_CONF_WINDOWMOVE * 2, wherey());
     chline(window->w - (wherex() - x) - 2);
     cputcxy(x2, y, CH_URCORNER);
   }
