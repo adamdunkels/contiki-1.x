@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.13 2004/09/12 07:20:04 adamdunkels Exp $
+ * $Id: webserver.c,v 1.14 2005/03/01 06:03:25 adamdunkels Exp $
  *
  */
 
@@ -37,13 +37,13 @@
 #include "ctk.h"
 #include "ek.h"
 #include "http-strings.h"
-#include "petsciiconv.h"
 
 #include "loader.h"
 
 #include "webserver.h"
 #include "httpd.h"
 
+#include <string.h>
 #include <stdio.h>
 
 /* The main window. */
@@ -66,7 +66,7 @@ static ek_id_t id = EK_ID_NONE;
 
 
 #define LOG_WIDTH  38
-#define LOG_HEIGHT 23
+#define LOG_HEIGHT 16
 static char log[LOG_WIDTH*LOG_HEIGHT];
 
 static struct ctk_label loglabel =
@@ -106,7 +106,7 @@ EK_EVENTHANDLER(webserver_eventhandler, ev, data)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-webserver_log_file(u16_t *requester, char *file)
+httpd_log_file(u16_t *requester, char *file)
 {
   int size;
   
@@ -129,7 +129,7 @@ webserver_log_file(u16_t *requester, char *file)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-webserver_log(char *msg)
+httpd_log(char *msg)
 {
   /* Scroll previous entries upwards */
   memcpy(log, &log[LOG_WIDTH], LOG_WIDTH * (LOG_HEIGHT - 1));
