@@ -52,11 +52,7 @@ void RTL8019dev_send(void)
 
 
 
-#if UIP_BUFSIZE > 255
 unsigned int RTL8019dev_poll(void)
-#else 
-unsigned char RTL8019dev_poll(void)
-#endif /* UIP_BUFSIZE > 255 */
 {
 	unsigned int packetLength;
 	
@@ -77,10 +73,5 @@ unsigned char RTL8019dev_poll(void)
 	RTL8019retreivePacketData( uip_buf, packetLength );
 	RTL8019endPacketRetreive();
 		
-#if UIP_BUFSIZE > 255
 	return packetLength;
-#else 
-	return (unsigned char)packetLength;
-#endif /* UIP_BUFSIZE > 255 */
-		
 }

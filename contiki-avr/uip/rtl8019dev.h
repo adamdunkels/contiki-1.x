@@ -54,10 +54,7 @@ void RTL8019dev_send(void);
 *                 will fit in uip_buf, it is retreived, and the length is
 *                 returned.  A packet bigger than the buffer is discarded
 *****************************************************************************/
-#if UIP_BUFSIZE > 255
 unsigned int RTL8019dev_poll(void);
-#else 
-unsigned char RTL8019dev_poll(void);
-#endif /* UIP_BUFSIZE > 255 */
+
 
 #endif /* __RTL8019DEV_H__ */
