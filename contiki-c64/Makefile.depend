@@ -7,6 +7,10 @@ contiki-main.o: contiki-main.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
 memstat.o: apps/memstat.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/ek/dispatcher.h \
  ../contiki/uip/uip.h ../contiki/uip/uipopt.h ../contiki/ek/loader.h
+vnc-draw.o: apps/vnc-draw.c ../contiki/apps/vnc-draw.h uip/uip_arch.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ ../contiki/ek/dispatcher.h ../contiki/ek/ek.h conf/ek-conf.h \
+ apps/vnc-draw-asm.h conf/vnc-conf.h
 ctk-blueround.o: ctk/ctk-blueround.c ../contiki/ctk/ctk.h \
  conf/ctk-conf.h ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/ctk/ctk-draw.h ctk/ctk-arch.h ctk/fire.h \
@@ -85,6 +89,17 @@ smtp.o: ../contiki/apps/smtp.c ../contiki/uip/uip.h \
 telnet.o: ../contiki/apps/telnet.c ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h ../contiki/ek/dispatcher.h ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/apps/telnet.h
+vnc-viewer.o: ../contiki/apps/vnc-viewer.c ../contiki/apps/vnc-draw.h \
+ uip/uip_arch.h ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ ../contiki/ek/dispatcher.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/apps/vnc-viewer.h
+vnc.o: ../contiki/apps/vnc.c ../contiki/lib/petsciiconv.h \
+ ../contiki/uip/uip_main.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h ../contiki/ek/dispatcher.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ../contiki/uip/resolv.h ../contiki/apps/telnet.h \
+ ../contiki/apps/vnc.h ../contiki/apps/vnc-draw.h uip/uip_arch.h \
+ ../contiki/apps/vnc-viewer.h conf/vnc-conf.h ../contiki/ek/loader.h
 webclient.o: ../contiki/apps/webclient.c ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h ../contiki/ek/dispatcher.h ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/apps/webclient.h \
