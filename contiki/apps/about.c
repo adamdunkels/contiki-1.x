@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.12 2004/07/11 12:20:23 oliverschmidt Exp $
+ * $Id: about.c,v 1.13 2004/08/09 20:04:08 adamdunkels Exp $
  *
  */
 
@@ -53,10 +53,10 @@ static struct ctk_label aboutlabel3 =
 static struct ctk_label aboutlabel4 =
   {CTK_LABEL(6, 4, 20, 1, "desktop environment.")};
 
-static char abouturl_petscii[] = "http://dunkels.com/adam/contiki/";
+static char abouturl_petscii[] = "http://www.sics.se/~adam/contiki/";
 static char abouturl_ascii[40];
 static struct ctk_hyperlink abouturl = 
-  {CTK_HYPERLINK(0, 6, 32, "http://dunkels.com/adam/contiki/",
+  {CTK_HYPERLINK(0, 6, 32, "http://www.sics.se/~adam/contiki/",
 		 abouturl_ascii)};
 static struct ctk_button aboutclose =
   {CTK_BUTTON(12, 8, 5, "Close")};
