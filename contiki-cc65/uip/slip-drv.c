@@ -31,16 +31,12 @@
  *
  * This file is part of the Contiki desktop OS fpr the C64
  *
- * $Id: slip-drv.c,v 1.3 2003/08/06 23:16:17 adamdunkels Exp $
+ * $Id: slip-drv.c,v 1.4 2003/08/20 20:49:35 adamdunkels Exp $
  *
  */
 
 
 /* uip_main.c: initialization code and main event loop. */
-
-#define NULL (void *)0
-
-
 
 #include "uip.h"
 #include "uip_arp.h"
@@ -115,7 +111,9 @@ LOADER_INIT_FUNC(slip_drv_init)
     arptimer = 0;
     start = ek_clock();
 
-    dispatcher_listen(uip_signal_uninstall);
+    dispatcher_listen(uip_signal_poll);
+    dispatcher_listen(uip_signal_poll_udp);
+    dispatcher_listen(uip_signal_uninstall);    
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -124,7 +122,17 @@ DISPATCHER_SIGHANDLER(slip_drv_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == dispatcher_signal_quit ||
+  if(s == uip_signal_poll) {
+    uip_periodic_conn(data);
+    if(uip_len > 0) {
+      rs232dev_send();
+    }
+  } else if(s == uip_signal_poll_udp) {
+    uip_udp_periodic_conn(data);
+    if(uip_len > 0) {
+      rs232dev_send();
+    }    
+  } else if(s == dispatcher_signal_quit ||
      s == uip_signal_uninstall) {
     dispatcher_exit(&p);
     id = EK_ID_NONE;
