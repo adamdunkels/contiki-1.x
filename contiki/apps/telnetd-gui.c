@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd-gui.c,v 1.3 2004/07/04 11:35:08 adamdunkels Exp $
+ * $Id: telnetd-gui.c,v 1.4 2004/08/09 21:46:28 adamdunkels Exp $
  *
  */
 
@@ -42,8 +42,6 @@
 #include "memb.h"
 
 #include "shell.h"
-
-#include "uip-signal.h"
 
 #include "telnetd.h"
 
