@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.10 2004/07/04 11:35:07 adamdunkels Exp $
+ * $Id: processes.c,v 1.11 2004/08/20 21:31:53 adamdunkels Exp $
  *
  */
 
@@ -78,7 +78,7 @@ update_processwindow(void)
   /* Step through each possible process ID and see if there is a
      matching process. */
   j = 0;
-  for(p = EK_PROCS(); p != NULL; p = p->next) {
+  for(p = EK_PROCS(); p != NULL && j < MAX_PROCESSLABELS; p = p->next) {
     idsptr = ids[j];
     i = p->id;
     idsptr[0] = '0' + i / 100;
