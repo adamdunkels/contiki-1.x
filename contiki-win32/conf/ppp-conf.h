@@ -44,7 +44,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp-conf.h,v 1.2 2004/08/22 12:38:04 oliverschmidt Exp $
+ * $Id: ppp-conf.h,v 1.3 2004/08/22 21:10:45 oliverschmidt Exp $
  *
  */
 
@@ -53,6 +53,9 @@
 
 #define PPP_RX_BUFFER_SIZE		1024 
 /*#define PPP_TX_BUFFER_SIZE		64*/
+
+#define PAP_USERNAME_SIZE		32
+#define PAP_PASSWORD_SIZE		32
 
 #define	LCP_RETRY_COUNT			5
 #define LCP_TIMEOUT			5
