@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.5 2003/09/04 23:04:22 adamdunkels Exp $
+ * $Id: shell.c,v 1.6 2004/02/16 20:56:58 adamdunkels Exp $
  *
  */
 
@@ -78,7 +78,6 @@ parse(register char *str, struct ptentry *t)
 	++str;
       }
 
-      shell_output("> ", sstr);
       /* Call parse table entry function and return. */
       p->pfunc(str);
       return;
@@ -147,11 +146,14 @@ static void
 runfile(char *str)
 {
   nullterminate(str);
-  
-  /* Call loader function. */
-  program_handler_load(str, NULL);
 
-  shell_output("Starting program ", str);  
+  if(strlen(str) > 0) {
+    /* Call loader function. */
+    program_handler_load(str, NULL);
+    shell_output("Starting program ", str);  
+  } else {
+    shell_output("Must supply a program name", "");  
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -184,7 +186,7 @@ killproc(char *str)
     shell_output("Killing process ", procstr);
     dispatcher_emit(dispatcher_signal_quit, NULL, procnum);
   } else {
-    shell_output("Could not parse process number", "");
+    shell_output("Invalid process number", "");
   }
   
 }
@@ -234,14 +236,26 @@ static struct ptentry configparsetab[] =
    {0, none}};
 /*-----------------------------------------------------------------------------------*/
 void
+shell_init(void)
+{
+  showingdir = 0;
+  shell_output("Contiki command shell", "");
+  shell_output("Type '?' and return for help", "");  
+  shell_prompt("contiki-c64> "); 
+}
+/*-----------------------------------------------------------------------------------*/
+void
 shell_input(char *cmd)
 {
   if(showingdir != 0) {
     showingdir = 0;
     shell_output("Directory stopped", "");
     c64_fs_closedir(&dir);
-    }
+  }
   parse(cmd, configparsetab);
+  if(showingdir == 0) {
+    shell_prompt("contiki-c64> ");
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -259,6 +273,7 @@ shell_idle(void)
       showingdir = 0;
       inttostr(size, totsize);
       shell_output("Total number of blocks: ", size);
+      shell_prompt("contiki-c64> ");
     }
   }
 }
