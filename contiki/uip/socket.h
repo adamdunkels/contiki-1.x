@@ -30,11 +30,11 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: socket.h,v 1.7 2004/09/12 20:24:56 adamdunkels Exp $
+ * $Id: socket.h,v 1.8 2005/02/07 07:04:44 adamdunkels Exp $
  */
 
 /**
- * \defgroup socket Socket library
+ * \defgroup socket Socket-like library
  * @{
  *
  * The socket library provides an interface to the uIP stack that is
@@ -46,12 +46,17 @@
  *
  * Sockets only work with TCP connections. 
  *
- * The socket library uses protothreads to provide sequential control
+ * The socket library uses \ref pt protothreads to provide sequential control
  * flow. This makes the sockets lightweight in terms of memory, but
  * also means that sockets inherits the functional limitations of
  * protothreads. Each socket lives only within a single function
  * block. Automatic variables (stack variables) are not necessarily
  * retained across a socket library function call.
+ *
+ * \note Because the socket library uses protothreads, local variables
+ * will not always be saved across a call to a socket library
+ * function. It is therefore advised that local variables are used
+ * with extreme care.
  *
  * The socket library provides functions for sending data without
  * having to deal with retransmissions and acknowledgements, as well
@@ -380,13 +385,11 @@ char socket_newdata(struct socket *s);
 #define SOCKET_NEWDATA(socket) socket_newdata(socket)
 
 /**
- * Wait until data arrives or until a condition is true.
+ * Wait until a condition is true.
  *
- * This macro blocks the protothread until new data arrives on the
- * socket or until the specified condition is true. After the
- * protothread unblocks, the macro SOCKET_NEWDATA() must be used to
- * check whether the protothread unblocked because of new data arrived
- * or (only) if the condition was true.
+ * This macro blocks the protothread until the specified condition is
+ * true. The macro SOCKET_NEWDATA() can be used to check if new data
+ * arrives when the socket is waiting.
  *
  * Typically, this macro is used as follows:
  *
@@ -395,7 +398,7 @@ char socket_newdata(struct socket *s);
  {
    SOCKET_BEGIN(s);
 
-   SOCKET_WAIT_UNTIL(s, timer_expired(t) || something_else());
+   SOCKET_WAIT_UNTIL(s, SOCKET_NEWADATA(s) || timer_expired(t));
    
    if(SOCKET_NEWDATA(s)) {
      SOCKET_READTO(s, '\n');
@@ -413,6 +416,9 @@ char socket_newdata(struct socket *s);
  * \hideinitializer
  */
 #define SOCKET_WAIT_UNTIL(socket, condition)    \
-  PT_WAIT_UNTIL(&((socket)->pt), socket_newdata(socket) || (condition));
+  PT_WAIT_UNTIL(&((socket)->pt), (condition));
+
+#define SOCKET_WAIT_THREAD(socket, condition)   \
+  PT_WAIT_THREAD(&((socket)->pt), (condition))
 
 #endif /* __SOCKET_H__ */
