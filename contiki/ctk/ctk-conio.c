@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.3 2003/04/16 18:29:10 adamdunkels Exp $
+ * $Id: ctk-conio.c,v 1.4 2003/04/24 17:20:18 adamdunkels Exp $
  *
  */
 
@@ -195,7 +195,7 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_ICON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      if(focus) {
+      if(focus & 1) {
 	revers(1);
       } else {
 	revers(0);
