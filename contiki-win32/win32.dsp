@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "conf" /I "ctk" /I "lib" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -354,6 +354,54 @@ SOURCE=..\contiki\lib\timer.c
 SOURCE=..\contiki\lib\timer.h
 # End Source File
 # End Group
+# Begin Group "contiki-ppp"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\contiki\ppp\ahdlc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\ahdlc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\ipcp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\ipcp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\lcp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\lcp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\pap.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\pap.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\ppp\ppp-service.c"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\ppp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ppp\ppp.h
+# End Source File
+# End Group
 # Begin Group "contiki-uip"
 
 # PROP Default_Filter ""
@@ -463,6 +511,10 @@ SOURCE=".\conf\log-conf.h"
 # End Source File
 # Begin Source File
 
+SOURCE=".\conf\ppp-conf.h"
+# End Source File
+# Begin Source File
+
 SOURCE=".\conf\uip-conf.h"
 # End Source File
 # Begin Source File
@@ -496,6 +548,14 @@ SOURCE=".\ctk\ctk-console.h"
 # Begin Source File
 
 SOURCE=.\lib\debug.c
+# End Source File
+# End Group
+# Begin Group "contiki-win32-ppp"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\ppp\ppp_arch.h
 # End Source File
 # End Group
 # Begin Group "contiki-win32-uip"
