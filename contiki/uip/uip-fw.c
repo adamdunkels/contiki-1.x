@@ -173,7 +173,12 @@ static void
 time_exceeded(void)
 {
   u16_t tmp16;
-  
+
+  /* We don't send out ICMP errors for ICMP messages. */
+  if(ICMPBUF->proto == UIP_PROTO_ICMP) {
+    uip_len = 0;
+    return;
+  }
   /* Copy fields from packet header into payload of this ICMP packet. */
   memcpy(&(ICMPBUF->payload[0]), ICMPBUF, 28);
 
@@ -270,21 +275,38 @@ find_netif(void)
  *
  * The IP packet should be present in the uip_buf buffer and its
  * length in the global uip_len variable.
+ *
+ * \retval UIP_FW_ZEROLEN Indicates that a zero-length packet
+ * transmission was attempted and that no packet was sent.
+ *
+ * \retval UIP_FW_NOROUTE No suitable network interface could be found
+ * for the outbound packet, and the packet was not sent.
+ *
+ * \return The return value from the actual network interface output
+ * function is passed unmodified as a return value.
  */
 /*------------------------------------------------------------------------------*/
-void
+u8_t
 uip_fw_output(void)
 {
   struct uip_fw_netif *netif;
+
+  if(uip_len == 0) {
+    return UIP_FW_ZEROLEN;
+  }
   
   netif = find_netif();
-  
+  /*  printf("uip_fw_output: netif %p ->output %p len %d\n", netif,
+	 netif->output,
+	 uip_len);*/
+
+  if(netif == NULL) {
+    return UIP_FW_NOROUTE;
+  }
   /* If we now have found a suitable network interface, we call its
      output function to send out the packet. */
-  if(netif != NULL && uip_len > 0) {
-    fwcache_register();
-    netif->output();
-  }
+  fwcache_register();
+  return netif->output();
 }
 /*------------------------------------------------------------------------------*/
 /**
@@ -292,11 +314,11 @@ uip_fw_output(void)
  *
  * 
  *
- * \return Non-zero if the packet was forwarded, zero if the packet
- * should be processed locally.
+ * \return UIP_FW_FORWARDED if the packet was forwarded, UIP_FW_OK if
+ * the packet should be processed locally.
  */
 /*------------------------------------------------------------------------------*/
-unsigned char
+u8_t
 uip_fw_forward(void)
 {
   struct uip_fw_netif *netif;
@@ -337,7 +359,6 @@ uip_fw_forward(void)
       return 1;
     }       
   }
-
   
   netif = find_netif();
 
