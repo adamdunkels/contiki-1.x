@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tapdev-drv.c,v 1.1 2003/05/28 05:22:39 adamdunkels Exp $
+ * $Id: tapdev-drv.c,v 1.2 2003/08/20 22:38:13 adamdunkels Exp $
  *
  */
 
@@ -66,7 +66,7 @@ LOADER_INIT_FUNC(tapdev_drv_init)
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);    
     tapdev_init();
-    dispatcher_listen(uip_signal_uninstall);
+    dispatcher_listen(dispatcher_signal_quit);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -75,8 +75,7 @@ DISPATCHER_SIGHANDLER(tapdev_drv_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == uip_signal_uninstall ||
-     s == dispatcher_signal_quit) {
+  if(s == dispatcher_signal_quit) {
     dispatcher_exit(&p);
     id = EK_ID_NONE;
     LOADER_UNLOAD();   
