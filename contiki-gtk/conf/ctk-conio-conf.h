@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-conf.h,v 1.2 2004/07/04 21:15:53 adamdunkels Exp $
+ * $Id: ctk-conio-conf.h,v 1.3 2004/08/12 22:00:16 oliverschmidt Exp $
  *
  */
 
@@ -41,6 +41,7 @@
 
 #define BORDERCOLOR         COLOR_BLACK
 #define SCREENCOLOR         COLOR_BLACK
+#define BACKGROUNDCOLOR     COLOR_BLACK
 
 #define WINDOWCOLOR_FOCUS   COLOR_WHITE
 #define WINDOWCOLOR         COLOR_WHITE
