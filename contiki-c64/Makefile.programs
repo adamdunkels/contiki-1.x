@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.27 2004/09/14 07:34:10 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.28 2004/09/17 20:58:37 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -43,7 +43,7 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      directory.prg directory.dsc \
      ssfire.sav ssfire.dsc \
      plasma.sav plasma.dsc \
-     rrnet.drv rrnet.dsc \
+     rrnet.drv rrnet.dsc rrnet-dump.drv \
      tfe.drv tfe.dsc \
      lan91c96.drv lan91c96.dsc \
      config.prg configedit.prg configedit.dsc config.cfg \
@@ -53,10 +53,11 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      editor.prg editor.dsc \
      cfs-cbm.drv \
      email.prg \
-     vnc.prg  \
      ctk-text.drv ctk-default.drv ctk-80col.drv \
      irc.prg irc.dsc \
-     slip.drv slip.dsc \
+     slip.drv slip.dsc slip-dump.drv \
+     cgterm.prg dhcp.prg
+#     vnc.prg  \
 #     mtest.prg warmboot.prg lc-test
 #     blueround.prg blueround.dsc \
 #     enabler.prg enabler.dsc \
@@ -95,6 +96,10 @@ www.prg: $(WWW)
 
 irc.prg: irc.o ircc.o socket.o uipbuf.o lc-asm.o ircc-strings.o
 
+cgterm.prg: cgterm.o socket.o uipbuf.o lc-asm.o
+
+dhcp.prg: dhcp.o dhcpc.o lc-asm.o
+
 webserver.prg: $(WEBSERVER) #c64-fs-raw.o
 
 simpletelnet.prg: $(TELNET)
@@ -103,9 +108,13 @@ tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o uip_arp.o
 
 rrnet.drv: rrnet-drv.o cs8900a.o rrnet-drv-asm.o uip_arp.o
 
+rrnet-dump.drv: rrnet-dump-drv.o cs8900a.o rrnet-drv-asm.o uip_arp.o tcpdump.o
+
 lan91c96.drv: lan91c96-drv.o lan91c96.o uip_arp.o
 
 slip.drv: slip-drv.o rs232dev.o
+
+slip-dump.drv: tcpdump.o slip-dump-drv.o rs232dev.o
 
 slip-ss.drv: slip-drv.o rs232dev-ss.o rs232silversurfer.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
