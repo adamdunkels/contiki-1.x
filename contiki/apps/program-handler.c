@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.11 2003/07/31 23:47:30 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.12 2003/08/05 13:48:43 adamdunkels Exp $
  *
  */
 
@@ -97,7 +97,7 @@ static char *errormsgs[] = {
   "OS error",
   "Data format error",
   "Out of memory",
-  "Could not open file"
+  "File not found"
 };
 
 static ek_signal_t loader_signal_load;
