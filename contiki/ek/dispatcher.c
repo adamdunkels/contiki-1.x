@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.13 2003/08/20 20:55:57 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.14 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -285,6 +285,8 @@ dispatcher_init(void)
   dispatcher_signal_quit = dispatcher_sigalloc();
 
   nsignals = fsignal = 0;
+
+  arg_init();
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -295,7 +297,6 @@ dispatcher_signal(void)
   static ek_signal_t s;
   static ek_data_t data;
   static ek_id_t id;
-  static ek_num_listeners_t i;
   
   /* If there are any signals in the queue, take the first one and
      walk through the list of processes to see if the signal should be

@@ -32,13 +32,12 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: simpletelnet.h,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: simpletelnet.h,v 1.2 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 #ifndef __SIMPLETELNET_H__
 #define __SIMPLETELNET_H__
 
-void simpletelnet_init(void);
-void simpletelnet_open(void);
+void simpletelnet_init(char *arg);
 
 #endif /* __SIMPLETELNET_H__ */

@@ -32,14 +32,12 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.h,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: ctk-vncserver.h,v 1.2 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 #ifndef __CTK_VNCSERVER_H__
 #define __CTK_VNCSERVER_H__
 
-void ctk_vncserver_init(void);
-
-
+void ctk_vncserver_init(char *arg);
 
 #endif /* __CTK_VNCSERVER_H__ */

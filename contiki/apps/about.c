@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.7 2003/06/30 20:39:29 adamdunkels Exp $
+ * $Id: about.c,v 1.8 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -69,9 +69,11 @@ static struct dispatcher_proc p =
 static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(about_init)
+LOADER_INIT_FUNC(about_init, arg)
 {
   unsigned char width;
+
+  arg_free(arg);
   
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);

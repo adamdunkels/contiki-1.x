@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-server.c,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: vnc-server.c,v 1.2 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -183,11 +183,11 @@ vnc_server_send_data(struct vnc_server_state *vs)
     initmsg->namelength[1] = 0;
     initmsg->namelength[2] = 0;	    
     initmsg->namelength[3] = 4;
-    /*    bcopy(uvnc_name, &uip_appdata[sizeof(struct rfb_server_init)], 4);*/
-    uip_appdata[sizeof(struct rfb_server_init)+0] = 'u';
+    bcopy(uvnc_name, &uip_appdata[sizeof(struct rfb_server_init)], 4);
+    /*    uip_appdata[sizeof(struct rfb_server_init)+0] = 'u';
     uip_appdata[sizeof(struct rfb_server_init)+1] = 'V';
     uip_appdata[sizeof(struct rfb_server_init)+2] = 'N';
-    uip_appdata[sizeof(struct rfb_server_init)+3] = 'C';
+    uip_appdata[sizeof(struct rfb_server_init)+3] = 'C';*/
     uip_send(uip_appdata, sizeof(struct rfb_server_init) + 4);
     break;
   case VNC_RUNNING:

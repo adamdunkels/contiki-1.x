@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.h,v 1.8 2003/08/13 22:52:15 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.9 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -40,6 +40,7 @@
 
 #include "ek.h"
 #include "cc.h"
+#include "arg.h"
 
 void dispatcher_init(void);
 

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.6 2003/08/12 21:09:04 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.7 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -99,7 +99,7 @@ static struct dispatcher_proc p =
 static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(simpletelnet_init)
+LOADER_INIT_FUNC(simpletelnet_init, arg)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);

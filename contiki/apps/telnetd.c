@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.2 2003/08/21 22:31:38 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.3 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -152,8 +152,10 @@ shell_output(char *str1, char *str2)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(telnetd_init)
+LOADER_INIT_FUNC(telnetd_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     dispatcher_listen(ctk_signal_window_close);
@@ -212,6 +214,7 @@ newdata(void)
        s.buf[s.bufptr] == ISO_nl) {
       s.buf[s.bufptr] = 0;
       petsciiconv_topetscii(s.buf, LINELEN);
+      shell_output(s.buf, "");
       shell_input(s.buf);
       s.bufptr = 0;
     } else {

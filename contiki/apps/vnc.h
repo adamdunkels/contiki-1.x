@@ -32,12 +32,12 @@
  *
  * This file is part of the Contiki VNC client.
  *
- * $Id: vnc.h,v 1.1 2003/04/08 19:41:23 adamdunkels Exp $
+ * $Id: vnc.h,v 1.2 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 #ifndef __VNC_H__
 #define __VNC_H__
 
-void vnc_init(void);
+void vnc_init(char *arg);
 
 #endif /* __VNC_H__ */

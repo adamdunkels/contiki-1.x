@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.7 2003/07/31 23:45:52 adamdunkels Exp $
+ * $Id: processes.c,v 1.8 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -104,8 +104,10 @@ update_processwindow(void)
   CTK_WIDGET_FOCUS(&processwindow, &processupdatebutton);
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(processes_init)
+LOADER_INIT_FUNC(processes_init, arg)
 {
+  arg_free(arg);
+    
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     

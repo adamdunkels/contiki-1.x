@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.10 2003/08/12 21:08:51 adamdunkels Exp $
+ * $Id: email.c,v 1.11 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -157,8 +157,10 @@ email_quit(void)
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(email_init)
+LOADER_INIT_FUNC(email_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     

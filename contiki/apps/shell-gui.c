@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.1 2003/08/21 22:24:29 adamdunkels Exp $
+ * $Id: shell-gui.c,v 1.2 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -96,8 +96,10 @@ shell_output(char *str1, char *str2)
   CTK_WIDGET_REDRAW(&loglabel);
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(config_init)
+LOADER_INIT_FUNC(config_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     dispatcher_listen(ctk_signal_window_close);

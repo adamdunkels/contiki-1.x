@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.8 2003/08/12 21:09:19 adamdunkels Exp $
+ * $Id: webserver.c,v 1.9 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -47,6 +47,8 @@
 
 #include "webserver.h"
 #include "httpd.h"
+
+#include <stdio.h>
 
 /* The main window. */
 static struct ctk_window mainwindow;
@@ -69,8 +71,10 @@ static char log[LOG_WIDTH*LOG_HEIGHT];
 static struct ctk_label loglabel =
 {CTK_LABEL(0, 1, LOG_WIDTH, LOG_HEIGHT, log)};
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(webserver_init)
+LOADER_INIT_FUNC(webserver_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
 
@@ -92,7 +96,6 @@ LOADER_INIT_FUNC(webserver_init)
 static
 DISPATCHER_SIGHANDLER(webserver_sighandler, s, data)
 {
-  unsigned char i;
   DISPATCHER_SIGHANDLER_ARGS(s, data);
   
   if(s == ctk_signal_window_close ||

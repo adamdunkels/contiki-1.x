@@ -32,7 +32,7 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: calc.c,v 1.4 2003/08/20 20:51:31 adamdunkels Exp $
+ * $Id: calc.c,v 1.5 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -100,9 +100,11 @@ static unsigned char op;
 #define OP_DIV 4
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(calc_init)
+LOADER_INIT_FUNC(calc_init, arg)
 {
   unsigned char i;
+
+  arg_free(arg);
   
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);

@@ -32,12 +32,11 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader.h,v 1.5 2003/04/24 17:18:43 adamdunkels Exp $
+ * $Id: loader.h,v 1.6 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_H__
 #define __LOADER_H__
-
 
 /* Errors that the LOADER_LOAD() function may return: */
 
@@ -55,13 +54,13 @@
 
 #ifdef WITH_LOADER_ARCH
 #include "loader-arch.h"
-#define LOADER_INIT_FUNC(name) void init(void)
+#define LOADER_INIT_FUNC(name, arg) void init(char *arg)
 #else /* WITH_LOADER_ARCH */
-#define LOADER_INIT_FUNC(name) void name(void)
+#define LOADER_INIT_FUNC(name, arg) void name(char *arg)
 #endif /* WITH_LOADER_ARCH */
 
 #ifndef LOADER_LOAD
-#define LOADER_LOAD(name) LOADER_OK
+#define LOADER_LOAD(name, arg) LOADER_OK
 #endif /* LOADER_LOAD */
 
 #ifndef LOADER_LOAD_DSC

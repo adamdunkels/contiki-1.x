@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.5 2003/07/31 23:48:42 adamdunkels Exp $
+ * $Id: vnc.c,v 1.6 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -103,8 +103,10 @@ static struct dispatcher_proc p =
 static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(vnc_init)
+LOADER_INIT_FUNC(vnc_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
 

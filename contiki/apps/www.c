@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.18 2003/08/22 19:24:40 adamdunkels Exp $
+ * $Id: www.c,v 1.19 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -45,6 +45,9 @@
 #include "resolv.h"
 
 #include "petsciiconv.h"
+
+#include "program-handler.h"
+
 
 #include "loader.h"
 
@@ -223,8 +226,10 @@ redraw_window(void)
  * Initializes and starts the web browser. Called either at startup or
  * to open the browser window.
  */
-LOADER_INIT_FUNC(www_init)
+LOADER_INIT_FUNC(www_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
@@ -449,6 +454,8 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
 {
   static struct ctk_widget *w;
   static unsigned char i;
+  static char *argptr;
+  
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
   
@@ -488,9 +495,13 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     } else if(w == (struct ctk_widget *)&wgetnobutton) {
       ctk_dialog_close();
     } else if(w == (struct ctk_widget *)&wgetyesbutton) {
-      ctk_dialog_close();
+      ctk_dialog_close();      
       quit();
-      program_handler_load("wget.prg");
+      argptr = arg_alloc(WWW_CONF_MAX_URLLEN);
+      if(argptr != NULL) {
+	strncpy(argptr, url, WWW_CONF_MAX_URLLEN);
+      } 
+      program_handler_load("wget.prg", argptr);
       
 #if WWW_CONF_FORMS
     } else {
@@ -609,12 +620,12 @@ webclient_connected(void)
 {
   x = nextwordptr = 0;
   starty = scrolly;
+  
 #if WWW_CONF_PAGEVIEW
-  if(starty == 0) {
-    scrollend = WWW_CONF_WEBPAGE_HEIGHT - 4;
-  } else {
-    scrollend = starty + WWW_CONF_WEBPAGE_HEIGHT - 4;
+  if(starty > 4) {
+    starty = scrolly - 4;
   }
+  scrollend = starty + WWW_CONF_WEBPAGE_HEIGHT - 4;
 #endif /* WWW_CONF_PAGEVIEW */
   
   nextword[0] = 0;
@@ -797,7 +808,7 @@ webclient_datahandler(char *data, u16_t len)
       show_statustext(receivingmsgs[count]);
       htmlparser_parse(data, len);
     } else {
-      uip_close();
+      uip_abort();
       ctk_dialog_open(&wgetdialog);
     }
   } else {

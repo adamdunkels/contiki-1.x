@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.18 2003/08/20 20:52:22 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.19 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -175,41 +175,48 @@ program_handler_init(void)
 }
 /*-----------------------------------------------------------------------------------*/
 #ifdef WITH_LOADER_ARCH
-#define NUM_LOADERNAMES 6
+#define NUM_PNARGS 6
 #define NAMELEN 16
-static char loadernames[(NAMELEN + 1) * NUM_LOADERNAMES];
-static char * 
-loadername_copy(char *name)
+struct pnarg {
+  char name[NAMELEN];
+  char *arg;
+};
+static struct pnarg pnargs[NUM_PNARGS];
+static struct pnarg *
+pnarg_copy(char *name, char *arg)
 {
   char i;
-  char *loadernamesptr;
+  struct pnarg *pnargsptr;
 
-  loadernamesptr = loadernames;
+  pnargsptr = pnargs;
   /* Allocate a place in the loadernames table. */
-  for(i = 0; i < NUM_LOADERNAMES; ++i) {
-    if(*loadernamesptr == 0) {
-      strncpy(loadernamesptr, name, NAMELEN);
-      return loadernamesptr;
+  for(i = 0; i < NUM_PNARGS; ++i) {
+    if(*(pnargsptr->name) == 0) {
+      strncpy(pnargsptr->name, name, NAMELEN);
+      pnargsptr->arg = arg;
+      return pnargsptr;
     }
-    loadernamesptr += NAMELEN + 1;
+    ++pnargsptr;
   }
   return NULL;
 }
 
 static void
-loadername_free(char *name)
+pnarg_free(struct pnarg *pn)
 {
-  *name = 0;
+  *(pn->name) = 0;
 }
 #endif /* WITH_LOADER_ARCH */
 /*-----------------------------------------------------------------------------------*/
 void
-program_handler_load(char *name)
+program_handler_load(char *name, char *arg)
 {
 #ifdef WITH_LOADER_ARCH
-  name = loadername_copy(name);
-  if(name != NULL) {
-    dispatcher_emit(loader_signal_display_name, name, id);
+  struct pnarg *pnarg;
+  
+  pnarg = pnarg_copy(name, arg);
+  if(pnarg != NULL) {
+    dispatcher_emit(loader_signal_display_name, pnarg, id);
   } else {
     ctk_label_set_text(&errortype, "Out of memory");
     ctk_dialog_open(&errordialog);
@@ -220,9 +227,9 @@ program_handler_load(char *name)
 }
 
 #ifdef WITH_LOADER_ARCH
-#define RUN(prg, name) program_handler_load(prg)
+#define RUN(prg, name, arg) program_handler_load(prg, arg)
 #else /* WITH_LOADER_ARCH */
-#define RUN(prg, initfunc) initfunc()/*; ctk_desktop_redraw(NULL)*/
+#define RUN(prg, initfunc, arg) initfunc(arg)
 #endif /* WITH_LOADER_ARCH */
 /*-----------------------------------------------------------------------------------*/
 void
@@ -247,7 +254,7 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 #ifdef WITH_LOADER_ARCH
     if(data == (ek_data_t)&loadbutton) {
       ctk_window_close(&runwindow);
-      program_handler_load(name);
+      program_handler_load(name, NULL);
     } else if(data == (ek_data_t)&errorokbutton) {
       ctk_dialog_close();
     }
@@ -256,7 +263,7 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
     for(i = 0; i < CTK_CONF_MAXMENUITEMS; ++i) {    
       if(*dscp != NULL &&
 	 data == (ek_data_t)(*dscp)->icon) {
-	RUN((*dscp)->prgname, (*dscp)->init);
+	RUN((*dscp)->prgname, (*dscp)->init, NULL);
 	break;
       }
       ++dscp;
@@ -266,7 +273,7 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 #if WITH_LOADER_ARCH
       dsc = contikidsc[contikimenu.active - 1];
       if(dsc != NULL) {
-	RUN(dsc->prgname, dsc->init);
+	RUN(dsc->prgname, dsc->init, NULL);
       } else if(contikimenu.active == runmenuitem) {
 	ctk_window_open(&runwindow);
 	CTK_WIDGET_FOCUS(&runwindow, &nameentry);
@@ -274,7 +281,8 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 #else /* WITH_LOADER_ARCH */
       if(contikidsc[contikimenu.active] != NULL) {
 	RUN(contikidsc[contikimenu.active]->prgname,
-	    contikidsc[contikimenu.active]->init);
+	    contikidsc[contikimenu.active]->init,
+	    NULL);
       }
 #endif /* WITH_LOADER_ARCH */
     }
@@ -282,14 +290,14 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
   } else if(s == ctk_signal_screensaver_start) {
 #if WITH_LOADER_ARCH
     if(screensaver[0] != 0) {
-      program_handler_load(screensaver);
+      program_handler_load(screensaver, NULL);
     }
 #endif /* WITH_LOADER_ARCH */
 #endif /* CTK_CONF_SCREENSAVER */
   } else if(s == loader_signal_display_name) {
 #if WITH_LOADER_ARCH
     if(displayname == NULL) {
-      ctk_label_set_text(&loadingname, data);
+      ctk_label_set_text(&loadingname, ((struct pnarg *)data)->name);
       ctk_dialog_open(&loadingdialog);
       dispatcher_emit(loader_signal_load, data, id);
       displayname = data;
@@ -303,15 +311,17 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
     if(displayname == data) {
       ctk_dialog_close();
       displayname = NULL;
-      err = LOADER_LOAD(data);
+      err = LOADER_LOAD(((struct pnarg *)data)->name,
+			((struct pnarg *)data)->arg);
       if(err != LOADER_OK) {
 	errorfilename[0] = '"';
-	strncpy(errorfilename + 1, data, sizeof(errorfilename) - 2);
-	errorfilename[1 + strlen(data)] = '"';
+	strncpy(errorfilename + 1, ((struct pnarg *)data)->name,
+		sizeof(errorfilename) - 2);
+	errorfilename[1 + strlen(((struct pnarg *)data)->name)] = '"';
 	ctk_label_set_text(&errortype, errormsgs[err]);
 	ctk_dialog_open(&errordialog);
       }
-      loadername_free(data);
+      pnarg_free(data);
     } else {
       /* Try again. */
       dispatcher_emit(loader_signal_display_name, data, id);

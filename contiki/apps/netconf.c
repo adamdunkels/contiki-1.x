@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.9 2003/07/31 23:25:34 adamdunkels Exp $
+ * $Id: netconf.c,v 1.10 2003/08/24 22:41:31 adamdunkels Exp $
  *
  */
 
@@ -95,8 +95,10 @@ static ek_id_t id;
 static void makestrings(void);
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(netconf_init)
+LOADER_INIT_FUNC(netconf_init, arg)
 {
+  arg_free(arg);
+    
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
