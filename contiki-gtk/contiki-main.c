@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,20 +29,22 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.10 2004/02/16 21:27:17 uid93195 Exp $
+ * $Id: contiki-main.c,v 1.11 2004/06/06 07:05:40 adamdunkels Exp $
  *
  */
 
 
 #include "ctk.h"
 #include "ctk-draw.h"
+/*#include "ek-x.h"*/
 #include "dispatcher.h"
 
 #include "program-handler.h"
 
 #include "tapdev-drv.h"
 
-#include "uip_main.h"
+#include "uip-fw.h"
+
 #include "uip.h"
 #include "uip_arp.h"
 
@@ -73,14 +72,36 @@
 #include <gdk/gdktypes.h>
 #include <gtk/gtk.h>
 
+#include "mt.h"
+#include "mtp.h"
+
+#include "mailget.h"
+
+#include "newslog.h"
+
+/*
+MTP(thread1, "Test thread", p1, t1, t1_idle);
+static void test1(void *data) { while(1) { printf("Test\n"); mt_yield(); } }
+
+MTP(thread2, "Test thread 2", p2, t2, t2_idle);
+static void test2(void *data) { while(1) { printf("Test 2\n"); mt_yield(); } }
+*/
+
+void tapdev_send(void);
+static struct uip_fw_netif tapif =
+  {UIP_FW_NETIF(0,0,0,0, 0,0,0,0, tapdev_send)};
 
 
 static gint
 idle_callback(gpointer data)
 {
-  dispatcher_process_signal();
-  dispatcher_process_idle();
-  
+  /*  ek_run();*/
+      /* Process one signal */
+    dispatcher_process_signal();
+
+    /* Run "idle" handlers */
+    dispatcher_process_idle();
+
   return TRUE;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -90,8 +111,8 @@ main(int argc, char **argv)
   u16_t addr[2];
 
   /*  ek_init();*/
-  dispatcher_init();
-
+  dispatcher_init();  
+  
   
   uip_init();
   resolv_init(NULL);
@@ -106,20 +127,32 @@ main(int argc, char **argv)
   uip_ipaddr(addr, 255,255,255,0);
   uip_setnetmask(addr);
 
+  uip_fw_init();
+  uip_fw_default(&tapif);
+  
   
   tapdev_drv_init();
 
+  /*  mt_init();
+
+  mtp_start(&p1, &t1, test1, NULL);
+  mtp_start(&p2, &t2, test2, NULL);*/
+  
 #if WITH_CTKVNC
   ctk_init();
   ctk_vncserver_init(NULL);
 #else
-  ctk_gtksim_init();
+  ctk_gtksim_init(&argc, &argv);
   ctk_init();
 #endif
   
+
+  gtk_timeout_add(20, idle_callback, NULL);
+  
+#if 1
   program_handler_init();
   
-  gtk_timeout_add(20, idle_callback, NULL);
+
 
   /*  vnc_init();*/
   program_handler_add(&about_dsc, "About", 1);
@@ -129,15 +162,15 @@ main(int argc, char **argv)
   program_handler_add(&www_dsc, "Web browser", 1);
   
   program_handler_add(&webserver_dsc, "Web server", 1);
-  program_handler_add(&telnet_dsc, "Telnet", 1);
+  /*  program_handler_add(&telnet_dsc, "Telnet", 1);*/
   
-  program_handler_add(&calc_dsc, "Calculator", 0);
-
+  /*  program_handler_add(&calc_dsc, "Calculator", 0);*/
+  
   /*  program_handler_add(&presenter_dsc, "Presenter", 1);*/
 
-  program_handler_add(&email_dsc, "E-mail", 1);
+  /*  program_handler_add(&email_dsc, "E-mail", 1);
   
-  program_handler_add(&telnetd_dsc, "Telnet daemon", 1);
+  program_handler_add(&telnetd_dsc, "Telnet daemon", 1);*/
   /*  program_handler_add(&maze_dsc, "3D maze", 1);*/
 
   /*program_handler_add(&wget_dsc, "Web downloader", 1);*/
@@ -145,8 +178,15 @@ main(int argc, char **argv)
   /*  ctk_redraw();*/
  /* maze_init();*/
 
-  telnetd_init();
+#endif
+
+  /*  mailget_init(NULL);*/
+
+  
+  /*  newslog_init(NULL);*/
+  
   webserver_init();
+    
   gtk_main();
     
   return 0;
@@ -168,3 +208,5 @@ ek_clock(void)
   return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 /*-----------------------------------------------------------------------------------*/
+
+void nntpc_done(int i) {}
