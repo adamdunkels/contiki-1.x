@@ -1,2 +1,0 @@
-.segment        "JUMPTABLE"
-.segment	"EXTZP"
