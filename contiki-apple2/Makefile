@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/04/10 07:25:26 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2004/03/02 20:53:20 adamdunkels Exp $
 #
 
 all: contiki
@@ -101,7 +101,7 @@ OPT=-Or
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
 
-UIP=uip.o uip_arch.o uip_main.o resolv.o
+UIP=uip.o uip_arch.o uiplib.o resolv.o
 
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 
 EMAIL=email.o smtp.o smtp-strings.o
@@ -116,7 +116,7 @@ contiki-labels.s: contiki
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
  ctk-conio.o ctk.o ek.o dispatcher.o \
  program-handler.o clock.o \
- about.o netconf.o processes.o
+ about.o netconf.o processes.o arg.o
 	cl65 -Ln contiki-labels -o contiki -t $(SYS) $^
 
 
