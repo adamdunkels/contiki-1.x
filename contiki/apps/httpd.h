@@ -28,17 +28,17 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.4 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: httpd.h,v 1.5 2004/08/09 22:07:58 adamdunkels Exp $
  *
  */
 
 #ifndef __HTTPD_H__
 #define __HTTPD_H__
 
-#include "dispatcher.h"
+#include "contiki.h"
 
 void httpd_init(void);
-DISPATCHER_UIPCALL(httpd_appcall, state);
+void httpd_appcall(void *state);
 
 struct httpd_state {
   u8_t state; 
