@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: email-dsc.c,v 1.1 2003/08/11 22:23:39 adamdunkels Exp $
+ * $Id: email-dsc.c,v 1.2 2004/06/27 12:34:24 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(email_dsc,
     email_init,
     &email_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char tcpipconficon_bitmap[3*3*8] = {
   0x00, 0x79, 0x43, 0x73, 0x47, 0x77, 0x47, 0x6f,
   0x00, 0xfe, 0xfe, 0xfc, 0xfc, 0xfc, 0xf8, 0xfb,
@@ -56,13 +57,15 @@ static unsigned char tcpipconficon_bitmap[3*3*8] = {
   0xfc, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xf7, 0x00,
   0x00, 0x80, 0x00, 0x00, 0x00, 0x84, 0xf0, 0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char tcpipconficon_textmap[9] = {
   '+', '-', '+',
   '|', 'v', '|',
   '+', '-', '+'
 };
-
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon email_icon =
   {CTK_ICON("E-mail program", tcpipconficon_bitmap, tcpipconficon_textmap)};

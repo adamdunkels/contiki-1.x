@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-dsc.c,v 1.1 2003/04/17 19:00:01 adamdunkels Exp $
+ * $Id: www-dsc.c,v 1.2 2004/06/27 12:34:24 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(www_dsc,
     www_init,
     &icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char wwwicon_bitmap[3*3*8] = {
   0x00, 0x7e, 0x40, 0x73, 0x46, 0x4c, 0x18, 0x13,
   0x00, 0x00, 0xff, 0x81, 0x34, 0xc9, 0x00, 0xb6,
@@ -56,12 +57,15 @@ static unsigned char wwwicon_bitmap[3*3*8] = {
   0x22, 0x91, 0x00, 0xc4, 0x81, 0xff, 0x00, 0x00,
   0x08, 0x18, 0x32, 0x62, 0xc6, 0x02, 0x3e, 0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char wwwicon_textmap[9] = {
   'w', 'w', 'w',
   '(', ')', ' ',
   ' ', '(', ')'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon icon =
   {CTK_ICON("Web browser", wwwicon_bitmap, wwwicon_textmap)};

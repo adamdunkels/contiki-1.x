@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf-dsc.c,v 1.2 2003/06/30 20:47:02 adamdunkels Exp $
+ * $Id: netconf-dsc.c,v 1.3 2004/06/27 12:34:24 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(netconf_dsc,
     netconf_init,
     &netconf_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char tcpipconficon_bitmap[3*3*8] = {
   0x00, 0x79, 0x43, 0x73, 0x47, 0x77, 0x47, 0x6f,
   0x00, 0xfe, 0xfe, 0xfc, 0xfc, 0xfc, 0xf8, 0xfb,
@@ -56,13 +57,15 @@ static unsigned char tcpipconficon_bitmap[3*3*8] = {
   0xfc, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xf7, 0x00,
   0x00, 0x80, 0x00, 0x00, 0x00, 0x84, 0xf0, 0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char tcpipconficon_textmap[9] = {
   'T', 'C', 'P',
   '/', 'I', 'P',
   'C', 'f', 'g'
 };
-
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon netconf_icon =
   {CTK_ICON("Network setup", tcpipconficon_bitmap, tcpipconficon_textmap)};

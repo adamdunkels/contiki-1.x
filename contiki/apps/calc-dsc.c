@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: calc-dsc.c,v 1.1 2003/04/18 00:19:36 adamdunkels Exp $
+ * $Id: calc-dsc.c,v 1.2 2004/06/27 12:34:24 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(calc_dsc,
     calc_init,
     &calc_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char calcicon_bitmap[3*3*8] = {
   0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
   0x00, 0xff, 0x00, 0x7e, 0x00, 0xff, 0x00, 0xff,
@@ -56,12 +57,15 @@ static unsigned char calcicon_bitmap[3*3*8] = {
   0x07, 0xe7, 0x0f, 0xef, 0x0f, 0x0f, 0xff, 0x00,
   0x8e, 0x06, 0x06, 0x06, 0x8e, 0xfe, 0xfe, 0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char calcicon_textmap[9] = {
   '+', ' ', '-',
   ' ', '*', ' ',
   '=', ' ', '/'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon calc_icon =
   {CTK_ICON("Calculator", calcicon_bitmap, calcicon_textmap)};

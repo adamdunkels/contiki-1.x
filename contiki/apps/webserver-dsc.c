@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: webserver-dsc.c,v 1.1 2003/04/17 19:00:01 adamdunkels Exp $
+ * $Id: webserver-dsc.c,v 1.2 2004/06/27 12:34:24 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(webserver_dsc,
     webserver_init,
     &webserver_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char webservericon_bitmap[3*3*8] = {
   0x00, 0x7f, 0x40, 0x41, 0x44, 0x48, 0x40, 0x50,
   0x00, 0xff, 0x5a, 0x00, 0x00, 0x00, 0x3c, 0x81,
@@ -56,12 +57,15 @@ static unsigned char webservericon_bitmap[3*3*8] = {
   0xc5, 0x34, 0x3c, 0x52, 0x7a, 0x7e, 0xa1, 0xfd,
   0x0a, 0x02, 0x12, 0x22, 0x82, 0x02, 0x7e, 0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char webservericon_textmap[9] = {
   '+', '-', '+',
   '|', ')', '|',
   '+', '-', '+'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon webserver_icon =
   {CTK_ICON("Web server", webservericon_bitmap, webservericon_textmap)};
