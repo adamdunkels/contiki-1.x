@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire.c,v 1.1 2003/04/24 17:10:34 adamdunkels Exp $
+ * $Id: ssfire.c,v 1.2 2003/07/31 23:34:42 adamdunkels Exp $
  *
  */
 
@@ -125,11 +125,11 @@ DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data)
   } else if(s == ctk_signal_screensaver_stop) {
     save = 0;
     ctk_draw_init();
-    ctk_redraw();
+    ctk_desktop_redraw(NULL);
   } else if(s == ctk_signal_screensaver_uninstall) {
     fire_quit();
     ctk_draw_init();
-    ctk_redraw();    
+    ctk_desktop_redraw(NULL);
   }
 }
 /*-----------------------------------------------------------------------------------*/

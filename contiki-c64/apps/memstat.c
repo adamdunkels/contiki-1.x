@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.3 2003/04/17 19:54:39 adamdunkels Exp $
+ * $Id: memstat.c,v 1.4 2003/07/31 23:34:04 adamdunkels Exp $
  *
  */
 
@@ -120,7 +120,6 @@ quit(void)
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
-  ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
 static
@@ -131,9 +130,12 @@ DISPATCHER_SIGHANDLER(memstat_sighandler, s, data)
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&updatebutton) {
       update();
-      ctk_window_redraw(&window);
+      /*      ctk_window_redraw(&window);*/
+      CTK_WIDGET_REDRAW(&freenum);
+      CTK_WIDGET_REDRAW(&lblocknum);
     } else if(data == (ek_data_t)&closebutton) {
       ctk_window_close(&window);
+      /*      ctk_desktop_redraw(window.desktop);*/
       quit();
     }
   } else if(s == ctk_signal_window_close &&
