@@ -22,6 +22,9 @@
 #include "uip.h"
 #include "uip_arch.h"
 #include "uip-fw.h"
+#include "uip-conf.h"
+
+#include <string.h> /* for memcpy() */
 
 /**
  * \internal
@@ -123,7 +126,12 @@ struct fwcache_entry {
  * \internal
  * The number of packets to remember when looking for duplicates.
  */
+#ifdef UIP_CONF_FWCACHE_SIZE
+#define FWCACHE_SIZE UIP_CONF_FWCACHE_SIZE
+#else
 #define FWCACHE_SIZE 2
+#endif
+
 
 /**
  * \internal
@@ -316,6 +324,19 @@ uip_fw_output(void)
   if(uip_len == 0) {
     return UIP_FW_ZEROLEN;
   }
+
+#if UIP_BROADCAST
+  /* Link local broadcasts go out on all interfaces. */
+  if(BUF->proto == UIP_PROTO_UDP &&
+     BUF->destipaddr[0] == 0xffff &&
+     BUF->destipaddr[1] == 0xffff) {
+    for(netif = netifs; netif != NULL; netif = netif->next) {
+      netif->output();
+    }
+    return UIP_FW_OK;
+  }
+#endif /* UIP_BROADCAST */  
+
   
   netif = find_netif();
   /*  printf("uip_fw_output: netif %p ->output %p len %d\n", netif,
@@ -352,6 +373,14 @@ uip_fw_forward(void)
      BUF->destipaddr[1] == uip_hostaddr[1]) {
     return UIP_FW_LOCAL;
   }
+
+#if UIP_BROADCAST
+  if(BUF->proto == UIP_PROTO_UDP &&
+     BUF->destipaddr[0] == 0xffff &&
+     BUF->destipaddr[1] == 0xffff) {
+    return UIP_FW_LOCAL;
+  }
+#endif /* UIP_BROADCAST */  
 
   /* If we use ping IP address configuration, and our IP address is
      not yet configured, we should intercept all ICMP echo packets. */
