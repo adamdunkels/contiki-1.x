@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: init.c,v 1.1 2003/08/05 22:02:16 adamdunkels Exp $
+ * $Id: init.c,v 1.2 2003/08/05 22:30:54 adamdunkels Exp $
  *
  */
 
@@ -94,7 +94,8 @@ loadfile(char *str)
   /* Nullterminate string since the loader functioin expects filename
      to end with a null chacter. Start with finding newline
      character. */
-  for(nt = str; *nt != '\n'; ++nt);
+  for(nt = str; *nt != '\r' &&
+	*nt != '\n'; ++nt);
 
   /* Replace newline with a null char. */
   *nt = 0;
@@ -154,8 +155,8 @@ initscript(void)
     return;
   }
   line[0] = ' ';
-  /*  while(line[0] != '.' &&
-      line[0] != 0)*/ {
+  while(line[0] != '.' &&
+	line[0] != 0) {
     lineptr = line;
     do {
       if(c64_fs_read(&f, lineptr, 1) != 1) {
@@ -167,8 +168,11 @@ initscript(void)
 	    *(lineptr - 1) != '\r');
 
     *lineptr = 0;
-    
-    parse(line, initparsetab);
+
+    if(line[0] != '.' &&
+       line[0] != 0) {
+      parse(line, initparsetab);
+    }
     
   }
   c64_fs_close(&f);
