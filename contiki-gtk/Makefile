@@ -30,12 +30,12 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.4 2003/04/17 20:07:23 adamdunkels Exp $
+# $Id: Makefile,v 1.5 2003/05/28 05:22:39 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
 CC=gcc
-CFLAGS=-g -pg\
+CFLAGS=-Wall -g -pg\
        -Iapps -Ictk -Iuip -Iconf \
        -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
@@ -64,19 +64,20 @@ LDFLAGS=-pg `gtk12-config --libs`
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
 
 
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 
+WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o
 EMAIL=email.o smtp.o smtp-strings.o
-WEBSERVER=webserver.o http-strings.o 
+WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-cgi.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
 
 contiki: contiki-main.o \
  program-handler.o about.o netconf.o processes.o \
- about-dsc.o netconf-dsc.o processes-dsc.o www-dsc.o \
+ about-dsc.o netconf-dsc.o processes-dsc.o  \
  ctk-gtksim.o ctk-conio.o libconio.o \
  ctk.o ek.o dispatcher.o \
- uip.o uip_arch.o uip_arp.o tapdev.o resolv.o \
- uip_main.o \
- $(WWW) $(EMAIL) vnc.o vnc-viewer.o vnc-draw.o
+ uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o \
+ uip_main.o tapdev.o tapdev-drv.o \
+ $(WWW) $(EMAIL) $(WEBSERVER) \
+ vnc.o vnc-viewer.o vnc-draw.o
 	gcc $(LDFLAGS) -o $@ $^
 
 clean:

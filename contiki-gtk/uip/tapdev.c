@@ -31,7 +31,7 @@
  *
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tapdev.c,v 1.1 2003/04/02 09:17:29 adamdunkels Exp $
+ * $Id: tapdev.c,v 1.2 2003/05/28 05:22:40 adamdunkels Exp $
  */
 
 
@@ -109,7 +109,6 @@ read_callback(gpointer data, gint source, GdkInputCondition condition)
 
 
 }
-
 gint
 timeout_callback(gpointer data)
 {
@@ -145,6 +144,7 @@ timeout_callback(gpointer data)
  
   return TRUE;
 }
+
 /*-----------------------------------------------------------------------------------*/
 void
 tapdev_init(void)

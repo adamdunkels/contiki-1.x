@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.4 2003/04/17 20:07:24 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.5 2003/05/28 05:22:39 adamdunkels Exp $
  *
  */
 
@@ -43,6 +43,8 @@
 
 #include "program-handler.h"
 
+#include "tapdev-drv.h"
+
 #include "uip_main.h"
 #include "uip.h"
 #include "uip_arp.h"
@@ -52,6 +54,7 @@
 #include "processes-dsc.h"
 
 #include "www-dsc.h"
+#include "webserver-dsc.h"
 
 static gint
 idle_callback(gpointer data)
@@ -81,7 +84,7 @@ main(int argc, char **argv)
   uip_setnetmask(addr);
 
   
-  tapdev_init();
+  tapdev_drv_init();
   
   ek_init();
   ctk_gtksim_init();
@@ -97,6 +100,8 @@ main(int argc, char **argv)
   program_handler_add(&processes_dsc, "Processes", 0);
   
   program_handler_add(&www_dsc, "Web browser", 1);
+
+  program_handler_add(&webserver_dsc, "Web server", 1);
 
   
   ctk_redraw();
