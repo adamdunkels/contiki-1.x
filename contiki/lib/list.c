@@ -1,3 +1,58 @@
+/**
+ * \defgroup list Linked list library
+ * @{
+ *
+ * The linked list library provides a set of functions for
+ * manipulating linked lists.
+ *
+ * A linked list is made up of elements where the first element \b
+ * must be a pointer. This pointer is used by the linked list library
+ * to form lists of the elements.
+ *
+ * Lists are declared with the LIST() macro. The declaration specifies
+ * the name of the list that later is used with all list functions.
+ *
+ * Example:
+ \code
+
+struct packet {
+   struct packet *next;
+   char data[1500];
+   int len;
+};
+
+LIST(packets);
+
+static void
+init_function(void) {
+   list_init(packets);
+}
+
+static void
+another_function(struct packet *p) {
+   list_add(packets, p);
+
+   p = list_head(packets);
+
+   p = list_tail(packets);
+}
+ \endcode 
+ *
+ * Lists can be manipulated by inserting or removing elements from
+ * either sides of the list (list_push(), list_add(), list_pop(),
+ * list_chop()). A specified element can also be removed from inside a
+ * list with list_remove(). The head and tail of a list can be
+ * extracted using list_head() and list_tail(), respecitively.
+ */
+
+/**
+ * \file
+ * Linked list library implementation.
+ *
+ * \author Adam Dunkels <adam@sics.se>
+ *
+ */
+
 /*
  * Copyright (c) 2004, Swedish Institute of Computer Science.
  * All rights reserved. 
@@ -30,7 +85,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: list.c,v 1.3 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: list.c,v 1.4 2005/02/07 07:52:31 adamdunkels Exp $
  */
 #include "list.h"
 
@@ -40,27 +95,69 @@ struct list {
   struct list *next;
 };
 
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/**
+ * Initialize a list.
+ *
+ * This function initalizes a list. The list will be empty after this
+ * function has been called.
+ *
+ * \param list The list to be initialized.
+ */
 void
-list_init(void **list)
+list_init(list_t list)
 {
   *list = NULL;
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/**
+ * Get a pointer to the first element of a list.
+ *
+ * This function returns a pointer to the first element of the
+ * list. The element will \b not be removed from the list.
+ *
+ * \param list The list.
+ * \return A pointer to the first element on the list.
+ *
+ * \sa list_tail()
+ */
 void *
-list_head(void **list)
+list_head(list_t list)
 {
   return *list;
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/**
+ * Duplicate a list.
+ *
+ * This function duplicates a list by copying the list reference, but
+ * not the elements.
+ *
+ * \note This function does \b not copy the elements of the list, but
+ * merely duplicates the pointer to the first element of the list.
+ *
+ * \param dest The destination list.
+ * \param src The source list.
+ */
 void
-list_copy(void **dest, void **src)
+list_copy(list_t dest, list_t src)
 {
   *dest = *src;
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/**
+ * Get the tail of a list.
+ *
+ * This function returns a pointer to the elements following the first
+ * element of a list. No elements are removed by this function.
+ *
+ * \param list The list
+ * \return A pointer to the element after the first element on the list.
+ *
+ * \sa list_head()
+ */
 void *
-list_tail(void **list)
+list_tail(list_t list)
 {
   struct list *l;
   
@@ -72,13 +169,20 @@ list_tail(void **list)
   
   return l;
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 /**
- * Add an item at the end of the list.
+ * Add an item at the end of a list.
+ *
+ * This function adds an item to the end of the list.
+ *
+ * \param list The list.
+ * \param item A pointer to the item to be added.
+ *
+ * \sa list_push()
  *
  */
 void
-list_add(void **list, void *item)
+list_add(list_t list, void *item)
 {
   struct list *l;
 
@@ -92,26 +196,30 @@ list_add(void **list, void *item)
     l->next = item;
   }
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 /**
  * Add an item to the start of the list.
  */
 void
-list_push(void **list, void *item)
+list_push(list_t list, void *item)
 {
-  struct list *l;
+  /*  struct list *l;*/
 
   ((struct list *)item)->next = *list;
   *list = item;
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 /**
  * Remove the last object on the list.
  *
- * @return The removed object
+ * This function removes the last object on the list and returns it.
+ * 
+ * \param list The list
+ * \return The removed object
+ *
  */
 void *
-list_chop(void **list)
+list_chop(list_t list)
 {
   struct list *l, *r;
   
@@ -131,15 +239,18 @@ list_chop(void **list)
   
   return r;
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 /**
- * Remove the first object on the list.
+ * Remove the first object on a list.
  *
- * @return The new head of the list.
+ * This function removes the first object on the list and returns it.
+ *
+ * \param list The list.
+ * \return The new head of the list.
  */
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 void *
-list_pop(void **list)
+list_pop(list_t list)
 {
   struct list *l;
   
@@ -149,4 +260,64 @@ list_pop(void **list)
 
   return *list;
 }
-/*------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/**
+ * Remove a specific element from a list.
+ *
+ * This function removes a specified element from the list.
+ *
+ * \param list The list.
+ * \param item The item that is to be removed from the list.
+ *
+ */
+/*---------------------------------------------------------------------------*/
+void
+list_remove(list_t list, void *item)
+{
+  struct list *l, *r;
+  
+  if(*list == NULL) {
+    return;
+  }
+  
+  r = NULL;
+  for(l = *list; l != NULL; l = l->next) {
+    if(l == item) {
+      if(r == NULL) {
+	/* First on list */
+	*list = l->next;
+      } else {
+	/* Not first on list */
+	r->next = l->next;
+      }
+      l->next = NULL;
+      return;
+    }
+    r = l;
+  }
+}
+/*---------------------------------------------------------------------------*/
+/**
+ * Get the length of a list.
+ *
+ * This function counts the number of elements on a specified list.
+ *
+ * \param list The list.
+ * \return The length of the list.
+ */
+/*---------------------------------------------------------------------------*/
+int
+list_length(list_t list)
+{
+  struct list *l; 
+  int n = 0;
+
+  for(l = *list; l != NULL; l = l->next) {
+    ++n;
+  }
+
+  return n;
+}
+/*---------------------------------------------------------------------------*/
+
+/** @} */
