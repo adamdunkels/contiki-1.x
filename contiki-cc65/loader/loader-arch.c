@@ -32,14 +32,14 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.3 2003/08/24 22:41:55 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.4 2003/09/07 18:10:15 adamdunkels Exp $
  *
  */
 
 #include <stdlib.h>
 #include <modload.h>
 #include <fcntl.h>
-#include <unistd.h>
+
 
 #include "loader.h"
 
