@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.28 2003/08/20 20:55:22 adamdunkels Exp $
+ * $Id: ctk.c,v 1.29 2003/08/24 22:38:12 adamdunkels Exp $
  *
  */
 
@@ -722,7 +722,7 @@ switch_focus_widget(unsigned char direction)
     if(focus == NULL) {
       if(window->active != NULL) {	
 	for(focus = window->active;
-	    focus->next != NULL; focus = focus->next);	
+	    focus->next != NULL; focus = focus->next);
       }
     }
   }
@@ -890,6 +890,7 @@ textentry_input(ctk_arch_key_t c,
   case CH_ENTER:
     /*    t->state = CTK_TEXTENTRY_NORMAL;*/
     activate((struct ctk_widget *)t);
+    switch_focus_widget(DOWN);
     break;
     
   case CTK_CONF_WIDGETDOWN_KEY:
