@@ -77,6 +77,9 @@ tfe-drv.o: uip/tfe-drv.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
+%.o: %.S
+	$(AS) -o $@ $(AFLAGS) $<
+
 %.o: apps/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
