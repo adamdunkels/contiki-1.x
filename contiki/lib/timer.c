@@ -5,20 +5,19 @@ void
 timer_set(struct timer *t, clock_time_t interval)
 {
   t->interval = interval;
-  timer_reset(t);
+  t->start = clock_time();
 }
 /*---------------------------------------------------------------------------*/
 void
 timer_reset(struct timer *t)
 {
-  t->current = t->start = clock_time();
+  t->start = t->start + t->interval;
 }
 /*---------------------------------------------------------------------------*/
 int
 timer_expired(struct timer *t)
 {
-  t->current = clock_time();
-  return (clock_time_t)(t->current - t->start) >= (clock_time_t)t->interval;
+  return (clock_time_t)(clock_time() - t->start) >= (clock_time_t)t->interval;
 }
 /*---------------------------------------------------------------------------*/
 

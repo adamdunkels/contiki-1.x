@@ -4,7 +4,7 @@
 #include "clock.h"
 
 struct timer {
-  clock_time_t start, current;
+  clock_time_t start;
   clock_time_t interval;
 };
 
