@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.16 2003/08/15 18:48:35 adamdunkels Exp $
+ * $Id: www.c,v 1.17 2003/08/20 20:54:46 adamdunkels Exp $
  *
  */
 
@@ -229,7 +229,7 @@ LOADER_INIT_FUNC(www_init)
        "Hyperlink activate" and "Hyperlink hover", and the resolver's
        signal. */
     dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_button_activate);
+    dispatcher_listen(ctk_signal_widget_activate);
     dispatcher_listen(ctk_signal_hyperlink_activate);
     dispatcher_listen(ctk_signal_hyperlink_hover);
     dispatcher_listen(resolv_signal_found);
@@ -426,7 +426,7 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
 
   
   w = (struct ctk_widget *)data;
-  if(s == ctk_signal_button_activate) {
+  if(s == ctk_signal_widget_activate) {
     if(w == (struct ctk_widget *)&backbutton) {
       scrolly = 0;
       run = 1;
@@ -442,7 +442,8 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
       run = 1;
       open_url();
       CTK_WIDGET_FOCUS(&mainwindow, &downbutton);
-    } else if(w == (struct ctk_widget *)&gobutton) {
+    } else if(w == (struct ctk_widget *)&gobutton ||
+	      w == (struct ctk_widget *)&urlentry) {
       scrolly = 0;
 #if WWW_CONF_PAGEVIEW
       starty = 0;
