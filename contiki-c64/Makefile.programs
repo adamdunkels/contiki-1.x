@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.19 2004/02/16 20:54:42 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.20 2004/06/06 06:20:48 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -51,14 +51,15 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      ssfire.sav ssfire.dsc \
      plasma.sav plasma.dsc \
      rrnet.drv rrnet.dsc \
-     slip.drv slip.dsc \
-     slip-ss.drv \
      tfe.drv tfe.dsc \
      config.prg configedit.prg configedit.dsc \
      shell.prg shell.dsc \
      telnetd.prg telnetd.dsc \
      email.prg \
      vnc.prg  \
+     mtest.prg
+#     slip.drv slip.dsc \
+#     slip-ss.drv \
 #     calc.prg \
 #     ssconfig.prg \
 
@@ -119,3 +120,5 @@ ravenpine.prg: themeloader.o ctk-hires-theme-ravenpine.o contiki-labels.o
 
 
 memstat.prg: memstat.o
+
+mtest.prg: mtest.o mtp.o mt.o mtarch.o mtarch-asm.o
