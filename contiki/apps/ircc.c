@@ -1,4 +1,8 @@
+
+#include "contiki.h"
 #include "ircc.h"
+
+#include "ircc-strings.h"
 
 #include <string.h>
 
@@ -6,13 +10,21 @@
 
 #define SEND_STRING(s, str) SOCKET_SEND(s, str, strlen(str))
 
+#define ISO_space 0x20
+#define ISO_bang  0x21
+#define ISO_at    0x40
+#define ISO_cr    0x0d
+#define ISO_nl    0x0a
+#define ISO_colon 0x3a
+#define ISO_O     0x4f
+
 enum {
   COMMAND_NONE,
   COMMAND_JOIN,
   COMMAND_PART,  
   COMMAND_MSG,
   COMMAND_LIST,
-  COMMAND_CLOSE
+  COMMAND_QUIT
 };
 
 /*---------------------------------------------------------------------------*/
@@ -23,7 +35,7 @@ ircc_init(void)
 }
 /*---------------------------------------------------------------------------*/
 static char *
-copystr(char *dest, char *src, int n)
+copystr(char *dest, const char *src, int n)
 {
   int len;
 
@@ -46,13 +58,13 @@ PT_THREAD(setup_connection(struct ircc_state *s))
   SOCKET_BEGIN(&s->s);
   
   ptr = s->outputbuf;
-  ptr = copystr(ptr, "NICK ", sizeof(s->outputbuf));
+  ptr = copystr(ptr, ircc_nick, sizeof(s->outputbuf));
   ptr = copystr(ptr, s->nick, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, "\r\nUSER ", sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_crnl_user, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->nick, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, " contiki ", sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_contiki, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->server, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, " :Contiki\r\n", sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_colon_contiki, sizeof(s->outputbuf) - (ptr - s->outputbuf));
 
   SEND_STRING(&s->s, s->outputbuf);
 
@@ -64,9 +76,9 @@ PT_THREAD(join_channel(struct ircc_state *s))
 {
   SOCKET_BEGIN(&s->s);
   
-  SEND_STRING(&s->s, "JOIN ");
+  SEND_STRING(&s->s, ircc_join_);
   SEND_STRING(&s->s, s->channel);
-  SEND_STRING(&s->s, "\r\n");
+  SEND_STRING(&s->s, ircc_crnl);
 
   ircc_sent(s);
   
@@ -78,9 +90,9 @@ PT_THREAD(part_channel(struct ircc_state *s))
 {
   SOCKET_BEGIN(&s->s);
 
-  SEND_STRING(&s->s, "PART ");
+  SEND_STRING(&s->s, ircc_part_);
   SEND_STRING(&s->s, s->channel);
-  SEND_STRING(&s->s, "\r\n");
+  SEND_STRING(&s->s, ircc_crnl);
 
   ircc_sent(s);
   
@@ -92,9 +104,9 @@ PT_THREAD(list_channel(struct ircc_state *s))
 {
   SOCKET_BEGIN(&s->s);
 
-  SEND_STRING(&s->s, "LIST ");
+  SEND_STRING(&s->s, ircc_list_);
   SEND_STRING(&s->s, s->channel);
-  SEND_STRING(&s->s, "\r\n");
+  SEND_STRING(&s->s, ircc_crnl);
 
   ircc_sent(s);
   
@@ -109,11 +121,11 @@ PT_THREAD(send_message(struct ircc_state *s))
   SOCKET_BEGIN(&s->s);
 
   ptr = s->outputbuf;
-  ptr = copystr(ptr, "PRIVMSG ", sizeof(s->outputbuf));
+  ptr = copystr(ptr, ircc_privmsg, sizeof(s->outputbuf));
   ptr = copystr(ptr, s->channel, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, " :", sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_colon, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->msg, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, "\r\n", sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_crnl, sizeof(s->outputbuf) - (ptr - s->outputbuf));
 
   SEND_STRING(&s->s, s->outputbuf);
 
@@ -123,6 +135,8 @@ PT_THREAD(send_message(struct ircc_state *s))
 }
 /*---------------------------------------------------------------------------*/
 struct parse_result {
+  char *msg;
+  
   char *user;
   char *host;
   char *name;
@@ -130,133 +144,137 @@ struct parse_result {
   char *middle;
   char *trailing;
 };
-
-static char *
-parse_whitespace(char *msg)
+static struct parse_result r;
+static void
+parse_whitespace(void)
 {
-  while(*msg == ' ') ++msg;
-  return msg;
+  while(*r.msg == ISO_space) ++r.msg;
 }
-static char *
-parse_word(char *msg)
+static void
+parse_word(void)
 {
-  while(*msg != ' ') ++msg;
-  return msg;  
+  char *ptr;
+  ptr = strchr(r.msg, ISO_space);
+  if(ptr != NULL) {
+    r.msg = ptr;
+  }  
 }
-static char *
-parse_user(char *msg, struct parse_result *r)
+static void
+parse_user(void)
 {
-  msg = parse_whitespace(msg);
-  r->user = msg;
-  msg = parse_word(msg);
-  *msg = 0;
-  return msg + 1;
+  parse_whitespace();
+  r.user = r.msg;
+  parse_word();
+  *r.msg = 0;
+  ++r.msg;
 }
-static char *
-parse_host(char *msg, struct parse_result *r)
+static void
+parse_host(void)
 {
-  msg = parse_whitespace(msg);
-  r->host = msg;
-  msg = parse_word(msg);
-  *msg = 0;
-  return msg + 1;
-}
-
-static char *
-parse_name(char *msg, struct parse_result *r)
-{
-  msg = parse_whitespace(msg);
-  r->name = msg;
-  msg = parse_word(msg);
-  *msg = 0;
-  return msg + 1;
+  parse_whitespace();
+  r.host = r.msg;
+  parse_word();
+  *r.msg = 0;
+  ++r.msg;
 }
 
-static char *
-parse_prefix(char *msg, struct parse_result *r)
+static void
+parse_name(void)
 {
-  msg = parse_name(msg, r);
-  if(*msg == '!') {
-    msg = parse_user(msg + 1, r);
+  parse_whitespace();
+  r.name = r.msg;
+  parse_word();
+  *r.msg = 0;
+  ++r.msg;
+}
+
+static void
+parse_prefix(void)
+{
+  parse_name();
+  if(*r.msg == ISO_bang) {
+    ++r.msg;
+    parse_user();
   }
-  if(*msg == '@') {
-    msg = parse_host(msg + 1, r);
-  }
-  return msg;
-}
-
-static char *
-parse_command(char *msg, struct parse_result *r)
-{
-  msg = parse_whitespace(msg);
-  r->command = msg;
-  msg = parse_word(msg);
-  *msg = 0;
-  return msg + 1;
-}
-
-static char *
-parse_trailing(char *msg, struct parse_result *r)
-{
-  r->trailing = msg;
-  if(strncmp(msg + 1, "gtk", 3) == 0)  abort();
-  while(*msg != 0 && *msg != '\r' && *msg != '\n') ++msg;
-  *msg = 0;
-  return msg + 1;
-}
-
-static char *
-parse_params(char *msg, struct parse_result *r)
-{
-  msg = parse_whitespace(msg);
-  if(*msg == ':') {
-    msg = parse_trailing(msg + 1, r);
-    return msg;
-  } else if(*msg == 0 || *msg == '\r' || *msg == '\n') {
-    return msg;
-  } else {
-    r->middle = msg;
-    msg = parse_word(msg);
-    *msg = 0;
-    return parse_params(msg + 1, r);
+  if(*r.msg == ISO_at) {
+    ++r.msg;
+    parse_host();
   }
 }
 
 static void
-parse(char *msg, struct parse_result *r)
+parse_command(void)
 {
-  if(*msg == '\r' ||
-     *msg == '\n') {
+  parse_whitespace();
+  r.command = r.msg;
+  parse_word();
+  *r.msg = 0;
+  ++r.msg;
+}
+
+static void
+parse_trailing(void)
+{
+  r.trailing = r.msg;
+  while(*r.msg != 0 && *r.msg != ISO_cr && *r.msg != ISO_nl) ++r.msg;
+  *r.msg = 0;
+  ++r.msg;
+}
+
+static void
+parse_params(void)
+{
+  char *ptr;
+
+  parse_whitespace();
+  ptr = strchr(r.msg, ISO_colon);
+  if(ptr != NULL) {
+    r.trailing = ptr + 1;
+    ptr = strchr(ptr, ISO_cr);
+    if(ptr != NULL) {
+      *ptr = 0;
+    }
+  }
+}
+
+static void
+parse(char *msg, struct parse_result *dummy)
+{
+  r.msg = msg;
+  if(*r.msg == ISO_cr || *r.msg == ISO_nl) {
     return;
   }
-  if(*msg == ':') {
-    msg = parse_prefix(msg + 1, r);
+  if(*r.msg == ISO_colon) {
+    ++r.msg;
+    parse_prefix();
   }
   
-  msg = parse_command(msg, r);
-  msg = parse_params(msg, r);
+  parse_command();
+  parse_params();
+
 }
+
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(handle_input(struct ircc_state *s))
 {
   int i;
   char *ptr;
-  struct parse_result r;
+  /*  struct parse_result r;*/
   
   SOCKET_BEGIN(&s->s);
   
-  SOCKET_READTO(&s->s, '\n');
+  SOCKET_READTO(&s->s, ISO_nl);
   
   if(SOCKET_DATALEN(&s->s) > 0) {
     
     s->inputbuf[SOCKET_DATALEN(&s->s)] = 0;
 
-    if(strncmp(s->inputbuf, "PING ", 5) == 0) {
+    if(strncmp(s->inputbuf, ircc_ping, 5) == 0) {
       strncpy(s->outputbuf, s->inputbuf, sizeof(s->outputbuf));
       
       /* Turn "PING" into "PONG" */
-      s->outputbuf[1] = 'O';
+      s->outputbuf[1] = ISO_O;
       SEND_STRING(&s->s, s->outputbuf);
     } else {
 
@@ -265,17 +283,15 @@ PT_THREAD(handle_input(struct ircc_state *s))
       parse(s->inputbuf, &r);
 
       if(r.name != NULL) {
-	for(i = 0; i < strlen(r.name); ++i) {
-	  if(r.name[i] == '!') {
-	    r.name[i] = 0;
-	    break;
-	  }
+	ptr = strchr(r.name, ISO_bang);
+	if(ptr != NULL) {
+	  *ptr = 0;
 	}
       }
       
-      if(r.command != NULL && strncmp(r.command, "JOIN", 4) == 0) {
+      if(r.command != NULL && strncmp(r.command, ircc_join_, 4) == 0) {
 	  ircc_text_output(s, "Joined channel", r.name);
-      } else if(r.command != NULL && strncmp(r.command, "PART", 4) == 0) {
+      } else if(r.command != NULL && strncmp(r.command, ircc_part_, 4) == 0) {
 	ircc_text_output(s, "Left channel", r.name);
       } else {
 	ircc_text_output(s, r.name, r.trailing);
@@ -330,9 +346,11 @@ PT_THREAD(handle_connection(struct ircc_state *s))
       s->command = COMMAND_NONE;
       PT_WAIT_THREAD(&s->pt, list_channel(s));
       break;
-    case COMMAND_CLOSE:
+    case COMMAND_QUIT:
       s->command = COMMAND_NONE;
+      tcp_markconn(uip_conn, NULL);
       SOCKET_CLOSE(&s->s);
+      ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_REQUEST_EXIT, NULL);
       PT_EXIT(&s->pt);
       break;
     default:
@@ -355,7 +373,7 @@ ircc_appcall(void *s)
 	   sizeof(((struct ircc_state *)s)->channel));
     ((struct ircc_state *)s)->command = COMMAND_NONE;
     handle_connection(s);
-  } else {
+  } else if(s != NULL) {
     handle_connection(s);
   }
 }
@@ -390,6 +408,12 @@ void
 ircc_part(struct ircc_state *s)
 {
   s->command = COMMAND_PART;
+}
+/*---------------------------------------------------------------------------*/
+void
+ircc_quit(struct ircc_state *s)
+{
+  s->command = COMMAND_QUIT;
 }
 /*---------------------------------------------------------------------------*/
 void
