@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.10 2004/09/01 20:48:04 adamdunkels Exp $
+ * $Id: wget.c,v 1.11 2004/09/12 13:50:55 adamdunkels Exp $
  *
  */
 
@@ -381,6 +381,7 @@ void
 webclient_connected(void)
 {    
   show_statustext("Request sent...");
+  c64_dio_init(_curunit);
 }
 /*-----------------------------------------------------------------------------------*/
 static u8_t
