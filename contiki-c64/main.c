@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -30,11 +27,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki operating system
  *
- * $Id: main.c,v 1.11 2004/07/04 19:53:07 adamdunkels Exp $
+ * $Id: main.c,v 1.12 2004/08/09 21:42:43 adamdunkels Exp $
  *
  */
+
+#include "contiki.h"
 
 #include "ctk.h"
 #include "ctk-draw.h"
@@ -53,7 +52,7 @@
 #include "directory-dsc.h"
 #include "processes-dsc.h"
 
-#include "c64-dio.h"
+#include "cfs-cbm.h"
 
 #include "clock.h"
 
@@ -70,6 +69,33 @@ uip_fw_periodic(void)
   return;
 }
 /*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  switch(ev) {
+  case EK_EVENT_INIT:
+    program_handler_load("config.prg", NULL);
+    break;
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_PROCESS(init, "Init", EK_PRIO_LOWEST,
+	   eventhandler, NULL, NULL);
+/*-----------------------------------------------------------------------------------*/
+void
+log_message(char *part1, char *part2)
+{
+  while(*part1 != 0) {
+    cbm_k_bsout(*part1++);
+  }
+
+  while(*part2 != 0) {
+    cbm_k_bsout(*part2++);
+  }
+
+  
+  cbm_k_bsout('\n');
+}
+/*-----------------------------------------------------------------------------------*/
 clock_time_t
 clock_time(void)
 {
@@ -79,29 +105,36 @@ clock_time(void)
 void
 main(void)
 {
-
-  c64_dio_init(_curunit);
+  log_message("Starting ", CONTIKI_VERSION_STRING);
   
   ek_init();
-  tcpip_init(NULL);
   
-  ctk_init();
+  log_message(": TCP/IP", "");
+    
+  tcpip_init(NULL);
 
   resolv_init(NULL);
   
   uip_event_init();
-  
+
+  log_message(": CTK GUI", "");
+  ctk_init();
+
+  log_message(": Initial filesystem", "");
+  cfs_init_init(NULL);
+
   program_handler_init();
    
   program_handler_add(&directory_dsc, "Directory", 1);
   program_handler_add(&configedit_dsc, "Configuration", 1);
   program_handler_add(&processes_dsc, "Processes", 1);  
 
-  program_handler_load("config.prg", NULL);
-
+  ek_start(&init);
+  
+  log_message("Starting process scheduling", "");  
+  
   while(1) {
     ek_run();
   }
-
 }
 /*-----------------------------------------------------------------------------------*/
