@@ -126,7 +126,7 @@ contiki-labels.s: contiki
 
 UIP=uip.o uip_arch.o uiplib.o resolv.o uip-event.o tcpip.o
 WWW=www.o webclient.o http-strings.o http-user-agent-string.o htmlparser.o html-strings.o 
-EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
+EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o socket.o uipbuf.o lc-asm.o memb.o
 WEBSERVER=webserver.o httpd.o http-strings.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
 WGET=wget.o webclient.o http-strings.o http-user-agent-string.o 
@@ -153,4 +153,5 @@ d64:
 	c1541 -attach contiki.d64 $(foreach prg, $(wildcard *.prg), -write $(prg))
 	c1541 -attach contiki.d64 $(foreach sav, $(wildcard *.sav), -write $(sav))
 	c1541 -attach contiki.d64 $(foreach drv, $(wildcard *.drv), -write $(drv))
+	c1541 -attach contiki.d64 $(foreach ser, $(wildcard *.ser), -write $(ser))
 	c1541 -attach contiki.d64 -list
