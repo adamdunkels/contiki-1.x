@@ -124,7 +124,7 @@ codesize:
 d64:
 	c1541 -format contiki,00 d64 contiki.d64
 	c1541 -attach contiki.d64 -write contiki
-	touch config.cfg
+	echo . > config.cfg
 	c1541 -attach contiki.d64 -write config.cfg
 	c1541 -attach contiki.d64 $(foreach dsc, $(wildcard *.dsc), -write $(dsc))
 	c1541 -attach contiki.d64 $(foreach prg, $(wildcard *.prg), -write $(prg))
