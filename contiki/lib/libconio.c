@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: libconio.c,v 1.3 2003/04/15 21:22:35 adamdunkels Exp $
+ * $Id: libconio.c,v 1.4 2003/08/09 13:35:43 adamdunkels Exp $
  *
  */
 
@@ -40,6 +40,7 @@
 
 static unsigned char cursx, cursy;
 static unsigned char reversed;
+static unsigned char color;
 
 /*-----------------------------------------------------------------------------------*/
 unsigned char
@@ -76,7 +77,7 @@ revers(unsigned char c)
 void
 cputc(char c)
 {
-  ctk_arch_draw_char(c, cursx, cursy, reversed);
+  ctk_arch_draw_char(c, cursx, cursy, reversed, color);
   ++cursx;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -112,7 +113,8 @@ cvline(unsigned char length)
 {
   int i;
   for(i = 0; i < length; ++i) {
-    ctk_arch_draw_char('|', cursx, cursy, 0);    
+    cputc('|');
+    --cursx;
     ++cursy;
   }
 }
@@ -162,7 +164,7 @@ cputcxy(unsigned char x, unsigned char y, char c)
 void
 textcolor(unsigned char c)
 {
-
+  color = c;
 }
 /*-----------------------------------------------------------------------------------*/
 void
