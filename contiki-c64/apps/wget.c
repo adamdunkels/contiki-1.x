@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.12 2004/09/19 15:32:38 adamdunkels Exp $
+ * $Id: wget.c,v 1.13 2004/09/19 18:58:48 adamdunkels Exp $
  *
  */
 
@@ -315,7 +315,11 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
       ds.track = 1;
       ds.sect = 0;
       bufferptr = 0;
-      /*      c64_dio_init(_curunit);*/
+#if USE_KERNAL
+#else
+      c64_dio_init(_curunit);
+#endif
+      
       /*      c64_dio_init(8);*/
     }
   } else if(ev == ctk_signal_hyperlink_activate) {
