@@ -11,7 +11,5 @@
 #include "memb.h"
 #include "timer.h"
 
-#include "ctk.h"
-#include "cfs.h"
 
 #endif /* __CONTIKI_H__ */
