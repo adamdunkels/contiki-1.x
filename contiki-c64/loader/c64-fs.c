@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.5 2003/08/09 13:27:41 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.6 2003/08/15 18:47:17 adamdunkels Exp $
  *
  */
 
@@ -174,7 +174,7 @@ unsigned char
 c64_fs_readdir(register struct c64_fs_dir *d,
 	       register struct c64_fs_dirent *f)
 {
-  struct directory_entry *de;
+  static struct directory_entry *de;
   register char *nameptr;
   int i;
   
