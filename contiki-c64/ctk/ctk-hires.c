@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.6 2003/08/15 18:46:25 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.7 2003/08/20 19:55:25 adamdunkels Exp $
  *
  */
 
@@ -436,10 +436,11 @@ draw_widget(register struct ctk_widget *w,
   static unsigned char i;
   static char c;
   static unsigned char len;
+  static unsigned char tmp;
   char *text;
   
   xpos = x + w->x;
-  ypos = y + w->y;
+  ypos = y + w->y;  
   
   switch(w->type) {
   case CTK_WIDGET_SEPARATOR:
@@ -494,8 +495,9 @@ draw_widget(register struct ctk_widget *w,
       hires_revers(0);
     }
     xscroll = 0;
-    if(w->widget.textentry.xpos >= w->w - 1) {
-      xscroll = w->widget.textentry.xpos - w->w + 1;
+    tmp = w->w - 1;
+    if(w->widget.textentry.xpos >= tmp) {
+      xscroll = w->widget.textentry.xpos - tmp;
     }
     if(ypos >= clipy1 && ypos < clipy2) {
       if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT) {
@@ -521,8 +523,9 @@ draw_widget(register struct ctk_widget *w,
 	/*	  hires_gotoxy(xpos + 1, ypos);          */
 	ctk_hires_cputsn(text, w->w);
 	i = hires_wherex();
-	if(i - xpos - 1 < w->w) {
-	  ctk_hires_cclear(w->w - (i - xpos) + 1);
+	tmp = i - xpos - 1;
+	if(tmp < w->w) {
+	  ctk_hires_cclear(w->w - tmp);
 	}
 	ctk_hires_cputc('|');
       }
@@ -538,9 +541,11 @@ draw_widget(register struct ctk_widget *w,
       if(x + len >= SCREEN_WIDTH) {
 	x = SCREEN_WIDTH - len;
       }
-      
-      if(ypos + 3 < clipy2) {
-	hires_gotoxy(x, ypos + 3);
+
+      tmp = ypos + 3;
+	
+      if(tmp < clipy2) {
+	hires_gotoxy(x, tmp);
 	ctk_hires_cputsn(w->widget.icon.title, len);
       }
 
