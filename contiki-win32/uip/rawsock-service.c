@@ -16,7 +16,7 @@ EK_PROCESS(proc, PACKET_SERVICE_NAME, EK_PRIO_NORMAL,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
-EK_PROCESS_INIT(rawsock_service_init, arg)
+EK_PROCESS_INIT(packet_service_init, arg)
 {
   ek_service_start(PACKET_SERVICE_NAME, &proc);
 }
