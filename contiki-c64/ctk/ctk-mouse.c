@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mouse.c,v 1.2 2003/04/09 09:02:06 adamdunkels Exp $
+ * $Id: ctk-mouse.c,v 1.3 2003/04/11 20:24:35 adamdunkels Exp $
  *
  */
 
@@ -62,16 +62,15 @@ ctk_mouse_init(void)
   asm("lda #>%v", ctk_mouse_asm_irq);
   asm("sta $0315");   
   asm("cli");
-
-  /* Turn on sprites 0 and 1 */
-  asm("lda #3");
-  asm("sta $d015");
-
+  
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned short
 ctk_mouse_x(void)
 {
+  if(ctk_mouse_joyx >= 320) {
+    ctk_mouse_joyx = 319;
+  }
   return ctk_mouse_joyx;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -97,6 +96,22 @@ unsigned char
 ctk_mouse_ytoc(unsigned short y)
 {
   return y / 8;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+ctk_mouse_hide(void)
+{
+  /* Turn off sprites 0 and 1 */
+  asm("lda #0");
+  asm("sta $d015"); 
+}
+/*-----------------------------------------------------------------------------------*/
+void
+ctk_mouse_show(void)
+{  
+  /* Turn on sprites 0 and 1 */
+  asm("lda #3");
+  asm("sta $d015"); 
 }
 /*-----------------------------------------------------------------------------------*/
 #endif /* CTK_CONF_MOUSE_SUPPORT */

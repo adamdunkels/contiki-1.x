@@ -69,17 +69,18 @@ ydy:
 	  tya
 	  clc
 	  adc _ctk_mouse_joyy
-	  sta _ctk_mouse_joyy
-	  php
-	  lda #$ff
-	  cpy #0
-	  bmi nolda0
-	  lda #0
-nolda0:
-	  plp
-	  adc _ctk_mouse_joyy+1
-	  sta _ctk_mouse_joyy+1
 
+	  cmp #240
+	  bcc :+
+	  lda #0
+:	
+		
+ 	  cmp #200
+ 	  bcc :+
+ 	  lda #199		
+:
+	  sta _ctk_mouse_joyy
+	
 	  cpx lastjoydx
 	  stx lastjoydx
 	  bne noxdx
@@ -120,7 +121,8 @@ xdx:
 nolda02:
 	  plp
 	  adc _ctk_mouse_joyx+1
-	  sta _ctk_mouse_joyy+1
+	  and #1
+	  sta _ctk_mouse_joyx+1
 	                                                                                       
 	  lda _ctk_mouse_joyy
 	  clc
@@ -136,5 +138,8 @@ nolda02:
 	  lda #0
 	  adc _ctk_mouse_joyx+1
 	  and #1
+	  beq :+
+	  lda #3
+:		
 	  sta $d010                                                                                       
 	  jmp $ea31
