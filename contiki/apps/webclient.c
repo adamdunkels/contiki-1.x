@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: webclient.c,v 1.2 2003/03/28 12:07:54 adamdunkels Exp $
  *
  */
 
@@ -83,19 +83,19 @@ static struct webclient_state s;
 char *
 webclient_mimetype(void)
 {
-  return &s.mimetype;
+  return s.mimetype;
 }
 /*-----------------------------------------------------------------------------------*/
 char *
 webclient_filename(void)
 {
-  return &s.file;
+  return s.file;
 }
 /*-----------------------------------------------------------------------------------*/
 char *
 webclient_hostname(void)
 {
-  return &s.host;
+  return s.host;
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned short
