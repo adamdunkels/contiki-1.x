@@ -243,9 +243,23 @@ sendl:
          dex
          bpl sendl
 
+	 lda $d020
+	 pha
+	 lda #1
+	 sta $d020
+	 pla
+	 sta $d020
+		
          rts
 ;---------------------------------------
 recv:
+	 lda $d020
+	 pha
+	 lda #0
+	 sta $d020
+	 pla
+	 sta $d020
+	
          ldx #7
 recvl:	
          lda $dd00

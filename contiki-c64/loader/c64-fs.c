@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.1 2003/08/04 00:12:50 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.2 2003/08/04 00:52:42 adamdunkels Exp $
  *
  */
 
@@ -58,6 +58,7 @@ static unsigned char dirbuftrack = 0, dirbufsect = 0;
 static unsigned char filebuf[256];
 static unsigned char filebuftrack = 0, filebufsect = 0;
 
+static struct c64_fs_dirent lastdirent;
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -78,6 +79,16 @@ static struct c64_fs_dirent opendirent;
 int
 c64_fs_open(const char *name, struct c64_fs_file *f)
 {
+  /* First check if we already have the file cached. If so, we don't
+     need to do an expensive directory lookup. */
+  if(strncmp(lastdirent.name, name, 16) == 0) {
+    f->track = lastdirent.track;
+    f->sect = lastdirent.sect;
+    f->ptr = 2;
+    return 0;
+  }
+
+  /* Not in cache, so we walk through directory instead. */
   c64_fs_opendir(&opendir);
 
   while(c64_fs_readdir(&opendir, &opendirent) == 0) {
@@ -172,6 +183,10 @@ c64_fs_readdir(struct c64_fs_dir *d,
   f->track = de->track;
   f->sect = de->sect;
 
+  /* Save directory entry as a cache for a file open that might follow
+     this readdir. */
+  memcpy(&lastdirent, f, sizeof(struct c64_fs_dirent));
+  
   if(d->ptr == 226) {
     if(dirbuf[0] == 0) {
       return 1;
