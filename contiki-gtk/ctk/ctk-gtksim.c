@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-gtksim.c,v 1.2 2003/04/15 21:20:43 adamdunkels Exp $
+ * $Id: ctk-gtksim.c,v 1.3 2003/08/11 22:20:56 adamdunkels Exp $
  *
  */
 
@@ -51,8 +51,8 @@
 #define FONT_HEIGHT 20
 #define FONT_WIDTH  16
 
-#define SCREEN_WIDTH 40
-#define SCREEN_HEIGHT 25
+#define SCREEN_WIDTH LIBCONIO_CONF_SCREEN_WIDTH
+#define SCREEN_HEIGHT LIBCONIO_CONF_SCREEN_HEIGHT
 
 static GdkPixmap *pixmap = NULL;
 static GtkWidget *drawing_area;
@@ -64,7 +64,8 @@ static int mouse_x, mouse_y, mouse_button;
 void
 ctk_arch_draw_char(char c,
 		   unsigned char x, unsigned char y,
-		   unsigned char reversed)
+		   unsigned char reversed,
+		   unsigned char color)
 {
   char str[2];
 
