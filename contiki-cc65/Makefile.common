@@ -7,7 +7,7 @@ CFLAGSCOMMON=-I $(CONTIKICC65)/apps -I $(CONTIKICC65)/ctk -I $(CONTIKICC65)/uip 
        -I apps -I ctk -I uip -I conf -I loader \
        -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
        -I $(CONTIKI)/lib -I $(CONTIKI)/uip \
-       -t $(SYS) --add-source
+       -t $(SYS) --add-source 
 CLFLAGS=-Ln contiki-labels
 OPT=-Or
 
@@ -28,8 +28,17 @@ OPT=-Or
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
 %.o: uip/%.c
-	$(CC) $(CFLAGS)  -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(CC) $(CFLAGS) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
+
+rrnet-drv.o: uip/rrnet-drv.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+tfe-drv.o: uip/tfe-drv.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
 
 %.o: $(CONTIKICC65)/apps/%.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
@@ -48,7 +57,7 @@ OPT=-Or
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
 %.o: $(CONTIKI)/ctk/%.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<	
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
 %.o: $(CONTIKI)/ek/%.c
@@ -81,6 +90,9 @@ OPT=-Or
 %.o: $(CONTIKICC65)/loader/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
+%.sav:  %.o contiki-labels.o
+	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+
 %.prg:  %.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
@@ -106,7 +118,7 @@ TELNET=simpletelnet.o telnet.o
 WGET=wget.o webclient.o http-strings.o http-user-agent-string.o 
 
 clean:
-	rm -f *.o *~ *core contiki *.s *.dsc *.prg *.drv contiki-labels
+	rm -f *.o *~ *core contiki *.s *.dsc *.prg *.drv *.sav contiki-labels
 
 depend:
 	gcc $(CCDEPFLAGS) -MM -Iapps -Ictk -Iuip -Iconf -Iloader \
@@ -125,5 +137,6 @@ d64:
 	c1541 -attach contiki.d64 -write config.cfg
 	c1541 -attach contiki.d64 $(foreach dsc, $(wildcard *.dsc), -write $(dsc))
 	c1541 -attach contiki.d64 $(foreach prg, $(wildcard *.prg), -write $(prg))
+	c1541 -attach contiki.d64 $(foreach sav, $(wildcard *.sav), -write $(sav))
 	c1541 -attach contiki.d64 $(foreach drv, $(wildcard *.drv), -write $(drv))
 	c1541 -attach contiki.d64 -list
