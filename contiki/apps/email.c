@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.13 2004/06/06 05:59:20 adamdunkels Exp $
+ * $Id: email.c,v 1.14 2004/06/13 09:48:32 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@
 
 #include "ctk-textedit.h"
 
+#include <string.h>
 
 #define MAXNUMMSGS 6
 

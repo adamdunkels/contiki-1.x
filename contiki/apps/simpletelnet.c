@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.10 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.11 2004/06/13 09:48:32 oliverschmidt Exp $
  *
  */
 
@@ -42,6 +42,8 @@
 #include "telnet.h"
 #include "simpletelnet.h"
 #include "loader.h"
+
+#include <string.h>
 
 /* Telnet window */
 static struct ctk_window telnetwindow;
