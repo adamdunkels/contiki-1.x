@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.2 2003/09/07 18:13:16 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.3 2004/06/06 06:35:12 adamdunkels Exp $
  *
  */
 
@@ -46,7 +46,7 @@
 #include "netconf-dsc.h"
 #include "memstat-dsc.h"
 
-#include "uip_main.h"
+#include "uiplib.h"
 #include "uip.h"
 #include "uip_arp.h"
 #if WITH_TFE
@@ -66,7 +66,6 @@ main(int argc, char **argv)
   
 #ifdef WITH_UIP
   uip_init();
-  uip_main_init();
   resolv_init();
 
 #ifdef WITH_TFE
@@ -105,3 +104,8 @@ main(int argc, char **argv)
   argc = argc;
 }
 /*-----------------------------------------------------------------------------------*/
+ek_clock_t
+ek_clock(void)
+{
+  return clock();
+}
