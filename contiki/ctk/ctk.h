@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.21 2004/08/09 20:30:50 adamdunkels Exp $
+ * $Id: ctk.h,v 1.22 2004/09/12 07:22:39 adamdunkels Exp $
  *
  */
 
@@ -315,15 +315,20 @@ struct ctk_icon {
   char *textmap;
 };
 
-#define CTK_BITMAP(x, y, w, h, bitmap) \
-  NULL, NULL, x, y, CTK_WIDGET_BITMAP, w, h, CTK_WIDGET_FLAG_INITIALIZER(0) bitmap,
+#define CTK_BITMAP(x, y, w, h, bitmap, bitmap_width, bitmap_height) \
+  NULL, NULL, x, y, CTK_WIDGET_BITMAP, w, h, \
+  CTK_WIDGET_FLAG_INITIALIZER(0) bitmap, bitmap_width, bitmap_height
 struct ctk_bitmap {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
   unsigned char *bitmap;
+  unsigned short bw, bh;
 };
 
 #define CTK_TEXTMAP_NORMAL 0
@@ -383,6 +388,7 @@ struct ctk_widget_icon {
 
 struct ctk_widget_bitmap {
   unsigned char *bitmap;
+  unsigned short bw, bh;  
 };
 /** @} */
 
