@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.15 2003/08/09 13:31:18 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.16 2003/08/09 23:30:37 adamdunkels Exp $
  *
  */
 
@@ -42,6 +42,7 @@
 #include "uip.h"
 #include "ctk.h"
 #include "ctk-draw.h"
+#include "ctk-conf.h"
 #include "dispatcher.h"
 #include "resolv.h"
 
@@ -76,10 +77,13 @@ static struct ctk_label loadingname =
 static struct ctk_window errordialog;
 static struct ctk_label errormsg =
   {CTK_LABEL(0, 1, 22, 1, "Error loading program:")};
+static char errorfilename[20];
+static struct ctk_label errorfilelabel =
+  {CTK_LABEL(2, 3, 20, 1, errorfilename)};
 static struct ctk_label errortype =
-  {CTK_LABEL(4, 3, 16, 1, "")};
+  {CTK_LABEL(4, 5, 16, 1, "")};
 static struct ctk_button errorokbutton =
-  {CTK_BUTTON(9, 5, 2, "Ok")};
+  {CTK_BUTTON(9, 7, 2, "Ok")};
 
 
 #endif /* WITH_LOADER_ARCH */
@@ -104,6 +108,8 @@ static ek_signal_t loader_signal_load;
 static ek_signal_t loader_signal_display_name;
 
 static char *displayname;
+
+static char screensaver[20];
 
 /*-----------------------------------------------------------------------------------*/
 void
@@ -141,27 +147,35 @@ program_handler_init(void)
     CTK_WIDGET_ADD(&loadingdialog, &loadingmsg);
     CTK_WIDGET_ADD(&loadingdialog, &loadingname);
 
-    ctk_dialog_new(&errordialog, 22, 6);
+    ctk_dialog_new(&errordialog, 22, 8);
     CTK_WIDGET_ADD(&errordialog, &errormsg);
+    CTK_WIDGET_ADD(&errordialog, &errorfilelabel);
     CTK_WIDGET_ADD(&errordialog, &errortype);
     CTK_WIDGET_ADD(&errordialog, &errorokbutton);
+    CTK_WIDGET_FOCUS(&errordialog, &errorokbutton);
 #endif /* WITH_LOADER_ARCH */
     
     dispatcher_listen(ctk_signal_menu_activate);
     dispatcher_listen(ctk_signal_button_activate);
 
+#if CTK_CONF_SCREENSAVER
+    dispatcher_listen(ctk_signal_screensaver_start);
+#endif /* CTK_CONF_SCREENSAVER */
+    
     loader_signal_load = dispatcher_sigalloc();
     dispatcher_listen(loader_signal_load);
     loader_signal_display_name = dispatcher_sigalloc();
     dispatcher_listen(loader_signal_display_name);
 
     displayname = NULL;
+
+    screensaver[0] = 0;
   }
   
 }
 /*-----------------------------------------------------------------------------------*/
 #ifdef WITH_LOADER_ARCH
-#define NUM_LOADERNAMES 8
+#define NUM_LOADERNAMES 6
 #define NAMELEN 16
 static char loadernames[(NAMELEN + 1) * NUM_LOADERNAMES];
 static char * 
@@ -211,6 +225,12 @@ program_handler_load(char *name)
 #define RUN(prg, initfunc) initfunc()/*; ctk_desktop_redraw(NULL)*/
 #endif /* WITH_LOADER_ARCH */
 /*-----------------------------------------------------------------------------------*/
+void
+program_handler_screensaver(char *name)
+{
+  strncpy(screensaver, name, sizeof(screensaver));
+}
+/*-----------------------------------------------------------------------------------*/
 static
 DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 {
@@ -253,8 +273,15 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 	    contikidsc[contikimenu.active]->init);
       }
 #endif /* WITH_LOADER_ARCH */
-    }      
-    
+    }
+#if CTK_CONF_SCREENSAVER
+  } else if(s == ctk_signal_screensaver_start) {
+#if WITH_LOADER_ARCH
+    if(screensaver[0] != 0) {
+      program_handler_load(screensaver);
+    }
+#endif /* WITH_LOADER_ARCH */
+#endif /* CTK_CONF_SCREENSAVER */
   } else if(s == loader_signal_display_name) {
 #if WITH_LOADER_ARCH
     if(displayname == NULL) {
@@ -273,11 +300,12 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
       ctk_dialog_close();
       displayname = NULL;
       err = LOADER_LOAD(data);
-      loadername_free(data);
       if(err != LOADER_OK) {
+	strncpy(errorfilename, data, sizeof(errorfilename));
 	ctk_label_set_text(&errortype, errormsgs[err]);
 	ctk_dialog_open(&errordialog);
       }
+      loadername_free(data);
     } else {
       /* Try again. */
       dispatcher_emit(loader_signal_display_name, data, id);
