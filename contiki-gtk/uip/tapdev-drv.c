@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tapdev-drv.c,v 1.2 2003/08/20 22:38:13 adamdunkels Exp $
+ * $Id: tapdev-drv.c,v 1.3 2003/09/04 19:20:07 adamdunkels Exp $
  *
  */
 
@@ -61,8 +61,10 @@ static ek_id_t id;
 
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tapdev_drv_init)
+LOADER_INIT_FUNC(tapdev_drv_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);    
     tapdev_init();

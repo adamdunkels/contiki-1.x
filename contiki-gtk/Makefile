@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.7 2003/08/20 22:37:45 adamdunkels Exp $
+# $Id: Makefile,v 1.8 2003/09/04 19:20:07 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -78,14 +78,14 @@ contiki: contiki-main.o \
  program-handler.o about.o netconf.o processes.o \
  about-dsc.o netconf-dsc.o processes-dsc.o  \
  $(CTKVNC) \
- ctk.o dispatcher.o \
+ ctk.o dispatcher.o arg.o \
  uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o \
  uip_main.o tapdev.o tapdev-drv.o \
  $(EMAIL) email-dsc.o $(WEBSERVER) $(TELNET) telnet-dsc.o \
  vnc.o vnc-viewer.o vnc-draw.o \
  calc.o calc-dsc.o \
- $(WWW) \
-# maze.o maze-dsc.o
+ $(WWW) telnetd.o telnetd-dsc.o shell.o \
+ #maze.o maze-dsc.o
 	gcc $(LDFLAGS) -o $@ $^
 
 clean:
