@@ -45,7 +45,7 @@ static DWORD (WINAPI *DeleteProxyArpEntry)(DWORD, DWORD, DWORD);
 
 void debug_printf(char *format, ...);
 
-static DWORD  interfaceindex;
+static DWORD  interfaceindex = -1;
 static DWORD  proxyaddr;
 static SOCKET rawsock = INVALID_SOCKET;
 
@@ -135,7 +135,7 @@ rawsock_init(void)
     error_exit("GetIpAddrTable(ptr) error: %d\n", retval);
   }
 
-  while(interfaceindex == 0) {
+  while(interfaceindex == -1) {
     if(entry == addrtable->dwNumEntries) {
       error_exit("Parameter error: Unknown host IP address\n", 0);
     }
@@ -159,6 +159,11 @@ rawsock_init(void)
   addr.sin_port        = 0;
   if(bind(rawsock, (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
     error_exit("bind() error: %d\n", WSAGetLastError());
+  }
+
+  if(setsockopt(rawsock, SOL_SOCKET, SO_BROADCAST,
+		(char *)&on, sizeof(on)) == SOCKET_ERROR) {
+    error_exit("setsockopt(SO_BROADCAST) error: %d\n", WSAGetLastError());
   }
 
   if(setsockopt(rawsock, IPPROTO_IP, IP_HDRINCL,
@@ -200,7 +205,8 @@ rawsock_send(void)
   if(sendto(rawsock, sendbuf, uip_len, 0,
 	    (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
 
-    if(WSAGetLastError() != WSAEHOSTUNREACH) {
+    if(WSAGetLastError() != WSAEADDRNOTAVAIL &&
+       WSAGetLastError() != WSAEHOSTUNREACH) {
       error_exit("sendto() error: %d\n", WSAGetLastError());
     }
   }
