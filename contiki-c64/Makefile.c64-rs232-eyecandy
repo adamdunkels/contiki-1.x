@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-rs232-eyecandy,v 1.2 2003/04/08 19:10:13 adamdunkels Exp $
+# $Id: Makefile.c64-rs232-eyecandy,v 1.3 2003/04/09 00:31:13 adamdunkels Exp $
 #
 
 all: contiki contiki-labels.o
@@ -49,7 +49,7 @@ contiki-labels.s: contiki
 
 contiki:  contiki-main.o petsciiconv.o \
  ctk.o ek.o dispatcher.o loader-arch.o \
- fire.o \
+ fire.o ctk-mouse.o ctk-mouse-asm.o \
  $(CTK_EYECANDY) \
  $(UIP) rs232dev.o \
  program-handler.o

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -32,42 +32,71 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-eyecandy-asm.h,v 1.3 2003/04/09 00:31:14 adamdunkels Exp $
+ * $Id: ctk-mouse.c,v 1.1 2003/04/09 00:31:14 adamdunkels Exp $
  *
  */
 
-#ifndef __CTK_EYECANDY_ASM_H__
-#define __CTK_EYECANDY_ASM_H__
+#include "ctk.h"
+#include "ctk-mouse.h"
+#include "ctk-conf.h"
 
-void __fastcall__ ctk_eyecandy_cclear(unsigned char len);
-void __fastcall__ ctk_eyecandy_chline(unsigned char len);
-void __fastcall__ ctk_eyecandy_cputc(unsigned char c);
-void __fastcall__ ctk_eyecandy_cputsn(unsigned char *str,
-				      unsigned char len);
+#if CTK_CONF_MOUSE_SUPPORT
 
-void ctk_eyecandy_draw_buttonleft(void);
-void ctk_eyecandy_draw_buttonright(void);
+unsigned short ctk_mouse_joyy, ctk_mouse_joyx;
+unsigned char ctk_mouse_firebutton;
 
-struct ctk_eyecandy_windowparams {
-  unsigned char w;
-  unsigned char h;
-  unsigned char clipy1;
-  unsigned char clipy2;
-  unsigned char color1;
-  unsigned char color2;
-  unsigned char titlelen;
-  char *title;
-};
-extern struct ctk_eyecandy_windowparams ctk_eyecandy_windowparams;
-void ctk_eyecandy_draw_windowborders(void);
+extern void ctk_mouse_asm_irq(void);
 
-extern unsigned char ctk_eyecandy_cursx,
-  ctk_eyecandy_cursy,
-  ctk_eyecandy_color,
-  ctk_eyecandy_reversed,
-  ctk_eyecandy_underline;
+/*-----------------------------------------------------------------------------------*/
+void
+ctk_mouse_init(void)
+{
+  ctk_mouse_joyx = ctk_mouse_joyy = 0;
+  
+  /* Setup and start IRQ */
+  asm("sei");
+  asm("lda #<%v", ctk_mouse_asm_irq);
+  asm("sta $0314");
+  asm("lda #>%v", ctk_mouse_asm_irq);
+  asm("sta $0315");   
+  asm("cli");
 
+  /* Turn on sprite 0 */
+  asm("lda #1");
+  asm("sta $d015");
 
-void __fastcall__ ctk_eyecandy_draw_bitmapline(unsigned char len);
-
-#endif /* __CTK_EYECANDY_ASM_H__ */
+  asm("lda #9");
+  asm("sta $d027");
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned short
+ctk_mouse_x(void)
+{
+  return ctk_mouse_joyx;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned short
+ctk_mouse_y(void)
+{
+  return ctk_mouse_joyy;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_mouse_button(void)
+{
+  return ctk_mouse_firebutton;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_mouse_xtoc(unsigned short x)
+{
+  return x / 8;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_mouse_ytoc(unsigned short y)
+{
+  return y / 8;
+}
+/*-----------------------------------------------------------------------------------*/
+#endif /* CTK_CONF_MOUSE_SUPPORT */
