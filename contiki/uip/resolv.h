@@ -34,7 +34,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.h,v 1.4 2003/11/27 15:54:02 adamdunkels Exp $
+ * $Id: resolv.h,v 1.5 2004/02/24 09:54:52 adamdunkels Exp $
  *
  */
 #ifndef __RESOLV_H__
@@ -60,7 +60,8 @@ void resolv_found(char *name, u16_t *ipaddr);
 /* Functions. */
 void resolv_conf(u16_t *dnsserver);
 u16_t *resolv_getserver(void);
-LOADER_INIT_FUNC(resolv_init, arg);
+/*LOADER_INIT_FUNC(resolv_init, arg);*/
+void resolv_init(char *arg);
 u16_t *resolv_lookup(char *name);
 void resolv_query(char *name);
 

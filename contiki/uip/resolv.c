@@ -58,9 +58,11 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.10 2003/11/27 15:53:48 adamdunkels Exp $
+ * $Id: resolv.c,v 1.11 2004/02/24 09:54:52 adamdunkels Exp $
  *
  */
+
+#include <string.h>
 
 #include "resolv.h"
 #include "dispatcher.h"
@@ -458,7 +460,9 @@ resolv_conf(u16_t *dnsserver)
  * Initalize the resolver.
  */
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(resolv_init, arg)
+/*LOADER_INIT_FUNC(resolv_init, arg)*/
+void
+resolv_init(char *arg)
 {
  static u8_t i;
  arg_free(arg);
