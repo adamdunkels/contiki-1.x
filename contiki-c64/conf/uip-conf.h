@@ -29,14 +29,14 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h,v 1.6 2004/09/12 14:07:31 adamdunkels Exp $
+ * $Id: uip-conf.h,v 1.7 2004/09/18 20:39:25 adamdunkels Exp $
  *
  */
 #ifndef __UIP_CONF_H__
 
 #define UIP_CONF_MAX_CONNECTIONS 10
 #define UIP_CONF_MAX_LISTENPORTS 10
-#define UIP_CONF_BUFFER_SIZE     310
+#define UIP_CONF_BUFFER_SIZE     350
 #define UIP_CONF_RECEIVE_WINDOW  120
 
 #define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
@@ -50,6 +50,7 @@
 #define UIP_CONF_UDP_CONNS       6
 #define UIP_CONF_BROADCAST       0
 
+#define UIP_CONF_UDP_CHECKSUMS   0
 
 
 #endif /* __UIP_CONF_H__ */
