@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.1 2003/05/28 05:21:51 adamdunkels Exp $
+ * $Id: httpd.h,v 1.2 2003/07/31 23:33:02 adamdunkels Exp $
  *
  */
 
@@ -46,6 +46,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state);
 struct httpd_state {
   u8_t state; 
   u16_t count;
+  u8_t poll;
   char *dataptr;
   char *script;
 };
