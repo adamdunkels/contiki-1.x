@@ -32,7 +32,7 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: calc.c,v 1.1 2003/04/09 19:16:49 adamdunkels Exp $
+ * $Id: calc.c,v 1.2 2003/04/11 20:12:34 adamdunkels Exp $
  *
  */
 
@@ -64,7 +64,7 @@ static struct ctk_button calcbutton =
 
 static DISPATCHER_SIGHANDLER(calc_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Calc world", NULL, calc_sighandler, NULL)};
+  {DISPATCHER_PROC("Calculator", NULL, calc_sighandler, NULL)};
 static ek_id_t id;
 
 static unsigned int operand1, operand2;
@@ -111,7 +111,6 @@ calc_quit(void)
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
-  ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
 static void
