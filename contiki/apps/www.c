@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.15 2003/08/13 22:51:07 adamdunkels Exp $
+ * $Id: www.c,v 1.16 2003/08/15 18:48:35 adamdunkels Exp $
  *
  */
 
@@ -116,7 +116,9 @@ struct formattribs {
 
 union pagewidgetattrib {
   char url[WWW_CONF_MAX_URLLEN];
+#if WWW_CONF_FORMS
   struct formattribs form;
+#endif /* WWW_CONF_FORMS */
 };
 static struct ctk_widget pagewidgets[WWW_CONF_MAX_NUMPAGEWIDGETS];
 static union pagewidgetattrib pagewidgetattribs[WWW_CONF_MAX_NUMPAGEWIDGETS];
@@ -823,7 +825,7 @@ static void *
 add_pagewidget(char *text, unsigned char type,
 	       unsigned char border)
 {  
-  struct ctk_widget *lptr;
+  register struct ctk_widget *lptr;
   register unsigned char *webpageptr;
   static unsigned char len, maxwidth;
   static void *dataptr;
