@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader.h,v 1.3 2003/04/17 19:00:02 adamdunkels Exp $
+ * $Id: loader.h,v 1.4 2003/04/17 20:06:35 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_H__
@@ -57,7 +57,7 @@
 #define LOADER_UNLOAD()
 #endif /* LOADER_UNLOAD */
 
-#ifndef LOADER_UNLOAD_DSC(dsc)
+#ifndef LOADER_UNLOAD_DSC
 #define LOADER_UNLOAD_DSC(dsc)
 #endif /* LOADER_UNLOAD */
 
