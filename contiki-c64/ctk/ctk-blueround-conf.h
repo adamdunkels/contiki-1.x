@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-blueround-conf.h,v 1.1 2003/03/19 16:26:19 adamdunkels Exp $
+ * $Id: ctk-blueround-conf.h,v 1.2 2003/04/08 19:27:12 adamdunkels Exp $
  *
  */
 
@@ -138,6 +138,15 @@ static unsigned char colors[] = {
   COLOR(COLOR_BLACK, COLOR_CYAN),
   COLOR(COLOR_WHITE, COLOR_BLUE),
   COLOR(COLOR_WHITE, COLOR_BLACK),
+
+
+  /* Bitmap colors. */
+  COLOR(COLOR_BLUE, COLOR_BLACK),
+  COLOR(COLOR_BLUE, COLOR_LIGHTBLUE),
+  COLOR(COLOR_LIGHTBLUE, COLOR_BLACK),
+  COLOR(COLOR_LIGHTBLUE, COLOR_CYAN),
+  COLOR(COLOR_LIGHTBLUE, COLOR_BLACK),
+  COLOR(COLOR_LIGHTBLUE, COLOR_CYAN),
 
 
   /* Icon colors. */
