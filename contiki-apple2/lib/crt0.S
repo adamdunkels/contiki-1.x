@@ -5,11 +5,11 @@
 ;
 
 	.export		_exit
-	.export		__heaporg, __heapptr, __heapend
-	.export		__heapfirst, __heaplast
 	.import	   	initlib, donelib
 	.import	   	zerobss
-       	.import	       	__RAM_START__, __RAM_LAST__	; Linker generated
+       	.import	       	__STARTUP_RUN__			; Linker generated
+       	.import	       	__BSS_RUN__, __BSS_SIZE__	; Linker generated
+       	.import	       	__CODE_RUN__, __CODE_SIZE__	; Linker generated
 	.import		callmain
 	.importzp	sp
 
@@ -18,8 +18,8 @@
 
 .segment	"EXEHDR"
 
-       	.word  	__RAM_START__			; Start address
-       	.word  	__RAM_LAST__ - __RAM_START__	; Size
+       	.word  	__STARTUP_RUN__					; Start address
+       	.word  	__BSS_RUN__ + __CODE_SIZE__ - __STARTUP_RUN__	; Size
 
 ; ------------------------------------------------------------------------
 ; Place the startup code in a special segment.
@@ -59,28 +59,51 @@
 	eor	#$A5
 	sta	$03F4
 		
-; Switch in LC bank 2 for R/W
+; Switch in LC bank 2 for W/O
 
-	bit	$C083
-	bit	$C083
+	bit	$C081
+	bit	$C081
 
-; Clear the BSS data (in LC bank 2)
+; Set source start
+
+	lda	#<__BSS_RUN__
+	ldx	#>__BSS_RUN__
+	sta	$3C
+	stx	$3D
+
+; Set source end
+
+	lda	#<(__BSS_RUN__ + __CODE_SIZE__)
+	ldx	#>(__BSS_RUN__ + __CODE_SIZE__)
+	sta	$3E
+	stx	$3F
+
+; Set destination
+
+	lda	#<__CODE_RUN__
+	ldx	#>__CODE_RUN__
+	sta	$42
+	stx	$43
+
+; Reset index and call MOVE
+
+	ldy	#$00
+	jsr	$FE2C
+
+; Switch in LC bank 2 for R/O
+
+	bit	$C080
+
+; Clear the BSS data
 
 	jsr	zerobss
 
-; Setup the stack in LC bank 2
+; Setup the stack at HIMEM
 
-	lda    	#$00
-	ldx	#$E0
+	lda    	$73
+	ldx	$73+1
 	sta	sp
        	stx	sp+1
-
-; Setup the heap end at HIMEM
-
-	lda	$73
-	ldx	$73+1
-	sta	__heapend
-	stx	__heapend+1
 
 ; Call module constructors
 
@@ -97,6 +120,10 @@ _exit:	ldx	#$02
 	sta	$03F2,x
 	dex
 	bpl	:-
+
+; Switch in LC bank 2 for R/O
+
+	bit	$C080
 
 ; Call module destructors
 
@@ -119,14 +146,3 @@ _exit:	ldx	#$02
 .data
 
 rvsave:	.res	3
-
-__heaporg:
-       	.word  	__RAM_LAST__	; Linker calculates this symbol
-__heapptr:
-      	.word	__RAM_LAST__	; Dito
-__heapend:
-       	.word	0
-__heapfirst:
-      	.word	0
-__heaplast:
-      	.word	0

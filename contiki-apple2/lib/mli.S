@@ -6,9 +6,6 @@
 ; int write (int fd, const void* buf, unsigned count);
 ; int close (int fd);
 ;
-; Write() only supports buffers in memory pages not protected by ProDOS.
-; Read() additionally supports small (up to 128 bytes) buffers in the LC.
-; 
 ; Be sure to keep the value priority of closeallfiles lower than that of
 ; closeallstreams (which is the high level C file I/O counterpart and must be
 ; called before closeallfiles).
@@ -19,7 +16,6 @@
 	.import		__BUFFER_START__, popax
 	.importzp 	ptr1
 
-IN		:= $0200
 PATHNAME	:= $0280
 MLI		:= $BF00
 
@@ -30,13 +26,13 @@ CLOSE_CALL	= $CC
 
 ; ------------------------------------------------------------------------
 
-.bss
+	.bss
 
 PREFIX:		.res	1
 
 ; ------------------------------------------------------------------------
 
-.data
+	.data
 
 OPEN_PARAM:
 		.byte	$03		;PARAM_COUNT
@@ -57,7 +53,7 @@ CLOSE_FD:	.byte	$00		;REF_NUM
 
 ; ------------------------------------------------------------------------
 
-.code
+	.segment	"CONTIKI"
 
 initprefix:
 	lda	PATHNAME
@@ -105,21 +101,9 @@ _read:
 	sta	RW_COUNT_IN
 	stx	RW_COUNT_IN+1
 
-	; Pop buf
+	; Pop and store buf
 	jsr	popax
-	sta	ptr1
-	stx	ptr1+1
-
-	; Is buf located in LC ?
-	cpx	#$D0
-	bcc	:+
-
-	; Yes: Use keyboard buf instead
-	lda	#<IN
-	ldx	#>IN
-
-	; Store buf
-:	sta	RW_BUFFER
+	sta	RW_BUFFER
 	stx	RW_BUFFER+1
 
 	; Pop and store fd
@@ -131,21 +115,8 @@ RW_CMD:	.byte	$00
 	.addr	RW_PARAM
 	bcs	ERROR
 
-	; Is buf located in LC ?
-	ldx	ptr1+1
-	cpx	#$D0
-	bcc	:++
-
-	; Yes: Copy data into buf
-	ldy	#$00
-:	lda	IN,y
-	sta	(ptr1),y
-	iny
-	cpy	RW_COUNT_OUT
-	bcc	:-
-
 	; Return bytes transfered
-:	lda	RW_COUNT_OUT
+	lda	RW_COUNT_OUT
 	ldx	RW_COUNT_OUT+1
 	rts
 

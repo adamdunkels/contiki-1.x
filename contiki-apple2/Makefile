@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.4 2004/12/26 14:13:34 oliverschmidt Exp $
+# $Id: Makefile,v 1.5 2005/01/22 03:00:27 oliverschmidt Exp $
 #
 
 CONTIKI=../contiki
@@ -47,7 +47,7 @@ usage:
 	@echo programsenh
 	@echo '(Also check the Makefile for more targets to try...)'
 
-all: clean apple2enh programs2enh
+all: clean apple2enh programsenh
 
 apple2:
 	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.apple2 SYS=apple2

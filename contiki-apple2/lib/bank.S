@@ -4,6 +4,8 @@
 
 	.export		SETWND, BASCALC
 
+	.segment	"CONTIKI"
+
 SETWND:
 	.ifdef __APPLE2__
 	sei
@@ -13,9 +15,8 @@ SETWND:
 	bit	$C082
 	jsr	$FB4B
 
-	; Switch in LC bank 2 for R/W
-	bit	$C083
-	bit	$C083
+	; Switch in LC bank 2 for R/O
+	bit	$C080
 
 	.ifdef __APPLE2__
 	cli
@@ -31,9 +32,8 @@ BASCALC:
 	bit	$C082
 	jsr	$FBC1
 
-	; Switch in LC bank 2 for R/W
-	bit	$C083
-	bit	$C083
+	; Switch in LC bank 2 for R/O
+	bit	$C080
 
 	.ifdef __APPLE2__
 	cli

@@ -16,8 +16,9 @@ Installation
 3. Use the 'a2tools' by Terry Kyriacopoulos to copy these files into a DOS 3.3
    disk image:
 
-   a2 in b      dos33.dsk CONTIKI.SYSTEM loader.system
+   a2 in b      dos33.dsk CONTIKI.SYSTEM loader~1.sys
    a2 in -r b   dos33.dsk CONTIKI        contiki
+   a2 in b.0000 dos33.dsk TFE.DRV        tfe.drv
    a2 in b.0000 dos33.dsk ABOUT.PRG      about.prg
    a2 in b.0000 dos33.dsk CALC.PRG       calc.prg
    a2 in b.0000 dos33.dsk DHCP.PRG       dhcp.prg
