@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.1 2003/04/08 11:49:12 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.2 2003/04/17 18:59:07 adamdunkels Exp $
  *
  */
 
@@ -40,19 +40,20 @@
 #include <fcntl.h>
 #include "loader-arch.h"
 
+static struct mod_ctrl ctrl = {
+  read            /* Read from disk */
+};
+
 /*-----------------------------------------------------------------------------------*/
-/* loader_arch_load(name)
+/* load(name)
  *
  * Loads a program from disk and executes it. Code originally written by
  * Ullrich von Bassewitz.
  */
 /*-----------------------------------------------------------------------------------*/
-unsigned char
-loader_arch_load(const char *name)
+static unsigned char
+load(const char *name)
 {
-  static struct mod_ctrl ctrl = {
-    read            /* Read from disk */
-  };
   unsigned char res;
   
   /* Now open the file */
@@ -76,7 +77,7 @@ loader_arch_load(const char *name)
     /* We've successfully loaded the module. Call its main function. We
      * could also evaluate the function result code if necessary.
      */
-    ((void (*)(void))ctrl.module)();
+    /*    ((void (*)(void))ctrl.module)();*/
     
   } else {
     
@@ -86,7 +87,30 @@ loader_arch_load(const char *name)
   }
 
   return MLOAD_OK;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+loader_arch_load(const char *name)
+{
+  unsigned char r;
+  r = load(name);
+  if(r == MLOAD_OK) {
+    ((void (*)(void))ctrl.module)();
+  }
+  return r;
+}
+/*-----------------------------------------------------------------------------------*/
+struct dsc *
+loader_arch_load_dsc(const char *name)
+{
+  unsigned char r;
 
+  r = load(name);
+  if(r == MLOAD_OK) {
+    
+    return (struct dsc *)ctrl.module;    
+  }
+  return NULL;
 }
 /*-----------------------------------------------------------------------------------*/
 void

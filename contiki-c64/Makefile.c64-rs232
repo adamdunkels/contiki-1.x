@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-rs232,v 1.1 2003/04/17 15:09:31 adamdunkels Exp $
+# $Id: Makefile.c64-rs232,v 1.2 2003/04/17 18:59:05 adamdunkels Exp $
 #
 
 all: contiki contiki-labels.o
@@ -49,6 +49,7 @@ contiki-labels.s: contiki
 
 contiki:  contiki-main.o petsciiconv.o \
  ctk.o ek.o dispatcher.o loader-arch.o \
+ about-dsc.o netconf-dsc.o processes-dsc.o www-dsc.o \
  fire.o ctk-mouse.o ctk-mouse-asm.o \
  ctk-hires.o ctk-hires-asm.o ctk-hires-theme-default.o \
  $(UIP) rs232dev.o \

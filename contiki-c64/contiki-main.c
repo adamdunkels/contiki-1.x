@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.3 2003/04/09 09:01:52 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.4 2003/04/17 18:59:06 adamdunkels Exp $
  *
  */
 
@@ -50,6 +50,12 @@
 #endif /* WITH_TFE */
 #include "resolv.h"
 #include "rs232dev.h"
+
+#include "about-dsc.h"
+#include "netconf-dsc.h"
+#include "processes-dsc.h"
+
+#include "www-dsc.h"
 
 /*-----------------------------------------------------------------------------------*/
 int
@@ -82,7 +88,13 @@ main(int argc, char **argv)
   ctk_init();
   
   program_handler_init();
+
+  program_handler_add(&about_dsc, "About", 1);
+  program_handler_add(&netconf_dsc, "Network setup", 1);
+  program_handler_add(&processes_dsc, "Processes", 0);
   
+  program_handler_add(&www_dsc, "Web browser", 1);
+
   ctk_redraw();
   ek_run();
 

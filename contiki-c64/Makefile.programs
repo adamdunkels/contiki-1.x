@@ -30,11 +30,11 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.4 2003/04/17 15:09:35 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.5 2003/04/17 18:59:06 adamdunkels Exp $
 #
 
-all: loader-arch-module.o contiki-labels.o \
-     www.prg email.prg simpletelnet.prg about.prg processes.prg \
+all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
+     www.prg email.prg simpletelnet.prg about.prg about.dsc processes.prg \
      netconf.prg memstat.prg vnc.prg calc.prg blueround.prg default.prg
 
 include Makefile.common 
@@ -48,6 +48,12 @@ CFLAGS:=$(CFLAGS) \
 
 %.prg:  %.o contiki-labels.o
 	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
+%.dsc:  %.o contiki-labels.o
+	cl65 --module -t c64 -o $@ loader-arch-dsc.o $^
+
+about.dsc: about-dsc.o 
+	cl65 --module -t c64 -o $@ loader-arch-dsc.o $^
 
 email.prg: $(EMAIL) 
 
