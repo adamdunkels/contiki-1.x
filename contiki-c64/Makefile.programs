@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.30 2004/09/19 18:57:13 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.31 2004/09/19 19:54:55 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -56,7 +56,8 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      ctk-text.drv ctk-default.drv ctk-80col.drv \
      irc.prg irc.dsc \
      slip.drv slip.dsc \
-     cgterm.prg dhcp.prg
+     cgterm.prg cgterm.dsc \
+     dhcp.prg
 #     vnc.prg  \
 #     mtest.prg warmboot.prg lc-test
 #     blueround.prg blueround.dsc \
