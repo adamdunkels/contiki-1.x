@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: sensorview-dsc.c,v 1.2 2004/06/27 12:49:59 oliverschmidt Exp $
+ * $Id: sensorview-dsc.c,v 1.3 2005/03/18 00:52:32 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static const char sensorviewicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon sensorview_icon =
   {CTK_ICON("Sensors", sensorviewicon_bitmap, sensorviewicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
