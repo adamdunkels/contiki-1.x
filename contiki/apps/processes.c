@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
+ * $Id: processes.c,v 1.4 2003/04/09 19:25:37 adamdunkels Exp $
  *
  */
 
@@ -40,16 +40,16 @@
 #include "dispatcher.h"
 #include "loader.h"
 
-#define MAX_PROCESSLABELS 16
+#define MAX_PROCESSLABELS 13
 static struct ctk_window processwindow;
-static unsigned char ids[MAX_PROCESSLABELS][3];
+static unsigned char ids[MAX_PROCESSLABELS][4];
 static struct ctk_label processidlabels[MAX_PROCESSLABELS];
 static struct ctk_label processnamelabels[MAX_PROCESSLABELS];
 
 static struct ctk_button processupdatebutton =
-  {CTK_BUTTON(0, 9, 6, "Update")};
+  {CTK_BUTTON(0, 14, 6, "Update")};
 static struct ctk_button processclosebutton =
-  {CTK_BUTTON(13, 9, 5, "Close")};
+  {CTK_BUTTON(13, 14, 5, "Close")};
 
 static DISPATCHER_SIGHANDLER(processes_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -69,15 +69,19 @@ update_processwindow(void)
     p = dispatcher_process(i);
     if(p != NULL) {
       idsptr = ids[j];
-      idsptr[0] = '0' + i / 10;
-      idsptr[1] = '0' + i % 10;
-      idsptr[2] = 0;
+      idsptr[0] = '0' + i / 100;
+      if(idsptr[0] == '0') {
+	idsptr[0] = ' ';
+      }
+      idsptr[1] = '0' + i / 10;
+      idsptr[2] = '0' + i % 10;
+      idsptr[3] = 0;
       CTK_LABEL_NEW(&processidlabels[j],
-		    0, j + 1, 2, 1, idsptr);
+		    0, j + 1, 3, 1, idsptr);
       CTK_WIDGET_ADD(&processwindow, &processidlabels[j]);
       
       CTK_LABEL_NEW(&processnamelabels[j],
-		    3, j + 1, 17, 1, p->name);
+		    4, j + 1, 16, 1, p->name);
       CTK_WIDGET_ADD(&processwindow, &processnamelabels[j]);
       ++j;
     }
@@ -95,8 +99,7 @@ LOADER_INIT_FUNC(processes_init)
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
-    ctk_window_new(&processwindow, 20, 10, "Processes");
-    ctk_window_move(&processwindow, 0, 1);
+    ctk_window_new(&processwindow, 20, 15, "Processes");
     update_processwindow();
     
     dispatcher_listen(ctk_signal_button_activate);
