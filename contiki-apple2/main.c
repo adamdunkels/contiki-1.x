@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.4 2004/07/12 21:28:59 oliverschmidt Exp $
+ * $Id: main.c,v 1.5 2004/10/09 07:24:26 oliverschmidt Exp $
  *
  */
 
@@ -42,7 +42,6 @@
 
 #include "program-handler.h"
 
-#include "uip-event.h"
 #include "uip.h"
 #include "uip_arp.h"
 
@@ -89,8 +88,6 @@ main(void)
   ctk_init();
 
   resolv_init(NULL);
-  
-  uip_event_init();
   
   program_handler_init();
 
