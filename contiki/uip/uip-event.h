@@ -1,18 +1,18 @@
 /**
  * \file
- * uIP TCP/IP stack signals.
+ * uIP TCP/IP stack events.
  * \author Adam Dunkels <adam@dunkels.com>
  *
- * The signals defined in this module usually is not used by
- * application programmers, but knowledge of these signals are useful
+ * The events defined in this module usually is not used by
+ * application programmers, but knowledge of these events are useful
  * for developers of network device drivers.
  *
- * These signals can be used to force a poll of a specific uIP
+ * These events can be used to force a poll of a specific uIP
  * connection. This usually is used after doing e.g. a TCP connect
  * that normally would not take place until next time the connection
  * was periodically polled (normally up to 0.5 seconds afterwards). By
- * emitting the signals defined by this module, the poll will take
- * place at once the signal is delivered.
+ * emitting the events defined by this module, the poll will take
+ * place at once the event is delivered.
  *
  */
 
@@ -48,38 +48,38 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: uip-signal.h,v 1.6 2003/10/01 11:25:37 adamdunkels Exp $
+ * $Id: uip-event.h,v 1.1 2004/07/04 16:54:36 adamdunkels Exp $
  *
  */
 
-#ifndef __UIP_SIGNAL_H__
-#define __UIP_SIGNAL_H__
+#ifndef __UIP_EVENT_H__
+#define __UIP_EVENT_H__
 
 #include "ek.h"
 
 /**
- * \addtogroup signals
+ * \addtogroup events
  * @{
  */
 
-extern ek_signal_t
- uip_signal_uninstall,  /**< Cause a network device driver to unload itself. */
+extern ek_event_t
+ uip_event_uninstall,  /**< Cause a network device driver to unload itself. */
   
- uip_signal_poll,       /**< Cause a poll of a TCP connection to take
+ uip_event_poll,       /**< Cause a poll of a TCP connection to take
 			   place. A pointer to the uip_conn struct
-			   must be passed as signal data with the
-			   signal. */
+			   must be passed as event data with the
+			   event. */
   
- uip_signal_poll_udp;   /**< Cause a poll of a UDP connection to take
+ uip_event_poll_udp;   /**< Cause a poll of a UDP connection to take
 			   place. A pointer to the uip_udp_conn struct
-			   must be passed as signal data with the
-			   signal. */
+			   must be passed as event data with the
+			   event. */
 
 /** @} */
 
 /**
- * Initialize the uIP signal module.
+ * Initialize the uIP event module.
  */
-void uip_signal_init(void);
+void uip_event_init(void);
 
-#endif /* __UIP_SIGNAL_H__ */
+#endif /* __UIP_EVENT_H__ */

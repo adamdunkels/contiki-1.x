@@ -29,23 +29,23 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: uip-signal.c,v 1.5 2004/06/06 06:11:47 adamdunkels Exp $
+ * $Id: uip-event.c,v 1.1 2004/07/04 16:54:36 adamdunkels Exp $
  *
  */
 
-#include "uip-signal.h"
-#include "dispatcher.h"
+#include "ek.h"
+#include "uip-event.h"
 
-ek_signal_t uip_signal_uninstall,
-  uip_signal_poll,
-  uip_signal_poll_udp;
+ek_event_t uip_event_uninstall,
+  uip_event_poll,
+  uip_event_poll_udp;
 
 /*-----------------------------------------------------------------------------------*/
 void
-uip_signal_init(void)
+uip_event_init(void)
 {
-  uip_signal_uninstall = dispatcher_sigalloc();
-  uip_signal_poll = dispatcher_sigalloc();
-  uip_signal_poll_udp = dispatcher_sigalloc();
+  uip_event_uninstall = ek_alloc_event();
+  uip_event_poll = ek_alloc_event();
+  uip_event_poll_udp = ek_alloc_event();
 }
 /*-----------------------------------------------------------------------------------*/
