@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -30,56 +30,17 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the "ctk" console GUI toolkit for cc65
+ * This file is part of the Contiki Destop OS
  *
- * $Id: ctk-conf.h,v 1.2 2003/09/07 18:12:53 adamdunkels Exp $
+ * $Id: uip-conf.h,v 1.1 2003/09/07 18:12:53 adamdunkels Exp $
  *
  */
+#ifndef __UIP_CONF_H__
 
-#ifndef __CTK_CONF_H__
-#define __CTK_CONF_H__
+#define UIP_CONF_MAX_CONNECTIONS 10
+#define UIP_CONF_MAX_LISTENPORTS 10
+#define UIP_CONF_BUFFER_SIZE     310
 
-/*
- * This file is used for setting various compile time settings for the
- * CTK GUI toolkit.
-*/
+#define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
 
-/* Defines which key that is to be used for activating the menus */
-#define CTK_CONF_MENU_KEY             CH_F1
-
-/* Defines which key that is to be used for switching the frontmost
-   window.  */
-#define CTK_CONF_WINDOWSWITCH_KEY     CH_F3
-
-
-#define CTK_CONF_WIDGETUP_KEY         CH_F5
-#define CTK_CONF_WIDGETDOWN_KEY       CH_F7
-
-/* Toggles mouse support (must have support functions in the
-architecture specific files to work). */
-#define CTK_CONF_MOUSE_SUPPORT        0 /* 1342 bytes */
-
-/* Toggles support for desktop icons. */
-#define CTK_CONF_ICONS                1 /* 107 bytes */
-
-/* Toggles support for movable windows. */
-#define CTK_CONF_WINDOWMOVE           1 /* 333 bytes */
-
-/* Toggles support for closable windows. */
-#define CTK_CONF_WINDOWCLOSE          1 /* 14 bytes */
-
-/* Toggles support for multiline text entry editing. */
-#define CTK_CONF_TEXTENTRY_MULTILINE  0 /* 118 bytes */
-
-/* Toggles support for menus. */
-#define CTK_CONF_MENUS                1 /* 1384 bytes */
-
-/* Defines the default width of a menu. */
-#define CTK_CONF_MENUWIDTH            16
-/* The maximum number of menu items in each menu. */
-#define CTK_CONF_MAXMENUITEMS         10
-
-/* Toggles support for screen savers. */
-#define CTK_CONF_SCREENSAVER          1
-
-#endif /* __CTK_CONF_H__ */
+#endif /* __UIP_CONF_H__ */
