@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.17 2003/08/21 22:27:29 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.18 2003/09/04 23:01:17 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -39,12 +39,9 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      processes.prg processes.dsc \
      www.prg www.dsc \
      simpletelnet.prg telnet.dsc \
-     email.prg \
      memstat.prg memstat.dsc \
-     vnc.prg  \
      webserver.prg webserver.dsc \
      wget.prg wget.dsc \
-     calc.prg \
      directory.prg directory.dsc \
      blueround.prg blueround.dsc \
      enabler.prg enabler.dsc \
@@ -57,10 +54,13 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      slip.drv slip.dsc \
      slip-ss.drv \
      tfe.drv tfe.dsc \
-     ssconfig.prg \
      config.prg configedit.prg configedit.dsc \
      shell.prg shell.dsc \
-     telnetd.prg telnetd.dsc
+#     telnetd.prg telnetd.dsc \
+#     email.prg \
+#     vnc.prg  \
+#     calc.prg \
+#     ssconfig.prg \
 
 SYS=c64
 
