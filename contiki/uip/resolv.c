@@ -58,7 +58,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.13 2004/08/09 20:46:32 adamdunkels Exp $
+ * $Id: resolv.c,v 1.14 2004/09/17 20:49:05 adamdunkels Exp $
  *
  */
 
@@ -350,7 +350,7 @@ EK_EVENTHANDLER(resolv_eventhandler, ev, data)
       uip_udp_remove(resolv_conn);
     }
     
-    resolv_conn = udp_new((u16_t *)data, 53, NULL);
+    resolv_conn = udp_new((u16_t *)data, HTONS(53), NULL);
 
   } else if(ev == tcpip_event) {
     if(uip_udp_conn->rport == HTONS(53)) {
