@@ -28,7 +28,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.12 2005/03/13 21:16:30 oliverschmidt Exp $
+ * $Id: cs8900a.c,v 1.13 2005/03/16 22:39:21 oliverschmidt Exp $
  *
  */
 
@@ -172,7 +172,7 @@ sendloop1:
   }
 
   /* Next, send rest of the packet. */
-  cnt = uip_len - UIP_LLH_LEN + UIP_TCPIP_HLEN;
+  cnt = uip_len - (UIP_LLH_LEN + UIP_TCPIP_HLEN);
 
   asm("lda %v", cnt);
   asm("lsr");

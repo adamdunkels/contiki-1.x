@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.11 2005/03/14 23:01:36 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.12 2005/03/16 22:39:21 oliverschmidt Exp $
  *
  */
 
@@ -366,7 +366,7 @@ L6:
     asm("cpy #%b", UIP_LLH_LEN + UIP_TCPIP_HLEN);
     asm("bne %g", L6);
 
-    packet_length = uip_len - UIP_LLH_LEN + UIP_TCPIP_HLEN;
+    packet_length = uip_len - (UIP_LLH_LEN + UIP_TCPIP_HLEN);
 
     asm("lda %v", uip_appdata);  /* uip_appdata is pointer */
     asm("sta ptr1");
