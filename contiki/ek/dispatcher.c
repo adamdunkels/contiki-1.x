@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.12 2003/08/15 18:49:53 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.13 2003/08/20 20:55:57 adamdunkels Exp $
  *
  */
 
@@ -129,6 +129,7 @@ dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
   static unsigned char i;
   struct listenport *l;
 
+#ifdef WITH_UIP
   /* If this process has any listening TCP ports, we remove them. */
   l = listenports;
   for(i = 0; i < UIP_LISTENPORTS; ++i) {
@@ -139,6 +140,8 @@ dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
     }
     ++l;
   }
+#endif /* WITH_UIP */
+  
   /* Remove process from the process list. */
   if(p == dispatcher_procs) {
     dispatcher_procs = dispatcher_procs->next;    
