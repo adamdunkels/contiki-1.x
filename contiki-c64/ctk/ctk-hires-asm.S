@@ -625,6 +625,7 @@ _ctk_hires_draw_windowborders:
 	ldx _ctk_hires_windowparams + wph
 	inx
 	stx tmph
+
 	;; Draw left and right borders
 
 	;; Fill color memory (pointer in ptr1, setup by setupptrs)
@@ -674,6 +675,9 @@ _ctk_hires_draw_windowborders:
 	iny
 	sty tmpw
 @bordercloop:
+	cpx _ctk_hires_windowparams + wpclipy2
+	beq @bordercloopend
+	
 	ldy tmpw
 	lda _ctk_hires_windowparams + wpcolor2
 	sta (ptr1),y
@@ -690,8 +694,6 @@ _ctk_hires_draw_windowborders:
 :
 	
 	inx
-	cpx _ctk_hires_windowparams + wpclipy2
-	beq @bordercloopend
 	cpx tmph
 	bcc @bordercloop
 	beq @bordercloop	
@@ -722,6 +724,9 @@ _ctk_hires_draw_windowborders:
 	;; Draw right border
 	ldx tmpy
 @rborderloop:
+	cpx _ctk_hires_windowparams + wpclipy2
+	beq @rborderloopend
+
 	lda ptr3
 	clc
 	adc #$40
@@ -738,8 +743,6 @@ _ctk_hires_draw_windowborders:
 	bpl :-
 
 	inx
-	cpx _ctk_hires_windowparams + wpclipy2
-	beq @rborderloopend
 	cpx tmph
 	bne @rborderloop	
 @rborderloopend:
