@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.c,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: htmlparser.c,v 1.2 2003/04/05 12:21:37 adamdunkels Exp $
  *
  */
 
@@ -68,6 +68,7 @@ G * (<br>, <p>, <h>), the <li> tag (but does not even try to
 #include "htmlparser.h"
 #include "html-strings.h"
 #include "www-conf.h"
+#include "cc.h"
 
 #if 1
 #define PRINTF(x)
@@ -76,11 +77,6 @@ G * (<br>, <p>, <h>), the <li> tag (but does not even try to
 #define PRINTF(x) printf x
 #endif
 
-#ifdef WITH_CC65
-#define FASTCALL __fastcall__
-#else
-#define FASTCALL
-#endif
 
 /*-----------------------------------------------------------------------------------*/
 #define ISO_A     0x41
@@ -233,7 +229,7 @@ static char *tags[] = {
 };
 
 /*-----------------------------------------------------------------------------------*/
-static unsigned char FASTCALL
+static unsigned char CC_FASTCALL
 iswhitespace(char c)
 {
   return (c == ISO_space ||
@@ -242,7 +238,7 @@ iswhitespace(char c)
 	  c == ISO_ht);
 }
 /*-----------------------------------------------------------------------------------*/
-static unsigned char FASTCALL
+static unsigned char CC_FASTCALL
 find_tag(char *tag)
 {
   static unsigned char first, last, i, tabi;
@@ -282,7 +278,7 @@ find_tag(char *tag)
   return TAG_LAST;
 }
 /*-----------------------------------------------------------------------------------*/
-static void FASTCALL
+static void CC_FASTCALL
 parse_char(unsigned char c)
 {
   if(c < 0x80) {
@@ -511,7 +507,7 @@ htmlparser_init(void)
   s.lastchar = 0;
 }
 /*-----------------------------------------------------------------------------------*/
-static char FASTCALL
+static char CC_FASTCALL
 lowercase(char c)
 {
   /* XXX: This is a *brute force* approach to lower-case
