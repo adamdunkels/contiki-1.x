@@ -4,7 +4,7 @@ LD=ld65
 CL=cl65
 CFLAGSCOMMON=-I $(CONTIKICC65)/apps -I $(CONTIKICC65)/ctk -I $(CONTIKICC65)/uip \
        -I $(CONTIKICC65)/conf -I $(CONTIKICC65)/loader \
-       -I apps -I ctk -I uip -I conf -I loader \
+       -I apps -I ctk -I lib -I uip -I conf -I loader \
        -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
        -I $(CONTIKI)/lib -I $(CONTIKI)/uip \
        -t $(SYS) --add-source 
@@ -20,6 +20,10 @@ OPT=-Or
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
 %.o: ctk/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: lib/%.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
@@ -76,6 +80,9 @@ tfe-drv.o: uip/tfe-drv.c
 	$(AS) -o $@ $(AFLAGS) $<
 
 %.o: ctk/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
+%.o: lib/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
 %.o: loader/%.S
