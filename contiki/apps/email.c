@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.15 2004/07/04 11:35:07 adamdunkels Exp $
+ * $Id: email.c,v 1.16 2004/12/22 09:38:24 oliverschmidt Exp $
  *
  */
 
@@ -44,6 +44,14 @@
 
 #include "ctk-textedit.h"
 
+#include "email-conf.h"
+
+#define MAIL_WIDTH EMAIL_CONF_WIDTH
+#define MAIL_HEIGHT EMAIL_CONF_HEIGHT
+/*
+#define MAIL_WIDTH 36
+#define MAIL_HEIGHT 17
+*/
 
 #define MAXNUMMSGS 6
 
@@ -54,31 +62,28 @@ unsigned char menuitem_compose, menuitem_setup, menuitem_quit;
 static struct ctk_window composewindow;
 
 static struct ctk_separator sep1 =
- {CTK_SEPARATOR(0, 20, 36)};
+ {CTK_SEPARATOR(0, MAIL_HEIGHT + 3, MAIL_WIDTH)};
 static struct ctk_label statuslabel =
- {CTK_LABEL(6, 21, 23, 1, "")};
+ {CTK_LABEL(6, MAIL_HEIGHT + 4, MAIL_WIDTH - 13, 1, "")};
 
 
 static struct ctk_label tolabel =
   {CTK_LABEL(0, 0, 3, 1, "To:")};
 static char to[40];
 static struct ctk_textentry totextentry =
-  {CTK_TEXTENTRY(8, 0, 26, 1, to, 38)};
+  {CTK_TEXTENTRY(8, 0, MAIL_WIDTH - 10, 1, to, 38)};
 
 static struct ctk_label cclabel =
   {CTK_LABEL(0, 1, 3, 1, "Cc:")};
 static char cc[40];
 static struct ctk_textentry cctextentry =
-  {CTK_TEXTENTRY(8, 1, 26, 1, cc, 38)};
+  {CTK_TEXTENTRY(8, 1, MAIL_WIDTH - 10, 1, cc, 38)};
 
 static struct ctk_label subjectlabel =
   {CTK_LABEL(0, 2, 8, 1, "Subject:")};
 static char subject[40];
 static struct ctk_textentry subjecttextentry =
-  {CTK_TEXTENTRY(8, 2, 26, 1, subject, 38)};
-
-#define MAIL_WIDTH 36
-#define MAIL_HEIGHT 17
+  {CTK_TEXTENTRY(8, 2, MAIL_WIDTH - 10, 1, subject, 38)};
 
 static char mail[MAIL_WIDTH * MAIL_HEIGHT];
 struct ctk_textedit mailtextedit =
@@ -86,9 +91,9 @@ struct ctk_textedit mailtextedit =
 
 
 static struct ctk_button sendbutton =
-  {CTK_BUTTON(0, 21, 4, "Send")};
+  {CTK_BUTTON(0, MAIL_HEIGHT + 4, 4, "Send")};
 static struct ctk_button erasebutton =
-  {CTK_BUTTON(29, 21, 5, "Erase")};
+  {CTK_BUTTON(MAIL_WIDTH - 7, MAIL_HEIGHT + 4, 5, "Erase")};
 
 /* The "Really erase message?" dialog. */
 static struct ctk_window erasedialog;
@@ -246,7 +251,7 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
 
     /* Create compose window. */
 
-    ctk_window_new(&composewindow, 36, 22, "Compose e-mail");
+    ctk_window_new(&composewindow, MAIL_WIDTH, MAIL_HEIGHT + 5, "Compose e-mail");
     
     CTK_WIDGET_ADD(&composewindow, &tolabel);
     CTK_WIDGET_ADD(&composewindow, &cclabel);
