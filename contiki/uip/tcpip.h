@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tcpip.h,v 1.3 2004/09/12 20:24:56 adamdunkels Exp $
+ * $Id: tcpip.h,v 1.4 2004/09/17 20:49:49 adamdunkels Exp $
  */
 #ifndef __TCPIP_H__
 #define __TCPIP_H__
@@ -78,5 +78,8 @@ void tcpip_set_forwarding(unsigned char f);
 void tcpip_input(void);
 void tcpip_output(void);
 
+
+void tcpip_poll_tcp(struct uip_conn *conn);
+void tcpip_poll_udp(struct uip_udp_conn *conn);
 
 #endif /* __TCPIP_H__ */
