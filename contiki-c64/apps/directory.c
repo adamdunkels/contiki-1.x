@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.5 2003/08/13 22:49:23 adamdunkels Exp $
+ * $Id: directory.c,v 1.6 2003/08/15 18:44:46 adamdunkels Exp $
  *
  */
 
@@ -102,8 +102,10 @@ startloading(void)
 {
   if(c64_fs_opendir(&dir) != 0) {
     show_statustext("Cannot open directory");
+    loading = 0;
   } else {
     loading = 1;
+    numfiles = 0;
   }
 }    
 /*-----------------------------------------------------------------------------------*/
@@ -230,6 +232,7 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
     if(data == (ek_data_t)&reloadbutton) {
       for(i = 0; dscs[i] != NULL; ++i) {
 	LOADER_UNLOAD_DSC(dscs[i]);
+	dscs[i] = NULL;
       }     
       /*      loaddirectory();*/
       startloading();
