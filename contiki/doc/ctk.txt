@@ -1,0 +1,534 @@
+This file describes the interface between the generic part of the
+Contiki toolkit (CTK) and the architecture specific parts of CTK (the
+so-called ctk-draw and ctk-arch layers).
+
+Author: Adam Dunkels <adam@dunkels.com>
+Version: $Id: ctk.txt,v 1.1 2003/03/28 12:21:52 adamdunkels Exp $
+
+
+* Introduction *
+----------------
+
+The purpose of the ctk-arch and the ctk-draw is to act as an interface
+between the CTK and the actual hardware of the system on which Contiki
+is run. The ctk-arch takes care of the keyboard input from the user,
+and the ctk-draw is responsible for drawing the CTK desktop, windows
+and user interface widgets onto the actual screen.
+
+In order to aid in implementing a ctk-draw module, a text-based
+ctk-draw called ctk-conio has already been implemented. It conforms to
+the Borland conio C library, and a skeleton implementation of said
+library exists in lib/libconio.c. If a more machine specific ctk-draw
+module is to be implemented, the instructions in this file should be
+followed.
+
+
+* Keyboard input *
+------------------
+
+Keyboard input is implemented using two functions:
+
+  unsigned char ctk_arch_keyavail(void);
+
+and
+
+  ctk_arch_key_t ctk_arch_getkey(void);
+
+The ctk_arch_keyavail() function should return zero if there are no
+keys in the keyboard input queue, and non-zero if there are key presses
+waiting in the input queue. The ctk_arch_getkey() function should
+remove the first key press on the input queue, and return it to the
+caller. The ctk_arch_key_t type should usually be typedef'ed to be
+"char", but some architectures use other C types for representing
+key presses (such as the 16-bit short type).
+
+The usual typedef looks like the following:
+
+   typedef char ctk_arch_key_t;
+
+and should be put into a file named "ctk-arch.h", together with the C
+#defines described below.
+
+Apart from the C functions that handles keyboard input, CTK requires a
+few special characters such as the cursor keys and the enter
+key. These are #defined as C macros in the "ctk-arch.h" file. The
+following macros must be defined:
+
+   CH_CURS_DOWN
+   CH_CURS_LEFT
+   CH_CURS_RIGHT
+   CH_CURS_UP
+   CH_DEL
+   CH_ENTER
+   CH_ESC
+   CH_KEY
+
+
+* Screen drawing *
+------------------
+
+The ctk-draw module takes care of the actual screen drawing for CTK by
+implementing a handful of functions that are called by CTK. The
+functions will be described in detail below, but are listed here for
+convenience:
+
+   void ctk_draw_init(void);
+   unsigned char ctk_draw_width(void);
+   unsigned char ctk_draw_height(void);
+   void ctk_draw_clear(unsigned char clipy1, unsigned char clipy2);
+   void ctk_draw_menus(struct ctk_menus *menus);
+   void ctk_draw_window(struct ctk_window *window,
+                        unsigned char focus,
+                        unsigned char clipy1,
+                        unsigned char clipy2);
+   void ctk_draw_dialog(struct ctk_window *dialog);
+   void ctk_draw_widget(struct ctk_widget *w,
+                        unsigned char focus,
+                        unsigned char clipy1,
+                        unsigned char clipy2);
+
+
+* Initialization *
+------------------
+
+The ctk-draw initializes itself by the function:
+
+   void ctk_draw_init(void);
+
+This function is supposed to get the screen ready for drawing, and may
+be called at more than one time during the operation of the system.
+
+
+* Screen coordinates *
+----------------------
+
+In order to work efficiently even on limited systems, CTK uses a
+simple coordinate system, where the screen is addressed using
+character coordinates instead of pixel coordinates. This makes it
+trivial to implement the coordinate system on a text-based screen,
+and significantly reduces complexity for pixel based screen systems.
+
+The top left of the screen is (0,0) with x and y coordinates growing
+downwards and to the right.
+
+It is the responsibility of the ctk-draw module to keep track of the
+screen size and must implement two functions which are used by the CTK
+for querying the screen size:
+
+   unsigned char ctk_draw_width(void);
+   unsigned char ctk_draw_height(void);
+
+The functions must return the width and the height of the ctk-draw
+screen in character coordinates.
+
+
+* Clearing the screen *
+-----------------------
+
+The ctk-draw is required to implement a function for clearing parts of
+the screen. This function is called by the CTK before an area of the
+screen is to be redrawn. The function prototype is:
+
+   void ctk_draw_clear(unsigned char clipy1, unsigned char clipy2);
+
+The function should clear the screen between the y coordinates
+"clipy1" and "clipy2", including the line at y coordinate "clipy1",
+but not the line at y coordinate "clipy2".
+
+Note that this function may be used to draw a background image
+(wallpaper) on the desktop; it does not necessarily "clear" the
+screen. 
+
+
+* Drawing menus *
+-----------------
+
+Drawing the menus is the responsibility of the ctk-draw, and is done
+from the function:
+
+   void ctk_draw_menus(struct ctk_menus *menus);
+
+The ctk_draw_menus() function takes a pointer to a struct ctk_menus as
+its argument and draws the menus at the top of the screen. The struct
+ctk_menus is defined in the file ctk/ctk.h as:
+
+   struct ctk_menus {
+     struct ctk_menu *menus;
+     struct ctk_menu *open;
+     struct ctk_menu *desktopmenu;
+   };
+
+The "open" item points to the currently active menu, if any. If all
+menus are closed, the "open" item is NULL. The "desktopmenu" item
+points to the "Desktop" menu, and can be used for drawing the desktop
+menu in a special way (such as drawing it at the rightmost
+position). The "menus" item points to a linked list of all menus,
+including the open menu and the desktop menu.
+
+The struct ctk_menu is also defined in ctk/ctk.h:
+
+   struct ctk_menu {
+     struct ctk_menu *next;
+     char *title;
+     unsigned char titlelen;
+     unsigned char nitems;
+     unsigned char active;
+     struct ctk_menuitem items[CTK_CONF_MAXMENUITEMS];
+   };
+
+The "next" pointer points to the next menu, or is NULL if this is the
+last menu, and should be used for stepping through the menus when
+drawing them on screen. The "title" is the title of the menu, and the
+length of the title is given in the "titlelen" field. The "nitems"
+field specifies the total number of menu items in the menu and the
+"active" item specifies the active item in the menu. The active item
+should be drawn differently from the other items (it usually is drawn
+inverted). Finally, the list of menu items is present in the "items"
+list. This list consists of struct ctk_menuitem items; the struct
+ctk_menuitem is defined in the file ctk/ctk.h as:
+
+   struct ctk_menuitem {
+     char *title;
+     unsigned char titlelen;
+   };
+
+Where the "title" field is the title of the menu item and the
+"titlelen" the length of the title in characters.
+
+
+* Drawing windows *
+-------------------
+
+The CTK will call upon the ctk-draw layer to actually draw windows
+onto the screen. The ctk-draw layer is free to choose how the window
+will appear on screen; with or without window borders and the style of
+the borders, with or without transparent window background and how the
+background shall look, etc.
+
+The function called by the CTK for drawing a window is:
+
+   void ctk_draw_window(struct ctk_window *window,
+                        unsigned char focus,
+                        unsigned char clipy1,
+                        unsigned char clipy2);
+
+The "clipy1" and "clipy2" parameters specify the first and last + 1
+lines on screen that actually should be drawn (if clipy1 = 2 and
+clipy2 = 3, only line 2 should be drawn). The clip parameters are
+given in screen coordinates, so line 1 is the first line below the
+menus.
+
+The focus parameter specifies if the window should be drawn in
+foreground or background colors and can be either CTK_FOCUS_NONE or
+CTK_FOCUS_WINDOW. Windows with a focus of CTK_FOCUS_WINDOW is usually
+drawn in a brighter color than those with CTK_FOCUS_NONE.
+
+Finally, the "window" parameter gives the actual window to be
+drawn. This is specified as a struct ctk_window, which is defined in
+the file ctk/ctk.h as:
+
+   struct ctk_window {
+     struct ctk_window *next, *prev;
+     ek_id_t owner;
+     char *title;
+     unsigned char titlelen;
+     struct ctk_button closebutton;
+     struct ctk_button titlebutton;
+
+     unsigned char x, y;
+     unsigned char w, h;
+
+     struct ctk_widget *inactive;
+     struct ctk_widget *active;
+     struct ctk_widget *focused;
+   };
+
+The first "next" and "prev" fields are pointers used by the CTK for
+keeping the windows on a doubly linked list and are not used by the
+ctk-draw. Likewise, the "owner" field is used by the CTK to keep track
+of the process that created the window, and is not used by
+ctk-draw. The "title" and "titlelen" fields are used by the CTK when
+constructing the desktop menu, and should usually not be used by the
+ctk-draw.
+
+The "closebutton" and "titlebutton" fields are the CTK buttons used in
+the title bar. These should not be used directly by the ctk-draw
+module, as they are already present in the "active" widgets field
+described below. They may be used as a comparison to give special
+treatment to these two widgets however (e.g., if the close button
+should be drawn at the upper left corner instead of the default upper
+right corner), but may otherwise be ignored by the ctk-draw module.
+
+The "x" and "y" fields specify the x and y coordinates of the top left
+corner of the window and the "w" and "h" fields give the width and
+height of the window (excluding any window borders).
+
+Finally, the "inactive" and "active" widget pointers points to linked
+lists of CTK widgets. The "focused" pointer points either to one of
+the widgets in the "active" list, or is NULL if no widget is
+focused. How CTK widgets are drawn is explained below.
+
+A pseudo-code implementation of a ctk_draw_window() function might
+look like this:
+
+   ctk_draw_window(window, focus, clipy1, clipy2) {
+      draw_window_background(window, focus, clipy1, clipy2);
+      draw_window_borders(window, focus, clipy1, clipy2);
+      foreach(widget, window->inactive) {
+         draw_widget(widget, focus, clipy1, clipy2);
+      }
+      foreach(widget, window->active) {
+         if(widget == window->focused) {
+	    draw_widget(widget, focus | CTK_FOCUS_WIDGET,
+	                    clipy1, clipy2);
+	 } else {
+	    draw_widget(widget, focus, clipy1, clipy2);
+	 }
+      }
+   }
+
+Where draw_window_background() draws the window background (between
+clipy1 and clipy2) and draw_window_borders() draws the window borders
+(also between clipy1 and clipy2). The draw_widget() function used may
+the same function as ctk_draw_widget() explained later. Notice how the
+clipy1 and clipy2 parameters are passed to all other functions; every
+function needs to know the boundaries within which they are allowed to
+draw.
+
+
+* Drawing dialogs *
+-------------------
+
+In CTK, a dialog is similar to a window, with the only exception being
+that they are drawn in a different style. Also, since dialogs always
+are drawn on top of everything else, they do not need to be drawn
+within any special boundaries.
+
+The ctk-draw function that draws a dialog on screen is as follows:
+
+   void ctk_draw_dialog(struct ctk_window *dialog);
+
+It can usually be implemented together with the ctk_draw_window()
+function, which is explained above.
+
+
+* Drawing widgets *
+-------------------
+
+The function that draws the CTK widgets is likely to be the most
+complex function in the ctk-draw module. Still, it is straightforward
+to implement as it can be written in an incremental fashion, starting
+with a single widget type and adding more widget types, one at a time.
+
+The function for drawing widgets is:
+
+   void ctk_draw_widget(struct ctk_widget *widget,
+                        unsigned char focus,
+                        unsigned char clipy1,
+                        unsigned char clipy2);
+
+The "clipy1" and "clipy2" parameters specify the upper and lower
+bounds for the widget. The "focus" parameter specifies how the widget
+is focused and usually is used to decide in what colors the widget is
+to be drawn. The focus is a logical "or" combination of
+CTK_FOCUS_WIDGET and either CTK_FOCUS_WINDOW, CTK_FOCUS_DIALOG or
+CTK_FOCUS_NONE. A non-focused widget in a background window will have
+focus == CTK_FOCUS_NONE, a focused widget in a foreground window will
+have focus == CTK_FOCUS_WIDGET | CTK_FOCUS_WINDOW, and so on.
+
+The ctk-draw module may exploit how the CTK focus constants are
+defined in order to use a look-up table for the colors. The CTK focus
+constants are defined in the file ctk/ctk.h as follows:
+
+   #define CTK_FOCUS_NONE     0
+   #define CTK_FOCUS_WIDGET   1
+   #define CTK_FOCUS_WINDOW   2
+   #define CTK_FOCUS_DIALOG   4
+
+This gives the following table:
+
+   0: CTK_FOCUS_NONE      (Background window, non-focused widget)
+   1: CTK_FOCUS_WIDGET    (Background window, focused widget)
+   2: CTK_FOCUS_WINDOW    (Foreground window, non-focused widget)
+   3: CTK_FOCUS_WINDOW | CTK_FOCUS_WIDGET
+                          (Foreground window, focused widget)
+   4: CTK_FOCUS_DIALOG    (Dialog, non-focused widget)
+   5: CTK_FOCUS_DIALOG | CTK_FOCUS_WIDGET
+                          (Dialog, focused widget)
+
+Finally, the "widget" parameter gives the actual widget that is to be
+drawn. The struct ctk_widget is defined in ctk/ctk.h and looks like:
+
+   struct ctk_widget {
+     struct ctk_widget *next;
+     struct ctk_window *window;
+     unsigned char x, y;
+     unsigned char type;
+     unsigned char w;
+     union {
+       struct ctk_widget_label label;
+       struct ctk_widget_button button;
+       struct ctk_widget_hyperlink hyperlink;
+       struct ctk_widget_textentry textentry;
+       struct ctk_widget_icon icon;
+       struct ctk_widget_bitmap bitmap;
+     } widget;
+   };
+
+The "next" pointer points to the next widget in the linked list of
+widgets and should be used by the ctk_draw_window() function when
+stepping through the widgets. It should not be used by the
+ctk_draw_widget() function, however. The "window" pointer points to
+the window in which the widget is contained, and should be used to
+obtain the coordinates for the window.
+
+The "x" and "y" fields are the x and y coordinates of the widget,
+relative to the x and y coordinates of the window in which the widget
+is contained (the "window" pointer). The "type" field specifies what
+kind of widget this is, and the "w" field has the width of the widget.
+
+Finally, the "widget" union holds the actual widget structure. These
+are described below.
+
+
+* The separator widget *
+------------------------
+
+The separator widget is the simplest of all widgets, and do not need
+any more information than what already is present in the struct
+ctk_widget structure: it has x and y coordinates and a width.
+
+
+* The label widget *
+--------------------
+
+The label widget is defined by the struct ctk_widget_label structure
+(accessible from the struct ctk_widget *widget as
+widget->widget.label), which is found in ctk/ctk.h:
+
+   struct ctk_widget_label {
+     char *text;
+     unsigned char h;
+   };
+
+The "text" points to an array of text, and the "h" specifies the
+height of the label. Each line of text in the "text" array is found at
+"w" distance from each other (the "w" is found in the struct
+ctk_widget).
+
+
+* The button widget *
+---------------------
+
+The struct ctk_widget_button looks like:
+
+   struct ctk_widget_button {
+     char *text;
+   };
+
+Where the "text" is the text that is to be displayed on the
+button. The CTK assumes that the button widget will have one character
+of space to the left and right of it (this is usually where the button
+borders are drawn).
+
+
+* The hyperlink widget *
+------------------------
+
+The hyperlink widget is defined by the struct ctk_widget_hyperlink
+structure:
+
+   struct ctk_widget_hyperlink {
+     char *text;
+     char *url;
+   };
+
+The "text" pointer points to the text of the hyperlink, and the "url"
+is the URL to which the hyperlink points. The ctk-draw usually will
+not need to bother with the "url" field. The hyperlink widget usually
+is drawn in a different color than the label widget, preferably
+underlined.
+
+
+* The text entry widget *
+-------------------------
+
+The text entry widget is a little more complicated to draw than the
+other widgets because it has a number of state variables which
+influence the way it should be drawn. The struct ctk_widget_textentry
+looks like this:
+
+   struct ctk_widget_textentry {
+     char *text;
+     unsigned char h;
+     unsigned char len;
+     unsigned char xpos, ypos;
+     unsigned char state;
+   };
+
+Where "text" is the text which is to be edited, "h" is the height of
+the text edit widget, "len" is the length of the line(s) that is being
+edited (which may be different from the width "w" of the
+widget). "xpos" and "ypos" is the position of the cursor in the text
+edit widget and "state" is the state in which the widget is. The state
+can be
+
+   CTK_TEXTENTRY_NORMAL
+
+or
+
+   CTK_TEXTENTRY_EDIT
+
+In the CTK_TEXTENTRY_EDIT state, the text is currenly being edited,
+while in the CTK_TEXTENTRY_NORMAL, the text is not being edited. Text
+entry widgets where the text is being edited should be drawn
+differently than when in the normal state.
+
+
+* The bitmap widget *
+---------------------
+
+The bitmap widget is different from the other CTK widgets because it
+is architecture dependant; there is no standard bitmap format
+specified for Contiki, but this is up to the architecture. (This means
+that application programs that use the bitmap widget must be able to
+draw in the architecture specific format as well.)
+
+The struct ctk_widget_bitmap looks like:
+
+   struct ctk_widget_bitmap {
+     unsigned char *bitmap;
+     unsigned char h;
+   };
+
+Where "h" is the height of the bitmap widget, and "bitmap" is a
+generic pointer that points to an architecture specific
+repressentation of the bitmap.
+
+* The icon widget *
+-------------------
+
+The icon widget is similar to the bitmap widget in that it uses an
+architecture specific bitmap format for the repressentation of the
+graphical icon. It also includes a text version of the icon. XXX: the
+icon widget format is likely to change in the near future!
+
+The struct ctk_widget_icon is defined as:
+
+   struct ctk_widget_icon {
+     char *title;
+     ek_id_t owner;
+     unsigned char *bitmap;
+     char *textmap;
+   };
+
+The "title" field is the name of the icon, and should be drawn below
+the icon picture. The "owner" is the process that created the icon,
+and should normally be ignored by the ctk-draw. The "bitmap" is a
+pointer to an architecture specific repressentation of the icon; the
+same on-screen drawing function can be used for this bitmap as for the
+bitmap widget. Finally, the "textmap" is a text based icon.
+
+Currently, icons are 24x24 pixels large (the text based versions are
+3x3 characters).
+
