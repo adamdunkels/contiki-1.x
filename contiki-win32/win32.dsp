@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "_DEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "_DEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -70,7 +70,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /W3 /GX- /Os /Gf /Gy /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# SUBTRACT CPP /Z<none> /Ox /Og
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -79,6 +80,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release/Contiki.exe"
 # ADD LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release_RawSock/Contiki.exe"
+# SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "win32 - Win32 Debug PPP"
 
@@ -95,7 +97,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "_DEBUG" /D "WITH_PPP" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "_DEBUG" /D "WITH_PPP" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -120,7 +122,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_PPP" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /W3 /GX- /Os /Gf /Gy /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_PPP" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# SUBTRACT CPP /Ox /Og
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -808,6 +811,10 @@ SOURCE=.\lib\debug.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\lib\lc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\lib\lc.h
 # End Source File
 # End Group
@@ -916,21 +923,6 @@ SOURCE=.\uip\rawsock.h
 # Begin Source File
 
 SOURCE=.\uip\uip_arch.c
-
-!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
-
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
-
-# SUBTRACT CPP /O<none>
-
-!ELSEIF  "$(CFG)" == "win32 - Win32 Debug PPP"
-
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release PPP"
-
-# SUBTRACT CPP /O<none>
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
