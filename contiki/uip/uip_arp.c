@@ -54,7 +54,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.14 2004/09/18 20:18:40 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.15 2005/02/23 22:40:40 oliverschmidt Exp $
  *
  */
 
@@ -406,7 +406,7 @@ uip_arp_out(void)
       BUF->protolen = 4;
       BUF->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);
 
-      uip_appdata = &uip_buf[40 + UIP_LLH_LEN];
+      uip_appdata = &uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN];
     
       uip_len = sizeof(struct arp_hdr);
       return;

@@ -43,7 +43,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp.c,v 1.4 2005/01/26 23:36:22 oliverschmidt Exp $
+ * $Id: ppp.c,v 1.5 2005/02/23 22:38:43 oliverschmidt Exp $
  *
  */
 
@@ -288,7 +288,8 @@ ppp_send(void)
 {
   /* If IPCP came up then our link should be up. */
   if((ipcp_state & IPCP_TX_UP) && (ipcp_state & IPCP_RX_UP)) {
-    ahdlc_tx(IPV4, uip_buf, uip_appdata, 40, uip_len - 40);
+    ahdlc_tx(IPV4, uip_buf,        uip_appdata,
+		   UIP_TCPIP_HLEN, uip_len - UIP_TCPIP_HLEN);
   }
 }
 /*---------------------------------------------------------------------------*/

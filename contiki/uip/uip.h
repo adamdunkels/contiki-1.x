@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.15 2005/02/22 22:32:40 adamdunkels Exp $
+ * $Id: uip.h,v 1.16 2005/02/23 22:40:40 oliverschmidt Exp $
  *
  */
 
@@ -353,11 +353,11 @@ void uip_init(void);
  devicedriver_send(void)
  {
     hwsend(&uip_buf[0], UIP_LLH_LEN); 
-    if(uip_len <= UIP_LLH_LEN + 40) {
+    if(uip_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
       hwsend(&uip_buf[UIP_LLH_LEN], uip_len - UIP_LLH_LEN);    
     } else {
-      hwsend(&uip_buf[UIP_LLH_LEN], 40);
-      hwsend(uip_appdata, uip_len - 40 - UIP_LLH_LEN);
+      hwsend(&uip_buf[UIP_LLH_LEN], UIP_TCPIP_HLEN);
+      hwsend(uip_appdata, uip_len - UIP_TCPIP_HLEN - UIP_LLH_LEN);
     }
  }
  \endcode

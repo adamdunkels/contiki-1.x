@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: uip-fw.c,v 1.8 2004/09/12 20:24:56 adamdunkels Exp $
+ * $Id: uip-fw.c,v 1.9 2005/02/23 22:40:40 oliverschmidt Exp $
  */
 /**
  * \addtogroup uip
@@ -469,7 +469,7 @@ uip_fw_forward(void)
   /* If we now have found a suitable network interface, we call its
      output function to send out the packet. */
   if(netif != NULL && uip_len > 0) {
-    uip_appdata = &uip_buf[UIP_LLH_LEN + 40];
+    uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_TCPIP_HLEN];
     fwcache_register();
     netif->output();
   }

@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.14 2004/09/18 20:18:59 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.15 2005/02/23 22:40:40 oliverschmidt Exp $
  *
  */
 
@@ -353,9 +353,10 @@ typedef unsigned short uip_stats_t;
 /**
  * The TCP maximum segment size.
  *
- * This is should not be to set to more than UIP_BUFSIZE - UIP_LLH_LEN - 40.
+ * This is should not be to set to more than
+ * UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN.
  */
-#define UIP_TCP_MSS     (UIP_BUFSIZE - (UIP_LLH_LEN) - 40)
+#define UIP_TCP_MSS     (UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
 
 /**
  * How long a connection should stay in the TIME_WAIT state.
