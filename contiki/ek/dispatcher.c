@@ -1,5 +1,101 @@
+/**
+ * \file
+ * Event kernel, signal dispatcher and handler of uIP events.
+ * \author Adam Dunkels <adam@dunkels.com> 
+ *
+ * The Dispatcher module is the event kernel in Contiki and handles
+ * processes, signals and uIP events. All process execution is
+ * initiated by the Dispatcher.
+ *
+ *
+ *
+ * The Dispatcher is the initiator of all program execution in
+ * Contiki. After the system has been initialized by the boot up code,
+ * the dispatcher_run() function is called. This function never
+ * returns, but will set in a loop in which it does two things.
+ * 
+ * - Pulls the first signal of the signal queue and dispatches this to
+ *   all listening processes.
+ *
+ * - Executes the "idle" handlers of all processes that have
+ *   registered.
+ *
+ * Only one signal is processes at a time, and the idle handlers of
+ * all processes are called between two signals are handled.
+ *
+ *
+ *
+ * A process is defined by a signal handler, a uIP event handler, and
+ * an idle handler. The signal handler is called when a signal has
+ * been emitted, for which the process is currently listening. The uIP
+ * event handler is called when the uIP TCP/IP stack has an event to
+ * deliver to the process. Such events can be that new data has
+ * arrived on a connection, that previously sent data has been
+ * acknowledged or that a connection has been closed. The idle handler
+ * is periodically called by the system.
+ *
+ * \note The name "idle handler" is a misnomer, since the idle handler
+ * will be called even though the system is not idle.
+ *
+ * A process is started by calling the dispatcher_start()
+ * function. This function must be called before any other Dispatcher
+ * function is called. When the function returns, the new process is
+ * running. The function dispatcher_exit() is used to tell the
+ * Dispatcher that a process has exited. This function must be called
+ * by the process itself, and must be called the process unloads
+ * itself.
+ *
+ * \note It is not possible to call dispatcher_exit() on behalf of
+ * another process - instead, emit the signal dispatcher_signal_quit
+ * with the process as a receiver. The other process should then
+ * listen for this signal, and call dispatcher_exit() when the signal
+ * is received. 
+ *
+ *
+ *
+ * The Dispatcher can pass signals between different
+ * processes. Signals are simple messages that consist of a signal
+ * number and a generic data pointer called the signal data. The
+ * signal data can be used to pass messages between processes. In
+ * order for a signal to be delivered to a process, the process must
+ * be listening for the signal number.
+ *
+ * When a process is running, the function dispatcher_listen() can be
+ * called to register the process as a listener for a signal. When a
+ * signal for which the process has registered itself as a listener is
+ * emitted by another process, the process' signal handler will be
+ * invoked. The signal number and the signal data are passed as
+ * function parameters to the signal handler. The signal handler must
+ * check the signal number and do whatever it should do based on the
+ * value of the signal number.
+ *
+ * Every process listens to the dispatcher_signal_quit signal by
+ * default, and the signal handler function must check for this
+ * signal. If this signal is received, the process must do any
+ * necessary clean-ups (i.e., close open windows, deallocate allocated
+ * memory, etc.) call process_exit(), and call the LOADER_UNLOAD()
+ * function.
+ *
+ * \note It is not possible to unregister a listening signal.
+ *
+ *
+ *
+ * If a process has registered an idle handler, the Dispatcher will
+ * call it as often as possible. The idle handler can be used to
+ * implement timer based functionality (by checking the ek_clock()
+ * function), or other background processing. The idle handler must
+ * return to the caller within a short time, or otherwise the system
+ * will feel sluggish.
+ *
+ *
+ *
+ * The uIP TCP/IP stack will call the Dispatcher when a uIP event has
+ * occured. The Dispatcher will find the right process for which the
+ * event is intended and call the process' uIP handler function. 
+ */
+
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +107,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +125,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.15 2003/08/29 20:37:26 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.16 2003/08/31 22:20:20 adamdunkels Exp $
  *
  */
 
@@ -43,25 +136,39 @@
 
 #include "uip-signal.h"
 
-/*#include <time.h>*/
-/*#include <conio.h>*/
-
+/**
+ * \internal Holds the currently running process' ID
+ *
+ */
 ek_id_t dispatcher_current;
+
+/**
+ * \internal Pointer to the currently running process structure.
+ *
+ */
 struct dispatcher_proc *dispatcher_procs;
 
 static struct dispatcher_proc *curproc;
 static ek_id_t ids = 1;
 
+/**
+ * The "quit" signal.
+ *
+ * All processes listens to this signal by default, but each program
+ * must implement the signal handler for the signal by itself.
+ */
 ek_signal_t dispatcher_signal_quit;
 
 static ek_signal_t lastsig = 1;
 
+/**
+ * \internal Structure for holding a TCP port and a process ID.
+ */
 struct listenport {
   u16_t port;
   ek_id_t id;
 };
 static struct listenport listenports[UIP_LISTENPORTS];
-/*static u8_t listenportsptr;*/
 
 #if CC_FUNCTION_POINTER_ARGS
 #else /* CC_FUNCTION_POINTER_ARGS */
@@ -69,24 +176,49 @@ ek_signal_t dispatcher_sighandler_s;
 ek_data_t dispatcher_sighandler_data;
 
 void *dispatcher_uipcall_state;
+
 #endif /* CC_FUNCTION_POINTER_ARGS */      
 
+
+/**
+ * \internal Structure used for keeping the queue of active signals.
+ */
 struct signal_data {
   ek_signal_t s;
   ek_data_t data;
   ek_id_t id;
 };
 
-/* Static variables. */
 static ek_num_signals_t nsignals, fsignal;
 static struct signal_data signals[EK_CONF_NUMSIGNALS];
 
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Allocates a signal number.
+ *
+ * \return The allocated signal number or EK_SIGNAL_NONE if no signal
+ * number could be allocated.
+ */
 /*-----------------------------------------------------------------------------------*/
 ek_signal_t
 dispatcher_sigalloc(void)
 {
   return lastsig++;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Starts a new process.
+ *
+ * Is called by a program in order to start a new process for the
+ * program. It must be called before any other dispatcher or CTK
+ * functions.
+ *
+ * \param p A pointer to a dispatcher_proc struct that must be found
+ * in the process own memory space.
+ *
+ * \return The process identifier for the new process or EK_ID_NONE
+ * if the process could not be started.
+ */
 /*-----------------------------------------------------------------------------------*/
 ek_id_t
 dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
@@ -95,13 +227,19 @@ dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
   struct dispatcher_proc *q;
   
  again:
+
   do {
     id = ids++;
   } while(id == EK_ID_NONE);
   
   /* Check if this ID is use. */
   for(q = dispatcher_procs; q != NULL; q = q->next) {
-    if(id == q->id) {
+    if(id == q->id) {      
+      if(id == EK_ID_NONE) {
+	/* We have tried all the available process IDs, and did not
+	   find any free ones. So we return with an error. */
+	return EK_ID_NONE;
+      } 
       goto again;
     }
   }
@@ -123,6 +261,16 @@ dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
   dispatcher_listen(dispatcher_signal_quit);
   return id;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Causes the process to exit.
+ *
+ * Must be called by the process itself before it unloads itself, or
+ * the system will crash.
+ *
+ * \param p A pointer to the process' dispatcher_proc struct that was
+ * started with dispatcher_start().
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
@@ -160,11 +308,40 @@ dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
   curproc = NULL;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * The real-time clock.
+ *
+ * This function may be used by programs for timing.
+ *
+ * \return The current wall-clock time in an archicture specific time
+ * unit.
+ */
+/*-----------------------------------------------------------------------------------*/
 ek_clock_t
 ek_clock(void)
 {
   return clock();
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Starts to connect to a remote host using TCP.
+ *
+ * This function should be called to connect to a remote host using
+ * the reliable TCP protocol. It is a wrapper to the uIP function
+ * uip_connect(), with the difference the dispatcher_connect() sends a
+ * uip_signal_poll signal to the TCP/IP driver which makes the
+ * connection request to go out immediately instead of being delayed
+ * for up to 0.5 seconds.
+ *
+ * \param ripaddr A pointer to a packed repressentation of the IP
+ * address of the host to which to connect.
+ *
+ * \param port The TCP port number on the remote host in host byte
+ * order.
+ *
+ * \return The connection identifier, or NULL if no connection
+ * identifier could be allocated.
+ */
 /*-----------------------------------------------------------------------------------*/
 struct uip_conn *
 dispatcher_connect(u16_t *ripaddr, u16_t port)
@@ -180,6 +357,17 @@ dispatcher_connect(u16_t *ripaddr, u16_t port)
 
   return c;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal The uIP callback function.
+ *
+ * This function is the uIP callback function and is called by the uIP
+ * code whenever a uIP event occurs. This funcion will find out to
+ * which process the event should be handed over to, and calls the
+ * appropriate process' uIP callback function if such a function has
+ * been registered.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 #ifdef WITH_UIP
 void
@@ -229,6 +417,15 @@ dispatcher_uipcall(void)
 }
 #endif /* WITH_UIP */
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Opens a TCP port for incoming requests.
+ *
+ * 
+ *
+ * \param port The TCP port number that should be opened for
+ * listening, in host byte order.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 dispatcher_uiplisten(u16_t port)
 {
@@ -250,6 +447,20 @@ dispatcher_uiplisten(u16_t port)
 
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Associates a generic pointer with a uIP connection.
+ *
+ * This function is used for registering a pointer to a uIP
+ * connection. This pointer will be passed as an argument to the
+ * process' uIP handler function for every uIP event.
+ *
+ * \param conn The uIP connection to which the pointer is to be
+ * associated.
+ *
+ * \param appstate The generic pointer that is to be associated with
+ * the uIP connection.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 dispatcher_markconn(struct uip_conn *conn,
 		    void *appstate)
@@ -261,6 +472,13 @@ dispatcher_markconn(struct uip_conn *conn,
   s->state = appstate;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Registers the calling process as a listener for a signal.
+ *
+ * \param s The signal to which the process should listen.
+ *
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 dispatcher_listen(ek_signal_t s)
 {
@@ -269,13 +487,14 @@ dispatcher_listen(ek_signal_t s)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void
-dispatcher_timer(ek_signal_t s, ek_data_t data, ek_ticks_t t)
-{
-#if EK_CONF_TIMERS
-  ek_timer(s, data, dispatcher_current, t);
-#endif /* EK_CONF_TIMERS */
-}
+/**
+ * Finds the process structure for a specific process ID.
+ *
+ * \param id The process ID for the process.
+ *
+ * \return The process structure for the process, or NULL if there
+ * process ID was not found.
+ */
 /*-----------------------------------------------------------------------------------*/
 struct dispatcher_proc *
 dispatcher_process(ek_id_t id)
@@ -288,6 +507,13 @@ dispatcher_process(ek_id_t id)
   }
   return NULL;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Initializes the dispatcher module.
+ *
+ * Must be called during the initialization of Contiki.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 dispatcher_init(void)
@@ -305,6 +531,14 @@ dispatcher_init(void)
 
   arg_init();
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal Delivers a signal to specific process.
+ *
+ * \param s The signal number
+ * \param data The signal data pointer
+ * \param id The process to which the signal should be delivered
+ */
 /*-----------------------------------------------------------------------------------*/
 static void CC_FASTCALL
 deliver(ek_signal_t s, ek_data_t data,
@@ -329,6 +563,28 @@ deliver(ek_signal_t s, ek_data_t data,
   }  
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Emits a signal, and delivers the signal immediately.
+ *
+ * This function emits a signal and calls the listening processes'
+ * signal handlers immediately, before returning to the caller. This
+ * function requires more call stack space than the dispatcher_emit()
+ * function and should be used with care, and only in situtations
+ * where the exact implications are known.
+ *
+ * In most situations, the dispatcher_emit() function should be used
+ * instead.
+ *
+ * \param s The signal to be emitted.
+ *
+ * \param data The auxillary data to be sent with the signal
+ *
+ * \param id The process ID to which the signal should be emitted, or
+ * DISPATCHER_BROADCAST if the signal should be emitted to all
+ * processes listening for the signal.
+ *
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 dispatcher_fastemit(ek_signal_t s, ek_data_t data,
 		    ek_id_t id)
@@ -345,8 +601,14 @@ dispatcher_fastemit(ek_signal_t s, ek_data_t data,
   curproc = p;  
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Process the next signal in the signal queue and deliver it to
+ * listening processes.
+ *
+ */
+/*-----------------------------------------------------------------------------------*/
 void
-dispatcher_signal(void)
+dispatcher_process_signal(void)
 { 
   static ek_signal_t s;
   static ek_data_t data;
@@ -375,8 +637,12 @@ dispatcher_signal(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Call each process' idle handler.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
-dispatcher_idle(void)
+dispatcher_process_idle(void)
 {
   struct dispatcher_proc *p;
   
@@ -391,17 +657,41 @@ dispatcher_idle(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Run the system - process signals and call idle handlers.
+ *
+ * This function should be called after all other initialization
+ * stuff, and will never return.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 dispatcher_run(void)
 {
   while(1) {
     /* Process one signal */
-    dispatcher_signal();
+    dispatcher_process_signal();
 
     /* Run "idle" handlers */
-    dispatcher_idle();
+    dispatcher_process_idle();
   }
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Emits a signal to a process.
+ *
+ * \param s The signal to be emitted.
+ *
+ * \param data The auxillary data to be sent with the signal
+ *
+ * \param id The process ID to which the signal should be emitted, or
+ * DISPATCHER_BROADCAST if the signal should be emitted to all
+ * processes listening for the signal.
+ *
+ * \retval EK_ERR_OK The signal could be emitted.
+ *
+ * \retval EK_ERR_FULL The signal queue was full and the signal could
+ * not be emitted
+ */
 /*-----------------------------------------------------------------------------------*/
 ek_err_t
 dispatcher_emit(ek_signal_t s, ek_data_t data, ek_id_t id)
