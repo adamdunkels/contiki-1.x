@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.c,v 1.1 2003/03/19 14:16:05 adamdunkels Exp $
+ * $Id: ek.c,v 1.2 2003/04/18 00:17:09 adamdunkels Exp $
  *
  */
 
@@ -212,24 +212,20 @@ ek_listen(ek_signal_t s, ek_id_t id)
   return EK_ERR_OK;  
 }
 /*-----------------------------------------------------------------------------------*/
-#if EK_CONF_UNLISTEN
 ek_err_t
-ek_unlisten(ek_signal_t s, ek_id_t id)
+ek_unlisten(ek_id_t id)
 {
   ek_num_listeners_t i;
   
   /* Go through the listeners list to find the listener to
      unregister. */
   for(i = 0; i < EK_CONF_NUMLISTENERS; ++i) {
-    if(listeners[i].id == id &&
-       listeners[i].s == s) {
+    if(listeners[i].id == id) {
       listeners[i].s = EK_SIGNAL_NONE;
-      return EK_ERR_OK;
     }
   }
   return EK_ERR_NOTFOUND;
 }
-#endif /* EK_CONF_UNLISTEN */
 /*-----------------------------------------------------------------------------------*/
 ek_err_t
 ek_timer(ek_signal_t s, ek_data_t data, ek_id_t id, ek_ticks_t t)

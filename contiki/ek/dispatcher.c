@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.6 2003/04/10 09:04:53 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.7 2003/04/18 00:17:09 adamdunkels Exp $
  *
  */
 
@@ -107,6 +107,9 @@ dispatcher_exit(struct dispatcher_proc *p)
 {
   struct dispatcher_proc *q;
   unsigned char i;
+
+  /* Unlisten all signals. */
+  ek_unlisten(p->id);
   
   /* If this process has any listening TCP ports, we remove them. */
   for(i = 0; i < UIP_LISTENPORTS; ++i) {

@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.h,v 1.1 2003/03/19 14:16:05 adamdunkels Exp $
+ * $Id: ek.h,v 1.2 2003/04/18 00:17:09 adamdunkels Exp $
  *
  */
 /*-----------------------------------------------------------------------------------*/
@@ -100,11 +100,11 @@ ek_err_t ek_listen(ek_signal_t s, ek_id_t id);
 
 /* ek_unlisten:
  *
- * Unregisters a previously registered listener.
+ * Unregisters all previously registered listeners with ID id.
  *
  * Return values: TBA
  */
-ek_err_t ek_unlisten(ek_signal_t s, ek_id_t id);
+ek_err_t ek_unlisten(ek_id_t id);
 
 /* ek_emit:
  *
