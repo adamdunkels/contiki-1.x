@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.12 2004/06/27 20:59:05 oliverschmidt Exp $
+ * $Id: ctk-conio.c,v 1.13 2004/07/04 11:38:43 adamdunkels Exp $
  *
  */
 
@@ -40,12 +40,18 @@
 
 #include "ctk-conio-conf.h"
 #include <string.h>
+#include <ctype.h>
 
 #ifndef NULL
 #define NULL (void *)0
 #endif /* NULL */
 
 static unsigned char sizex, sizey;
+
+unsigned char ctk_draw_windowborder_height = 1;
+unsigned char ctk_draw_windowborder_width = 1;
+unsigned char ctk_draw_windowtitle_height = 1;
+
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -530,3 +536,8 @@ ctk_draw_width(void)
   return sizex;
 }
 /*-----------------------------------------------------------------------------------*/
+int
+ctk_arch_isprint(char c)
+{
+  return isprint(c);
+}
