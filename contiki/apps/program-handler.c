@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.26 2004/09/09 21:15:55 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.27 2005/01/24 23:20:50 oliverschmidt Exp $
  *
  */
 
@@ -127,7 +127,9 @@ static const char * const errormsgs[] = {
 
 static char *displayname;
 
+#if CTK_CONF_SCREENSAVER
 static char screensaver[20];
+#endif /* CTK_CONF_SCREENSAVER */
 
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -243,6 +245,7 @@ program_handler_load(char *name, char *arg)
  * should be used.
  */
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_SCREENSAVER
 void
 program_handler_screensaver(char *name)
 {
@@ -252,6 +255,7 @@ program_handler_screensaver(char *name)
     strncpy(screensaver, name, sizeof(screensaver));
   }
 }
+#endif /* CTK_CONF_SCREENSAVER */
 /*-----------------------------------------------------------------------------------*/
 static void
 make_windows(void)
@@ -303,7 +307,9 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
     
     displayname = NULL;
 
+#if CTK_CONF_SCREENSAVER
     screensaver[0] = 0;
+#endif /* CTK_CONF_SCREENSAVER */
 
   } else if(ev == ctk_signal_button_activate) {
 #ifdef WITH_LOADER_ARCH
