@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.5 2003/04/28 20:31:48 adamdunkels Exp $
+ * $Id: ctk-conio.c,v 1.6 2003/07/30 23:31:56 adamdunkels Exp $
  *
  */
 
@@ -81,7 +81,7 @@ draw_widget(struct ctk_widget *w,
   unsigned char i, j;
   char c, *text;
   unsigned char len;
-
+  
   if(focus & CTK_FOCUS_WINDOW) {    
     textcolor(WIDGETCOLOR_FWIN);
     if(focus & CTK_FOCUS_WIDGET) {
@@ -107,7 +107,7 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_LABEL:
     text = w->widget.label.text;
-    for(i = 0; i < w->widget.label.h; ++i) {
+    for(i = 0; i < w->h; ++i) {
       if(ypos >= clipy1 && ypos < clipy2) {
 	gotoxy(xpos, ypos);
 	cputsn(text, w->w);
@@ -156,7 +156,7 @@ draw_widget(struct ctk_widget *w,
     if(w->widget.textentry.xpos >= w->w - 1) {
       xscroll = w->widget.textentry.xpos - w->w + 1;
     }
-    for(j = 0; j < w->widget.textentry.h; ++j) {
+    for(j = 0; j < w->h; ++j) {
       if(ypos >= clipy1 && ypos < clipy2) {
 	if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT &&
 	   w->widget.textentry.ypos == j) {
@@ -341,9 +341,6 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
   /* Draw window frame. */  
   if(y >= clipy1) {
     cputcxy(x, y, CH_ULCORNER);
-    /*    cputc(' ');
-    cputs(window->title);
-    cputc(' ');*/
     gotoxy(wherex() + window->titlelen + 2, wherey());
     chline(window->w - (wherex() - x) - 2);
     cputcxy(x2, y, CH_URCORNER);
@@ -354,22 +351,22 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
   if(clipy1 > y1) {
     if(clipy1 - y1 < h) {
       h = clipy1 - y1;
-      y1 = clipy1;
+            y1 = clipy1;
     } else {
       h = 0;
     }
   }
 
-  if(y1 + h >= clipy2) {
+  if(clipy2 < y1 + h) {
     if(y1 >= clipy2) {
       h = 0;
     } else {
       h = clipy2 - y1;
     }
   }
-  
+
   cvlinexy(x, y1, h);
-  cvlinexy(x2, y1, h);
+  cvlinexy(x2, y1, h);  
 
   if(y + window->h >= clipy1 &&
      y + window->h < clipy2) {
@@ -379,7 +376,7 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
   }
 
   draw_window_contents(window, focus & CTK_FOCUS_WINDOW, clipy1, clipy2,
-		       x1, x2, y1, y2);
+		       x1, x2, y + 1, y2);
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -478,7 +475,8 @@ void
 ctk_draw_menus(struct ctk_menus *menus)
 {
   struct ctk_menu *m;  
-  
+
+  return;
   
   /* Draw menus */
   textcolor(MENUCOLOR);
