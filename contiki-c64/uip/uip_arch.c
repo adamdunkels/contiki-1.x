@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.3 2004/07/04 18:33:08 adamdunkels Exp $
+ * $Id: uip_arch.c,v 1.4 2004/07/18 13:20:38 oliverschmidt Exp $
  *
  */
 
@@ -45,6 +45,7 @@
 /*-----------------------------------------------------------------------------------*/
 #if UIP_BUFSIZE > 255
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 uip_add32(u8_t *op32, u16_t op16)
 {
@@ -72,9 +73,11 @@ uip_add32(u8_t *op32, u16_t op16)
   asm("adc #0");
   asm("sta _uip_acc32+0");  
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 #else /* UIP_BUFSIZE > 255 */
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 uip_add32(u8_t *op32, u8_t op8)
 {
@@ -101,12 +104,14 @@ uip_add32(u8_t *op32, u8_t op8)
   asm("adc #0");
   asm("sta _uip_acc32+0");  
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 #endif /* UIP_BUFSIZE > 255 */
 
 static u16_t chksum_ptr, chksum_len, chksum_tmp;
 static u16_t chksum(void);
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 u16_t
 chksum(void) {
 
@@ -201,6 +206,7 @@ chksum(void) {
   asm("lda tmp1");
   asm("ldx tmp1+1");
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 u16_t
 uip_chksum(u16_t *buf, u16_t len)
@@ -241,6 +247,7 @@ uip_ipchksum(void)
   return chksum();
 }
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 u16_t
 uip_tcpchksum(void)
 {  
@@ -338,4 +345,5 @@ uip_tcpchksum(void)
 
   return chksum_tmp;
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/

@@ -54,7 +54,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.9 2004/02/16 21:00:14 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.10 2004/07/18 13:20:11 oliverschmidt Exp $
  *
  */
 
@@ -151,6 +151,9 @@ c64_fs_open(const char *name, register struct c64_fs_file *f)
  * of file was encountered.
  */
 /*-----------------------------------------------------------------------------------*/
+#if !NOASM
+#pragma optimize(push, off)
+#endif /* !NOASM */
 int __fastcall__
 c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
 {
@@ -254,6 +257,9 @@ c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
   }
   return i;
 }
+#if !NOASM    
+#pragma optimize(pop)
+#endif /* !NOASM */
 /*-----------------------------------------------------------------------------------*/
 /**
  * Close an open file.

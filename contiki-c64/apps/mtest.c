@@ -2,6 +2,7 @@
 
 MTP(t, p, "Test thread");
 /*--------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 static void
 test(void *data)
 {
@@ -9,6 +10,7 @@ test(void *data)
     asm("inc $d020");
   }
 }
+#pragma optimize(pop)
 /*--------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(mtest_init, arg)
 {

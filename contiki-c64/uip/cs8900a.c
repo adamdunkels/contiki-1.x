@@ -31,7 +31,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.4 2004/02/24 09:51:50 adamdunkels Exp $
+ * $Id: cs8900a.c,v 1.5 2004/07/18 13:20:38 oliverschmidt Exp $
  *
  */
 
@@ -60,6 +60,7 @@ static u8_t r;
 
 
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 cs8900a_init(void)
 {
@@ -122,7 +123,9 @@ cs8900a_init(void)
   asm("sta %v+1", cs8900a_ppdata);
 
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 cs8900a_send(void)
 {
@@ -246,7 +249,9 @@ cs8900a_send(void)
   asm("pla");
   asm("sta ptr1");  
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 static void
 skip_frame(void)
 {
@@ -260,7 +265,9 @@ skip_frame(void)
   asm("ora #$40");
   asm("sta %v", cs8900a_ppdata);
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 u8_t
 cs8900a_poll(void)
 {
@@ -361,3 +368,4 @@ cs8900a_poll(void)
   asm("sta ptr1");
   return len;
 }
+#pragma optimize(pop)

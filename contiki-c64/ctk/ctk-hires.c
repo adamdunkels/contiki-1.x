@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.11 2004/07/04 18:33:08 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.12 2004/07/18 13:19:47 oliverschmidt Exp $
  *
  */
 
@@ -167,6 +167,7 @@ hires_cputcxy(unsigned char x, unsigned char y, char c)
   ctk_hires_cputc(c);
 }
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 static void 
 clear_line(unsigned char line)
 {
@@ -291,7 +292,9 @@ clear_line(unsigned char line)
 		     sizeof(CONTIKI_VERSION_STRING) - 1);
   }
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 static void
 nmi2(void)
 {
@@ -300,7 +303,9 @@ nmi2(void)
   asm("pla");
   asm("rti");
 }  
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 static void
 nmi(void)
 {
@@ -320,7 +325,9 @@ nmi(void)
 
   nmi2();
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 static void
 setup_nmi(void)
 {
@@ -331,7 +338,9 @@ setup_nmi(void)
   return;
   nmi();
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 ctk_draw_init(void)
 {
@@ -436,6 +445,7 @@ ctk_draw_init(void)
 
   return;
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 static void __fastcall__
 draw_widget(register struct ctk_widget *w,

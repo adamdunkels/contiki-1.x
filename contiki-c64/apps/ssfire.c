@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire.c,v 1.5 2004/07/04 18:33:07 adamdunkels Exp $
+ * $Id: ssfire.c,v 1.6 2004/07/18 13:22:26 oliverschmidt Exp $
  *
  */
 
@@ -133,6 +133,7 @@ EK_EVENTHANDLER(ssfire_eventhandler, ev, data)
 static unsigned char *flameptr, *colorptr1, *colorptr2;
 static unsigned char x, y;
 
+#pragma optimize(push, off)
 EK_POLLHANDLER(ssfire_pollhandler)
 {
 
@@ -182,5 +183,6 @@ EK_POLLHANDLER(ssfire_pollhandler)
   
   }
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 

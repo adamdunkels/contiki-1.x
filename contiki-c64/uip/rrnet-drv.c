@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-drv.c,v 1.7 2004/07/04 18:33:08 adamdunkels Exp $
+ * $Id: rrnet-drv.c,v 1.8 2004/07/18 13:20:38 oliverschmidt Exp $
  *
  */
 
@@ -65,6 +65,7 @@ output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
   cs8900a_send();
 }
 /*---------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
@@ -86,6 +87,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     break;
   }
 }
+#pragma optimize(pop)
 /*---------------------------------------------------------------------------*/
 EK_POLLHANDLER(pollhandler)
 {

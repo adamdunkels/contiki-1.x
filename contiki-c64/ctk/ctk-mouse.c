@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mouse.c,v 1.4 2003/08/06 23:58:03 adamdunkels Exp $
+ * $Id: ctk-mouse.c,v 1.5 2004/07/18 13:19:47 oliverschmidt Exp $
  *
  */
 
@@ -48,6 +48,7 @@ unsigned char ctk_mouse_firebutton;
 extern void ctk_mouse_asm_irq(void);
 
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 ctk_mouse_init(void)
 {
@@ -64,6 +65,7 @@ ctk_mouse_init(void)
   asm("cli");
   
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 unsigned short
 ctk_mouse_x(void)
@@ -100,6 +102,7 @@ ctk_mouse_ytoc(unsigned short y)
   return y / 8;
 }
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 ctk_mouse_hide(void)
 {
@@ -107,7 +110,9 @@ ctk_mouse_hide(void)
   asm("lda #0");
   asm("sta $d015"); 
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 ctk_mouse_show(void)
 {  
@@ -115,5 +120,6 @@ ctk_mouse_show(void)
   asm("lda #3");
   asm("sta $d015"); 
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 #endif /* CTK_CONF_MOUSE_SUPPORT */

@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.3 2004/07/04 18:33:08 adamdunkels Exp $
+ * $Id: lan91c96.c,v 1.4 2004/07/18 13:20:38 oliverschmidt Exp $
  *
  */
 
@@ -108,6 +108,7 @@ extern u8_t uip_len;
 #endif
 
 
+#pragma optimize(push, off)
 void lan91c96_init(void)
 {
   /* Check if high byte is 0x33 */
@@ -169,8 +170,10 @@ void lan91c96_init(void)
   asm("lda #%%00001111");               //RCV INT, ALLOC INT, TX INT, TX EMPTY 
   asm("sta %w", ETHMSK);
 }
+#pragma optimize(pop)
 
 
+#pragma optimize(push, off)
 #if UIP_BUFSIZE > 255
 u16_t lan91c96_poll(void)
 #else
@@ -279,10 +282,12 @@ u8_t lan91c96_poll(void)
 
   return packet_length;
 }
+#pragma optimize(pop)
 
 /* First 40+14 (IP nad TCP header) is send from uip_buf */
 /* than data from uip_appdata                           */
 
+#pragma optimize(push, off)
 void lan91c96_send(void)
 {
   #ifdef DEBUG
@@ -446,6 +451,7 @@ void lan91c96_send(void)
 //  printf("\n## %02x\n", *(unsigned char *)ETHIST);
   return;
 }
+#pragma optimize(pop)
 
 #ifdef DEBUG
 static void print_packet(u8_t *buf, u16_t length)
