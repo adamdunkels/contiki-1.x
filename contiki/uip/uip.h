@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.14 2005/02/07 07:00:54 adamdunkels Exp $
+ * $Id: uip.h,v 1.15 2005/02/22 22:32:40 adamdunkels Exp $
  *
  */
 
@@ -1305,6 +1305,13 @@ typedef struct {
 #define UIP_PROTO_ICMP  1
 #define UIP_PROTO_TCP   6
 #define UIP_PROTO_UDP   17
+
+/* Header sizes. */
+#define UIP_IPH_LEN    20    /* Size of IP header */
+#define UIP_UDPH_LEN    8    /* Size of UDP header */
+#define UIP_TCPH_LEN   20    /* Size of TCP header */
+#define UIP_IPUDPH_LEN 28    /* Size of IP + UDP header */
+#define UIP_IPTCPH_LEN 40    /* Size of IP + TCP header */
 
 
 
