@@ -11,14 +11,17 @@
        	.import	       	__INIT_RUN__, __INIT_SIZE__	; Linker generated
        	.import	       	__CODE_RUN__, __CODE_SIZE__	; Linker generated
 	.importzp	sp
+	.linecont	+
 
 ; ------------------------------------------------------------------------
 ; The executable header
 
 .segment	"EXEHDR"
 
-       	.word  	__STARTUP_RUN__									; Start address
-       	.word  	__BSS_RUN__ + __BOOT_SIZE__ + __INIT_SIZE__ + __CODE_SIZE__ - __STARTUP_RUN__	; Size
+       	.word  	__STARTUP_RUN__				; Start address
+       	.word  	__BSS_RUN__   + __BOOT_SIZE__ +		\
+		__INIT_SIZE__ + __CODE_SIZE__ -		\
+		__STARTUP_RUN__				; Size
 
 ; ------------------------------------------------------------------------
 ; Place the startup code in a special segment.
