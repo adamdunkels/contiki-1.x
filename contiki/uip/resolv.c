@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.5 2003/08/15 18:50:36 adamdunkels Exp $
+ * $Id: resolv.c,v 1.6 2003/08/24 22:40:32 adamdunkels Exp $
  *
  */
 
@@ -86,7 +86,7 @@ struct namemap {
   u8_t retries;
   u8_t seqno;
   u8_t err;
-  char name[64];
+  char name[32];
   u16_t ipaddr[2];
 };
 
