@@ -29,18 +29,20 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.11 2004/08/09 21:00:28 adamdunkels Exp $
+ * $Id: configedit.c,v 1.12 2004/09/12 07:27:33 adamdunkels Exp $
  *
  */
 
 #include "contiki.h"
+
+#include "ctk-draw-service.h"
+#include "packet-service.h"
+
 #include "uip.h"
 #include "uip_arp.h"
 #include "resolv.h"
 #include "ctk.h"
 #include "ctk-draw.h"
-
-#include "uip-event.h"
 
 #include "program-handler.h"
 
@@ -354,6 +356,12 @@ configedit_quit(void)
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
+static void
+quit_services(void)
+{
+  ctk_draw_quit();  
+}
+/*-----------------------------------------------------------------------------------*/
 EK_EVENTHANDLER(eventhandler, ev, data)
 {
   EK_EVENTHANDLER_ARGS(ev, data);
@@ -393,6 +401,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 
   } else if(ev == ctk_signal_button_activate) {   
     if(data == (ek_data_t)&savebutton) {
+      quit_services();
       savescript();
       ctk_window_close(&window);
       configedit_quit();
