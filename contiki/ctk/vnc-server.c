@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-server.c,v 1.3 2004/06/06 05:54:47 adamdunkels Exp $
+ * $Id: vnc-server.c,v 1.4 2004/08/09 20:32:28 adamdunkels Exp $
  *
  */
 
@@ -79,7 +79,7 @@ static u8_t uvnc_name[4] = {117,86,78,67};
 u8_t
 vnc_server_draw_rect(u8_t *ptr, u16_t x, u16_t y, u16_t w, u16_t h, u8_t c)
 {
-  struct rfb_fb_update_rect_hdr *recthdr;
+  register struct rfb_fb_update_rect_hdr *recthdr;
   struct rfb_rre_hdr *rrehdr;
 
   recthdr = (struct rfb_fb_update_rect_hdr *)ptr;
@@ -149,7 +149,7 @@ vnc_send_update(struct vnc_server_state *vs)
 void
 vnc_server_send_data(struct vnc_server_state *vs)
 {
-  struct rfb_server_init *initmsg;
+  register struct rfb_server_init *initmsg;
   
   switch(vs->state) {
   case VNC_VERSION:
@@ -245,7 +245,7 @@ vnc_pointer_event(struct vnc_server_state *vs)
 }
 /*-----------------------------------------------------------------------------------*/
 static u8_t
-vnc_read_data(struct vnc_server_state *vs)
+vnc_read_data(register struct vnc_server_state *vs)
 {
   u8_t *appdata;
   u16_t len;
@@ -392,7 +392,7 @@ vnc_read_data(struct vnc_server_state *vs)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-vnc_new(struct vnc_server_state *vs)
+vnc_new(register struct vnc_server_state *vs)
 {
   vs->counter = 0;
   vs->readlen = 0;
@@ -409,7 +409,7 @@ vnc_new(struct vnc_server_state *vs)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-vnc_acked(struct vnc_server_state *vs)
+vnc_acked(register struct vnc_server_state *vs)
 {
   switch(vs->state) {
   case VNC_VERSION:
