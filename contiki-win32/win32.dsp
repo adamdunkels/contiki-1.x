@@ -167,6 +167,22 @@ SOURCE=..\contiki\apps\calc.c
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\apps\dhcp-dsc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\dhcp-dsc.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\dhcp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\dhcp.h
+# End Source File
+# Begin Source File
+
 SOURCE="..\contiki\apps\email-dsc.c"
 # End Source File
 # Begin Source File
@@ -351,6 +367,14 @@ SOURCE=..\contiki\ek\arg.h
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\ek\contiki-version.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ek\contiki.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\ek\dsc.h
 # End Source File
 # Begin Source File
@@ -377,6 +401,10 @@ SOURCE=..\contiki\ek\loader.h
 
 SOURCE=..\contiki\ek\log.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ek\pt.h
+# End Source File
 # End Group
 # Begin Group "contiki-lib"
 
@@ -396,6 +424,10 @@ SOURCE="..\contiki\lib\ctk-textedit.c"
 # Begin Source File
 
 SOURCE="..\contiki\lib\ctk-textedit.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\lib\memb.h
 # End Source File
 # Begin Source File
 
@@ -628,6 +660,14 @@ SOURCE=..\contiki\ppp\ppp.h
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\contiki\uip\dhcpc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\uip\dhcpc.h
+# End Source File
+# Begin Source File
+
 SOURCE="..\contiki\uip\packet-service.h"
 # End Source File
 # Begin Source File
@@ -766,6 +806,10 @@ SOURCE=".\ctk\ctk-console.h"
 
 SOURCE=.\lib\debug.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\lib\lc.h
+# End Source File
 # End Group
 # Begin Group "contiki-win32-ppp"
 
@@ -872,6 +916,21 @@ SOURCE=.\uip\rawsock.h
 # Begin Source File
 
 SOURCE=.\uip\uip_arch.c
+
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
+
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
+
+# SUBTRACT CPP /O<none>
+
+!ELSEIF  "$(CFG)" == "win32 - Win32 Debug PPP"
+
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release PPP"
+
+# SUBTRACT CPP /O<none>
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
