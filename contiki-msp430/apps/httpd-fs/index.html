@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>Contiki / uIP on MSP430 demo-server</title>
+</head>
+<body bgcolor="#e0e0e0" text="black">
+<table width="100%" cellspacing=0 cellpadding=0 border=0><tr valign="top">
+<td width="25%" valign="top">
+<br>
+<a href="/">Front page</a><br>
+<br>		      
+<a href="/vnc.html">Virtual desktop</a><br>
+<br>		      
+<a href="/cgi/tcp">Network connections</a><br>
+<br>			
+<a href="/cgi/processes">Processes</a><br>
+<br>
+<a href="/cgi/sensors">Sensors</a><br>
+<br>			    
+<td class="content">
+<h1><a href="http://dunkels.com/adam/contiki/">Contiki</a> / <a
+href="http://dunkels.com/adam/uip/">uIP</a> on MSP430</h1>
+<p>
+The web pages you are watching are served by a <a
+href="http://dunkels.com/adam/contiki/apps/webserver.html">web
+server</a> running under the <a
+href="http://dunkels.com/adam/contiki/">Contiki operating system</a>
+on a small <a
+href="http://www.inf.fu-berlin.de/inst/ag-tech/esb/english/">sensor
+board</a> developed by <a
+href="http://www.inf.fu-berlin.de/inst/ag-tech/">the CST group</a> at
+<a href="http://www.fu-berlin.de">FU Berlin</a>. The sensor board is
+equipped with a TI MSP430 micrcontroller with 2048 bytes of RAM and 60
+kilobytes of flash ROM, as well as a number of sensors. The sensors
+can measure vibration, temperature, IR-light, sound, tilt and motion.
+</p>
+
+<h2>Internet connectivity</h2>			    
+<p>
+The sensor board is directly connected to the Internet through the
+RS232 interface on the board, and is running the <a
+href="http://dunkels.com/adam/uip/">uIP TCP/IP stack</a> on which
+Contiki is based.
+</p>
+			      
+<h2>Virtual desktop</h2>
+<p>
+In addition to running this web server, this small sensor board also
+has a virtual Contiki desktop that can be remotely accessed using VNC,
+directly from your web browser. Because of the memory constraints of
+the system, the virtual desktop is very small (120x56 pixels). See the
+<a href="vnc.html">virtual desktop</a> page.
+</p>
+<center><img src="/img/screenshot.png"></center>
+<h2>Memory usage</h2>
+<p>
+The entire Contiki MSP430 system uses only about 1800 bytes RAM, of
+which 280 bytes is used for the virtual screen and 300 bytes for
+network buffers. All code and web pages are stored in the
+microcontroller's on-chip flash ROM.
+</p>
+<p align="right">
+/<a href="http://www.sics.se/%7eadam/">Adam Dunkels</a>
+</p>
+</td>
+</tr>
+</table>
+    
+</body>
+</html>

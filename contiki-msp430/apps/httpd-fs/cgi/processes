@@ -1,0 +1,8 @@
+i /header.html
+# 
+t <h1>System processes</h1><br><table width="100%">
+t <tr><th>ID</th><th>Name</th><th>Idle handler</th><th>Signal handler</th><th>TCP/IP handler</th> </tr>
+c c
+t </table>
+i /footer.plain
+.

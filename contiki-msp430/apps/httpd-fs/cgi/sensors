@@ -1,0 +1,7 @@
+i /header.html
+# 
+t <h1>Sensors</h1><br> <ul>
+c a
+t </ul>
+i /footer.plain
+.
