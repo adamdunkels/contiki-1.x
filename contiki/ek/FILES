@@ -31,7 +31,7 @@ loader.h
 
 log.h
 
-  Header file for the system loggin facility.
+  Header file for the system logging facility.
 
 mt.[ch]
 
