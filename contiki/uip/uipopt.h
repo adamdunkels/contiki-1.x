@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.15 2005/02/23 22:40:40 oliverschmidt Exp $
+ * $Id: uipopt.h,v 1.16 2005/02/24 22:25:12 oliverschmidt Exp $
  *
  */
 
@@ -310,7 +310,7 @@ typedef unsigned short uip_stats_t;
  * \hideinitializer
  */
 #ifndef UIP_CONF_RECEIVE_WINDOW
-#define UIP_RECEIVE_WINDOW   32768
+#define UIP_RECEIVE_WINDOW   32768U
 #else
 #define UIP_RECEIVE_WINDOW UIP_CONF_RECEIVE_WINDOW
 #endif
