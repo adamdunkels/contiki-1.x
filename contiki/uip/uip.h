@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.3 2003/04/16 18:28:16 adamdunkels Exp $
+ * $Id: uip.h,v 1.4 2003/08/13 22:52:48 adamdunkels Exp $
  *
  */
 
@@ -101,6 +101,12 @@ void uip_init(void);
  * Starts listening to the specified port.
  */
 void uip_listen(u16_t port);
+
+/* uip_unlisten(port):
+ *
+ * Stops listening to the specified port.
+ */
+void uip_unlisten(u16_t port);
 
 /* uip_connect(ripaddr, port):
  *

@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.5 2003/08/05 13:51:50 adamdunkels Exp $
+ * $Id: uip.c,v 1.6 2003/08/13 22:52:48 adamdunkels Exp $
  *
  */
 
@@ -334,12 +334,23 @@ uip_udp_new(u16_t *ripaddr, u16_t rport)
 #endif /* UIP_UDP */
 /*-----------------------------------------------------------------------------------*/
 void
+uip_unlisten(u16_t port)
+{
+  for(c = 0; c < UIP_LISTENPORTS; ++c) {
+    if(uip_listenports[c] == port) {
+      uip_listenports[c] = 0;
+      return;
+    }
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+void
 uip_listen(u16_t port)
 {
   for(c = 0; c < UIP_LISTENPORTS; ++c) {
     if(uip_listenports[c] == 0) {
-      uip_listenports[c] = HTONS(port);
-      break;
+      uip_listenports[c] = htons(port);
+      return;
     }
   }
 }
@@ -966,7 +977,7 @@ uip_process(u8_t flag)
   
   tmpport = BUF->destport;
   /* Next, check listening connections. */  
-  for(c = 0; c < UIP_LISTENPORTS && uip_listenports[c] != 0; ++c) {
+  for(c = 0; c < UIP_LISTENPORTS; ++c) {
     if(tmpport == uip_listenports[c])
       goto found_listen;
   }
