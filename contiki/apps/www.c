@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.9 2003/04/15 21:24:14 adamdunkels Exp $
+ * $Id: www.c,v 1.10 2003/04/18 00:20:22 adamdunkels Exp $
  *
  */
 
@@ -459,10 +459,12 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     ctk_window_open(&mainwindow);
     run = 1;
   } else if(s == ctk_signal_hyperlink_hover) {
-    strncpy(statustexturl, w->widget.hyperlink.url,
-	    sizeof(statustexturl));
-    petsciiconv_topetscii(statustexturl, sizeof(statustexturl));
-    show_statustext(statustexturl);
+    if(CTK_WIDGET_TYPE((struct ctk_widget *)data) == CTK_WIDGET_HYPERLINK) {
+      strncpy(statustexturl, w->widget.hyperlink.url,
+	      sizeof(statustexturl));
+      petsciiconv_topetscii(statustexturl, sizeof(statustexturl));
+      show_statustext(statustexturl);
+    }
   } else if(s == resolv_signal_found) {
     /* Either found a hostname, or not. */
     if((char *)data != NULL &&
