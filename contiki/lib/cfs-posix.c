@@ -65,7 +65,11 @@ s_open(const char *n, int f)
 {
   char filename[255];
   sprintf(filename, "cfs-root/%s", n);
-  return open(filename, O_CREAT|O_RDWR);
+  if(f == CFS_READ) {
+    return open(filename, O_RDONLY);
+  } else {
+    return open(filename, O_CREAT|O_RDWR);
+  }
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -114,7 +118,7 @@ s_readdir(struct cfs_dir *p, struct cfs_dirent *e)
     return 1;
   }
   strncpy(e->name, res->d_name, sizeof(e->name));
-  e->size = res->d_reclen;
+  e->size = 0;
   return 0;
 }
 /*---------------------------------------------------------------------------*/
