@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about-dsc.c,v 1.2 2003/04/18 00:15:13 adamdunkels Exp $
+ * $Id: about-dsc.c,v 1.3 2003/04/24 17:16:04 adamdunkels Exp $
  *
  */
 
@@ -64,5 +64,5 @@ static char abouticon_textmap[9] = {
 };
 
 static struct ctk_icon about_icon =
-  {CTK_ICON("About Contiki", abouticon_bitmap, abouticon_textmap)};
+  {CTK_ICON("About", abouticon_bitmap, abouticon_textmap)};
 /*-----------------------------------------------------------------------------------*/
