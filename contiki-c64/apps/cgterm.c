@@ -127,6 +127,8 @@ static struct ctk_button connectbutton =
   {CTK_BUTTON(0, 2, 7, "Connect")};
 static struct ctk_button switchbutton =
   {CTK_BUTTON(30, 2, 6, "Switch")};
+static struct ctk_label helplabel =
+  {CTK_LABEL(0, 4, 37, 1, "RUN/STOP to return from terminal view")};
 /*---------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(cgterm_init, arg)
 {
@@ -168,13 +170,14 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   if(ev == tcpip_event) {
     appcall(data);
   } else if(ev == EK_EVENT_INIT) {
-    ctk_window_new(&window, 38, 3, "C/G term");
+    ctk_window_new(&window, 38, 5, "C/G term");
     CTK_WIDGET_ADD(&window, &hostlabel);
     CTK_WIDGET_ADD(&window, &hostentry);
     CTK_WIDGET_ADD(&window, &portlabel);
     CTK_WIDGET_ADD(&window, &portentry);
     CTK_WIDGET_ADD(&window, &connectbutton);
     CTK_WIDGET_ADD(&window, &switchbutton);
+    CTK_WIDGET_ADD(&window, &helplabel);
     ctk_window_open(&window);
   } else if(ev == ctk_signal_widget_activate) {
 
