@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: shell-dsc.c,v 1.2 2004/06/27 12:34:24 oliverschmidt Exp $
+ * $Id: shell-dsc.c,v 1.3 2004/07/04 17:46:52 adamdunkels Exp $
  *
  */
 
@@ -40,7 +40,7 @@ extern struct ctk_icon shell_icon;
 DSC(shell_dsc,
     "The Contiki command shell",
     "shell.prg",
-    shell_init,
+    shell_gui_init,
     &shell_icon);
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_ICON_BITMAPS
