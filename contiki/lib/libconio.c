@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: libconio.c,v 1.2 2003/04/02 18:50:17 adamdunkels Exp $
+ * $Id: libconio.c,v 1.3 2003/04/15 21:22:35 adamdunkels Exp $
  *
  */
 
@@ -180,7 +180,7 @@ bordercolor(unsigned char c)
 void
 screensize(unsigned char *x, unsigned char *y)
 {
-  x = LIBCONIO_SCREEN_WIDTH;
-  y = LIBCONIO_SCREEN_HEIGHT;
+  *x = LIBCONIO_SCREEN_WIDTH;
+  *y = LIBCONIO_SCREEN_HEIGHT;
 }
 /*-----------------------------------------------------------------------------------*/
