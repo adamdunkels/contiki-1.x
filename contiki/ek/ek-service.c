@@ -1,6 +1,8 @@
 
 #include "ek-service.h"
 
+#include "log.h"
+
 /*---------------------------------------------------------------------------*/
 ek_id_t
 ek_service_start(const char *name, struct ek_proc *p)
