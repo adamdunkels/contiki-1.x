@@ -32,10 +32,11 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.4 2003/04/02 11:36:21 adamdunkels Exp $
+ * $Id: ctk.c,v 1.5 2003/04/05 12:22:35 adamdunkels Exp $
  *
  */
 
+#include "cc.h"
 #include "ek.h"
 #include "dispatcher.h"
 #include "ctk.h"
@@ -184,7 +185,7 @@ ctk_mode_get(void) {
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_icon_add(register struct ctk_widget *icon,
+ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon,
 	     ek_id_t id)
 {
 #if CTK_CONF_ICONS
@@ -215,7 +216,7 @@ ctk_dialog_close(void)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_window_open(register struct ctk_window *w)
+ctk_window_open(CC_REGISTER_ARG struct ctk_window *w)
 {
   struct ctk_window *w2;
   
@@ -290,8 +291,8 @@ ctk_window_close(struct ctk_window *w)
 #endif /* CTK_CONF_MENUS */
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-make_windowbuttons(register struct ctk_window *window)
+static void 
+make_windowbuttons(CC_REGISTER_ARG struct ctk_window *window)
 {
 #if CTK_CONF_WINDOWMOVE
   CTK_BUTTON_NEW(&window->titlebutton, 0, -1, window->titlelen, window->title);
@@ -431,7 +432,7 @@ ctk_window_redraw(struct ctk_window *w)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-window_new(register struct ctk_window *window,
+window_new(CC_REGISTER_ARG struct ctk_window *window,
 	   unsigned char w, unsigned char h,
 	   char *title)
 {
@@ -460,7 +461,7 @@ ctk_window_new(struct ctk_window *window,
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_dialog_new(register struct ctk_window *window,
+ctk_dialog_new(CC_REGISTER_ARG struct ctk_window *window,
 	       unsigned char w, unsigned char h)
 {
   window_new(window, w, h, NULL);
@@ -470,7 +471,7 @@ ctk_dialog_new(register struct ctk_window *window,
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_menu_new(register struct ctk_menu *menu,
+ctk_menu_new(CC_REGISTER_ARG struct ctk_menu *menu,
 	     char *title)
 {
 #if CTK_CONF_MENUS
@@ -483,7 +484,7 @@ ctk_menu_new(register struct ctk_menu *menu,
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-ctk_menuitem_add(register struct ctk_menu *menu,
+ctk_menuitem_add(CC_REGISTER_ARG struct ctk_menu *menu,
 		 char *name)
 {
 #if CTK_CONF_MENUS
@@ -559,8 +560,8 @@ ctk_widget_redraw(struct ctk_widget *widget)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_widget_add(register struct ctk_window *window,
-	       register struct ctk_widget *widget)
+ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
+	       CC_REGISTER_ARG struct ctk_widget *widget)
 {  
   if(widget->type == CTK_WIDGET_LABEL ||
      widget->type == CTK_WIDGET_SEPARATOR) {
@@ -710,7 +711,7 @@ switch_menu_item(unsigned char updown)
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
 static unsigned char 
-activate(register struct ctk_widget *w)
+activate(CC_REGISTER_ARG struct ctk_widget *w)
 {
   static unsigned char len;
   
@@ -755,7 +756,7 @@ activate(register struct ctk_widget *w)
 /*-----------------------------------------------------------------------------------*/
 static void
 textentry_input(ctk_arch_key_t c,
-		register struct ctk_textentry *t)
+		CC_REGISTER_ARG struct ctk_textentry *t)
 {
   static char *cptr, *cptr2;
   static unsigned char len, txpos, typos, tlen;
@@ -1117,4 +1118,6 @@ sighandler(ek_signal_t s, ek_data_t data)
     dispatcher_timer(ctk_signal_timer, data, CLK_TCK);
   }
 }
+/*-----------------------------------------------------------------------------------*/
+
 /*-----------------------------------------------------------------------------------*/
