@@ -31,19 +31,20 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.2 2004/02/16 20:55:34 adamdunkels Exp $
+ * $Id: httpd.h,v 1.3 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
 #ifndef __HTTPD_H__
 #define __HTTPD_H__
 
-#include "dispatcher.h"
+#include "ek.h"
 
 #include "httpd-fs.h"
 
 void httpd_init(void);
-DISPATCHER_UIPCALL(httpd_appcall, state);
+/*DISPATCHER_UIPCALL(httpd_appcall, state);*/
+void httpd_appcall(void *state);
 
 struct httpd_buffer {
   u8_t *buf;

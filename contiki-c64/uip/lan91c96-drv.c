@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, Adam Dunkels.
+ * Copyright (c) 2001-2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -28,129 +28,85 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: lan91c96-drv.c,v 1.2 2004/02/16 20:59:49 adamdunkels Exp $
+ * $Id: lan91c96-drv.c,v 1.3 2004/07/04 18:33:08 adamdunkels Exp $
  *
  */
 
+#include "packet-service.h"
 
-#include "uip.h"
-#include "uip_arp.h"
-#include "uip-signal.h"
-#include "loader.h"
 #include "lan91c96.h"
 
-#include "dispatcher.h"
-#include "ek.h"
+#include "uip_arp.h"
 
+static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
+
+static const struct packet_service_state state =
+  {
+    PACKET_SERVICE_VERSION,
+    output
+  };
+
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_POLLHANDLER(pollhandler);
+EK_PROCESS(proc, PACKET_SERVICE_NAME, EK_PRIO_NORMAL,
+	   eventhandler, pollhandler, (void *)&state);
+
+/*---------------------------------------------------------------------------*/
+LOADER_INIT_FUNC(tapdev_service_init, arg)
+{
+  arg_free(arg);
+  ek_service_start(PACKET_SERVICE_NAME, &proc);
+}
+/*---------------------------------------------------------------------------*/
+static void
+output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
+{
+  uip_arp_out();
+  lan91c96_send();
+}
+/*---------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  switch(ev) {
+  case EK_EVENT_INIT:
+    lan91c96_init();
+    break;
+  case EK_EVENT_REQUEST_REPLACE:
+    ek_replace((struct ek_proc *)data, NULL);
+    LOADER_UNLOAD();
+    break;
+  case EK_EVENT_REQUEST_EXIT:
+    ek_exit();
+    LOADER_UNLOAD();
+    break;
+  default:
+    break;
+  }
+}
+/*---------------------------------------------------------------------------*/
+EK_POLLHANDLER(pollhandler)
+{
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
-
-static u8_t i, arptimer;
-static u16_t start, current;
-
-static void lan91c96_drv_idle(void);
-static DISPATCHER_SIGHANDLER(lan91c96_drv_sighandler, s, data);
-static struct dispatcher_proc p =
-  {DISPATCHER_PROC("TCP/IP/LAN91C96 driver", lan91c96_drv_idle,
-		   lan91c96_drv_sighandler, NULL)};
-static ek_id_t id;
-
-/*-----------------------------------------------------------------------------------*/
-static void
-send(void)
-{
-  if(uip_len > 0) {
-    uip_arp_out();
-    lan91c96_send();
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-timer(void)
-{
-  for(i = 0; i < UIP_CONNS; ++i) {
-    uip_periodic(i);
-    send();
-  }
-
-  for(i = 0; i < UIP_UDP_CONNS; i++) {
-    uip_udp_periodic(i);
-    /* If the above function invocation resulted in data that
-       should be sent out on the network, the global variable
-       uip_len is set to a value > 0. */
-    send();
-  }   
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-lan91c96_drv_idle(void)
-{
+  
   /* Poll Ethernet device to see if there is a frame avaliable. */
   uip_len = lan91c96_poll();
   if(uip_len > 0) {
     /* A frame was avaliable (and is now read into the uip_buf), so
-       we process it. */ 
+       we process it. */
     if(BUF->type == HTONS(UIP_ETHTYPE_IP)) {
       uip_arp_ipin();
       uip_len -= sizeof(struct uip_eth_hdr);
-      uip_input();
-      /* If the above function invocation resulted in data that
-	 should be sent out on the network, the global variable
-	 uip_len is set to a value > 0. */
-      send();
+      tcpip_input();
     } else if(BUF->type == HTONS(UIP_ETHTYPE_ARP)) {
       uip_arp_arpin();
       /* If the above function invocation resulted in data that
-	 should be sent out on the network, the global variable
-	 uip_len is set to a value > 0. */	
+         should be sent out on the network, the global variable
+         uip_len is set to a value > 0. */
       if(uip_len > 0) {
-	lan91c96_send();
+        lan91c96_send();
       }
     }
   }
-  /* Check the clock so see if we should call the periodic uIP
-     processing. */
-  current = ek_clock();
 
-  if((current - start) >= CLK_TCK/2) {
-    timer();
-    start = current;
-  }    
 }
-/*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(lan91c96_drv_init, arg)
-{
-  arg_free(arg);
-  
-  if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
-    arptimer = 0;
-    start = ek_clock();
-
-    lan91c96_init();
-    
-    dispatcher_listen(uip_signal_poll);
-    dispatcher_listen(uip_signal_poll_udp);
-    dispatcher_listen(uip_signal_uninstall);
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(lan91c96_drv_sighandler, s, data)
-{
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-
-  if(s == uip_signal_poll) {
-    uip_periodic_conn(data);
-    send();
-  } else if(s == uip_signal_poll_udp) {
-    uip_udp_periodic_conn(data);
-    send();
-  } else if(s == dispatcher_signal_quit ||
-	    s == uip_signal_uninstall) {
-    dispatcher_exit(&p);
-    id = EK_ID_NONE;
-    LOADER_UNLOAD();   
-  }
-}
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/

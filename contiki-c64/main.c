@@ -32,13 +32,13 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.9 2004/06/08 11:47:18 adamdunkels Exp $
+ * $Id: main.c,v 1.10 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 
 #include "program-handler.h"
 
@@ -55,11 +55,23 @@
 
 #include "c64-dio.h"
 
+#include "clock.h"
+
 #include <cbm.h>
 
+unsigned char
+uip_fw_forward(void)
+{
+  return 0;
+}
+void
+uip_fw_periodic(void)
+{
+  return;
+}
 /*-----------------------------------------------------------------------------------*/
-ek_clock_t
-ek_clock(void)
+clock_time_t
+clock_time(void)
 {
   return clock();
 }
@@ -70,14 +82,14 @@ main(void)
 
   c64_dio_init(_curunit);
   
-  dispatcher_init();
-  uip_init();
+  ek_init();
+  tcpip_init(NULL);
   
   ctk_init();
 
   resolv_init(NULL);
   
-  uip_signal_init();
+  uip_event_init();
   
   program_handler_init();
    
@@ -86,8 +98,10 @@ main(void)
   program_handler_add(&processes_dsc, "Processes", 1);  
 
   program_handler_load("config.prg", NULL);
-  
-  dispatcher_run();
+
+  while(1) {
+    ek_run();
+  }
 
 }
 /*-----------------------------------------------------------------------------------*/

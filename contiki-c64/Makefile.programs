@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.20 2004/06/06 06:20:48 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.21 2004/07/04 18:33:07 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -52,6 +52,7 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      plasma.sav plasma.dsc \
      rrnet.drv rrnet.dsc \
      tfe.drv tfe.dsc \
+     lan91c96.drv lan91c96.dsc \
      config.prg configedit.prg configedit.dsc \
      shell.prg shell.dsc \
      telnetd.prg telnetd.dsc \
@@ -91,6 +92,8 @@ simpletelnet.prg: $(TELNET)
 tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o uip_arp.o
 
 rrnet.drv: rrnet-drv.o cs8900a.o rrnet-drv-asm.o uip_arp.o
+
+lan91c96.drv: lan91c96-drv.o lan91c96.o uip_arp.o
 
 slip.drv: slip-drv.o rs232dev.o
 

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS for the C64
  *
- * $Id: ctk-hires-theme-ravenpine.c,v 1.2 2003/08/20 19:54:12 adamdunkels Exp $
+ * $Id: ctk-hires-theme-ravenpine.c,v 1.3 2004/07/04 18:33:08 adamdunkels Exp $
  *
  */
 
@@ -39,7 +39,7 @@
 #define COLOR(bg, fg) ((fg << 4) | (bg))
 
 #define BGCOLOR1 0x00
-#define BGCOLOR2 0x00
+#define BGCOLOR2 0x05
 
 
 struct ctk_hires_theme ctk_hires_theme =

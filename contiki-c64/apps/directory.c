@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.8 2003/08/24 22:35:22 adamdunkels Exp $
+ * $Id: directory.c,v 1.9 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
@@ -42,7 +39,7 @@
 
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "loader.h"
 
 #include "c64-fs.h"
@@ -78,12 +75,16 @@ static struct ctk_button backbutton =
 static struct ctk_button reloadbutton =
   {CTK_BUTTON(30, 20, 6, "Reload")};
 
-static DISPATCHER_SIGHANDLER(directory_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(directory_sighandler, s, data);
 static void directory_idle(void);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Directory browser", directory_idle,
 		   directory_sighandler, NULL)};
-static ek_id_t id;
+		   static ek_id_t id;*/
+EK_EVENTHANDLER(directory_eventhandler, ev, data);
+EK_PROCESS(p, "Directory browser", EK_PRIO_NORMAL,
+	   directory_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 static unsigned char width, height;
 
@@ -105,6 +106,7 @@ startloading(void)
     loading = 0;
   } else {
     loading = 1;
+    ek_post(id, EK_EVENT_CONTINUE, NULL);
     numfiles = 0;
   }
 }    
@@ -192,23 +194,11 @@ LOADER_INIT_FUNC(directory_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    id = ek_start(&p);
 
     width = ctk_draw_width() - 4;
     height = ctk_draw_height() - 4;
-    
-    ctk_window_new(&window, width, height, "Directory");
-
-    /*    loaddirectory();*/
-    makewindow(0);
-    show_statustext("Loading directory...");
-    startloading();
-    
-    dispatcher_listen(ctk_signal_widget_activate);
-    dispatcher_listen(ctk_signal_widget_select);
-    dispatcher_listen(ctk_signal_window_close);
   }
-  ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -220,18 +210,67 @@ quit(void)
   for(i = 0; dscs[i] != NULL; ++i) {
     LOADER_UNLOAD_DSC(dscs[i]);
   }
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
+static void
+read_dirent(void)
+{
+  static struct c64_fs_dirent dirent;
+  static char message[40];
+    
+  if(loading != 0) {
+    c64_fs_readdir_dirent(&dir, &dirent);
+    if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
+      dscs[numfiles] = LOADER_LOAD_DSC(dirent.name);
+      if(dscs[numfiles] != NULL) {
+	++numfiles;
+	if(numfiles == MAX_NUMFILES) {
+	  c64_fs_closedir(&dir);
+	  loading = 0;
+	  makewindow(0);
+	  ctk_window_redraw(&window);
+	  return;
+	}
+      }
+      strcpy(message, "Loading \"");
+      strcpy(message + 9, dirent.name);
+      strcpy(message + 9 + strlen(dirent.name), "\"...");
+      show_statustext(message);
+    }
+    if(c64_fs_readdir_next(&dir) != 0) {
+      c64_fs_closedir(&dir);
+      loading = 0;
+      makewindow(0);
+      show_statustext("Directory loaded");
+      ctk_window_redraw(&window);
+    }
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(directory_eventhandler, ev, data)
 {
   unsigned char i;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_widget_activate) {
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&window, width, height, "Directory");
+
+    /*    loaddirectory();*/
+    makewindow(0);
+    show_statustext("Loading directory...");
+    startloading();
+    
+    ctk_window_open(&window);
+
+  } else if(ev == EK_EVENT_CONTINUE) {
+    read_dirent();
+    if(loading != 0) {
+      ek_post(id, EK_EVENT_CONTINUE, NULL);
+    }
+  } else if(ev == ctk_signal_widget_activate) {
     if(data == (ek_data_t)&reloadbutton) {
       for(i = 0; dscs[i] != NULL; ++i) {
 	LOADER_UNLOAD_DSC(dscs[i]);
@@ -267,7 +306,7 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
 	}
       }
     }
-  } else if(s == ctk_signal_widget_select) {
+  } else if(ev == ctk_signal_widget_select) {
     if(data == (ek_data_t)&reloadbutton) {
       show_statustext("Reload directory");
     } else if(data == (ek_data_t)&morebutton) {
@@ -284,47 +323,12 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
 	}
       }
     }
-  } else if(s == ctk_signal_window_close &&
+  } else if(ev == ctk_signal_window_close &&
 	    data == (ek_data_t)&window) {
     quit();
-  } else if(s == dispatcher_signal_quit) {
+  } else if(ev == EK_EVENT_REQUEST_EXIT) {
     ctk_window_close(&window);
     quit();
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-directory_idle(void)
-{
-  static struct c64_fs_dirent dirent;
-  static char message[40];
-    
-  if(loading != 0) {
-    c64_fs_readdir_dirent(&dir, &dirent);
-    if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
-      dscs[numfiles] = LOADER_LOAD_DSC(dirent.name);
-      if(dscs[numfiles] != NULL) {
-	++numfiles;
-	if(numfiles == MAX_NUMFILES) {
-	  c64_fs_closedir(&dir);
-	  loading = 0;
-	  makewindow(0);
-	  ctk_window_redraw(&window);
-	  return;
-	}
-      }
-      strcpy(message, "Loading \"");
-      strcpy(message + 9, dirent.name);
-      strcpy(message + 9 + strlen(dirent.name), "\"...");
-      show_statustext(message);
-    }
-    if(c64_fs_readdir_next(&dir) != 0) {
-      c64_fs_closedir(&dir);
-      loading = 0;
-      makewindow(0);
-      show_statustext("Directory loaded");
-      ctk_window_redraw(&window);
-    }
   }
 }
 /*-----------------------------------------------------------------------------------*/

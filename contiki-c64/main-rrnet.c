@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main-rrnet.c,v 1.1 2003/09/05 21:16:38 adamdunkels Exp $
+ * $Id: main-rrnet.c,v 1.2 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
@@ -63,7 +63,6 @@ void rrnet_drv_init(void);
 #include "wget-dsc.h"
 #include "www-dsc.h"
 
-#include "vnc-dsc.h"
 
 #include "webserver.h"
 

@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.10 2004/02/24 09:50:58 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.11 2004/07/04 18:33:08 adamdunkels Exp $
  *
  */
 
@@ -78,6 +75,10 @@ static unsigned char x1, y1, x2, y2;
 
 struct ctk_hires_windowparams ctk_hires_windowparams;
 unsigned char *ctk_hires_bitmapptr;
+
+unsigned char ctk_draw_windowborder_height = 1;
+unsigned char ctk_draw_windowborder_width = 1;
+unsigned char ctk_draw_windowtitle_height = 1;
 
 /*-----------------------------------------------------------------------------------*/
 /* Tables. */
@@ -851,3 +852,8 @@ ctk_draw_width(void)
   return SCREEN_WIDTH;
 }
 /*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_arch_isprint(char c)
+{
+  return isprint(c);
+}

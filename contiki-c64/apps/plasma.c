@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: plasma.c,v 1.2 2003/08/24 22:35:23 adamdunkels Exp $
+ * $Id: plasma.c,v 1.3 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
@@ -41,7 +38,7 @@
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-mouse.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "loader.h"
 
 static unsigned char sinetab1[256] = {
@@ -116,19 +113,24 @@ static unsigned char yadd = 0xfe;
 static unsigned char movcnt;
 static unsigned char movadd = 0xfb;
 
-static DISPATCHER_SIGHANDLER(sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(sighandler, s, data);
 static void idle(void);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Plasma screensaver", idle,
 		   sighandler,
 		   NULL)};
-static ek_id_t id;
+		   static ek_id_t id;*/
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_POLLHANDLER(pollhandler);
+EK_PROCESS(p, "Plasma screensaver", EK_PRIO_LOWEST,
+	   eventhandler, pollhandler, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 static void
 quit(void)
 {
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
@@ -169,8 +171,7 @@ scrninit(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-idle(void)     
+EK_POLLHANDLER(pollhandler)
 {
   static unsigned char i, x, y;
   register unsigned char *cptr;
@@ -220,15 +221,23 @@ idle(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(sighandler, s, data)
+/*static
+  DISPATCHER_SIGHANDLER(sighandler, s, data)*/
+EK_EVENTHANDLER(eventhandler, ev, data)
 {
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_screensaver_stop ||
-     s == dispatcher_signal_quit) {
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+    ctk_mode_set(CTK_MODE_SCREENSAVER);
+    ctk_mouse_hide();
+   
+    scrninit();
+
+  } else if(ev == ctk_signal_screensaver_stop ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     ctk_draw_init();
     ctk_desktop_redraw(NULL);
+    /*    ctk_mode_set(CTK_MODE_NORMAL);*/
     quit();
   }
 }
@@ -238,12 +247,7 @@ LOADER_INIT_FUNC(plasma_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    dispatcher_listen(ctk_signal_screensaver_stop);
-    ctk_mode_set(CTK_MODE_SCREENSAVER);
-    ctk_mouse_hide();
-    
-    scrninit();
+    id = ek_start(&p);
   }
 }
 /*-----------------------------------------------------------------------------------*/

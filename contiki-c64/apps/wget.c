@@ -32,18 +32,20 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.8 2004/02/24 09:53:44 adamdunkels Exp $
+ * $Id: wget.c,v 1.9 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
 
 #include "ctk.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "webclient.h"
 #include "resolv.h"
 #include "petsciiconv.h"
 #include "uiplib.h"
 #include "loader.h"
+
+#include "contiki.h"
 
 #include "program-handler.h"
 
@@ -93,10 +95,15 @@ static struct ctk_button overwritebutton =
 static struct ctk_button cancelbutton =
   {CTK_BUTTON(26, 6, 6, "Cancel")};
 
-static DISPATCHER_SIGHANDLER(wget_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(wget_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Web downloader", NULL, wget_sighandler, webclient_appcall)};
-static ek_id_t id;
+  static ek_id_t id;*/
+
+EK_EVENTHANDLER(wget_eventhandler, ev, data);
+EK_PROCESS(p, "Web downloader", EK_PRIO_NORMAL,
+	   wget_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /* State */
 
@@ -134,46 +141,9 @@ LOADER_INIT_FUNC(wget_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
-    /* Create the main window. */
-    ctk_window_new(&window, 36, 8, "Web downloader");
+    id = ek_start(&p);
 
-    
-    CTK_WIDGET_ADD(&window, &urllabel);
-    CTK_WIDGET_ADD(&window, &urltextentry);
-    
-    CTK_WIDGET_ADD(&window, &savefilenamelabel);
-    CTK_WIDGET_ADD(&window, &savefilenametextentry);
-
-    /*    CTK_WIDGET_ADD(&window, &filebutton);*/
-
-    CTK_WIDGET_ADD(&window, &d64button);
-
-    CTK_WIDGET_ADD(&window, &statustext);
-
-    dload_state = DLOAD_NONE;
-      
-    memset(savefilename, 0, sizeof(savefilename));
-    memset(url, 0, sizeof(url));
-
-    ctk_dialog_new(&d64dialog, 36, 8);
-    CTK_WIDGET_ADD(&d64dialog, &overwritelabel);
-    CTK_WIDGET_ADD(&d64dialog, &makesurelabel1);
-    CTK_WIDGET_ADD(&d64dialog, &makesurelabel2);
-    CTK_WIDGET_ADD(&d64dialog, &overwritebutton);
-    CTK_WIDGET_ADD(&d64dialog, &cancelbutton);
-    
-    
-    /* Attach as a listener to a number of signals ("Button activate",
-       "Hyperlink activate" and "Hyperlink hover", and the resolver's
-       signal. */
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_hyperlink_activate);
-    dispatcher_listen(resolv_signal_found);
   }
-  ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -271,14 +241,46 @@ start_get(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
+EK_EVENTHANDLER(wget_eventhandler, ev, data)
 {
   int ret;
   static unsigned char i;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  EK_EVENTHANDLER_ARGS(ev, data);
 
-  if(s == ctk_signal_button_activate) {
+  if(ev == EK_EVENT_INIT) {
+    /* Create the main window. */
+    ctk_window_new(&window, 36, 8, "Web downloader");
+
+    
+    CTK_WIDGET_ADD(&window, &urllabel);
+    CTK_WIDGET_ADD(&window, &urltextentry);
+    
+    CTK_WIDGET_ADD(&window, &savefilenamelabel);
+    CTK_WIDGET_ADD(&window, &savefilenametextentry);
+
+    /*    CTK_WIDGET_ADD(&window, &filebutton);*/
+
+    CTK_WIDGET_ADD(&window, &d64button);
+
+    CTK_WIDGET_ADD(&window, &statustext);
+
+    dload_state = DLOAD_NONE;
+      
+    memset(savefilename, 0, sizeof(savefilename));
+    memset(url, 0, sizeof(url));
+
+    ctk_dialog_new(&d64dialog, 36, 8);
+    CTK_WIDGET_ADD(&d64dialog, &overwritelabel);
+    CTK_WIDGET_ADD(&d64dialog, &makesurelabel1);
+    CTK_WIDGET_ADD(&d64dialog, &makesurelabel2);
+    CTK_WIDGET_ADD(&d64dialog, &overwritebutton);
+    CTK_WIDGET_ADD(&d64dialog, &cancelbutton);
+    
+    
+    ctk_window_open(&window);
+  } else if(ev == tcpip_event) {
+    webclient_appcall(data);
+  } else if(ev == ctk_signal_button_activate) {
     if(data == (void *)&filebutton) {
       /*      ret = cbm_open(2, 8, 2, savefilename);
 	      if(ret == -1) {*/
@@ -311,7 +313,7 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
       bufferptr = 0;
       /*      c64_dio_init(8);*/
     }
-  } else if(s == ctk_signal_hyperlink_activate) {
+  } else if(ev == ctk_signal_hyperlink_activate) {
     if(dload_state == DLOAD_NONE) {
       /*      open_link(w->widget.hyperlink.url);*/
       strncpy(urledit,
@@ -320,7 +322,7 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
       CTK_WIDGET_REDRAW(&urltextentry);
       CTK_WIDGET_FOCUS(&window, &urltextentry);
     }
-  } else if(s == resolv_signal_found) {
+  } else if(ev == resolv_event_found) {
     /* Either found a hostname, or not. */
     if((char *)data != NULL &&
        resolv_lookup((char *)data) != NULL) {
@@ -328,8 +330,8 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
     } else {
       show_statustext("Host not found.");
     }
-  } else if(s == ctk_signal_window_close) {
-    dispatcher_exit(&p);
+  } else if(ev == ctk_signal_window_close) {
+    ek_exit();
     id = EK_ID_NONE;
     LOADER_UNLOAD();
   }

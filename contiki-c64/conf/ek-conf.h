@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek-conf.h,v 1.3 2003/08/15 18:45:54 adamdunkels Exp $
+ * $Id: ek-conf.h,v 1.4 2004/07/04 18:33:08 adamdunkels Exp $
  *
  */
 
@@ -45,6 +45,8 @@
 typedef void *ek_data_t;
 
 typedef unsigned char ek_signal_t;
+typedef unsigned char ek_event_t;
+typedef unsigned char ek_num_events_t;
 typedef unsigned char ek_id_t;
 
 /* ek_ticks_t: should be defined to be the largest type that fits the
@@ -66,5 +68,8 @@ typedef unsigned char ek_num_timers_t;
 
 #define EK_CONF_NUMLISTENERS  16    /* Must be 2^n */
 typedef unsigned char ek_num_listeners_t;
+
+#define EK_CONF_MAXPROCS 32
+#define EK_CONF_NUMEVENTS 16
 
 #endif /* __EK_CONF_H__ */

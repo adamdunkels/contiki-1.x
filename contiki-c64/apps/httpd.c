@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.c,v 1.4 2004/02/16 20:55:34 adamdunkels Exp $
+ * $Id: httpd.c,v 1.5 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
@@ -42,6 +42,7 @@
 #include "httpd-fsdata.h"
 #include "httpd-cgi.h"
 
+#include "tcpip.h"
 
 #include <stdio.h>
 
@@ -130,7 +131,7 @@ httpd_init(void)
   httpd_fs_init();
   
   /* Listen to port 80. */
-  dispatcher_uiplisten(HTONS(80));
+  tcp_listen(HTONS(80));
 
   for(i = 0; i < HTTPD_CONF_NUMCONNS; ++i) {
     conns[i].state = STATE_DEALLOCATED;
@@ -333,10 +334,10 @@ senddata(CC_REGISTER_ARG struct httpd_state *hs)
   }
 }
 /*-----------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(httpd_appcall, state)
+void
+httpd_appcall(void *state)
 {
   register struct httpd_state *hs;
-  DISPATCHER_UIPCALL_ARG(state);
 
   hs = (struct httpd_state *)(state);
 
@@ -352,7 +353,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
 	uip_close();
 	return;
       }
-      dispatcher_markconn(uip_conn, (void *)hs);
+      tcp_markconn(uip_conn, (void *)hs);
     }
     /* Since we have just been connected with the remote host, we
        reset the state for this connection. The ->count variable

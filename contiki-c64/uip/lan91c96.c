@@ -32,9 +32,16 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.2 2004/02/16 21:00:05 adamdunkels Exp $
+ * $Id: lan91c96.c,v 1.3 2004/07/04 18:33:08 adamdunkels Exp $
  *
  */
+
+#define UIP_ETHADDR0 0x00
+#define UIP_ETHADDR1 0x0d
+#define UIP_ETHADDR2 0x60
+#define UIP_ETHADDR3 0x80
+#define UIP_ETHADDR4 0x3d
+#define UIP_ETHADDR5 0xb9
 
 #include "lan91c96.h"
 #include "uip.h"

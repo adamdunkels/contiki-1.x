@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire.c,v 1.4 2003/08/24 22:31:23 adamdunkels Exp $
+ * $Id: ssfire.c,v 1.5 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
@@ -41,18 +38,23 @@
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-mouse.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "loader.h"
 
 
-static DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data);
 static void ssfire_idle(void);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Fire screensaver", ssfire_idle,
 		   ssfire_sighandler,
 		   NULL)};
-static ek_id_t id;
+		   static ek_id_t id;*/
 
+EK_EVENTHANDLER(ssfire_eventhandler, ev, data);
+EK_POLLHANDLER(ssfire_pollhandler);
+EK_PROCESS(p, "Fire screensaver", EK_PRIO_LOWEST,
+	   ssfire_eventhandler, ssfire_pollhandler, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 static unsigned char flames[8*17];
 
@@ -73,18 +75,14 @@ LOADER_INIT_FUNC(ssfire_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    dispatcher_listen(ctk_signal_screensaver_stop);
-    ctk_mode_set(CTK_MODE_SCREENSAVER);
-    ctk_mouse_hide();
-    fire_init();
+    id = ek_start(&p);
   }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 fire_quit(void)
 {
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
@@ -116,13 +114,16 @@ fire_init(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data)
+EK_EVENTHANDLER(ssfire_eventhandler, ev, data)
 {
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  EK_EVENTHANDLER_ARGS(ev, data);
   
-  if(s == ctk_signal_screensaver_stop ||
-     s == dispatcher_signal_quit) {
+  if(ev == EK_EVENT_INIT) {
+    ctk_mode_set(CTK_MODE_SCREENSAVER);
+    ctk_mouse_hide();
+    fire_init();
+  } else if(ev == ctk_signal_screensaver_stop ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     fire_quit();
     ctk_draw_init();
     ctk_desktop_redraw(NULL);
@@ -132,8 +133,7 @@ DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data)
 static unsigned char *flameptr, *colorptr1, *colorptr2;
 static unsigned char x, y;
 
-void
-ssfire_idle(void)
+EK_POLLHANDLER(ssfire_pollhandler)
 {
 
   if(ctk_mode_get() == CTK_MODE_SCREENSAVER) {

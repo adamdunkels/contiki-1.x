@@ -32,18 +32,18 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.9 2004/02/24 09:53:44 adamdunkels Exp $
+ * $Id: configedit.c,v 1.10 2004/07/04 18:33:07 adamdunkels Exp $
  *
  */
 
+#include "contiki.h"
 #include "uip.h"
 #include "uip_arp.h"
 #include "resolv.h"
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
 
-#include "uip-signal.h"
+#include "uip-event.h"
 
 #include "program-handler.h"
 
@@ -52,6 +52,8 @@
 #include "loader.h"
 
 #include <stdio.h>
+
+#include <string.h>
 
 /* TCP/IP configuration window. */
 static struct ctk_window window;
@@ -103,12 +105,15 @@ static struct ctk_button savebutton =
 static struct ctk_button cancelbutton =
   {CTK_BUTTON(24, 15, 6, "Cancel")};
 
-static DISPATCHER_SIGHANDLER(configedit_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(configedit_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Config editor", NULL, configedit_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
 
-
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "Config editor", EK_PRIO_NORMAL,
+	   eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 
 /*-----------------------------------------------------------------------------------*/
@@ -336,8 +341,25 @@ LOADER_INIT_FUNC(configedit_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
+    id = ek_start(&p);
+  }    
+}
+/*-----------------------------------------------------------------------------------*/
+
+/*-----------------------------------------------------------------------------------*/
+static void
+configedit_quit(void)
+{
+  ek_exit();
+  id = EK_ID_NONE;
+  LOADER_UNLOAD();
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
     /* Create window. */
     ctk_window_new(&window, 32, 16, "Config editor");
 
@@ -368,28 +390,9 @@ LOADER_INIT_FUNC(configedit_init, arg)
        configuration */
     initscript();
     
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
-  }
-  ctk_window_open(&window);
-}
-/*-----------------------------------------------------------------------------------*/
+    ctk_window_open(&window);
 
-/*-----------------------------------------------------------------------------------*/
-static void
-configedit_quit(void)
-{
-  dispatcher_exit(&p);
-  id = EK_ID_NONE;
-  LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(configedit_sighandler, s, data)
-{
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_button_activate) {   
+  } else if(ev == ctk_signal_button_activate) {   
     if(data == (ek_data_t)&savebutton) {
       savescript();
       ctk_window_close(&window);
@@ -399,8 +402,8 @@ DISPATCHER_SIGHANDLER(configedit_sighandler, s, data)
       ctk_window_close(&window);
       configedit_quit();
     }
-  } else if(s == ctk_signal_window_close ||
-	    s == dispatcher_signal_quit) {
+  } else if(ev == ctk_signal_window_close ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     ctk_window_close(&window);
     configedit_quit();
   }
