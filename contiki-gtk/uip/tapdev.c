@@ -31,7 +31,7 @@
  *
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tapdev.c,v 1.4 2004/07/04 21:15:54 adamdunkels Exp $
+ * $Id: tapdev.c,v 1.5 2005/02/23 22:44:50 oliverschmidt Exp $
  */
 
 
@@ -260,13 +260,13 @@ do_send(void)
   }
 #endif /* DROP */
   
-  for(i = 0; i < 40 + UIP_LLH_LEN; i++) {
+  for(i = 0; i < UIP_TCPIP_HLEN + UIP_LLH_LEN; i++) {
     tmpbuf[i] = uip_buf[i];
   }
 
   
   for(; i < uip_len; i++) {
-    tmpbuf[i] = uip_appdata[i - 40 - UIP_LLH_LEN];
+    tmpbuf[i] = uip_appdata[i - UIP_TCPIP_HLEN - UIP_LLH_LEN];
   }
   
   ret = write(fd, tmpbuf, uip_len);
