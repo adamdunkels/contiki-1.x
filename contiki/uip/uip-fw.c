@@ -9,6 +9,7 @@
  */
 
 #include "uip.h"
+#include "uip_arch.h"
 #include "uip-fw.h"
 
 /**
@@ -49,11 +50,48 @@ struct tcpip_hdr {
   u8_t optdata[4];
 };
 
+struct icmpip_hdr {
+  /* IP header. */
+  u8_t vhl,
+    tos,          
+    len[2],       
+    ipid[2],        
+    ipoffset[2],  
+    ttl,          
+    proto;     
+  u16_t ipchksum;
+  u16_t srcipaddr[2], 
+    destipaddr[2];
+  /* ICMP (echo) header. */
+  u8_t type, icode;
+  u16_t icmpchksum;
+  u16_t id, seqno;
+  u8_t payload[1];
+};
+
+/**
+ * \internal
+ * ICMP ECHO type definition.
+ */
+#define ICMP_ECHO 8 
+
+/**
+ * \internal
+ * ICMP TIME-EXCEEDED type definition.
+ */
+#define ICMP_TE 11 
+
 /**
  * \internal
  * Pointer to the TCP/IP headers of the packet in the uip_buf buffer.
  */
 #define BUF ((struct tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
+
+/**
+ * \internal
+ * Pointer to the ICMP/IP headers of the packet in the uip_buf buffer.
+ */
+#define ICMPBUF ((struct icmpip_hdr *)&uip_buf[UIP_LLH_LEN])
 
 /**
  * \internal
@@ -114,6 +152,63 @@ ipaddr_maskcmp(u16_t *ipaddr, u16_t *netipaddr, u16_t *netmask)
 /*------------------------------------------------------------------------------*/
 /**
  * \internal
+ * Send out an ICMP TIME-EXCEEDED message.
+ *
+ * This function replaces the packet in the uip_buf buffer with the
+ * ICMP packet.
+ */
+/*------------------------------------------------------------------------------*/
+static void
+time_exceeded(void)
+{
+  u16_t tmp16;
+  
+  /* Copy fields from packet header into payload of this ICMP packet. */
+  memcpy(&(ICMPBUF->payload[0]), ICMPBUF, 28);
+
+  /* Set the ICMP type and code. */
+  ICMPBUF->type = ICMP_TE;
+  ICMPBUF->icode = 0;
+
+  /* Calculate the ICMP checksum. */
+  ICMPBUF->icmpchksum = 0;
+  ICMPBUF->icmpchksum = ~uip_chksum((u16_t *)&(ICMPBUF->type), 36);
+
+  /* Set the IP destination address to be the source address of the
+     original packet. */
+  tmp16= BUF->destipaddr[0];
+  BUF->destipaddr[0] = BUF->srcipaddr[0];
+  BUF->srcipaddr[0] = tmp16;
+  tmp16 = BUF->destipaddr[1];
+  BUF->destipaddr[1] = BUF->srcipaddr[1];
+  BUF->srcipaddr[1] = tmp16;
+
+  /* Set our IP address as the source address. */
+  BUF->srcipaddr[0] = uip_hostaddr[0];
+  BUF->srcipaddr[1] = uip_hostaddr[1];
+
+  /* The size of the ICMP time exceeded packet is 36 + the size of the
+     IP header (20) = 56. */
+  uip_len = 56;
+  ICMPBUF->len[0] = 0;
+  ICMPBUF->len[1] = uip_len;
+
+  /* Fill in the other fields in the IP header. */
+  ICMPBUF->vhl = 0x45;
+  ICMPBUF->tos = 0;
+  ICMPBUF->ipoffset[0] = ICMPBUF->ipoffset[1] = 0;
+  ICMPBUF->ttl  = UIP_TTL;
+  ICMPBUF->proto = UIP_PROTO_ICMP;
+  
+  /* Calculate IP checksum. */
+  ICMPBUF->ipchksum = 0;
+  ICMPBUF->ipchksum = ~(uip_ipchksum());
+
+
+}
+/*------------------------------------------------------------------------------*/
+/**
+ * \internal
  * Register a packet in the forwarding cache so that it won't be
  * forwarded again.
  */
@@ -122,7 +217,7 @@ static void
 fwcache_register(void)
 {
   struct fwcache_entry *fw;
-    
+
   /* Register packet in forwarding cache. */
   fw = &fwcache[0];
   fw->len = BUF->len;
@@ -137,6 +232,29 @@ fwcache_register(void)
 }
 /*------------------------------------------------------------------------------*/
 /**
+ * \internal
+ * Find a network interface for the IP packet in uip_buf.
+ */
+/*------------------------------------------------------------------------------*/
+static struct uip_fw_netif *
+find_netif(void)
+{
+  struct uip_fw_netif *netif;
+  
+  /* Walk through every network interface to check for a match. */
+  for(netif = netifs; netif != NULL; netif = netif->next) {
+    if(ipaddr_maskcmp(BUF->destipaddr, netif->ipaddr,
+		      netif->netmask)) {
+      /* If there was a match, we break the loop. */
+      return netif;
+    }
+  }
+  
+  /* If no matching netif was found, we use default netif. */
+  return defaultnetif;  
+}    
+/*------------------------------------------------------------------------------*/
+/**
  * Output an IP packet on the correct network interface.
  *
  * The IP packet should be present in the uip_buf buffer and its
@@ -148,20 +266,8 @@ uip_fw_output(void)
 {
   struct uip_fw_netif *netif;
   
-  /* Walk through every network interface to check for a match. */
-  for(netif = netifs; netif != NULL; netif = netif->next) {
-    if(ipaddr_maskcmp(BUF->destipaddr, netif->ipaddr,
-		      netif->netmask)) {
-      /* If there was a match, we break the loop. */
-      break;
-    }
-  }
+  netif = find_netif();
   
-  /* If no matching netif was found, we use default netif. */
-  if(netif == NULL) {
-    netif = defaultnetif;
-  }
-
   /* If we now have found a suitable network interface, we call its
      output function to send out the packet. */
   if(netif != NULL && uip_len > 0) {
@@ -184,13 +290,23 @@ uip_fw_forward(void)
 {
   struct uip_fw_netif *netif;
   struct fwcache_entry *fw;
-  
+
   /* First check if the packet is destined for ourselves and return 0
      to indicate that the packet should be processed locally. */
   if(BUF->destipaddr[0] == uip_hostaddr[0] &&
      BUF->destipaddr[1] == uip_hostaddr[1]) {
     return 0;
   }
+
+  /* If we use ping IP address configuration, and our IP address is
+     not yet configured, we should intercept all ICMP echo packets. */
+#if UIP_PINGADDRCONF
+  if((uip_hostaddr[0] | uip_hostaddr[1]) == 0 &&
+     BUF->proto == UIP_PROTO_ICMP &&
+     ICMPBUF->type == ICMP_ECHO) {
+    return 0;
+  }
+#endif /* UIP_PINGADDRCONF */
 
   /* Check if the packet is in the forwarding cache already, and if so
      we drop it. */
@@ -212,35 +328,24 @@ uip_fw_forward(void)
   }
 
   
-  /* Walk through every network interface to check for a match. */
-  for(netif = netifs; netif != NULL; netif = netif->next) {
-    if(ipaddr_maskcmp(BUF->destipaddr, netif->ipaddr,
-		      netif->netmask)) {
-      /* If there was a match, we break the loop. */
-      break;
-    }
-  }
-  
-  /* If no matching netif was found, we use default netif. */
-  if(netif == NULL) {
-    netif = defaultnetif;
-  }
+  netif = find_netif();
 
   /* Decrement the TTL (time-to-live) value in the IP header */
-  BUF->ttl = htons(htons(BUF->ttl) - 1);
+  BUF->ttl = BUF->ttl - 1;
   
-  /* We should really send an ICMP message if TTL == 0, but we skip it
-     for now... Instead, we just drop the packet (and pretend that it
-     was forwarded by returning 1). */
-  if(BUF->ttl == 0) {
-    return 1;
-  }
-
-  /* Incrementally update the IP checksum. */
+  /* Update the IP checksum. */
   if(BUF->ipchksum >= htons(0xffff - 0x0100)) {
     BUF->ipchksum = BUF->ipchksum + HTONS(0x0100) + 1;
   } else {
     BUF->ipchksum = BUF->ipchksum + HTONS(0x0100);
+  }
+  
+  /* If the TTL reaches zero we procude an ICMP time exceeded message
+     in the uip_buf buffer and forward that packet back to the sender
+     of the packet. */
+  if(BUF->ttl == 0) {    
+    time_exceeded();
+    netif = find_netif();
   }
   
   /* If we now have found a suitable network interface, we call its
