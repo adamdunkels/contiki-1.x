@@ -212,14 +212,14 @@ parse_command(void)
   ++r.msg;
 }
 
-static void
+/*static void
 parse_trailing(void)
 {
   r.trailing = r.msg;
   while(*r.msg != 0 && *r.msg != ISO_cr && *r.msg != ISO_nl) ++r.msg;
   *r.msg = 0;
   ++r.msg;
-}
+}*/
 
 static void
 parse_params(void)
@@ -317,7 +317,7 @@ PT_THREAD(handle_connection(struct ircc_state *s))
 {
   PT_BEGIN(&s->pt);
 
-  SOCKET_INIT(&s->s, s->inputbuf, sizeof(s->inputbuf));
+  SOCKET_INIT(&s->s, s->inputbuf, sizeof(s->inputbuf) - 1);
   
   PT_WAIT_THREAD(&s->pt, setup_connection(s));
 
