@@ -29,12 +29,17 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.h,v 1.4 2004/07/04 17:50:39 adamdunkels Exp $
+ * $Id: webserver.h,v 1.5 2004/09/12 07:20:04 adamdunkels Exp $
  *
  */
 #ifndef __WEBSERVER_H__
 #define __WEBSERVER_H__
 
+#include "uip.h"
+
 void webserver_init(char *arg);
+void webserver_log(char *msg);
+void webserver_log_file(u16_t *requester, char *file);
+
 
 #endif /* __WEBSERVER_H__ */

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.12 2004/07/04 17:50:39 adamdunkels Exp $
+ * $Id: webserver.c,v 1.13 2004/09/12 07:20:04 adamdunkels Exp $
  *
  */
 
@@ -65,8 +65,8 @@ EK_PROCESS(p, "Web server", EK_PRIO_NORMAL,
 static ek_id_t id = EK_ID_NONE;
 
 
-#define LOG_WIDTH  30
-#define LOG_HEIGHT 16
+#define LOG_WIDTH  38
+#define LOG_HEIGHT 23
 static char log[LOG_WIDTH*LOG_HEIGHT];
 
 static struct ctk_label loglabel =
@@ -100,6 +100,8 @@ EK_EVENTHANDLER(webserver_eventhandler, ev, data)
     ek_exit();
     id = EK_ID_NONE;
     LOADER_UNLOAD();    
+  } else if(ev == tcpip_event) {
+    httpd_appcall(data);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -122,6 +124,19 @@ webserver_log_file(u16_t *requester, char *file)
   /* Copy filename into last line. */		 
   strncpy(&log[LOG_WIDTH * (LOG_HEIGHT - 1) + size], file, LOG_WIDTH - size);
 	   
+  /* Update log display. */
+  CTK_WIDGET_REDRAW(&loglabel);
+}
+/*-----------------------------------------------------------------------------------*/
+void
+webserver_log(char *msg)
+{
+  /* Scroll previous entries upwards */
+  memcpy(log, &log[LOG_WIDTH], LOG_WIDTH * (LOG_HEIGHT - 1));
+
+  /* Copy filename into last line. */		 
+  strncpy(&log[LOG_WIDTH * (LOG_HEIGHT - 1)], msg, LOG_WIDTH);
+  
   /* Update log display. */
   CTK_WIDGET_REDRAW(&loglabel);
 }
