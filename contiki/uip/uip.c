@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.7 2003/08/20 20:56:54 adamdunkels Exp $
+ * $Id: uip.c,v 1.8 2003/08/21 18:10:21 adamdunkels Exp $
  *
  */
 
@@ -237,6 +237,8 @@ uip_connect(u16_t *ripaddr, u16_t rport)
   conn->snd_nxt[2] = iss[2];
   conn->snd_nxt[3] = iss[3];
 
+  conn->mss = UIP_TCP_MSS;
+  
   conn->len = 1;   /* TCP length of the SYN is one. */
   conn->nrtx = 0;
   conn->timer = 1; /* Send the SYN next time around. */
