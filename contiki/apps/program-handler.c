@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.17 2003/08/11 22:24:20 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.18 2003/08/20 20:52:22 adamdunkels Exp $
  *
  */
 
@@ -77,9 +77,9 @@ static struct ctk_label loadingname =
 static struct ctk_window errordialog;
 static struct ctk_label errormsg =
   {CTK_LABEL(0, 1, 22, 1, "Error loading program:")};
-static char errorfilename[20];
+static char errorfilename[22];
 static struct ctk_label errorfilelabel =
-  {CTK_LABEL(2, 3, 20, 1, errorfilename)};
+  {CTK_LABEL(0, 3, 22, 1, errorfilename)};
 static struct ctk_label errortype =
   {CTK_LABEL(4, 5, 16, 1, "")};
 static struct ctk_button errorokbutton =
@@ -305,7 +305,9 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
       displayname = NULL;
       err = LOADER_LOAD(data);
       if(err != LOADER_OK) {
-	strncpy(errorfilename, data, sizeof(errorfilename));
+	errorfilename[0] = '"';
+	strncpy(errorfilename + 1, data, sizeof(errorfilename) - 2);
+	errorfilename[1 + strlen(data)] = '"';
 	ctk_label_set_text(&errortype, errormsgs[err]);
 	ctk_dialog_open(&errordialog);
       }
