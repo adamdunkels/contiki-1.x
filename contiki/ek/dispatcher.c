@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.7 2003/04/18 00:17:09 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.8 2003/06/30 21:28:52 adamdunkels Exp $
  *
  */
 
@@ -41,13 +41,14 @@
 
 #include "uip.h"
 
-#include <time.h>
+/*#include <time.h>*/
 /*#include <conio.h>*/
 
 ek_id_t dispatcher_current;
-static struct dispatcher_proc *procs;
+struct dispatcher_proc *dispatcher_procs;
 static ek_id_t ids = 1;
 
+ek_signal_t dispatcher_signal_quit;
 
 static ek_signal_t lastsig = 1;
 
@@ -85,20 +86,22 @@ dispatcher_start(struct dispatcher_proc *p)
   } while(id == EK_ID_NONE);
   
   /* Check if this ID is use. */
-  for(q = procs; q != NULL; q = q->next) {
+  for(q = dispatcher_procs; q != NULL; q = q->next) {
     if(id == q->id) {
       goto again;
     }
   }
 
   /* Put first on the procs list.*/
-  p->next = procs;
-  procs = p;
+  p->next = dispatcher_procs;
+  dispatcher_procs = p;
     
   p->id = id;
 
   dispatcher_current = id;
-  
+
+  /* All processes must listen to the dispatcher_signal_quit signal. */
+  dispatcher_listen(dispatcher_signal_quit);
   return id;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -118,10 +121,10 @@ dispatcher_exit(struct dispatcher_proc *p)
     } 
   }
   /* Remove process from the process list. */
-  if(p == procs) {
-    procs = procs->next;    
+  if(p == dispatcher_procs) {
+    dispatcher_procs = dispatcher_procs->next;    
   } else {
-    for(q = procs; q != NULL; q = q->next) {
+    for(q = dispatcher_procs; q != NULL; q = q->next) {
       if(q->next == p) {
 	q->next = p->next;
 	break;
@@ -134,7 +137,7 @@ void
 ek_idle(void)
 {
   struct dispatcher_proc *p;
-  for(p = procs; p != NULL; p = p->next) {
+  for(p = dispatcher_procs; p != NULL; p = p->next) {
     if(p->idle != NULL) {
       dispatcher_current = p->id;
       p->idle();
@@ -152,7 +155,7 @@ ek_err_t
 ek_dispatcher(ek_signal_t s, ek_data_t data, ek_id_t id)
 {
   struct dispatcher_proc *p;
-  for(p = procs; p != NULL; p = p->next) {
+  for(p = dispatcher_procs; p != NULL; p = p->next) {
     if(p->id == id &&
        p->signalhandler != NULL) {
       dispatcher_current = id;
@@ -185,13 +188,14 @@ dispatcher_uipcall(void)
     for(i = 0; i < UIP_LISTENPORTS; ++i) {
       if(listenports[i].port == uip_conn->lport) {
 	s->id = listenports[i].id;
+	s->state = NULL;
 	break;
       }
     }
   }
   
 
-  for(p = procs; p != NULL; p = p->next) {
+  for(p = dispatcher_procs; p != NULL; p = p->next) {
     if(p->id == s->id &&
        p->uiphandler != NULL) {
       dispatcher_current = p->id;
@@ -257,7 +261,7 @@ struct dispatcher_proc *
 dispatcher_process(ek_id_t id)
 {
   struct dispatcher_proc *p;
-  for(p = procs; p != NULL; p = p->next) {
+  for(p = dispatcher_procs; p != NULL; p = p->next) {
     if(p->id == id) {
       return p;
     }
@@ -273,5 +277,7 @@ dispatcher_init(void)
   for(i = 0; i < UIP_LISTENPORTS; ++i) {
     listenports[i].port = 0;
   }
+
+  dispatcher_signal_quit = dispatcher_sigalloc();
 }
 /*-----------------------------------------------------------------------------------*/
