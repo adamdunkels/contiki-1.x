@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.c,v 1.2 2003/04/18 00:17:09 adamdunkels Exp $
+ * $Id: ek.c,v 1.3 2003/08/09 13:35:17 adamdunkels Exp $
  *
  */
 
@@ -45,6 +45,7 @@ struct ek_listener {
   ek_id_t id;
 };
 
+#if EK_CONF_TIMERS
 struct ek_timer {
   struct ek_timer *next;
   ek_ticks_t t;
@@ -52,6 +53,7 @@ struct ek_timer {
   ek_data_t data;
   ek_id_t id;
 };
+#endif /* EK_CONF_TIMERS */
 
 struct ek_signal_data {
   ek_signal_t s;
@@ -65,8 +67,10 @@ static struct ek_signal_data signals[EK_CONF_NUMSIGNALS];
 
 static struct ek_listener listeners[EK_CONF_NUMLISTENERS];
 
+#if EK_CONF_TIMERS
 static struct ek_timer timers[EK_CONF_NUMTIMERS];
 static struct ek_timer *timers_free, *timers_used;
+#endif /* EK_CONF_TIMERS */
 
 #ifndef NULL
 #define NULL (void *)0
@@ -80,12 +84,14 @@ ek_init(void)
   
   nsignals = fsignal = 0;
 
+#if EK_CONF_TIMERS
   timers_used = NULL;
   for(i = 0; i < EK_CONF_NUMTIMERS - 1; ++i) {
     timers[i].next = &timers[i+1];
   }
   timers[i].next = NULL;
   timers_free = &timers[0];
+#endif /* EK_CONF_TIMERS */
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -121,22 +127,28 @@ ek_signals(void)
 void
 ek_run(void)
 {
-  static ek_clock_t lasttime, curtime;
   static ek_signal_t s;
   static ek_data_t data;
   static ek_id_t id;
+#if EK_CONF_TIMERS
+  static ek_clock_t lasttime, curtime;
   static struct ek_timer *tptr;
-  
+#endif /* EK_CONF_TIMERS */
+
+#if EK_CONF_TIMERS
   lasttime = ek_clock();
+#endif /* EK_CONF_TIMERS */
   
   while(1) {
     /* Check the signal list to see if we have signals that should be
        emitted. */
     ek_signals();
-    
+
+#if EK_CONF_TIMERS
     /* If no signals should be emitted, we first check outstanding
        timers and then call the ek_idle function. */
     curtime = ek_clock();
+
     
     while(timers_used != NULL &&
 	  (curtime - lasttime) >= (ek_clock_t)timers_used->t) {
@@ -156,6 +168,7 @@ ek_run(void)
 	 run through the loop. */
       ek_emit(s, data, id);
     }
+#endif /* EK_CONF_TIMERS */
     ek_idle();
     
   }
@@ -227,6 +240,7 @@ ek_unlisten(ek_id_t id)
   return EK_ERR_NOTFOUND;
 }
 /*-----------------------------------------------------------------------------------*/
+#if EK_CONF_TIMERS
 ek_err_t
 ek_timer(ek_signal_t s, ek_data_t data, ek_id_t id, ek_ticks_t t)
 {
@@ -284,6 +298,7 @@ ek_timer(ek_signal_t s, ek_data_t data, ek_id_t id, ek_ticks_t t)
     }    
   }  
   
-  return EK_ERR_OK;
+  return EK_ERR_OK;  
 }
+#endif /* EK_CONF_TIMERS */
 /*-----------------------------------------------------------------------------------*/
