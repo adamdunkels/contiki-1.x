@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.1 2003/08/09 13:14:33 adamdunkels Exp $
+ * $Id: httpd.h,v 1.2 2004/02/16 20:55:34 adamdunkels Exp $
  *
  */
 
@@ -39,22 +39,40 @@
 #define __HTTPD_H__
 
 #include "dispatcher.h"
-#include "c64-fs.h"
+
+#include "httpd-fs.h"
 
 void httpd_init(void);
 DISPATCHER_UIPCALL(httpd_appcall, state);
+
+struct httpd_buffer {
+  u8_t *buf;
+  int ptr;
+};
 
 struct httpd_state {
   u8_t state; 
   u16_t count;
   u8_t poll;
   char *dataptr;
+  struct httpd_fs_file file;
+
+  const char *contenttype;
+  int contentlen;
+  
   char *script;
 
+  struct httpd_buffer buf;
+
+  int getlen;
+  u8_t getbuffer[100];
+  u8_t hdrbuffer[100];
+  
+  /*
   union {
     struct c64_fs_dir d;
     struct c64_fs_file f;
-  } f;
+    } f;*/
 };
 
 extern struct httpd_state *hs;
