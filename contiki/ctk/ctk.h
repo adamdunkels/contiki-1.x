@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.13 2003/08/11 22:27:51 adamdunkels Exp $
+ * $Id: ctk.h,v 1.14 2003/08/20 20:55:35 adamdunkels Exp $
  *
  */
 
@@ -105,6 +105,7 @@ struct ctk_hyperlink {
 #define CTK_TEXTENTRY_NORMAL 0
 #define CTK_TEXTENTRY_EDIT   1
 
+#define CTK_TEXTENTRY_CLEAR(e) do {memset((e)->text, 0, (e)->len); (e)->xpos = 0;} while(0);
 
 #define CTK_TEXTENTRY(x, y, w, h, text, len) \
   NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, h, text, len, \
