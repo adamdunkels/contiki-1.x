@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.7 2005/03/20 00:23:59 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.8 2005/03/31 21:55:14 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o contiki-labels.o \
@@ -43,6 +43,7 @@ all: loader-arch-module.o contiki-labels.o \
      processes.prg \
      telnet.prg \
      welcome.prg \
+     wget.prg \
      www.prg
 
 SYS=apple2enh
@@ -67,5 +68,7 @@ dhcp.prg: dhcp.o dhcpc.o lc-asm.o
 irc.prg: irc.o ircc.o psock.o uipbuf.o lc-asm.o ircc-strings.o
 
 telnet.prg: $(TELNET)
+
+wget.prg: wget.o webclient.o http-strings.o http-user-agent-string.o
 
 www.prg: $(WWW)

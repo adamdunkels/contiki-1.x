@@ -30,6 +30,7 @@ Installation
    a2 in b.0000 dos33.dsk PROCESSES.PRG  proces~1.prg
    a2 in b.0000 dos33.dsk TELNET.PRG     telnet.prg
    a2 in b.0000 dos33.dsk WELCOME.PRG    welcome.prg
+   a2 in b.0000 dos33.dsk WGET.PRG       wget.prg
    a2 in b.0000 dos33.dsk WWW.PRG        www.prg
 
 
@@ -58,5 +59,6 @@ Note
 
 Contiki uses $D400-$DFFF in the language card bank2 although this memory is
 marked as reserved by ProDOS 8.
+
 
 eof
