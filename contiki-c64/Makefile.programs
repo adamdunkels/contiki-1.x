@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.15 2003/08/12 20:13:50 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.16 2003/08/20 22:53:20 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -51,12 +51,15 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      springlight.prg springlight.dsc \
      default.prg default.dsc \
      ravenpine.prg ravenpine.dsc \
-     ssfire.prg ssfire.dsc \
+     ssfire.sav ssfire.dsc \
+     plasma.sav plasma.dsc \
      rrnet.drv rrnet.dsc \
      slip.drv slip.dsc \
+     slip-ss.drv \
      tfe.drv tfe.dsc \
      ssconfig.prg \
-     config.prg configedit.prg configedit.dsc
+     config.prg configedit.prg configedit.dsc \
+     shell.prg shell.dsc
 
 SYS=c64
 
@@ -69,6 +72,8 @@ CFLAGS:=$(CFLAGSCOMMON) \
 
 directory.prg: directory.o
 
+shell.prg: shell.o
+
 configedit.prg: configedit.o c64-fs-write.o
 
 email.prg: $(EMAIL) 
@@ -79,11 +84,15 @@ webserver.prg: $(WEBSERVER) c64-fs-raw.o
 
 simpletelnet.prg: $(TELNET)
 
-tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o
+tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o uip_arp.o
 
-rrnet.drv: rrnet-drv.o cs8900a.o rrnet-drv-asm.o
+rrnet.drv: rrnet-drv.o cs8900a.o rrnet-drv-asm.o uip_arp.o
 
 slip.drv: slip-drv.o rs232dev.o
+
+slip-ss.drv: slip-drv.o rs232dev-ss.o rs232silversurfer.o contiki-labels.o
+	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+
 
 wget.prg: wget.o webclient.o http-strings.o http-user-agent-string.o
 
@@ -106,3 +115,4 @@ ravenpine.prg: themeloader.o ctk-hires-theme-ravenpine.o contiki-labels.o
 	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
 
 
+memstat.prg: memstat.o
