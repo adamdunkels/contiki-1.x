@@ -32,12 +32,13 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: program-handler.h,v 1.1 2003/04/08 17:56:45 adamdunkels Exp $
+ * $Id: program-handler.h,v 1.2 2003/04/11 20:12:03 adamdunkels Exp $
  *
  */
 #ifndef __PROGRAM_HANDLER_H__
 #define __PROGRAM_HANDLER_H__
 
 void program_handler_init(void);
+void program_handler_load(char *name);
 
 #endif /* __PROGRAM_HANDLER_H__ */
