@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.39 2004/07/04 11:41:39 adamdunkels Exp $
+ * $Id: ctk.c,v 1.40 2004/08/09 20:29:35 adamdunkels Exp $
  *
  */
 
@@ -92,10 +92,11 @@ static unsigned char maxnitems;
 
 static unsigned char iconx, icony;
 #define ICONX_START  (width - 6)
-#define ICONY_START  0
+#define ICONY_START  (height - 7)
 #define ICONX_DELTA  -16
-#define ICONY_DELTA  5
-#define ICONY_MAX    (height - 5)
+#define ICONY_DELTA  -5
+#define ICONY_MAX    height
+#define ICONY_MIN    0
 
 #ifndef ctk_arch_isprint
 unsigned char ctk_arch_isprint(char c);
@@ -212,6 +213,41 @@ make_desktopmenu(void)
   }
 }
 #endif /* CTK_CONF_MENUS */
+/*-----------------------------------------------------------------------------------*/
+static void
+arrange_icons(void)
+{
+  struct ctk_widget *icon;
+
+  iconx = ICONX_START;
+  icony = ICONY_START;
+  
+  for(icon = desktop_window.active; icon != NULL; icon = icon->next) {
+    
+    icon->x = iconx;
+    icon->y = icony;
+    
+    icony += ICONY_DELTA;
+    if(icony >= ICONY_MAX ||
+       icony < ICONY_MIN) {
+      icony = ICONY_START;
+      iconx += ICONX_DELTA;
+    }
+  }
+}
+/*-----------------------------------------------------------------------------------*/  
+void
+ctk_restore(void)
+{
+  ctk_draw_init();
+
+  height = ctk_draw_height();
+  width = ctk_draw_width();
+
+  arrange_icons();
+
+  redraw = REDRAW_ALL;
+}
 /*-----------------------------------------------------------------------------------*/
 /**
  * Initializes the Contiki Toolkit.
@@ -331,7 +367,7 @@ void
 ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon, ek_id_t id)
 {
 #if CTK_CONF_ICONS 
-  icon->x = iconx;
+  /*  icon->x = iconx;
   icon->y = icony;
   icon->widget.icon.owner = id;
 
@@ -339,9 +375,10 @@ ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon, ek_id_t id)
   if(icony >= ICONY_MAX) {
     icony = ICONY_START;
     iconx += ICONX_DELTA;
-  }
-  
+    }*/
+  icon->widget.icon.owner = id;
   ctk_widget_add(&desktop_window, icon);
+  arrange_icons();
 #endif /* CTK_CONF_ICONS */
 }
 /*-----------------------------------------------------------------------------------*/
