@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.10 2003/04/09 13:45:07 adamdunkels Exp $
+ * $Id: ctk.c,v 1.11 2003/04/09 19:22:19 adamdunkels Exp $
  *
  */
 
@@ -454,7 +454,18 @@ window_new(CC_REGISTER_ARG struct ctk_window *window,
 	   unsigned char w, unsigned char h,
 	   char *title)
 {
-  window->x = window->y = 0;
+  
+  if(w >= width - 2) {
+    window->x = 0;
+  } else {
+    window->x = (width - w - 2) / 2;
+  }
+  if(h >= height - 3) {
+    window->y = 0;
+  } else {
+    window->y = (height - h - 1) / 2;
+  }
+
   window->w = w;
   window->h = h;
   window->title = title;
@@ -483,9 +494,6 @@ ctk_dialog_new(CC_REGISTER_ARG struct ctk_window *window,
 	       unsigned char w, unsigned char h)
 {
   window_new(window, w, h, NULL);
-
-  window->x = (width - w) / 2;
-  window->y = (height - h - 1) / 2; 
 }
 /*-----------------------------------------------------------------------------------*/
 void

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
+ * $Id: netconf.c,v 1.4 2003/04/09 19:23:27 adamdunkels Exp $
  *
  */
 
@@ -98,7 +98,15 @@ LOADER_INIT_FUNC(netconf_init)
     
     /* Create TCP/IP configuration window. */
     ctk_window_new(&tcpipwindow, 30, 10, "TCP/IP config");
-    ctk_window_move(&tcpipwindow, 4, 6);
+    if(ctk_draw_width() < 30) {
+      ctk_window_move(&tcpipwindow, 0,
+		      (ctk_draw_height() - 10) / 2 - 2);
+    } else {
+      ctk_window_move(&tcpipwindow,
+		      (ctk_draw_width() - 30) / 2,
+		      (ctk_draw_height() - 10) / 2 - 2);
+    }
+
     
     
 #ifdef WITH_ETHERNET

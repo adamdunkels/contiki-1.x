@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.4 2003/04/09 19:23:27 adamdunkels Exp $
  *
  */
 
@@ -291,10 +291,7 @@ program_handler_init(void)
     
 
     ctk_window_new(&runwindow, 26, 1, "Run program");
-    ctk_window_move(&runwindow,
-		    (ctk_draw_width() - 26) / 2,
-		    ctk_draw_height() / 2 - 2);
-
+ 
     CTK_WIDGET_ADD(&runwindow, &namelabel);
     CTK_WIDGET_ADD(&runwindow, &nameentry);
     CTK_WIDGET_ADD(&runwindow, &loadbutton);
