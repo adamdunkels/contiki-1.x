@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.2 2003/06/30 20:41:14 adamdunkels Exp $
+ * $Id: httpd-cgi.c,v 1.3 2003/08/05 13:52:24 adamdunkels Exp $
  *
  */
 
@@ -216,6 +216,14 @@ struct drv_state {
 static struct drv_state ds;
 
 
+#include "c64-dio.h"
+
+static void
+read_sector(void)
+{
+  c64_dio_read_block(ds.track, ds.sect, uip_appdata);
+}
+#if 0
 static void
 x_open(u8_t f, u8_t d, u8_t cmd, u8_t *fname)
 {
@@ -226,7 +234,9 @@ x_open(u8_t f, u8_t d, u8_t cmd, u8_t *fname)
     /*    show_statustext("Open error");*/
   }
   
+
 }
+
 
 static u8_t cmd[32];
 static void
@@ -248,7 +258,7 @@ read_sector(void)
   cbm_close(2);
   cbm_close(15);
 }
-
+#endif /* 0 */
 static u8_t
 next_sector(void)
 {
@@ -287,6 +297,7 @@ d64output(void)
   if(hs->count == 0) {
     ds.track = 1;
     ds.sect = 0;
+    /*    c64_dio_init(8);*/
   }
   
   if(uip_acked()) {
