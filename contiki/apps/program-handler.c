@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.14 2003/08/05 23:27:23 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.15 2003/08/09 13:31:18 adamdunkels Exp $
  *
  */
 
@@ -164,7 +164,7 @@ program_handler_init(void)
 #define NUM_LOADERNAMES 8
 #define NAMELEN 16
 static char loadernames[(NAMELEN + 1) * NUM_LOADERNAMES];
-static char *
+static char * 
 loadername_copy(char *name)
 {
   char i;
@@ -215,6 +215,8 @@ static
 DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 {
   unsigned char err, i;
+  struct dsc *dsc;
+  struct dsc **dscp;
   DISPATCHER_SIGHANDLER_ARGS(s, data);
   
   if(s == ctk_signal_button_activate) {
@@ -224,23 +226,23 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
       program_handler_load(name);
     } else if(data == (ek_data_t)&errorokbutton) {
       ctk_dialog_close();
-      /*      ctk_redraw();*/
     }
 #endif /* WITH_LOADER_ARCH */
-    
-    for(i = 0; i < CTK_CONF_MAXMENUITEMS; ++i) {
-      if(contikidsc[i] != NULL &&
-	 data == (ek_data_t)contikidsc[i]->icon) {
-	RUN(contikidsc[i]->prgname, contikidsc[i]->init);
+    dscp = &contikidsc[0];
+    for(i = 0; i < CTK_CONF_MAXMENUITEMS; ++i) {    
+      if(*dscp != NULL &&
+	 data == (ek_data_t)(*dscp)->icon) {
+	RUN((*dscp)->prgname, (*dscp)->init);
 	break;
       }
-    }    
+      ++dscp;
+    }
   } else if(s == ctk_signal_menu_activate) {
     if((struct ctk_menu *)data == &contikimenu) {
 #if WITH_LOADER_ARCH
-      if(contikidsc[contikimenu.active - 1] != NULL) {
-	RUN(contikidsc[contikimenu.active - 1]->prgname,
-	    contikidsc[contikimenu.active - 1]->init);
+      dsc = contikidsc[contikimenu.active - 1];
+      if(dsc != NULL) {
+	RUN(dsc->prgname, dsc->init);
       } else if(contikimenu.active == runmenuitem) {
 	ctk_window_open(&runwindow);
 	CTK_WIDGET_FOCUS(&runwindow, &nameentry);
