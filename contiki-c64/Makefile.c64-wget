@@ -30,35 +30,25 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.8 2003/09/04 22:00:18 adamdunkels Exp $
+# $Id: Makefile.c64-wget,v 1.1 2003/09/04 22:00:19 adamdunkels Exp $
 #
 
-CONTIKI=../contiki
-CONTIKICC65=../contiki-cc65
-
-usage:
-	@echo "Make sure the Contiki sources is in the directory $(CONTIKI)"
-	@echo 'To compile Contiki, use "'$(MAKE)' target" where target'
-	@echo 'is one of the following:'
-	@echo all
-	@echo c64
-	@echo programs
-	@echo d64
-	@echo programs
-	@echo '(Also check the Makefile for more targets to try...)'
-
-all: clean c64 programs
-
-programs:
-	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.programs
-c64:
-	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64
-
-wget:
-	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-wget
-
-
-CCDEPFLAGS=-D__CBM__ -D__C64__ -DCTK_HIRES -DWITH_UIP -DWITH_LOADER_ARCH -I/usr/local/lib/cc65/include
+all: contiki
 
 include $(CONTIKICC65)/Makefile.common
+SYS=c64
+
+CFLAGS:=$(CFLAGSCOMMON) -t $(SYS) \
+        -DCTK_HIRES \
+	-DWITH_UIP -DWITH_RRNET -DWITH_ETHERNET 
+
+contiki:  main-rrnet.o petsciiconv.o \
+ ctk.o ek.o dispatcher.o arg.o \
+ program-handler.o \
+ ctk-hires.o ctk-hires-asm.o ctk-hires-theme-default.o \
+ ctk-mouse.o ctk-mouse-asm.o ctk-mouse-joy.o \
+ $(UIP) uip_arp.o cs8900a.o rrnet-drv.o rrnet-drv-asm.o \
+ netconf.o netconf-dsc.o \
+ $(WGET) wget-dsc.o c64-dio.o c64-dio-asm.o
+	cl65 -Ln labels -o contiki -t $(SYS) $^
 
