@@ -7,9 +7,9 @@
 #include "ctk-draw-service.h"
 
 
-unsigned char ctk_draw_windowborder_width,
-  ctk_draw_windowborder_height,
-  ctk_draw_windowtitle_height;
+unsigned char ctk_draw_windowborder_width = 1,
+  ctk_draw_windowborder_height = 1,
+  ctk_draw_windowtitle_height = 1;
 
 EK_SERVICE(service, CTK_DRAW_SERVICE_NAME);
 
@@ -117,7 +117,7 @@ ctk_draw_width(void)
   if((interface = find_interface()) != NULL) {   
     return interface->width();
   }
-  return 0;
+  return 40;
 }
 /*---------------------------------------------------------------------------*/
 unsigned char
@@ -128,7 +128,7 @@ ctk_draw_height(void)
   if((interface = find_interface()) != NULL) {   
     return interface->height();
   }
-  return 0;
+  return 24;
 }
 /*---------------------------------------------------------------------------*/
 unsigned short
