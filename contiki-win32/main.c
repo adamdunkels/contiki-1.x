@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.8 2005/02/15 00:28:03 oliverschmidt Exp $
+ * $Id: main.c,v 1.9 2005/02/15 00:42:45 oliverschmidt Exp $
  *
  */
 
@@ -55,6 +55,7 @@
 #include "webserver-dsc.h"
 #include "telnet-dsc.h"
 #include "email-dsc.h"
+#include "irc-dsc.h"
 #include "calc-dsc.h"
 #include "processes-dsc.h"
 #include "about-dsc.h"
@@ -102,7 +103,7 @@ main(int argc)
 
   program_handler_init();
 
-#if 1
+#if 0
   uip_ipaddr(addr, 192,168,0,3);
   uip_sethostaddr(addr);
  
@@ -119,15 +120,16 @@ main(int argc)
   ppp_service_init(NULL);
 #endif /* WITH_PPP */
 
-  program_handler_add(&netconf_dsc,   "Network setup",  1);
-  program_handler_add(&dhcp_dsc,      "DHCP client",    1);
-  program_handler_add(&www_dsc,       "Web browser",    1);
-  program_handler_add(&webserver_dsc, "Web server",     1);
-  program_handler_add(&telnet_dsc,    "Telnet",         1);
-  program_handler_add(&email_dsc,     "E-mail program", 1);
-  program_handler_add(&calc_dsc,      "Calculator",     1);
-  program_handler_add(&processes_dsc, "Processes",      1);
-  program_handler_add(&about_dsc,     "About Contiki",  0);
+  program_handler_add(&netconf_dsc,   "Network setup", 1);
+  program_handler_add(&dhcp_dsc,      "DHCP client",   1);
+  program_handler_add(&www_dsc,       "Web browser",   1);
+  program_handler_add(&webserver_dsc, "Web server",    1);
+  program_handler_add(&telnet_dsc,    "Telnet",        1);
+  program_handler_add(&email_dsc,     "E-mail",        1);
+  program_handler_add(&irc_dsc,       "IRC client",    1);
+  program_handler_add(&calc_dsc,      "Calculator",    1);
+  program_handler_add(&processes_dsc, "Processes",     1);
+  program_handler_add(&about_dsc,     "About Contiki", 0);
 
   while(1) {
     ek_run();

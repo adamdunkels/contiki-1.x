@@ -250,11 +250,48 @@ SOURCE="..\contiki\apps\httpd-fs.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\apps\httpd-fsdata.c"
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\httpd-fsdata.h"
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\apps\httpd.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\contiki\apps\httpd.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\irc-dsc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\irc-dsc.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\irc.c
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\ircc-strings.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\ircc-strings.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\ircc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\ircc.h
 # End Source File
 # Begin Source File
 
@@ -824,6 +861,10 @@ SOURCE=".\conf\ek-conf.h"
 # Begin Source File
 
 SOURCE=".\conf\email-conf.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\conf\irc-conf.h"
 # End Source File
 # Begin Source File
 
