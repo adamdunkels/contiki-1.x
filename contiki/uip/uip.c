@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.3 2003/06/30 20:35:41 adamdunkels Exp $
+ * $Id: uip.c,v 1.4 2003/07/30 23:31:40 adamdunkels Exp $
  *
  */
 
@@ -1218,7 +1218,6 @@ uip_process(u8_t flag)
 	uip_connr->rto = (uip_connr->sa >> 3) + uip_connr->sv;
 
       }
-
       /* Set the acknowledged flag. */
       uip_flags = UIP_ACKDATA;
       /* Reset the length of the outstanding data. */
@@ -1226,6 +1225,7 @@ uip_process(u8_t flag)
       /* Reset the retransmission timer. */
       uip_connr->timer = UIP_RTO;
     }
+    
   }
 
   /* Do different things depending on in what state the connection is. */
@@ -1412,8 +1412,9 @@ uip_process(u8_t flag)
 	 !uip_outstanding(uip_connr)) {
 	uip_connr->nrtx = 0;
 	uip_connr->len = uip_slen;
-      } else {	
-	uip_slen = 0;
+      } else {
+	uip_connr->nrtx = 0;
+	uip_slen = uip_connr->len;
       }
     apprexmit:
       /* If the application has data to be sent, or if the incoming
