@@ -1,28 +1,26 @@
-This is the source code for the Contiki desktop environment, which is
-a modern Internet-enabled desktop environment for the Commodore 64 and
-a bunch of other systems written by Adam Dunkels. The Contiki desktop
-environment includes a simple window system and GUI, TCP/IP
-networking, a web server, a telnet client, and a web browser. Contiki
-is written in C and is compiled with Ullrich von Bassewitz' cc65 C
-compiler.
+This is the source code for the Contiki operating system, which is an
+open source, highly portable, networked, multi-tasking operating
+system for memory-constrained systems, written by Adam
+Dunkels. Contiki runs on a variety of tiny systems ranging from
+embedded 8-bit microcontrollers to old homecomputers such the
+Commodore 64. Code footprint is on the order of kilobytes and memory
+usage can be configured to be as low as tens of bytes.
+
+In addition to the source code in this directory, an Contiki port must
+be downloaded.
 
 More information about the Contiki desktop environment can be found on
 its web page:
 
-   http://dunkels.com/adam/contiki/
-
-The cc65 C compiler can be found on the cc65 web page:
-
-   http://www.cc65.org/
+   http://www.sics.se/~adam/contiki/
 
 The Contiki desktop environment source code is divided into the
 following directories:
 
   apps/ - the Contiki applications
-  ctk/  - the ctk conio windowing toolkit on which Contiki builds
-  ek/   - the ek event kernel and the dispatcher
+  ctk/  - the Contiki GUI tool kit CTK
+  doc/  - documentation
+  ek/   - the event-driven kernel
   lib/  - various library files
   uip/  - the uIP TCP/IP stack
 
-To build the Contiki desktop environment from sources, GNU make and
-cc65 must be installed. 
