@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.7 2005/03/18 00:35:26 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.8 2005/03/31 21:54:44 oliverschmidt Exp $
 #
 
 all: contiki
@@ -51,7 +51,7 @@ CTK=ctk.o ctk-conio.o
 endif
 
 contiki:crt0.o main.o ek.o ek-service.o timer.o program-handler.o arg.o \
-	$(CTK) $(UIP) loader-arch.o bank.o mli.o \
+	$(CTK) $(UIP) loader-arch.o bank.o mli.o import.o \
 	about-dsc.o \
 	calc-dsc.o \
 	configedit-dsc.o \
