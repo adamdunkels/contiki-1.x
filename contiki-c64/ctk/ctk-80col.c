@@ -41,7 +41,7 @@ unsigned char ctk_80col_righttab[256];
 
 unsigned char ctk_80col_screencolors[25] =
   {COLOR(BGCOLOR4,BGCOLOR1),
-   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
+   COLOR(BGCOLOR2,BGCOLOR1),
    COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
    COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
    COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
@@ -52,11 +52,11 @@ unsigned char ctk_80col_screencolors[25] =
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
-   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3)};
+   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
+   COLOR(BGCOLOR4,BGCOLOR3)};
 
 unsigned char ctk_80col_screenpattern[25*8] =
-  {0x88,0x00,0x22,0x00,0x88,0x00,0x22,0x00,
-   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+  {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
    0xff,0xdd,0xff,0x77,0xff,0xdd,0xff,0x77,
    0xff,0x55,0xff,0x55,0xff,0x55,0xff,0x55,
    0xee,0x55,0xbb,0x55,0xee,0x55,0xbb,0x55,
@@ -79,7 +79,8 @@ unsigned char ctk_80col_screenpattern[25*8] =
    0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,
    0xaa,0x44,0xaa,0x11,0xaa,0x44,0xaa,0x11,
    0xaa,0x00,0xaa,0x00,0xaa,0x00,0xaa,0x00,
-   0x88,0x00,0x22,0x00,0x88,0x00,0x22,0x00};
+   0x88,0x00,0x22,0x00,0x88,0x00,0x22,0x00,
+   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 
 unsigned short ctk_80col_yscreenaddr[25] =
   {0 * 40 + SCREENADDR, 1 * 40 + SCREENADDR,
@@ -226,10 +227,19 @@ struct ctk_80col_theme ctk_80col_theme =
     {COLOR(COLOR_GRAY3, COLOR_GRAY1),
      COLOR(COLOR_GRAY1, COLOR_GRAY2),
      COLOR(COLOR_WHITE, COLOR_BLACK),
-     COLOR(COLOR_BLACK, COLOR_YELLOW),
+     COLOR(COLOR_BLUE, COLOR_WHITE),
      COLOR(COLOR_WHITE, COLOR_BLACK),
      COLOR(COLOR_BLACK, COLOR_YELLOW)},
     
+    /* Menu colors. */
+    /*    unsigned char menucolor,*/
+    COLOR(COLOR_BLUE, COLOR_YELLOW),
+    
+    /*    openmenucolor, */
+    COLOR(COLOR_YELLOW, COLOR_BLUE),
+    
+    /* activemenucolor; */
+    COLOR(COLOR_YELLOW, COLOR_BLUE),
     
   };
 char ctk_80col_versionstring[] = CONTIKI_VERSION_STRING;
@@ -588,6 +598,7 @@ _cputsn(char *str, unsigned char len)
 static void
 s_ctk_draw_init(void)
 {
+  ctk_80col_init();      
   screensize(&sizex, &sizey);
   ctk_draw_clear(0, sizey);
 }
@@ -715,11 +726,14 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_ICON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      if(focus & 1) {
+      color(ctk_80col_theme.iconcolors[focus]);
+      
+      /*      if(focus & 1) {
+	
 	revers(1);
       } else {
 	revers(0);
-      }
+	}*/
       /*      gotoxy(xpos, ypos);*/
       if(xpos >= 73) {
 	xpos = 73;
@@ -730,11 +744,7 @@ draw_widget(struct ctk_widget *w,
       if(w->widget.icon.textmap != NULL) {
 	ctk_80col_bitmapptr = w->widget.icon.bitmap;
 	for(i = 0; i < 3; ++i) {
-	  gotoxy(xpos, ypos);
 	  if(ypos >= clipy1 && ypos < clipy2) {
-	    /*	    cputc(w->widget.icon.textmap[0 + 3 * i]);
-	    cputc(w->widget.icon.textmap[1 + 3 * i]);
-	    cputc(w->widget.icon.textmap[2 + 3 * i]);*/
 	    gotoxy(xpos, ypos);
 	    ctk_80col_draw_bitmapline(3);	    
 	  }
@@ -749,9 +759,12 @@ draw_widget(struct ctk_widget *w,
 	x = sizex - len;
       }
 
-      gotoxy(x, ypos);
       if(ypos >= clipy1 && ypos < clipy2) {
-	_cputs(w->widget.icon.title);
+	len = strlen(w->widget.icon.title);
+	gotoxy((x & 0xfe) + 1, ypos);
+	ctk_80col_cclear(len / 2);
+	gotoxy(x, ypos);
+	ctk_80col_cputsn(w->widget.icon.title, len);
       }
       revers(0);
     }
@@ -1008,35 +1021,41 @@ static void
 draw_menu(struct ctk_menu *m)
 {
   unsigned char x, x2, y;
+  
+  color(ctk_80col_theme.openmenucolor);
+  
   revers(0);
   x = wherex();
   _cputs(m->title);
   cputc(' ');
   x2 = wherex();
   if(x + CTK_CONF_MENUWIDTH > sizex) {
-    x = sizex - CTK_CONF_MENUWIDTH;
+    x = sizex - CTK_CONF_MENUWIDTH - 2;
   }
-  
-  
+    
   for(y = 0; y < m->nitems; ++y) {
     if(y == m->active) {
-      revers(0);
+      color(ctk_80col_theme.activemenucolor);
     } else {
-      revers(1);
+      color(ctk_80col_theme.menucolor);
     }
+    gotoxy(x, y + 1);
+    ctk_80col_cclear(CTK_CONF_MENUWIDTH/2);
+
     gotoxy(x, y + 1);
     if(m->items[y].title[0] == '-') {
       chline(CTK_CONF_MENUWIDTH);
     } else {
       _cputs(m->items[y].title);
     }
-    if(x + CTK_CONF_MENUWIDTH > wherex()) {
+    /*    if(x + CTK_CONF_MENUWIDTH > wherex()) {
       cclear(x + CTK_CONF_MENUWIDTH - wherex());
-    }
+      }*/
   
   }
   gotoxy(x2, 0);
   revers(1);
+
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -1044,10 +1063,10 @@ s_ctk_draw_menus(struct ctk_menus *menus)
 {
   struct ctk_menu *m;  
 
+  memcpy(0xe000, ctk_80col_theme.menuleftpattern, 8);
   /* Draw menus */
-  gotoxy(0, 0);
+  gotoxy(2, 0);
   revers(1);
-  cputc(' ');
   for(m = menus->menus->next; m != NULL; m = m->next) {
     if(m != menus->open) {
       _cputs(m->title);
@@ -1058,22 +1077,24 @@ s_ctk_draw_menus(struct ctk_menus *menus)
   }
 
 
-  if(wherex() + strlen(menus->desktopmenu->title) + 1>= sizex) {
-    gotoxy(sizex - strlen(menus->desktopmenu->title) - 1, 0);
+  if(wherex() + strlen(menus->desktopmenu->title) + 2 >= sizex) {
+    gotoxy(sizex - strlen(menus->desktopmenu->title) - 2, 0);
   } else {
     cclear(sizex - wherex() -
-	   strlen(menus->desktopmenu->title) - 1);
+	   strlen(menus->desktopmenu->title) - 2);
   }
   
   /* Draw desktopmenu */
   if(menus->desktopmenu != menus->open) {
     _cputs(menus->desktopmenu->title);
     cputc(' ');
+    cputc(' ');    
   } else {
     draw_menu(menus->desktopmenu);
   }
 
   revers(0);
+  memcpy(0xe138, ctk_80col_theme.menurightpattern, 8);
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned char
@@ -1135,7 +1156,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
-    ctk_80col_init();
+    s_ctk_draw_init();
     ctk_restore();
     break;
   case EK_EVENT_REQUEST_REPLACE:

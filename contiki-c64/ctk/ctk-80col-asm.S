@@ -596,7 +596,7 @@ _ctk_80col_clear_line:
 	bne :+			
 
 	sta _ctk_80col_cursy
-	lda #0
+	lda #2
 	sta _ctk_80col_cursx
 
 	jsr restore01
@@ -621,7 +621,7 @@ _ctk_80col_draw_bitmapline:
 	ldy #0	
 	lda _ctk_80col_color
 :	
-	;  	sta (ptr1),y	
+	sta (ptr1),y	
 	iny
 	cpy tmpl
 	bne :-
