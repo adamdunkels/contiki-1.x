@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.2 2003/04/08 19:29:41 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.3 2003/06/30 20:38:05 adamdunkels Exp $
  *
  */
 
@@ -42,6 +42,16 @@
    uIP. You should make a copy of this file into one of your project's
    directories instead of editing this example "uipopt.h" file that
    comes with the uIP distribution. */
+
+#ifndef LITTLE_ENDIAN
+#define LITTLE_ENDIAN  3412
+#endif /* LITTLE_ENDIAN */
+#ifndef BIG_ENDIAN
+#define BIG_ENDIAN     1234
+#endif /* BIGE_ENDIAN */
+
+#include "uip-conf.h"
+
 
 /*-----------------------------------------------------------------------------------*/
 /* First, two typedefs that may have to be tweaked for your particular
@@ -54,7 +64,7 @@ typedef unsigned short u16_t;
 typedef unsigned long u32_t;
 typedef unsigned long uip_stats_t;
 
-#include <string.h>
+/*#include <string.h>*/
 #define bcopy(s,d,l) memcpy(d,s,l)
 
 /*-----------------------------------------------------------------------------------*/
@@ -123,19 +133,27 @@ void udp_appcall(void);
 
 /* UIP_CONNS: The maximum number of simultaneously active
    connections. */
-#define UIP_CONNS       6
+#ifndef UIP_CONF_MAX_CONNECTIONS
+#define UIP_CONNS       10
+#else /* UIP_CONF_MAX_CONNECTIONS */
+#define UIP_CONNS UIP_CONF_MAX_CONNECTIONS
+#endif /* UIP_CONF_MAX_CONNECTIONS */
 
 /* UIP_LISTENPORTS: The maximum number of simultaneously listening TCP
    ports. For a web server, 1 is enough here. */
-#define UIP_LISTENPORTS 6
+#ifndef UIP_CONF_MAX_LISTENPORTS
+#define UIP_LISTENPORTS 20
+#else /* UIP_CONF_MAX_LISTENPORTS */
+#define UIP_LISTENPORTS UIP_CONF_MAX_LISTENPORTS       
+#endif /* UIP_CONF_MAX_LISTENPORTS */
 
 /* UIP_BUFSIZE: The size of the buffer that holds incoming and
    outgoing packets. */
-#ifdef WITH_ETHERNET
-#define UIP_BUFSIZE     360
-#else /* WITH_ETHERNET */
-#define UIP_BUFSIZE     300
-#endif /* WITH_ETHERNET */
+#ifndef UIP_CONF_BUFFER_SIZE
+#define UIP_BUFSIZE     400
+#else /* UIP_CONF_BUFFER_SIZE */
+#define UIP_BUFSIZE UIP_CONF_BUFFER_SIZE
+#endif /* UIP_CONF_BUFFER_SIZE */
 
 /* UIP_STATISTICS: Determines if statistics support should be compiled
    in. The statistics is useful for debugging and to show the user. */
@@ -150,11 +168,7 @@ void udp_appcall(void);
 /* UIP_LLH_LEN: The link level header length; this is the offset into
    the uip_buf where the IP header can be found. For Ethernet, this
    should be set to 14. For SLIP, this should be set to 0. */
-#ifdef WITH_ETHERNET
 #define UIP_LLH_LEN     14
-#else /* WITH_ETHERNET */
-#define UIP_LLH_LEN     0
-#endif /* WITH_ETHERNET */
 
 /*-----------------------------------------------------------------------------------*/
 /* The following configuration options can be tweaked for your
@@ -198,15 +212,13 @@ void udp_appcall(void);
  * definition of the BYTE_ORDER macro to configure uIP for your
  * project.
  */
-#ifndef LITTLE_ENDIAN
-#define LITTLE_ENDIAN  3412
-#endif /* LITTLE_ENDIAN */
-#ifndef BIG_ENDIAN
-#define BIG_ENDIAN     1234
-#endif /* BIGE_ENDIAN */
 
 #ifndef BYTE_ORDER
+#ifdef UIP_CONF_BYTE_ORDER
+#define BYTE_ORDER     UIP_CONF_BYTE_ORDER
+#else /* UIP_CONF_BYTE_ORDER */
 #define BYTE_ORDER     LITTLE_ENDIAN
+#endif /* UIP_CONF_BYTE_ORDER */
 #endif /* BYTE_ORDER */
 
 #endif /* __UIPOPT_H__ */
