@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.6 2004/09/19 19:01:12 adamdunkels Exp $
+ * $Id: uip_arch.c,v 1.7 2005/02/24 22:04:53 oliverschmidt Exp $
  *
  */
 
@@ -207,7 +207,7 @@ u16_t
 uip_ipchksum(void)
 {  
   chksum_ptr = (u16_t)uip_buf + UIP_LLH_LEN;
-  chksum_len = 20;  
+  chksum_len = UIP_IPH_LEN;  
   return chksum();
 }
 /*-----------------------------------------------------------------------------------*/
@@ -216,14 +216,14 @@ static u16_t
 transport_chksum(u8_t protocol)
 {
   chksum_protocol = protocol;
-  chksum_ptr = (u16_t)&uip_buf[20 + UIP_LLH_LEN];
-  chksum_len = 20;  
+  chksum_ptr = (u16_t)&uip_buf[UIP_LLH_LEN + UIP_IPH_LEN];
+  chksum_len = UIP_TCPH_LEN;  
   chksum_tmp = chksum();
 
   chksum_ptr = (u16_t)uip_appdata;
   asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
   asm("sec");
-  asm("sbc #40");
+  asm("sbc #%b", UIP_IPTCPH_LEN);
   asm("sta _chksum_len");
   asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
   asm("sbc #0");
@@ -255,7 +255,7 @@ transport_chksum(u8_t protocol)
 
   asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
   asm("sec");
-  asm("sbc #20");
+  asm("sbc #%b", UIP_IPH_LEN);
   asm("sta _chksum_len");
   asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
   asm("sbc #0");
@@ -318,14 +318,14 @@ uip_tcpchksum(void)
 {
   return transport_chksum(IP_PROTO_TCP);
 #if 0
-  chksum_ptr = (u16_t)&uip_buf[20 + UIP_LLH_LEN];
-  chksum_len = 20;  
+  chksum_ptr = (u16_t)&uip_buf[UIP_LLH_LEN + UIP_IPH_LEN];
+  chksum_len = UIP_TCPH_LEN;  
   chksum_tmp = chksum();
 
   chksum_ptr = (u16_t)uip_appdata;
   asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
   asm("sec");
-  asm("sbc #40");
+  asm("sbc #%b", UIP_IPTCPH_LEN);
   asm("sta _chksum_len");
   asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
   asm("sbc #0");
@@ -357,7 +357,7 @@ uip_tcpchksum(void)
 
   asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
   asm("sec");
-  asm("sbc #20");
+  asm("sbc #%b", UIP_IPH_LEN);
   asm("sta _chksum_len");
   asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
   asm("sbc #0");
