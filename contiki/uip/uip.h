@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.5 2003/08/20 20:58:08 adamdunkels Exp $
+ * $Id: uip.h,v 1.6 2003/08/21 22:26:57 adamdunkels Exp $
  *
  */
 
@@ -326,7 +326,7 @@ u16_t htons(u16_t val);
  * The uip_buf array is used to hold incoming and outgoing
  * packets. The device driver fills this with incoming packets.
  */
-extern u8_t uip_buf[UIP_BUFSIZE];
+extern u8_t uip_buf[UIP_BUFSIZE+2];
 
 /* u8_t *uip_appdata:
  *

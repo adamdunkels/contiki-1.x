@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.8 2003/08/21 18:10:21 adamdunkels Exp $
+ * $Id: uip.c,v 1.9 2003/08/21 22:26:57 adamdunkels Exp $
  *
  */
 
@@ -72,7 +72,7 @@ const u16_t uip_hostaddr[2] =
 u16_t uip_hostaddr[2];       
 #endif /* UIP_FIXEDADDR */
 
-u8_t uip_buf[UIP_BUFSIZE];   /* The packet buffer that contains
+u8_t uip_buf[UIP_BUFSIZE+2];   /* The packet buffer that contains
 				incoming packets. */
 volatile u8_t *uip_appdata;  /* The uip_appdata pointer points to
 				application data. */

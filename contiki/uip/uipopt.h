@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.4 2003/07/31 23:41:56 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.5 2003/08/21 22:26:57 adamdunkels Exp $
  *
  */
 
@@ -195,7 +195,7 @@ void udp_appcall(void);
 
 /* UIP_TCP_MSS: The TCP maximum segment size. This should be set to
    at most UIP_BUFSIZE - UIP_LLH_LEN - 40. */
-#define UIP_TCP_MSS     (UIP_BUFSIZE - UIP_LLH_LEN - 42)
+#define UIP_TCP_MSS     (UIP_BUFSIZE - UIP_LLH_LEN - 40)
 
 /* UIP_TTL: The IP TTL (time to live) of IP packets sent by uIP. */
 #define UIP_TTL         255
