@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.5 2003/04/09 13:45:08 adamdunkels Exp $
+ * $Id: ctk.h,v 1.6 2003/04/10 07:04:45 adamdunkels Exp $
  *
  */
 
@@ -241,8 +241,8 @@ struct ctk_menu {
   char *title;
   unsigned char titlelen;
 #if CC_UNSIGNED_CHAR_BUGS
-  unsigned char nitems;
-  unsigned char active;
+  unsigned int nitems;
+  unsigned int active;
 #else /* CC_UNSIGNED_CHAR_BUGS */
   unsigned char nitems;
   unsigned char active;
