@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.3 2005/01/26 23:36:23 oliverschmidt Exp $
+ * $Id: uip_arch.c,v 1.4 2005/02/24 22:03:15 oliverschmidt Exp $
  *
  */
 
@@ -241,7 +241,7 @@ u16_t
 uip_ipchksum(void)
 {  
   chksum_ptr = (u16_t)uip_buf + UIP_LLH_LEN;
-  chksum_len = 20;  
+  chksum_len = UIP_IPH_LEN;  
   return chksum();
 }
 /*-----------------------------------------------------------------------------------*/
