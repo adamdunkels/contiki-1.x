@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-dump-drv.c,v 1.1 2004/09/17 20:54:51 adamdunkels Exp $
+ * $Id: rrnet-dump-drv.c,v 1.2 2004/09/18 20:49:13 adamdunkels Exp $
  *
  */
 
@@ -72,7 +72,7 @@ dump_packet(void)
   CTK_WIDGET_REDRAW(&dumplabel);
 }
 /*---------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tapdev_service_init, arg)
+LOADER_INIT_FUNC(rrnet_dump_drv_init, arg)
 {
   arg_free(arg);
   ek_service_start(PACKET_SERVICE_NAME, &proc);
@@ -83,6 +83,7 @@ output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
 {
   uip_arp_out();
   cs8900a_send();
+  dump_packet();
 }
 /*---------------------------------------------------------------------------*/
 #pragma optimize(push, off)
@@ -123,6 +124,7 @@ EK_POLLHANDLER(pollhandler)
   /* Poll Ethernet device to see if there is a frame avaliable. */
   uip_len = cs8900a_poll();
   if(uip_len > 0) {
+    dump_packet();
     /* A frame was avaliable (and is now read into the uip_buf), so
        we process it. */
     if(BUF->type == HTONS(UIP_ETHTYPE_IP)) {
