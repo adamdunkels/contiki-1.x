@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.7 2003/07/31 23:26:07 adamdunkels Exp $
+ * $Id: webserver.c,v 1.8 2003/08/12 21:09:19 adamdunkels Exp $
  *
  */
 
@@ -63,7 +63,7 @@ static ek_id_t id;
 
 
 #define LOG_WIDTH  30
-#define LOG_HEIGHT 20
+#define LOG_HEIGHT 16
 static char log[LOG_WIDTH*LOG_HEIGHT];
 
 static struct ctk_label loglabel =
