@@ -31,13 +31,17 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: init.c,v 1.2 2003/08/05 22:30:54 adamdunkels Exp $
+ * $Id: init.c,v 1.3 2003/08/05 23:26:11 adamdunkels Exp $
  *
  */
 
 #include "program-handler.h"
 #include "loader.h"
 #include "c64-fs.h"
+#include "uip.h"
+#include "uip_main.h"
+#include "uip_arp.h"
+#include "resolv.h"
 
 struct ptentry {
   char c;
@@ -87,47 +91,85 @@ skipnewline(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
-loadfile(char *str)
+nullterminate(char *str)
 {
   char *nt;
 
-  /* Nullterminate string since the loader functioin expects filename
-     to end with a null chacter. Start with finding newline
-     character. */
+  /* Nullterminate string. Start with finding newline character. */
   for(nt = str; *nt != '\r' &&
 	*nt != '\n'; ++nt);
 
   /* Replace newline with a null char. */
   *nt = 0;
 
+  /* Return pointer to null char. */
+  return nt;
+}
+/*-----------------------------------------------------------------------------------*/
+static char *
+loadfile(char *str)
+{
+  char *nt;
+
+  nt = nullterminate(str);
+  
   /* Call loader function. */
   program_handler_load(str);
 
   return nt + 1;
 }
 /*-----------------------------------------------------------------------------------*/
+static u16_t addr[2];
 static char *
 ipaddrconf(char *str)
 {
-  return skipnewline(str);
+  char *nt;
+  
+  nt = nullterminate(str);
+  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+    uip_sethostaddr(addr);
+  }
+
+  return nt + 1;
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 netmaskconf(char *str)
 {
-  return skipnewline(str);
+  char *nt;
+  
+  nt = nullterminate(str);
+  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+    uip_setnetmask(addr);
+  }
+
+  return nt + 1;
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 drconf(char *str)
 {
-  return skipnewline(str);
+  char *nt;
+  
+  nt = nullterminate(str);
+  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+    uip_setdraddr(addr);
+  }
+
+  return nt + 1;
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 dnsconf(char *str)
 {
-  return skipnewline(str);
+  char *nt;
+  
+  nt = nullterminate(str);
+  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+    resolv_conf(addr);
+  }
+
+  return nt + 1;
 }
 /*-----------------------------------------------------------------------------------*/
 static struct ptentry initparsetab[] =
