@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.6 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.7 2004/06/27 18:32:10 oliverschmidt Exp $
  *
  */
 
@@ -449,6 +449,7 @@ draw_widget(struct ctk_widget *w,
     }
     revers(0);
     break;
+#if CTK_CONF_ICONS
   case CTK_WIDGET_ICON:
     if(ypos >= clipy1 && ypos < clipy2) {
       textcolor(VNC_OUT_ICONCOLOR + focus);
@@ -469,11 +470,11 @@ draw_widget(struct ctk_widget *w,
 	cputs(w->widget.icon.title);
       }
 
-      gotoxy(xpos, ypos);
+#if CTK_CONF_ICON_BITMAPS
       if(w->widget.icon.bitmap != NULL) {
 	iconnum = vnc_out_add_icon((struct ctk_icon *)w);
-	gotoxy(xpos, ypos);
 	textcolor(iconnum | (focus << 6));
+	gotoxy(xpos, ypos);
 	cputc(0x80);
 	cputc(0x81);
 	cputc(0x82);
@@ -502,11 +503,12 @@ draw_widget(struct ctk_widget *w,
 	  ++ypos;
 	  }*/
       }
-      x = xpos;
-  
+#endif /* CTK_CONF_ICON_BITMAPS */
+
       revers(0);
     }
     break;
+#endif /* CTK_CONF_ICONS */
 
   default:
     break;
