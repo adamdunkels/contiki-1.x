@@ -1,12 +1,14 @@
-#include "ircc.h"
+
 #include "contiki.h"
+#include "ircc.h"
+
 #include "ctk.h"
 #include "ctk-textedit.h"
 
 #include <string.h>
 
-#define LOG_WIDTH 40
-#define LOG_HEIGHT 20
+#define LOG_WIDTH 38
+#define LOG_HEIGHT 21
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_PROCESS(p, "IRC client", EK_PRIO_NORMAL,
@@ -39,10 +41,10 @@ static struct ctk_label nicklabel =
 static struct ctk_textentry nickentry =
   {CTK_TEXTENTRY(0, 5, 16, 1, nick, sizeof(nick))};
 
-static struct ctk_button quitbutton =
-  {CTK_BUTTON(0, 7, 4, "Quit")};
 static struct ctk_button connectbutton =
-  {CTK_BUTTON(8, 7, 7, "Connect")};
+  {CTK_BUTTON(0, 7, 7, "Connect")};
+static struct ctk_button quitbutton =
+  {CTK_BUTTON(12, 7, 4, "Quit")};
 
 /*static char nick[] = "asdf";
   static char server[] = "efnet.demon.co.uk";*/
@@ -62,6 +64,8 @@ LOADER_INIT_FUNC(irc_init, arg)
 static void
 quit(void)
 {
+  ctk_window_close(&window);
+  ctk_window_close(&setupwindow);
   ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
@@ -71,8 +75,8 @@ void
 ircc_text_output(struct ircc_state *s, char *text1, char *text2)
 {
   char *ptr;
-  int len;
-
+  int len, len2;
+  
   if(text1 == NULL) {
     text1 = "";
   }
@@ -96,6 +100,12 @@ ircc_text_output(struct ircc_state *s, char *text1, char *text2)
     strncpy(ptr + 2, text2, LOG_WIDTH - len - 2);
   }
 
+  len2 = strlen(text2);
+  if(len2 > LOG_WIDTH - len - 2) {
+    memcpy(log, &log[LOG_WIDTH], LOG_WIDTH * (LOG_HEIGHT - 1));
+    strncpy(&log[LOG_WIDTH * (LOG_HEIGHT - 1)],
+	    text2 + LOG_WIDTH - 2 - len, LOG_WIDTH);
+  }
   CTK_WIDGET_REDRAW(&loglabel);
   
 }
@@ -110,20 +120,23 @@ parse_line(void)
   
   
   if(line[0] == '/') {
-    if(strncmp(&line[1], "join ", 4) == 0) {
+    if(strncmp(&line[1], "join", 4) == 0) {
       ircc_join(&s, &line[6]);
       ircc_text_output(&s, "Join", &line[6]);
-    } else if(strncmp(&line[1], "list ", 4) == 0) {
+    } else if(strncmp(&line[1], "list", 4) == 0) {
       ircc_list(&s);
       ircc_text_output(&s, "Channel list", "");
-    } else if(strncmp(&line[1], "part ", 4) == 0) {
+    } else if(strncmp(&line[1], "part", 4) == 0) {
       ircc_part(&s);
       ircc_text_output(&s, "Leaving channel", "");
+    } else if(strncmp(&line[1], "quit", 4) == 0) {
+      ircc_quit(&s);
     } else {
       ircc_text_output(&s, &line[1], "Not implemented");
       ircc_sent(&s);
     }
   } else {
+    petsciiconv_toascii(line, sizeof(line));
     ircc_msg(&s, &line[0]);
     ircc_text_output(&s, nick, line);
   }
@@ -159,8 +172,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     CTK_WIDGET_ADD(&setupwindow, &serverentry);
     CTK_WIDGET_ADD(&setupwindow, &nicklabel);
     CTK_WIDGET_ADD(&setupwindow, &nickentry);
-    CTK_WIDGET_ADD(&setupwindow, &quitbutton);
     CTK_WIDGET_ADD(&setupwindow, &connectbutton);
+    CTK_WIDGET_ADD(&setupwindow, &quitbutton);
 
     ctk_window_open(&setupwindow);
 
@@ -173,14 +186,12 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     if(data == (ek_data_t)&lineedit) {
       parse_line();
     } else if(data == (ek_data_t)&quitbutton) {
-      ctk_window_close(&window);
-      ctk_window_close(&setupwindow);
       quit();
     } else if(data == (ek_data_t)&connectbutton) {
       ctk_window_close(&setupwindow);
       ctk_window_open(&window);
       ipaddr = serveraddr;
-      if(uiplib_ipaddrconv(server, serveraddr) == 0) {
+      if(uiplib_ipaddrconv(server, (u8_t *)serveraddr) == 0) {
 	ipaddr = resolv_lookup(server);
 	if(ipaddr == NULL) {
 	  resolv_query(server);
