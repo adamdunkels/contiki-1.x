@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -30,79 +27,42 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki desktop environment
  *
- * $Id: contiki-main.c,v 1.6 2003/04/25 08:46:00 adamdunkels Exp $
+ * $Id: tfe-dsc.c,v 1.1 2003/04/25 08:46:07 adamdunkels Exp $
  *
  */
 
-#include "ctk.h"
-#include "ctk-draw.h"
-#include "dispatcher.h"
+#include "dsc.h"
 
-#include "program-handler.h"
-
-#include "uip_main.h"
-#include "uip-signal.h"
-#include "uip.h"
-#include "uip_arp.h"
-#if WITH_TFE
-#include "cs8900a.h"
-#endif /* WITH_TFE */
-#include "resolv.h"
-#include "rs232dev.h"
-
-#include "about-dsc.h"
-#include "netconf-dsc.h"
-#include "processes-dsc.h"
-#include "directory-dsc.h"
-
+extern struct ctk_icon tfe_icon;
 /*-----------------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
-{
+DSC(tfe_dsc,
+    "The Final Ethernet driver",
+    "tfe.drv",
+    tfe_init,
+    &tfe_icon);
+/*-----------------------------------------------------------------------------------*/
+static unsigned char tfeicon_bitmap[3*3*8] = {
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 
-#ifdef WITH_UIP
-  uip_init();
-  /*  uip_main_init();*/
-  uip_signal_init();
-  resolv_init();
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 
-#ifdef WITH_TFE
-  cs8900a_init();
-#endif /* WITH_TFE */
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+};
 
-  
-#ifdef WITH_RS232
-  /*  rs232dev_init();*/
-#endif /* WITH_RS232 */
-  
-#ifdef WITH_TAPDEV
-  tapdev_init();
-#endif /* WITH_TAPDEV */
+static char tfeicon_textmap[9] = {
+  'T', 'C', 'P',
+  '/', 'I', 'P',
+  'T', 'F', 'E'
+};
 
-
-#endif /* WITH_UIP */
-	    
-  ek_init();
-  dispatcher_init();
-  ctk_init();
-
-  program_handler_init();
-
-  program_handler_add(&directory_dsc, "Directory", 1);
-  program_handler_add(&netconf_dsc, "Network setup", 1);  
-  program_handler_add(&processes_dsc, "Processes", 0);
-  program_handler_add(&about_dsc, "About", 0);
-  
-  ctk_redraw();
-  ek_run();
-
-  clrscr();
-  
-  return 0;
-
-  argv = argv;
-  argc = argc;
-}
+static struct ctk_icon tfe_icon =
+  {CTK_ICON("TFE", tfeicon_bitmap, tfeicon_textmap)};
 /*-----------------------------------------------------------------------------------*/

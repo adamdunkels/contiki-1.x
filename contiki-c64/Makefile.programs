@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.8 2003/04/24 17:12:54 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.9 2003/04/25 08:46:00 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -48,7 +48,9 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      enabler.prg enabler.dsc \
      springlight.prg springlight.dsc \
      default.prg default.dsc \
-     ssfire.sav
+     ssfire.sav \
+     slip.drv slip.dsc \
+     tfe.drv tfe.dsc
 
 SYS=c64
 
@@ -64,6 +66,10 @@ email.prg: $(EMAIL)
 www.prg: $(WWW)
 
 simpletelnet.prg: $(TELNET)
+
+tfe.drv: tfe-drv.o uip_arp.o cs8900a.o
+
+slip.drv: slip-drv.o rs232dev.o
 
 VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
 vnc.prg: $(VNC)
