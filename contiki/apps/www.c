@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.17 2003/08/20 20:54:46 adamdunkels Exp $
+ * $Id: www.c,v 1.18 2003/08/22 19:24:40 adamdunkels Exp $
  *
  */
 
@@ -96,6 +96,16 @@ static struct ctk_label statustext =
 static struct ctk_separator sep2 =
   {CTK_SEPARATOR(0, WWW_CONF_WEBPAGE_HEIGHT + 3,
 		 WWW_CONF_WEBPAGE_WIDTH)};
+
+static struct ctk_window wgetdialog;
+static struct ctk_label wgetlabel1 =
+  {CTK_LABEL(0, 0, 34, 1, "This web page cannot be displayed.")};
+static struct ctk_label wgetlabel2 =
+  {CTK_LABEL(0, 2, 35, 1, "Would you like to download instead?")};
+static struct ctk_button wgetnobutton =
+  {CTK_BUTTON(0, 4, 6, "Cancel")};
+static struct ctk_button wgetyesbutton =
+  {CTK_BUTTON(9, 4, 24, "Close browser & download")};
 
 /* The char arrays that hold the history of visited URLs. */
 static char history[WWW_CONF_HISTORY_SIZE][WWW_CONF_MAX_URLLEN];
@@ -224,6 +234,13 @@ LOADER_INIT_FUNC(www_init)
                    WWW_CONF_WEBPAGE_HEIGHT+5, "Web browser");
     make_window();
     CTK_WIDGET_FOCUS(&mainwindow, &urlentry);
+
+    /* Create download dialog.*/
+    ctk_dialog_new(&wgetdialog, 35, 5);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetlabel1);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetlabel2);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetnobutton);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetyesbutton);
     
     /* Attach as a listener to a number of signals ("Button activate",
        "Hyperlink activate" and "Hyperlink hover", and the resolver's
@@ -240,12 +257,13 @@ LOADER_INIT_FUNC(www_init)
 static void
 clear_page(void)
 {
-  if(ctk_window_isopen(&mainwindow)) {
+  /*  if(ctk_window_isopen(&mainwindow)) {
     ctk_window_close(&mainwindow);
-  }
+    }*/
   ctk_window_clear(&mainwindow);
   make_window();
-  ctk_window_open(&mainwindow);
+  /*  ctk_window_open(&mainwindow);*/
+  ctk_window_redraw(&mainwindow);
   memset(webpage, 0, WWW_CONF_WEBPAGE_WIDTH * WWW_CONF_WEBPAGE_HEIGHT);  
 }
 /*-----------------------------------------------------------------------------------*/
@@ -412,6 +430,15 @@ log_back(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+static void
+quit(void)
+{
+  ctk_window_close(&mainwindow);
+  dispatcher_exit(&p);
+  id = EK_ID_NONE;
+  LOADER_UNLOAD();
+}
+/*-----------------------------------------------------------------------------------*/
 /* www_dispatcher():
  *
  * The program's signal dispatcher function. Is called by the ek
@@ -458,6 +485,13 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     } else if(w == (struct ctk_widget *)&stopbutton) {
       run = 0;
       webclient_close();
+    } else if(w == (struct ctk_widget *)&wgetnobutton) {
+      ctk_dialog_close();
+    } else if(w == (struct ctk_widget *)&wgetyesbutton) {
+      ctk_dialog_close();
+      quit();
+      program_handler_load("wget.prg");
+      
 #if WWW_CONF_FORMS
     } else {
       /* Check form buttons */
@@ -478,7 +512,7 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     log_back();
     open_link(w->widget.hyperlink.url);
     CTK_WIDGET_FOCUS(&mainwindow, &stopbutton);
-    ctk_window_open(&mainwindow);
+    /*    ctk_window_open(&mainwindow);*/
     run = 1;
   } else if(s == ctk_signal_hyperlink_hover) {
     if(CTK_WIDGET_TYPE((struct ctk_widget *)data) ==
@@ -498,10 +532,7 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     }
   } else if(s == ctk_signal_window_close ||
 	    s == dispatcher_signal_quit) {
-    ctk_window_close(&mainwindow);
-    dispatcher_exit(&p);
-    id = EK_ID_NONE;
-    LOADER_UNLOAD();
+    quit();
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -761,13 +792,14 @@ void
 webclient_datahandler(char *data, u16_t len)
 {
   if(len > 0) {
-    /*    if(strcmp(webclient_mimetype(), http_texthtml) == 0) {*/
-    count = (count + 1) & 3;
-    show_statustext(receivingmsgs[count]);
-    htmlparser_parse(data, len);
-    /*    } else {
-	  show_statustext("Receiving non-HTML data...");
-	  }*/
+    if(strcmp(webclient_mimetype(), http_texthtml) == 0) { 
+      count = (count + 1) & 3;
+      show_statustext(receivingmsgs[count]);
+      htmlparser_parse(data, len);
+    } else {
+      uip_close();
+      ctk_dialog_open(&wgetdialog);
+    }
   } else {
     /* Clear remaining parts of page. */
     run = 0;
