@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.5 2003/04/05 12:22:35 adamdunkels Exp $
+ * $Id: ctk.c,v 1.6 2003/04/08 19:28:15 adamdunkels Exp $
  *
  */
 
@@ -275,7 +275,13 @@ ctk_window_close(struct ctk_window *w)
     /* Otherwise we step through the list until we find the window
        before the one to be closed. We then redirect its ->next
        pointer and its ->next->prev. */
-    for(w2 = windows; w2->next != w; w2 = w2->next);
+    for(w2 = windows; w2 != NULL && w2->next != w; w2 = w2->next);
+
+    if(w2 == NULL) {
+      /* The window wasn't open, so there is nothing more for us to
+	 do. */
+      return;
+    }
 
     if(w->next != NULL) {
       w->next->prev = w->prev;
