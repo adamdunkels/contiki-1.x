@@ -31,7 +31,7 @@
 # Makefile for Atari 8-bit version
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/04/12 02:06:45 sannyx Exp $
+# $Id: Makefile,v 1.2 2003/04/14 21:31:28 sannyx Exp $
 #
 
 all: contiki.com
@@ -120,7 +120,7 @@ clean:
 	rm -f *.o *~ *core contiki *.s *.prg contiki-labels contiki.com Makefile.depend
 
 depend:
-	gcc -MM -Iapps -Ictk -Iuip -Iconf -Ilib \
+	gcc -MM -MG -Iapps -Ictk -Iuip -Iconf -Ilib -I$(CC65_INC) \
 	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
 	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
 	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
