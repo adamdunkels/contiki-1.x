@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: webclient.c,v 1.2 2003/08/25 12:38:41 adamdunkels Exp $
  *
  */
 
@@ -40,6 +40,8 @@
 #include "webclient.h"
 #include "resolv.h"
 #include "uip_main.h"
+
+#include "www-conf.h"
 
 #include <string.h>
 
@@ -67,7 +69,7 @@ struct webclient_state {
 
   u16_t port;
   char host[40];
-  char file[100];  
+  char file[WWW_CONF_MAX_URLLEN];  
   u16_t getrequestptr;
   u16_t getrequestleft;
   
@@ -138,7 +140,7 @@ webclient_get(char *host, u16_t port, char *file)
 {
   struct uip_conn *conn;
   u16_t *ipaddr; 
-  u16_t addr[2];
+  static u16_t addr[2];
   
   /* First check if the host is an IP address. */
   ipaddr = &addr[0];
@@ -149,7 +151,7 @@ webclient_get(char *host, u16_t port, char *file)
       return 0;
     }
   }
-
+  
   /* XXX: here we check so that the server does not try to access any
      hosts on the SICS networks. */
   if(ipaddr[0] == HTONS((193 << 8) | 10) &&
@@ -174,8 +176,9 @@ webclient_get(char *host, u16_t port, char *file)
   return 1;
 }
 /*-----------------------------------------------------------------------------------*/
-static unsigned char *
-copy_string(unsigned char *dest, unsigned char *src, unsigned char len)
+static unsigned char * CC_FASTCALL
+copy_string(unsigned char *dest,
+	    unsigned char *src, unsigned char len)
 {
   return strcpy(dest, src) + len;
 }
@@ -271,10 +274,32 @@ parse_statusline(u16_t len)
   return len;
 }
 /*-----------------------------------------------------------------------------------*/
+static char
+casecmp(char *str1, char *str2, char len)
+{
+  static char c;
+  
+  while(len > 0) {
+    c = *str1;
+    /* Force lower-case characters. */
+    if(c & 0x40) {
+      c |= 0x20;
+    }
+    if(*str2 != c) {
+      return 1;
+    }
+    ++str1;
+    ++str2;
+    --len;
+  }
+  return 0;
+}
+/*-----------------------------------------------------------------------------------*/
 static u16_t
 parse_headers(u16_t len)
 {
   char *cptr;
+  static char c;
   
   while(len > 0 && s.httpheaderlineptr < sizeof(s.httpheaderline)) {
     s.httpheaderline[s.httpheaderlineptr] = *uip_appdata;
@@ -292,9 +317,9 @@ parse_headers(u16_t len)
       }
 
       s.httpheaderline[s.httpheaderlineptr - 1] = 0;
-      /* Check for specific HTTP header fields. */
-      if(strncmp(s.httpheaderline, http_content_type,
-		 sizeof(http_content_type) - 1) == 0) {
+      /* Check for specific HTTP header fields. */      
+      if(casecmp(s.httpheaderline, http_content_type,
+		     sizeof(http_content_type) - 1) == 0) {
 	/* Found Content-type field. */
 	cptr = strchr(s.httpheaderline, ';');
 	if(cptr != NULL) {
@@ -302,7 +327,7 @@ parse_headers(u16_t len)
 	}
 	strncpy(s.mimetype, s.httpheaderline +
 		sizeof(http_content_type) - 1, sizeof(s.mimetype));
-      } else if(strncmp(s.httpheaderline, http_location,
+      } else if(casecmp(s.httpheaderline, http_location,
 			    sizeof(http_location) - 1) == 0) {
 	strncpy(s.file, s.httpheaderline +
 		sizeof(http_location) - 1, sizeof(s.file));
