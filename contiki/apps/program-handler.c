@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.13 2003/08/05 22:02:52 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.14 2003/08/05 23:27:23 adamdunkels Exp $
  *
  */
 
@@ -101,6 +101,9 @@ static char *errormsgs[] = {
 };
 
 static ek_signal_t loader_signal_load;
+static ek_signal_t loader_signal_display_name;
+
+static char *displayname;
 
 /*-----------------------------------------------------------------------------------*/
 void
@@ -149,6 +152,10 @@ program_handler_init(void)
 
     loader_signal_load = dispatcher_sigalloc();
     dispatcher_listen(loader_signal_load);
+    loader_signal_display_name = dispatcher_sigalloc();
+    dispatcher_listen(loader_signal_display_name);
+
+    displayname = NULL;
   }
   
 }
@@ -188,9 +195,7 @@ program_handler_load(char *name)
 #ifdef WITH_LOADER_ARCH
   name = loadername_copy(name);
   if(name != NULL) {
-    dispatcher_emit(loader_signal_load, name, id);
-    ctk_label_set_text(&loadingname, name);
-    ctk_dialog_open(&loadingdialog);
+    dispatcher_emit(loader_signal_display_name, name, id);
   } else {
     ctk_label_set_text(&errortype, "Out of memory");
     ctk_dialog_open(&errordialog);
@@ -248,14 +253,32 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 #endif /* WITH_LOADER_ARCH */
     }      
     
+  } else if(s == loader_signal_display_name) {
+#if WITH_LOADER_ARCH
+    if(displayname == NULL) {
+      ctk_label_set_text(&loadingname, data);
+      ctk_dialog_open(&loadingdialog);
+      dispatcher_emit(loader_signal_load, data, id);
+      displayname = data;
+    } else {
+      /* Try again. */
+      dispatcher_emit(loader_signal_display_name, data, id);
+    }
+#endif /* WITH_LOADER_ARCH */
   } else if(s == loader_signal_load) {
 #if WITH_LOADER_ARCH
-    ctk_dialog_close();
-    err = LOADER_LOAD(data);
-    loadername_free(data);
-    if(err != LOADER_OK) {
-      ctk_label_set_text(&errortype, errormsgs[err]);
-      ctk_dialog_open(&errordialog);
+    if(displayname == data) {
+      ctk_dialog_close();
+      displayname = NULL;
+      err = LOADER_LOAD(data);
+      loadername_free(data);
+      if(err != LOADER_OK) {
+	ctk_label_set_text(&errortype, errormsgs[err]);
+	ctk_dialog_open(&errordialog);
+      }
+    } else {
+      /* Try again. */
+      dispatcher_emit(loader_signal_display_name, data, id);
     }
 #endif /* WITH_LOADEER_ARCH */
   } 
