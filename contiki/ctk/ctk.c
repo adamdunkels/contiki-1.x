@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.25 2003/08/11 22:27:13 adamdunkels Exp $
+ * $Id: ctk.c,v 1.26 2003/08/12 21:12:59 adamdunkels Exp $
  *
  */
 
@@ -393,7 +393,10 @@ ctk_menu_remove(struct ctk_menu *menu)
   for(m = menus.menus; m->next != NULL; m = m->next) {
     if(m->next == menu) {
       m->next = menu->next;
-      redraw |= REDRAW_MENUPART;
+      if(menu == lastmenu) {
+	lastmenu = NULL;
+      }
+      redraw |= REDRAW_MENUPART;      
       return;
     }
   }
