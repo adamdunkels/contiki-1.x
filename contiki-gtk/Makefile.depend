@@ -30,8 +30,7 @@ shell.o: apps/shell.c ../contiki/apps/program-handler.h \
  ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
  conf/uip-conf.h ../contiki/uip/tcpip.h ../contiki/uip/uip_arp.h \
- ../contiki/uip/resolv.h ../contiki/uip/uip-signal.h \
- ../contiki/apps/shell.h
+ ../contiki/uip/resolv.h ../contiki/apps/shell.h
 vnc-draw.o: apps/vnc-draw.c ../contiki/apps/vnc-draw.h uip/uip_arch.h \
  ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
  ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
@@ -135,24 +134,13 @@ processes.o: ../contiki/apps/processes.c ../contiki/ek/ek.h \
 program-handler.o: ../contiki/apps/program-handler.c \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
- ../contiki/lib/petsciiconv.h ../contiki/uip/uip.h \
- ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
- ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
- ../contiki/ctk/ctk-draw.h ../contiki/uip/resolv.h \
+ ../contiki/lib/petsciiconv.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ctk/ctk-draw.h \
  ../contiki/apps/program-handler.h ../contiki/ek/dsc.h
 shell-dsc.o: ../contiki/apps/shell-dsc.c ../contiki/ek/dsc.h \
  ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h
-shell-gui.o: ../contiki/apps/shell-gui.c ../contiki/ek/ek.h \
- conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
- ../contiki/ek/loader.h ../contiki/apps/program-handler.h \
- ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
- ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/uip/uip.h \
- ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
- ../contiki/uip/uip_arp.h ../contiki/uip/resolv.h \
- ../contiki/apps/shell.h ../contiki/uip/uip-signal.h \
- conf/shell-gui-conf.h
 simpletelnet.o: ../contiki/apps/simpletelnet.c ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki/lib/petsciiconv.h \
@@ -179,17 +167,6 @@ telnetd-dsc.o: ../contiki/apps/telnetd-dsc.c ../contiki/ek/dsc.h \
  ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h
-telnetd-gui.o: ../contiki/apps/telnetd-gui.c \
- ../contiki/apps/program-handler.h ../contiki/ek/dsc.h \
- ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
- ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
- ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip.h \
- ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
- ../contiki/lib/petsciiconv.h ../contiki/uip/uip_arp.h \
- ../contiki/uip/resolv.h ../contiki/apps/telnetd.h \
- ../contiki/ek/contiki.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
- ../contiki/lib/clock.h conf/clock-conf.h ../contiki/apps/shell.h \
- ../contiki/uip/uip-signal.h
 telnetd.o: ../contiki/apps/telnetd.c ../contiki/ek/loader.h \
  ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
  ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
