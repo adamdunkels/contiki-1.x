@@ -112,7 +112,7 @@ _read:
 
 	; Is buf located in LC ?
 	cpx	#$D0
-	bmi	:+
+	bcc	:+
 
 	; Yes: Use keyboard buf instead
 	lda	#<IN
@@ -134,7 +134,7 @@ RW_CMD:	.byte	$00
 	; Is buf located in LC ?
 	ldx	ptr1+1
 	cpx	#$D0
-	bmi	:++
+	bcc	:++
 
 	; Yes: Copy data into buf
 	ldy	#$00
@@ -142,7 +142,7 @@ RW_CMD:	.byte	$00
 	sta	(ptr1),y
 	iny
 	cpy	RW_COUNT_OUT
-	bmi	:-
+	bcc	:-
 
 	; Return bytes transfered
 :	lda	RW_COUNT_OUT
