@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.12 2004/07/04 16:52:30 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.13 2004/08/09 20:10:09 adamdunkels Exp $
  *
  */
 
@@ -377,7 +377,11 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
+#ifdef UIP_CONF_ARPTAB_SIZE
+#define UIP_ARPTAB_SIZE UIP_CONF_ARPTAB_SIZE
+#else
 #define UIP_ARPTAB_SIZE 8
+#endif
 
 /**
  * The maxium age of ARP table entries measured in 10ths of seconds.
