@@ -1,41 +1,30 @@
 ;---------------------------------------------------------------------
 	.importzp ptr1
-	.export _lc_get
+	.export _lc_set
 	.export _lc_resume
-	.export _lc_tmp
-	
 ;---------------------------------------------------------------------
-.data
-_lc_tmp:	.byte 2		
-.code
-_lc_get:
-	pla
-	tay
-	pla
-	tax
-	
-	pha
-	tya
-	pha
-
-	sec
-	sbc #2
-	bcs :+
-	dex
-:
+_lc_set:
+	sta ptr1
+	stx ptr1+1
+	tsx
+	lda $0102,x
+	ldy #$01
+	sta (ptr1),y
+	lda $0101,x
+	dey
+	sta (ptr1),y
 	rts
 ;---------------------------------------------------------------------
 _lc_resume:	
 	sta ptr1
 	stx ptr1+1
-	cpx #0
-	bne :+
-	rts
-:		
-	pla
-	pla
-	jmp (ptr1)
+	ldy #$01
+	lda (ptr1),y
+	beq :+
+	tsx
+	sta $0102,x
+	dey
+	lda (ptr1),y
+	sta $0101,x
+:	rts
 ;---------------------------------------------------------------------	
-
-
-	
