@@ -62,9 +62,10 @@ struct dhcp_msg {
 #define DHCP_OPTION_REQ_IPADDR   50
 #define DHCP_OPTION_MSG_TYPE     53
 #define DHCP_OPTION_SERVER_ID    54
+#define DHCP_OPTION_REQ_LIST     55
 #define DHCP_OPTION_END         255
 
-static const u8_t xid[4] = {0xad, 0xde, 0x00, 0x00};
+static const u8_t xid[4] = {0xad, 0xde, 0x12, 0x23};
 static const u8_t magic_cookie[4] = {99, 130, 83, 99};
 /*---------------------------------------------------------------------------*/
 static u8_t *
@@ -95,6 +96,17 @@ add_req_ipaddr(u8_t *optptr)
 }
 /*---------------------------------------------------------------------------*/
 static u8_t *
+add_req_options(u8_t *optptr)
+{
+  *optptr++ = DHCP_OPTION_REQ_LIST;
+  *optptr++ = 3;
+  *optptr++ = DHCP_OPTION_SUBNET_MASK;
+  *optptr++ = DHCP_OPTION_ROUTER;
+  *optptr++ = DHCP_OPTION_DNS_SERVER;
+  return optptr;
+}
+/*---------------------------------------------------------------------------*/
+static u8_t *
 add_end(u8_t *optptr)
 {
   *optptr++ = DHCP_OPTION_END;
@@ -102,7 +114,7 @@ add_end(u8_t *optptr)
 }
 /*---------------------------------------------------------------------------*/
 static void
-create_msg(struct dhcp_msg *m)
+create_msg(register struct dhcp_msg *m)
 {
   m->op = DHCP_REQUEST;
   m->htype = DHCP_HTYPE_ETHERNET;
@@ -111,7 +123,8 @@ create_msg(struct dhcp_msg *m)
   memcpy(m->xid, xid, sizeof(m->xid));
   m->secs = 0;
   m->flags = 0;
-  uip_ipaddr_copy((u16_t *)m->ciaddr, uip_hostaddr);
+  /*  uip_ipaddr_copy(m->ciaddr, uip_hostaddr);*/
+  memcpy(m->ciaddr, uip_hostaddr, sizeof(m->ciaddr));
   memset(m->yiaddr, 0, sizeof(m->yiaddr));
   memset(m->siaddr, 0, sizeof(m->siaddr));
   memset(m->giaddr, 0, sizeof(m->giaddr));
@@ -130,8 +143,9 @@ send_discover(void)
 
   create_msg(m);
 
-  add_end(add_msg_type(&m->options[4], DHCPDISCOVER));
-  
+  add_end(add_req_options(add_msg_type(&m->options[4], DHCPDISCOVER)));
+
+
   uip_udp_send(300);
 }
 /*---------------------------------------------------------------------------*/
@@ -196,7 +210,9 @@ parse_msg(void)
 {
   struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
   
-  if(m->op == DHCP_REPLY) {
+  if(m->op == DHCP_REPLY &&
+     memcmp(m->xid, xid, sizeof(xid)) == 0/* &&
+					     memcmp(m->chaddr, &uip_ethaddr, sizeof(uip_ethaddr))*/) {
     memcpy(s.ipaddr, m->yiaddr, 4);
     parse_options(&m->options[4], uip_datalen());
   }
