@@ -16,6 +16,7 @@ sub stringify {
       $datan = $data;
       $datan =~ s/\\r/\r/g;
       $datan =~ s/\\n/\n/g;
+      $datan =~ s/\\01/\01/g;      
       $datan =~ s/\\0/\0/g;
       
       printf(OUTPUTC "const char $var\[%d] = \n", length($datan) + 1);
@@ -38,6 +39,7 @@ stringify("http-user-agent-string");
 stringify("smtp-strings");
 stringify("html-strings");
 stringify("ircc-strings");
+stringify("popc-strings");
 
 exit 0;
 
