@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: cc-conf.h,v 1.1 2003/04/05 12:14:46 adamdunkels Exp $
+ * $Id: cc-conf.h,v 1.2 2003/04/05 12:24:25 adamdunkels Exp $
  *
  */
 #ifndef __CC_CONF_H__
@@ -40,7 +40,8 @@
 
 #define CC_CONF_REGISTER_ARGS          1
 #define CC_CONF_FUNCTION_POINTER_ARGS  1
-#define CC_CONF_FASTCALL               1
+
+#define CC_CONF_FASTCALL               fastcall
 
 #endif /* __CC_CONF_H__ */
 
