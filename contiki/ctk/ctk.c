@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.17 2003/04/25 08:49:17 adamdunkels Exp $
+ * $Id: ctk.c,v 1.18 2003/04/28 23:21:42 adamdunkels Exp $
  *
  */
 
@@ -114,7 +114,8 @@ unsigned short mouse_x, mouse_y, mouse_button;
 #endif /* CTK_CONF_MOUSE_SUPPORT */
 
 static unsigned short screensaver_timer;
-#define SCREENSAVER_TIMEOUT (5*60)
+unsigned short ctk_screensaver_timeout = (5*60);
+/*#define SCREENSAVER_TIMEOUT (5*60)*/
 
 #if CTK_CONF_MENUS
 /*-----------------------------------------------------------------------------------*/
@@ -623,6 +624,18 @@ ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
       window->focused = widget;
       }*/
   }
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_desktop_width(struct ctk_window *w)
+{
+  return ctk_draw_width();
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_desktop_height(struct ctk_window *w)
+{
+  return ctk_draw_height();
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -1446,7 +1459,7 @@ DISPATCHER_SIGHANDLER(ctk_sighandler, s, data)
   if(s == ctk_signal_timer) {
     if(mode == CTK_MODE_NORMAL) {
       ++screensaver_timer;
-      if(screensaver_timer == SCREENSAVER_TIMEOUT) {
+      if(screensaver_timer == ctk_screensaver_timeout) {
 #if CTK_CONF_SCREENSAVER
 	dispatcher_emit(ctk_signal_screensaver_start, NULL,
 			DISPATCHER_BROADCAST);

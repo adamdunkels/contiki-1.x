@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.9 2003/04/24 17:18:27 adamdunkels Exp $
+ * $Id: ctk.h,v 1.10 2003/04/28 23:21:42 adamdunkels Exp $
  *
  */
 
@@ -384,6 +384,10 @@ void ctk_widget_redraw(struct ctk_widget *w);
  (widg)->text = (linktext); \
  (widg)->url = (linkurl)
 
+/* Desktop interface. */
+unsigned char ctk_desktop_width(struct ctk_window *w);
+unsigned char ctk_desktop_height(struct ctk_window *w);
+
 /* Signals. */
 extern ek_signal_t ctk_signal_keypress,
   ctk_signal_widget_activate,
@@ -398,6 +402,10 @@ extern ek_signal_t ctk_signal_keypress,
 extern ek_signal_t ctk_signal_screensaver_start,
   ctk_signal_screensaver_stop,
   ctk_signal_screensaver_uninstall;
+
+extern unsigned short ctk_screensaver_timeout;
+#define CTK_SCREENSAVER_SET_TIMEOUT(t) ctk_screensaver_timeout = (t)
+#define CTK_SCREENSAVER_TIMEOUT() ctk_screensaver_timeout
 #endif /* CTK_CONF_SCREENSAVER */
 
 /* These should no longer be used: */
