@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.3 2003/07/31 23:12:51 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.4 2003/08/06 23:01:07 adamdunkels Exp $
  *
  */
 
@@ -134,7 +134,7 @@ LOADER_INIT_FUNC(tfe_drv_init)
 
     cs8900a_init();
     
-    dispatcher_listen(dispatcher_signal_quit);
+    dispatcher_listen(uip_signal_uninstall);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -143,7 +143,8 @@ DISPATCHER_SIGHANDLER(tfe_drv_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == dispatcher_signal_quit) {
+  if(s == dispatcher_signal_quit ||
+     s == uip_signal_uninstall) {
     dispatcher_exit(&p);
     id = EK_ID_NONE;
     LOADER_UNLOAD();   
