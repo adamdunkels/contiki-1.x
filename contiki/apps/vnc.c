@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.1 2003/04/08 19:41:23 adamdunkels Exp $
+ * $Id: vnc.c,v 1.2 2003/04/09 13:45:05 adamdunkels Exp $
  *
  */
 
@@ -89,9 +89,9 @@ static struct ctk_button downbutton =
 static struct ctk_button rightbutton =
   {CTK_BUTTON(25, HEIGHT - 1, 5, "Right")};
 
-static void sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(vnc_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("VNC client", NULL, sighandler,
+  {DISPATCHER_PROC("VNC client", NULL, vnc_sighandler,
 		   (void (*)(void *))vnc_viewer_app)};
 static ek_id_t id;
 
@@ -174,9 +174,11 @@ connect(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(vnc_sighandler, s, data)
 {
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
+    
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&connectbutton) {
       connect();

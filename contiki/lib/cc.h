@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: cc.h,v 1.1 2003/04/05 12:14:09 adamdunkels Exp $
+ * $Id: cc.h,v 1.2 2003/04/09 13:45:09 adamdunkels Exp $
  *
  */
 #ifndef __CC_H__
@@ -46,11 +46,23 @@
 #define CC_REGISTER_ARG
 #endif /* CC_CONF_REGISTER_ARGS */
 
+#if CC_CONF_FUNCTION_POINTER_ARGS
+#define CC_FUNCTION_POINTER_ARGS 1
+#else /* CC_CONF_FUNCTION_POINTER_ARGS */
+#define CC_FUNCTION_POINTER_ARGS 0
+#endif /* CC_CONF_FUNCTION_POINTER_ARGS */
+
 #ifdef CC_CONF_FASTCALL
 #define CC_FASTCALL CC_CONF_FASTCALL
 #else /* CC_CONF_FASTCALL */
 #define CC_FASTCALL
 #endif /* CC_CONF_FASTCALL */
+
+#if CC_CONF_UNSIGNED_CHAR_BUGS
+#define CC_UNSIGNED_CHAR_BUGS 1
+#else /* CC_CONF_UNSIGNED_CHAR_BUGS */
+#define CC_UNSIGNED_CHAR_BUGS 0
+#endif /* CC_CONF_UNSIGNED_CHAR_BUGS */
 
 #endif /* __CC_H__ */
 

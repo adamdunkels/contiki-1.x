@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.2 2003/04/08 23:27:33 adamdunkels Exp $
+ * $Id: processes.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
  *
  */
 
@@ -51,7 +51,7 @@ static struct ctk_button processupdatebutton =
 static struct ctk_button processclosebutton =
   {CTK_BUTTON(13, 9, 5, "Close")};
 
-static void processes_sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(processes_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Process listing", NULL, processes_sighandler, NULL)};
 static ek_id_t id;
@@ -113,9 +113,10 @@ processes_quit(void)
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-processes_sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(processes_sighandler, s, data)
 {
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&processupdatebutton) {
       ctk_window_clear(&processwindow);

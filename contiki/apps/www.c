@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.7 2003/04/08 19:37:35 adamdunkels Exp $
+ * $Id: www.c,v 1.8 2003/04/09 13:45:06 adamdunkels Exp $
  *
  */
 
@@ -153,9 +153,9 @@ static char receivingmsgs[4][23] = {
 };
 
 
-static void sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(www_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Web browser", NULL, sighandler, webclient_appcall)};
+  {DISPATCHER_PROC("Web browser", NULL, www_sighandler, webclient_appcall)};
 static ek_id_t id;
 
 
@@ -400,11 +400,12 @@ log_back(void)
  * The program's signal dispatcher function. Is called by the ek
  * dispatcher whenever a signal arrives.
  */
-static void
-sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(www_sighandler, s, data)
 {
   static struct ctk_widget *w;
   static unsigned char i;
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
 
   
   w = (struct ctk_widget *)data;

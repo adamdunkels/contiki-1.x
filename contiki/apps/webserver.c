@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.3 2003/04/08 19:26:14 adamdunkels Exp $
+ * $Id: webserver.c,v 1.4 2003/04/09 13:45:06 adamdunkels Exp $
  *
  */
 
@@ -83,10 +83,11 @@ static unsigned char onoff;
 #define ON  1
 #define OFF 0
 
-static void sighandler(ek_signal_t s, ek_data_t data);
-static void uipappcall(void *state);
+static DISPATCHER_SIGHANDLER(webserver_sighandler, s, data);
+static void webserver_uipappcall(void *state);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Web server", NULL, sighandler, uipappcall)};
+  {DISPATCHER_PROC("Web server", NULL, webserver_sighandler,
+		   webserver_uipappcall)};
 static ek_id_t id;
 
 
@@ -145,11 +146,12 @@ LOADER_INIT_FUNC(webserver_init)
   ctk_window_open(&mainwindow);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(webserver_sighandler, s, data)
 {
   struct ctk_button *b;
   unsigned char i;
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
   
   if(s == ctk_signal_button_activate) {
     b = (struct ctk_button *)data;
@@ -278,7 +280,7 @@ next_sector(void)
 
 /*-----------------------------------------------------------------------------------*/
 static void
-uipappcall(void *state)
+webserver_uipappcall(void *state)
 {
   u8_t i;
   int len;

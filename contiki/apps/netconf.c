@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.2 2003/04/08 23:27:33 adamdunkels Exp $
+ * $Id: netconf.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
  *
  */
 
@@ -84,7 +84,7 @@ static struct ctk_textentry dnsservertextentry =
 static struct ctk_button tcpipclosebutton =
   {CTK_BUTTON(0, 9, 2, "Ok")};
 
-static void netconf_sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(netconf_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Network config", NULL, netconf_sighandler, NULL)};
 static ek_id_t id;
@@ -174,9 +174,11 @@ netconf_quit(void)
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-netconf_sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(netconf_sighandler, s, data)
 {
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  
   if(s == ctk_signal_button_activate) {   
     if(data == (ek_data_t)&tcpipclosebutton) {
       apply_tcpipconfig();

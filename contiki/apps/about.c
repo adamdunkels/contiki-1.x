@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.2 2003/04/08 23:27:33 adamdunkels Exp $
+ * $Id: about.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
  *
  */
 
@@ -64,7 +64,7 @@ static struct ctk_button aboutclose =
   {CTK_BUTTON(12, 10, 5, "Close")};
 
 
-static void about_sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(about_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("About Contiki", NULL, about_sighandler, NULL)};
 static ek_id_t id;
@@ -105,9 +105,10 @@ about_quit(void)
   ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-about_sighandler(ek_signal_t s, ek_data_t data)
+static DISPATCHER_SIGHANDLER(about_sighandler, s, data)
 {
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&aboutclose) {
       about_quit();

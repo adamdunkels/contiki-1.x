@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.2 2003/04/08 19:25:38 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
  *
  */
 
@@ -199,7 +199,7 @@ static struct ctk_textentry nameentry =
 static struct ctk_button loadbutton =
   {CTK_BUTTON(20, 0, 4, "Load")};
 
-static void program_handler_sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Program loader", NULL, program_handler_sighandler, NULL)};
 static ek_id_t id;
@@ -219,7 +219,7 @@ static ek_signal_t loader_signal_load;
 
 static struct ctk_window loadingdialog;
 static struct ctk_label loadingmsg =
-  {CTK_LABEL(0, 0, 8, 1, "Loading:")};
+  {CTK_LABEL(0, 0, 8, 1, "Starting")};
 static struct ctk_label loadingname =
   {CTK_LABEL(9, 0, 16, 1, name)};
 
@@ -332,10 +332,12 @@ load(char *name)
 #else /* WITH_LOADER_ARCH */
 #define RUN(prg, initfunc) initfunc(); ctk_redraw()
 #endif /* WITH_LOADER_ARCH */
-static void
-program_handler_sighandler(ek_signal_t s, ek_data_t data)
+/*-----------------------------------------------------------------------------------*/
+static
+DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 {
   unsigned char err;
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
   
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&loadbutton) {

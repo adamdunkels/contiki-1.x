@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.4 2003/04/08 23:27:33 adamdunkels Exp $
+ * $Id: email.c,v 1.5 2003/04/09 13:45:05 adamdunkels Exp $
  *
  */
 
@@ -143,9 +143,9 @@ static struct ctk_textentry pop3passwordtextentry =
 static struct ctk_button setupokbutton =
   {CTK_BUTTON(24, 15, 2, "Ok")};
 
-static void sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(email_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("E-mail client", NULL, sighandler, smtp_appcall)};
+  {DISPATCHER_PROC("E-mail client", NULL, email_sighandler, smtp_appcall)};
 static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
@@ -311,11 +311,13 @@ prepare_message(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(email_sighandler, s, data)
 {
   struct ctk_widget *w;
   unsigned char i;
+
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
   
   if(s == ctk_signal_button_activate) {
     w = (struct ctk_widget *)data;

@@ -1,7 +1,7 @@
 This document is a checklist for what steps to take for a Contiki
 release.
 
-Version: $Id: release.txt,v 1.1 2003/04/09 11:01:29 adamdunkels Exp $
+Version: $Id: release.txt,v 1.2 2003/04/09 13:45:08 adamdunkels Exp $
 Author: Adam Dunkels
 
 * Update version number for web browser user-agent string:
@@ -27,6 +27,11 @@ Author: Adam Dunkels
  - uip/resolv.h
  - uip/uip.h
  - uip/uip_main.h
+ - uip/uipopt.h
+ From port:
+ - ctk/ctk-conf.h
+ - ctk/ek-conf.h
+ - loader/loader-arch.h
 
 * Compile the rs232-eyecandy module and programs in contiki-c64
  - gmake clean rs232-eyecandy programs
@@ -35,6 +40,8 @@ Author: Adam Dunkels
  - gmake d64
 
 * Rename D64 image to contiki-minor.major.d64
+
+* Copy .prg programs from port to contiki-devel-environment
 
 * Copy contiki, contiki-labels.o and loader-arch-module.o into
   contiki-devel-environment

@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.9 2003/04/09 09:22:24 adamdunkels Exp $
+ * $Id: ctk.c,v 1.10 2003/04/09 13:45:07 adamdunkels Exp $
  *
  */
 
@@ -84,7 +84,7 @@ static unsigned char iconx, icony;
 #define ICONY_MAX    (height - 4)
 
 static void ctk_idle(void);
-static void ctk_sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(ctk_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, ctk_sighandler, NULL)};
 static ek_id_t ctkid;
@@ -1206,9 +1206,11 @@ ctk_idle(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-ctk_sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(ctk_sighandler, s, data)
 {
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  
   if(s == ctk_signal_timer) {
     if(mode == CTK_MODE_NORMAL) {
       ++screensaver_timer;

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.3 2003/04/08 19:26:14 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.4 2003/04/09 13:45:05 adamdunkels Exp $
  *
  */
 
@@ -92,9 +92,9 @@ static struct telnet_state ts_appstate;
 #define ISO_NL       0x0a
 #define ISO_CR       0x0d
 
-static void sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(simpletelnet_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Simple telnet", NULL, sighandler,
+  {DISPATCHER_PROC("Simple telnet", NULL, simpletelnet_sighandler,
 		   (void (*)(void *))telnet_app)};
 static ek_id_t id;
 
@@ -234,11 +234,12 @@ connect(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(simpletelnet_sighandler, s, data)
 {
   struct ctk_widget *w;
   char *ptr;
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
   
   if(s == ctk_signal_button_activate) {
     

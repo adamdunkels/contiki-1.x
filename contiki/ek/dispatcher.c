@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.3 2003/04/08 07:19:09 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.4 2003/04/09 13:45:09 adamdunkels Exp $
  *
  */
 
@@ -58,6 +58,12 @@ struct listenport {
 static struct listenport listenports[UIP_LISTENPORTS];
 /*static u8_t listenportsptr;*/
 
+#if CC_FUNCTION_POINTER_ARGS
+#else /* CC_FUNCTION_POINTER_ARGS */
+ek_signal_t dispatcher_sighandler_s;
+ek_data_t dispatcher_sighandler_data;
+#endif /* CC_FUNCTION_POINTER_ARGS */      
+
 /*-----------------------------------------------------------------------------------*/
 ek_signal_t
 dispatcher_sigalloc(void)
@@ -80,13 +86,11 @@ dispatcher_start(struct dispatcher_proc *p)
       goto again;
     }
   }
-  
-  if(procs == NULL) {
-    procs = p;
-  } else {
-    p->next = procs;
-    procs = p;
-  }
+
+  /* Put first on the procs list.*/
+  p->next = procs;
+  procs = p;
+    
   p->id = id;
 
   dispatcher_current = id;
@@ -145,7 +149,13 @@ ek_dispatcher(ek_signal_t s, ek_data_t data, ek_id_t id)
     if(p->id == id &&
        p->signalhandler != NULL) {
       dispatcher_current = id;
+#if CC_FUNCTION_POINTER_ARGS
       p->signalhandler(s, data);
+#else /* CC_FUNCTION_POINTER_ARGS */
+      dispatcher_sighandler_s = s;
+      dispatcher_sighandler_data = data;
+      p->signalhandler();
+#endif /* CC_FUNCTION_POINTER_ARGS */      
       return EK_ERR_OK;
     }
   }
