@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.2 2003/08/21 22:25:03 adamdunkels Exp $
+ * $Id: shell.c,v 1.3 2003/08/24 22:35:23 adamdunkels Exp $
  *
  */
 
@@ -149,7 +149,7 @@ runfile(char *str)
   nullterminate(str);
   
   /* Call loader function. */
-  program_handler_load(str);
+  program_handler_load(str, NULL);
 
   shell_output("Starting program ", str);  
 }

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.4 2003/08/15 18:45:10 adamdunkels Exp $
+ * $Id: wget.c,v 1.5 2003/08/24 22:35:23 adamdunkels Exp $
  *
  */
 
@@ -138,8 +138,15 @@ static u16_t bufferptr;
  * Initializes and starts the web browser. Called either at startup or
  * to open the browser window.
  */
-LOADER_INIT_FUNC(wget_init)
+LOADER_INIT_FUNC(wget_init, arg)
 {
+  if(arg != NULL) {
+    strncpy(url, arg, sizeof(url));
+    strncpy(urledit, arg, sizeof(urledit));
+    petsciiconv_topetscii(urledit, sizeof(urledit));
+  }
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     

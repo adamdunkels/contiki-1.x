@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.4 2003/08/20 19:51:00 adamdunkels Exp $
+ * $Id: config.c,v 1.5 2003/08/24 22:35:22 adamdunkels Exp $
  *
  */
 
@@ -122,7 +122,7 @@ loadfile(char *str)
   nt = nullterminate(str);
   
   /* Call loader function. */
-  program_handler_load(str);
+  program_handler_load(str, NULL);
 
   return nt + 1;
 }
@@ -139,7 +139,7 @@ loaddriver(char *str)
 		  DISPATCHER_BROADCAST);
   
   /* Call loader function. */
-  program_handler_load(str);
+  program_handler_load(str, NULL);
 
   return nt + 1;
 }
@@ -254,8 +254,9 @@ configscript(void)
   return;
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(config_init)
+LOADER_INIT_FUNC(config_init, arg)
 {
+  arg_free(arg);
   program_handler_screensaver(NULL);
   configscript();
   LOADER_UNLOAD();

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssconfig.c,v 1.1 2003/07/31 23:36:29 adamdunkels Exp $
+ * $Id: ssconfig.c,v 1.2 2003/08/24 22:35:23 adamdunkels Exp $
  *
  */
 
@@ -73,8 +73,10 @@ static struct dispatcher_proc p =
 static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(ssconfig_init)
+LOADER_INIT_FUNC(ssconfig_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.7 2003/08/20 19:52:22 adamdunkels Exp $
+ * $Id: directory.c,v 1.8 2003/08/24 22:35:22 adamdunkels Exp $
  *
  */
 
@@ -187,8 +187,10 @@ makewindow(unsigned char i)
   CTK_WIDGET_ADD(&window, &reloadbutton);    
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(directory_init)
+LOADER_INIT_FUNC(directory_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
 
@@ -256,7 +258,7 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
     } else {
       for(i = 0; dscs[i] != NULL; ++i) {
 	if(data == (ek_data_t)(dscs[i]->icon)) {
-	  program_handler_load(dscs[i]->prgname);
+	  program_handler_load(dscs[i]->prgname, NULL);
 	  if(autoexit) {
 	    ctk_window_close(&window);
 	    quit();

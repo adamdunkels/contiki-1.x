@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: plasma.c,v 1.1 2003/08/20 19:49:44 adamdunkels Exp $
+ * $Id: plasma.c,v 1.2 2003/08/24 22:35:23 adamdunkels Exp $
  *
  */
 
@@ -233,8 +233,10 @@ DISPATCHER_SIGHANDLER(sighandler, s, data)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(plasma_init)
+LOADER_INIT_FUNC(plasma_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     dispatcher_listen(ctk_signal_screensaver_stop);

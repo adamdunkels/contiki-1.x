@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.6 2003/08/20 19:51:47 adamdunkels Exp $
+ * $Id: configedit.c,v 1.7 2003/08/24 22:35:22 adamdunkels Exp $
  *
  */
 
@@ -334,8 +334,10 @@ savescript(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(configedit_init)
+LOADER_INIT_FUNC(configedit_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
@@ -395,7 +397,7 @@ DISPATCHER_SIGHANDLER(configedit_sighandler, s, data)
       savescript();
       ctk_window_close(&window);
       configedit_quit();
-      program_handler_load("config.prg");
+      program_handler_load("config.prg", NULL);
     } else if(data == (ek_data_t)&cancelbutton) {
       ctk_window_close(&window);
       configedit_quit();

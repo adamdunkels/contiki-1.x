@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: themeloader.c,v 1.1 2003/04/17 19:04:46 adamdunkels Exp $
+ * $Id: themeloader.c,v 1.2 2003/08/24 22:35:23 adamdunkels Exp $
  *
  */
 
@@ -40,8 +40,10 @@
 #include "ctk-hires-theme.h"
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(themeloader_init)
+LOADER_INIT_FUNC(themeloader_init, arg)
 {
+  arg_free(arg);
+  
   memcpy(ctk_hires_theme_ptr, &ctk_hires_theme,
 	 sizeof(struct ctk_hires_theme));
   ctk_draw_init();

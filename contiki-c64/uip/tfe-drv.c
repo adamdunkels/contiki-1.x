@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.5 2003/08/20 20:35:33 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.6 2003/08/24 22:35:23 adamdunkels Exp $
  *
  */
 
@@ -123,8 +123,10 @@ tfe_drv_idle(void)
   }    
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tfe_drv_init)
+LOADER_INIT_FUNC(tfe_drv_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     

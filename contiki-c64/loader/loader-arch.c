@@ -32,12 +32,16 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.6 2003/08/09 13:28:31 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.7 2003/08/24 22:35:23 adamdunkels Exp $
  *
  */
 
 #include <stdlib.h>
 #include <modload.h>
+
+#ifndef NULL
+#define NULL (void *)0
+#endif /* NULL */
 
 #include "c64-fs.h"
 
@@ -101,7 +105,7 @@ load(const char *name)
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-loader_arch_load(const char *name)
+loader_arch_load(const char *name, char *arg)
 {
   unsigned char r;
   struct loader_arch_hdr *hdr;
@@ -117,7 +121,7 @@ loader_arch_load(const char *name)
   
   /* Call the init function. */
 
-  ((void (*)(void))hdr->initfunc)();
+  ((void (*)(char *))hdr->initfunc)(arg);
 
   return LOADER_OK;
 }
