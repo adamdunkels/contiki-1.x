@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat-dsc.c,v 1.1 2003/04/18 00:14:13 adamdunkels Exp $
+ * $Id: memstat-dsc.c,v 1.2 2003/08/20 19:53:07 adamdunkels Exp $
  *
  */
 
@@ -38,7 +38,7 @@
 extern struct ctk_icon memstat_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(memstat_dsc,
-    "Memory stats",
+    "Memory statistics",
     "memstat.prg",
     memstat_init,
     &memstat_icon);
