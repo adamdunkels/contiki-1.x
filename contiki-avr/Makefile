@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2003/08/12 21:15:55 adamdunkels Exp $
 #
 
 all: contiki.srec
@@ -46,7 +46,7 @@ OBJCOPY=avr-objcopy
 CFLAGS=-Os -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
 	-Iapps -Ictk -Iuip -Iconf \
-	-DWITH_UIP -DWITH_ASCII \
+	-DWITH_UIP -DWITH_ASCII -DWITH_AVR \
 	-Wall -g -fpack-struct -I../uip -I. -mmcu=atmega128 
 LDFLAGS=-mmcu=atmega128 -Wl,-Map=contiki.map,--cref,-Tdata,0x801100
 
