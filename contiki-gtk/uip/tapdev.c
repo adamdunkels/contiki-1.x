@@ -31,7 +31,7 @@
  *
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tapdev.c,v 1.2 2003/05/28 05:22:40 adamdunkels Exp $
+ * $Id: tapdev.c,v 1.3 2004/06/06 07:07:15 adamdunkels Exp $
  */
 
 
@@ -61,6 +61,8 @@
 #include "uip.h"
 #include "uip_arp.h"
 
+
+
 #define DROP 0
 
 static int drop = 0;
@@ -71,6 +73,7 @@ static struct timezone tz;
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
+static void do_send(void);
 void tapdev_send(void);
 
 
@@ -94,8 +97,7 @@ read_callback(gpointer data, gint source, GdkInputCondition condition)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
     if(uip_len > 0) {
-      uip_arp_out();
-      tapdev_send();
+      uip_split_output();
     }
   } else if(BUF->type == htons(UIP_ETHTYPE_ARP)) {
     uip_arp_arpin();
@@ -103,7 +105,7 @@ read_callback(gpointer data, gint source, GdkInputCondition condition)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */	
     if(uip_len > 0) {
-      tapdev_send();
+      do_send();
     }
   }
 
@@ -120,8 +122,7 @@ timeout_callback(gpointer data)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
     if(uip_len > 0) {
-      uip_arp_out();
-      tapdev_send();
+      uip_split_output();
     }
   }
 
@@ -131,8 +132,7 @@ timeout_callback(gpointer data)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
     if(uip_len > 0) {
-	uip_arp_out();
-	tapdev_send();
+      uip_split_output();
       }
     }
 
@@ -154,7 +154,7 @@ tapdev_init(void)
   fd = open(DEVTAP, O_RDWR);
   if(fd == -1) {
     perror("tapdev: tapdev_init: open");
-    exit(1);
+    return;
   }
 
 #ifdef linux
@@ -169,8 +169,7 @@ tapdev_init(void)
   }
 #endif /* Linux */
 
-  snprintf(buf, sizeof(buf), "ifconfig tap0 inet %d.%d.%d.%d",
-	   UIP_DRIPADDR0, UIP_DRIPADDR1, UIP_DRIPADDR2, UIP_DRIPADDR3);
+  snprintf(buf, sizeof(buf), "ifconfig tap0 inet 192.168.2.1");
   system(buf);
 
   lasttime = 0;
@@ -196,9 +195,11 @@ tapdev_read(void)
   tv.tv_sec = 0;
   tv.tv_usec = 500000 - lasttime;
 
-
+  
   FD_ZERO(&fdset);
-  FD_SET(fd, &fdset);
+  if(fd > 0) {
+    FD_SET(fd, &fdset);
+  }
 
   gettimeofday(&now, &tz);  
   ret = select(fd + 1, &fdset, NULL, NULL, &tv);
@@ -233,14 +234,17 @@ tapdev_read(void)
   return ret;
 }
 /*-----------------------------------------------------------------------------------*/
-void
-tapdev_send(void)
+static void 
+do_send(void) 
 {
   int ret;
   char tmpbuf[UIP_BUFSIZE];
   int i;
-  
 
+  if(fd <= 0) {
+    return;
+  }
+  
   /*  printf("tapdev_send: sending %d bytes\n", size);*/
   /*  check_checksum(uip_buf, size);*/
 #if DROP
@@ -254,6 +258,7 @@ tapdev_send(void)
   for(i = 0; i < 40 + UIP_LLH_LEN; i++) {
     tmpbuf[i] = uip_buf[i];
   }
+
   
   for(; i < uip_len; i++) {
     tmpbuf[i] = uip_appdata[i - 40 - UIP_LLH_LEN];
@@ -266,4 +271,13 @@ tapdev_send(void)
     exit(1);
   }
 }  
+/*-----------------------------------------------------------------------------------*/
+void
+tapdev_send(void)
+{
+
+  uip_arp_out();
+
+  do_send();
+}
 /*-----------------------------------------------------------------------------------*/
