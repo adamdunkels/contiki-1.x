@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.c,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: httpd.c,v 1.2 2003/09/04 19:43:11 adamdunkels Exp $
  *
  */
 
@@ -122,7 +122,7 @@ httpd_init(void)
   httpd_fs_init();
   
   /* Listen to port 80. */
-  dispatcher_uiplisten(80);
+  dispatcher_uiplisten(HTONS(80));
 
   for(i = 0; i < HTTPD_CONF_NUMCONNS; ++i) {
     conns[i].state = HTTP_DEALLOCATED;
