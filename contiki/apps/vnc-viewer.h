@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC client.
  *
- * $Id: vnc-viewer.h,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
+ * $Id: vnc-viewer.h,v 1.3 2003/04/17 18:55:38 adamdunkels Exp $
  *
  */
 
@@ -55,6 +55,15 @@ void vnc_viewer_refresh(void);
 #define VNC_POINTER_EVENT RFB_POINTER_EVENT
 #define VNC_KEY_EVENT     RFB_KEY_EVENT
 #define VNC_UPDATERQ_EVENT 7
+
+#define VNC_VIEWER_POST_POINTER_EVENT(x, y, button) \
+        vnc_viewer_post_event(VNC_POINTER_EVENT, button, x, y, 0)
+
+#define VNC_VIEWER_POST_KEY_EVENT(key) \
+        vnc_viewer_post_event(VNC_KEY_EVENT, key, 0, 0, 0)
+
+#define VNC_VIEWER_POST_UPDATERQ_EVENT(x1,y1,x2,y2) \
+        vnc_viewer_post_event(VNC_UPDATERQ_EVENT, x1, y1, x2, y2)
 
 void vnc_viewer_post_event(u8_t event,
 			   u16_t data1, u16_t data2,

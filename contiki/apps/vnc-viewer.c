@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-viewer.c,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
+ * $Id: vnc-viewer.c,v 1.3 2003/04/17 18:55:38 adamdunkels Exp $
  *
  */
 
@@ -53,7 +53,7 @@
 /* "RFB 003.003" */
 static u8_t rfb_server_version_string[12] = {82,70,66,32,48,48,51,46,48,48,51,10};
 
-#if 1
+#if 0
 #define PRINTF(x)
 #else
 #define PRINTF(x) printf x
@@ -309,7 +309,7 @@ recv_rectstate(u8_t *dataptr, u16_t datalen)
 /*-----------------------------------------------------------------------------------*/
 /* Returns: the amount of bytes that needs to be buffered before the
    rect can be drawn. */ 
-static void
+static unsigned short
 recv_update_rect(register struct rfb_fb_update_rect_hdr *rhdr,
 		 u16_t dataleft)
 {
@@ -329,7 +329,7 @@ recv_update_rect(register struct rfb_fb_update_rect_hdr *rhdr,
       vs->rectstateh = htons(rhdr->rect.h);
       vs->rectstatex2 = vs->rectstatex0 + vs->rectstatew;
       vs->rectstatey2 = vs->rectstatey0 + vs->rectstateh;
-      return;
+      break;
 
     case RFB_ENC_RRE:
       rrehdr = (struct rfb_rre_hdr *)((u8_t *)rhdr +
@@ -341,24 +341,29 @@ recv_update_rect(register struct rfb_fb_update_rect_hdr *rhdr,
       vs->rectstateleft = ((u32_t)(htons(rrehdr->subrects[1]) << 16) + 
 			(u32_t)htons(rrehdr->subrects[0]));
       vs->rectstate = VNC_RECTSTATE_RRE;
-      return;
+
+      break;
 
     default:
+      PRINTF(("Bad encoding %02x%02x%02x%02x\n", rhdr->encoding[0],
+	      rhdr->encoding[1],rhdr->encoding[2],rhdr->encoding[3]));
       break;
     }
 
   }
-  PRINTF(("Bad encoding %02x%02x%02x%02x\n", rhdr->encoding[0],
-	 rhdr->encoding[1],rhdr->encoding[2],rhdr->encoding[3]));
 
+  return 0;
+	
+  PRINTF(("recv_update_rect: returning%d\n", vs->rectstateleft));
+  return sizeof(struct rfb_fb_update_rect_hdr) + vs->rectstateleft;
 }
 /*-----------------------------------------------------------------------------------*/
 /* identify_data():
  *
  * This function looks at the state of the connection (i.e., if it is
  * handshaking or in steady-state) as well as on the contents of the
- * incoming message and sets in state of the connection
- * accordingly.
+ * incoming message and returns the number of bytes of data that is to
+ * be expected.
  */ 
 static u16_t
 identify_data(register u8_t *data, u16_t datalen)
@@ -385,6 +390,7 @@ identify_data(register u8_t *data, u16_t datalen)
   case VNC_WAIT_NONE:
     switch(*data) {
     case RFB_FB_UPDATE:
+      PRINTF(("RFB FB UPDATE received\n"));
       return sizeof(struct rfb_fb_update);
       
     case RFB_BELL:
@@ -420,7 +426,7 @@ identify_data(register u8_t *data, u16_t datalen)
  *
  * Handles the data.
  */
-static void
+static unsigned short
 handle_data(register u8_t *data, u16_t datalen)
 {
   
@@ -437,7 +443,7 @@ handle_data(register u8_t *data, u16_t datalen)
     case RFB_AUTH_FAILED:
       PRINTF(("Connection failed.\n"));
       uip_abort();
-      return;
+      return 0;
       
     case RFB_AUTH_NONE:
       vs->sendmsg = VNC_SEND_CINIT;
@@ -470,6 +476,7 @@ handle_data(register u8_t *data, u16_t datalen)
     case RFB_FB_UPDATE:
       vs->waitmsg = VNC_WAIT_UPDATE_RECT;
       vs->rectsleft = htons(((struct rfb_fb_update *)data)->rects);
+      PRINTF(("Handling RFB FB UPDATE for %d rects\n", vs->rectsleft));
       break;
       
     case RFB_BELL:
@@ -491,6 +498,7 @@ handle_data(register u8_t *data, u16_t datalen)
     break;
     
   case VNC_WAIT_UPDATE_RECT:
+    PRINTF(("Handling data in WAIT_UPDATE_RECT, %d rects left (%d bytes)\n", vs->rectsleft, datalen));
     --vs->rectsleft;
     if(vs->rectsleft > 0) {
       vs->waitmsg = VNC_WAIT_UPDATE_RECT;
@@ -499,9 +507,10 @@ handle_data(register u8_t *data, u16_t datalen)
       vs->sendmsg = VNC_SEND_NONE;
       vs->rectstate = VNC_RECTSTATE_NONE;
     }
-    recv_update_rect((struct rfb_fb_update_rect_hdr *)data, datalen);
+    return recv_update_rect((struct rfb_fb_update_rect_hdr *)data, datalen);
     break;
   }
+  return 0;
 }
 /*-----------------------------------------------------------------------------------*/
 /* newdata():
@@ -528,15 +537,21 @@ newdata(void)
   datalen = uip_datalen();
   dataptr = (u8_t *)uip_appdata;
 
+  PRINTF(("newdata: %d bytes\n", datalen));
+  
   /* If we are in a "rectstate", meaning that the incoming data is
      part of a rectangle that is being incrementaly drawn on the
      screen, we handle that first. */
   if(vs->rectstate != VNC_RECTSTATE_NONE) {
     readlen = recv_rectstate(dataptr, datalen);
+    PRINTF(("newdata: vs->rectstate %d, datalen %d, readlen %d\n",
+	    vs->rectstate, datalen, readlen));
     datalen -= readlen;
     dataptr += readlen;
   }
-  
+
+  /* Next, check if we are supposed to buffer data from the incoming
+     segment. */
   while(vs->bufferleft > 0 && datalen > 0) {
     if(datalen >= vs->bufferleft) {
       /* There is more data in the incoming chunk than we need to
@@ -556,10 +571,13 @@ newdata(void)
     }
   }
 
+  /* Finally, if there is data left in the segment, we handle it. */
   while(datalen > 0) {
 
     if(vs->rectstate != VNC_RECTSTATE_NONE) {
       readlen = recv_rectstate(dataptr, datalen);
+      PRINTF(("newdata (2): vs->rectstate %d, datalen %d, readlen %d\n",
+	      vs->rectstate, datalen, readlen));
       datalen -= readlen;
       dataptr += readlen;
     } else {
@@ -572,7 +590,8 @@ newdata(void)
 	PRINTF(("Identify returned 0\n"));
 	return 0;
       }
-    
+
+      PRINTF(("Reading %d bytes more\n", readlen));
       /* The data has been identified and the amount of data that
 	 needs to be read to be able to process the data is in the
 	 "readlen" variable. If the incoming chunk contains enough
@@ -584,13 +603,20 @@ newdata(void)
 	vs->bufferleft = readlen;      
 	buffer_data(dataptr, datalen);
 	return 0;
-      }
+      }      
       if(readlen <= datalen) {
-	handle_data(dataptr, readlen);
+	PRINTF(("Before handle_data %d\n", readlen));
+	readlen += handle_data(dataptr, readlen);
+	PRINTF(("After handle_data %d\n", readlen));
 	datalen -= readlen;
 	dataptr += readlen;
       }
+
     }
+    if(datalen > 0) {
+      PRINTF(("newdata: there is more data left after first iteration... %d\n", datalen));
+    }
+    
   }
   
   return 0;
@@ -598,6 +624,7 @@ newdata(void)
 /*-----------------------------------------------------------------------------------*/
 /* Called when there is nothing else to do - checks for any pending
    events (mouse movements or keypresses). If no events are found, it
+   makes sure that we send out an incremental update rd, it
    makes sure that we send out an incremental update request. */
 static void
 check_events(void)
@@ -615,6 +642,9 @@ request_update(void)
   if(vs->sendmsg == VNC_SEND_NONE) {
     vs->sendmsg = VNC_SEND_UPDATERQ_INC;
     vs->waitmsg = VNC_WAIT_UPDATE;
+    PRINTF(("request_update: requesting\n"));
+  } else {
+    PRINTF(("request_update: not requesting\n"));
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -668,6 +698,8 @@ DISPATCHER_UIPCALL(vnc_viewer_app, nullptr)
     check_events();
     request_update();
   }
+  PRINTF(("vs->sendmsg %d, vs->waitmsg %d, vs->rectstate %d\n",
+	  vs->sendmsg, vs->waitmsg, vs->rectstate));
   
   if(uip_rexmit() ||
      uip_newdata() ||

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.3 2003/04/10 09:04:50 adamdunkels Exp $
+ * $Id: vnc.c,v 1.4 2003/04/17 18:55:38 adamdunkels Exp $
  *
  */
 
@@ -49,6 +49,13 @@
 #include "vnc-conf.h"
 
 #include "loader.h"
+
+#if 0
+#define PRINTF(x)
+#else
+#include <stdio.h>
+#define PRINTF(x) printf x
+#endif
 
 #define HEIGHT (4 + VNC_CONF_VIEWPORT_HEIGHT/8)
 
@@ -122,6 +129,7 @@ LOADER_INIT_FUNC(vnc_init)
     dispatcher_listen(ctk_signal_button_activate);
     dispatcher_listen(resolv_signal_found);
 
+    dispatcher_listen(ctk_signal_pointer_move);
     
     vnc_draw_init();
   }
@@ -177,6 +185,8 @@ connect(void)
 static
 DISPATCHER_SIGHANDLER(vnc_sighandler, s, data)
 {
+  unsigned short x, y;
+  unsigned char xc, yc;
   DISPATCHER_SIGHANDLER_ARGS(s, data);
     
   if(s == ctk_signal_button_activate) {
@@ -195,6 +205,21 @@ DISPATCHER_SIGHANDLER(vnc_sighandler, s, data)
 	show("Host not found");
       }
     }
+  } else if(s == ctk_signal_pointer_move) {
+    /* Check if pointer is within the VNC viewer area */
+    x = ctk_mouse_x();
+    y = ctk_mouse_y();
+
+    xc = ctk_mouse_xtoc(x);
+    yc = ctk_mouse_ytoc(y);
+    
+    if(xc >= 2 && yc >= 2 &&
+       xc < 2 + VNC_CONF_VIEWPORT_WIDTH / 8 &&
+       yc < 2 + VNC_CONF_VIEWPORT_HEIGHT / 8) {
+    
+      VNC_VIEWER_POST_POINTER_EVENT(x, y, 0);
+    }
+       
   }
 }
 /*-----------------------------------------------------------------------------------*/
