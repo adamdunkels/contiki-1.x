@@ -1,7 +1,5 @@
 /**
- * \file
- * Memory block allocation routines.
- * \author Adam Dunkels <adam@sics.se>
+ * \defgroup memb Memory block management functions
  *
  * The memory block allocation routines provide a simple yet powerful
  * set of functions for managing a set of memory blocks of fixed
@@ -19,6 +17,8 @@
  * being 20 bytes large.
  *
  \code
+ #include "memb.h"
+ 
  MEMB(cmem, 20, 8);
 
  int main(int argc, char *argv[]) {
@@ -34,14 +34,20 @@
        printf("Could not allocate memory.\n");
     }
 
-    if(memb_free(ptr) == 0) {
+    if(memb_free(&cmem, ptr) == 0) {
        printf("Deallocation succeeded.\n");
     }
  }
  \endcode
- * 
+ *
+ * @{
  */
 
+ /**
+ * \file
+ * Memory block allocation routines.
+ * \author Adam Dunkels <adam@sics.se>
+ */
 #include <string.h>
 
 #include "memb.h"
@@ -102,7 +108,7 @@ memb_alloc(struct memb_blocks *m)
  */
 /*------------------------------------------------------------------------------*/
 char
-memb_free(struct memb_blocks *m, char *ptr)
+memb_free(struct memb_blocks *m, void *ptr)
 {
   int i;
   char *ptr2;
@@ -112,7 +118,7 @@ memb_free(struct memb_blocks *m, char *ptr)
   ptr2 = m->mem;
   for(i = 0; i < m->num; ++i) {
     
-    if(ptr2 == ptr - 1) {
+    if(ptr2 == (char *)ptr - 1) {
       /* We've found to block to which "ptr" points so we decrease the
 	 reference count and return the new value of it. */      
       return --*ptr2;
@@ -142,6 +148,4 @@ memb_ref(struct memb_blocks *m, char *ptr)
 }
 /*------------------------------------------------------------------------------*/
 
-
-
-
+/** @} */

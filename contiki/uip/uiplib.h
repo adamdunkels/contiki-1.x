@@ -1,3 +1,11 @@
+/**
+ * \file
+ * Various uIP library functions.
+ * \author
+ * Adam Dunkels <adam@sics.se>
+ *
+ */
+
 /*
  * Copyright (c) 2002, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +19,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,12 +37,35 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: uiplib.h,v 1.1 2004/02/24 09:49:08 adamdunkels Exp $
+ * $Id: uiplib.h,v 1.2 2004/03/18 21:07:00 adamdunkels Exp $
  *
  */
 #ifndef __UIPLIB_H__
 #define __UIPLIB_H__
 
+/**
+ * \addtogroup uipconvfunc
+ * @{
+ */
+
+/**
+ * Convert a textual representation of an IP address to a numerical representation.
+ *
+ * This function takes a textual representation of an IP address in
+ * the form a.b.c.d and converts it into a 4-byte array that can be
+ * used by other uIP functions.
+ *
+ * \param addrstr A pointer to a string containing the IP address in
+ * textual form.
+ *
+ * \param addr A pointer to a 4-byte array that will be filled in with
+ * the numerical representation of the address.
+ *
+ * \retval 0 If the IP address could not be parsed.
+ * \retval Non-zero If the IP address was parsed. 
+ */
 unsigned char uiplib_ipaddrconv(char *addrstr, unsigned char *addr);
+
+/** @} */
 
 #endif /* __UIPLIB_H__ */
