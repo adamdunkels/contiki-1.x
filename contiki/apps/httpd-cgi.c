@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.4 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: httpd-cgi.c,v 1.5 2004/09/12 07:15:00 adamdunkels Exp $
  *
  */
 
@@ -49,26 +49,17 @@
 
 #include "petsciiconv.h"
 
-#ifdef __CBM__
-#include <cbm.h>
-#include <c64.h>
-#endif /* __CBM__ */
-
 #include <stdio.h>
 #include <string.h>
 
-static u8_t file_stats(void);
-static u8_t tcp_stats(void);
-static u8_t processes(void);
-
-static u8_t d64output(void);
+static PT_THREAD(file_stats(struct httpd_state *s, char *arg));
+static PT_THREAD(tcp_stats(struct httpd_state *s, char *arg));
+static PT_THREAD(processes(struct httpd_state *s, char *arg));
 
 httpd_cgifunction httpd_cgitab[] = {
   file_stats,    /* CGI function "a" */
   tcp_stats,     /* CGI function "b" */
   processes,     /* CGI function "c" */
-
-  d64output,     /* CGI function "d" */
 };
 
 static const char closed[] =   /*  "CLOSED",*/
@@ -111,208 +102,79 @@ static const char *states[] = {
   
 
 /*-----------------------------------------------------------------------------------*/
-static u8_t
-file_stats(void)
+static unsigned short
+generate_file_stats(char *f)
 {
-  /* We use sprintf() to print the number of file accesses to a
-     particular file (given as an argument to the function in the
-     script). We then use uip_send() to actually send the data. */
-  if(uip_acked()) {
-    return 1;
-  }
-  uip_send(uip_appdata, sprintf((char *)uip_appdata, "%5u", httpd_fs_count(&hs->script[4])));
-  return 0;
+  return sprintf((char *)uip_appdata, "%5u", httpd_fs_count(f));
 }
 /*-----------------------------------------------------------------------------------*/
-static u8_t
-tcp_stats(void)
+static
+PT_THREAD(file_stats(struct httpd_state *s, char *ptr))
+{
+  SOCKET_BEGIN(&s->sout);
+
+  SOCKET_GENERATOR_SEND(&s->sout, generate_file_stats, ptr);
+  
+  SOCKET_END(&s->sout);
+}
+/*-----------------------------------------------------------------------------------*/
+static unsigned short
+make_tcp_stats(struct httpd_state *s)
 {
   struct uip_conn *conn;  
-
-  if(uip_acked()) {
-    /* If the previously sent data has been acknowledged, we move
-       forward one connection. */
-    if(++hs->count == UIP_CONNS) {
-      /* If all connections has been printed out, we are done and
-	 return 1. */
-      return 1;
-    }
-  }
-
-  conn = &uip_conns[hs->count];
-  while((conn->tcpstateflags & TS_MASK) == CLOSED) {
-    if(++hs->count == UIP_CONNS) {
-      /* If all connections has been printed out, we are done and
-	 return 1. */
-      return 1;
-    }
-    conn = &uip_conns[hs->count];
-  }
-
-  uip_send(uip_appdata, sprintf((char *)uip_appdata,
-				"<tr><td>%d</td><td>%u.%u.%u.%u:%u</td><td>%s</td><td>%u</td><td>%u</td><td>%c %c</td></tr>\r\n",
-				htons(conn->lport),
-				htons(conn->ripaddr[0]) >> 8,
-				htons(conn->ripaddr[0]) & 0xff,
-				htons(conn->ripaddr[1]) >> 8,
-				htons(conn->ripaddr[1]) & 0xff,
-				htons(conn->rport),
-				states[conn->tcpstateflags & TS_MASK],
-				conn->nrtx,
-				conn->timer,
-				(uip_outstanding(conn))? '*':' ',
-				(uip_stopped(conn))? '!':' '));
-
-  return 0;
+  conn = &uip_conns[s->count];
+  return sprintf((char *)uip_appdata,
+		 "<tr><td>%d</td><td>%u.%u.%u.%u:%u</td><td>%s</td><td>%u</td><td>%u</td><td>%c %c</td></tr>\r\n",
+		 htons(conn->lport),
+		 htons(conn->ripaddr[0]) >> 8,
+		 htons(conn->ripaddr[0]) & 0xff,
+		 htons(conn->ripaddr[1]) >> 8,
+		 htons(conn->ripaddr[1]) & 0xff,
+		 htons(conn->rport),
+		 states[conn->tcpstateflags & TS_MASK],
+		 conn->nrtx,
+		 conn->timer,
+		 (uip_outstanding(conn))? '*':' ',
+		 (uip_stopped(conn))? '!':' ');
 }
 /*-----------------------------------------------------------------------------------*/
-static u8_t
-processes(void)
+static
+PT_THREAD(tcp_stats(struct httpd_state *s, char *ptr))
 {
-  u8_t i;
-  struct dispatcher_proc *p;
+  
+  SOCKET_BEGIN(&s->sout);
+
+  for(s->count = 0; s->count < UIP_CONNS; ++s->count) {   
+    if((uip_conns[s->count].tcpstateflags & TS_MASK) != CLOSED) {
+      SOCKET_GENERATOR_SEND(&s->sout, make_tcp_stats, s);
+    }
+  }
+
+  SOCKET_END(&s->sout);
+}
+/*-----------------------------------------------------------------------------------*/
+static unsigned short
+make_processes(struct ek_proc *p)
+{
   char name[40];
-
-  p = DISPATCHER_PROCS();
-  for(i = 0; i < hs->count; ++i) {
-    if(p != NULL) {
-      p = p->next;
-    }
-  }
-
-  if(uip_acked()) {
-    /* If the previously sent data has been acknowledged, we move
-       forward one connection. */
-    ++hs->count;
-    if(p != NULL) {
-      p = p->next;
-    }
-    if(p == NULL) {
-      /* If all processes have been printed out, we are done and
-	 return 1. */
-      return 1;
-    }
-  }
 
   strncpy(name, p->name, 40);
   petsciiconv_toascii(name, 40);
-  uip_send(uip_appdata,
-	   sprintf((char *)uip_appdata,
-		   "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%04x</td><td>0x%04x</td><td>0x%04x</td></tr>\r\n",
-		   p->id, name,
-		   p->idle, p->signalhandler, p->uiphandler));
-  return 0;
+  return sprintf((char *)uip_appdata,
+		 "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%04x</td><td>0x%04x</td><td>0x%04x</td></tr>\r\n",
+		 p->id, name,
+		 p->pollhandler, p->eventhandler, p->procstate);
 }
 /*-----------------------------------------------------------------------------------*/
-#ifdef __CBM__
-struct drv_state {
-  u8_t track;
-  u8_t sect;
-};
-
-static struct drv_state ds;
-
-
-#include "c64-dio.h"
-
-static void
-read_sector(void)
+static
+PT_THREAD(processes(struct httpd_state *s, char *ptr))
 {
-  c64_dio_read_block(ds.track, ds.sect, uip_appdata);
-}
-#if 0
-static void
-x_open(u8_t f, u8_t d, u8_t cmd, u8_t *fname)
-{
-  u8_t ret;
-  
-  ret = cbm_open(f, d, cmd, fname);
-  if(ret != 0) {
-    /*    show_statustext("Open error");*/
-  }
-  
+  SOCKET_BEGIN(&s->sout);
 
-}
-
-
-static u8_t cmd[32];
-static void
-read_sector(void)
-{  
-  int ret;
-  
-  x_open(15, 8, 15, NULL);
-  x_open(2, 8, 2, "#");
-
-  sprintf(cmd, "u1: 2 0 %d %d", ds.track, ds.sect);  
-  cbm_write(15, cmd, strlen(cmd));
+  /*  for(s->count = 0; s->count < EK_CONF_MAXPROCS; ++s->count) {
     
-  ret = cbm_read(2, uip_appdata, 256);
-  if(ret == -1) {
-    /*    ctk_label_set_text(&statuslabel, "Read err");
-	  CTK_WIDGET_REDRAW(&statuslabel);*/
-  }
-  cbm_close(2);
-  cbm_close(15);
-}
-#endif /* 0 */
-static u8_t
-next_sector(void)
-{
-  ++ds.sect;
-  if(ds.track < 18) {
-    if(ds.sect == 21) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  } else if(ds.track < 25) {
-    if(ds.sect == 19) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  } else if(ds.track < 31) {
-    if(ds.sect == 18) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  } else if(ds.track < 36) {
-    if(ds.sect == 17) {
-      ++ds.track;
-      ds.sect = 0;
-    }
-  }
-
-  if(ds.track == 36) {
-    return 1;
-  }
-  return 0;
-}
-
-static u8_t
-d64output(void)
-{
-  if(hs->count == 0) {
-    ds.track = 1;
-    ds.sect = 0;
-    /*    c64_dio_init(8);*/
-  }
+  }*/
   
-  if(uip_acked()) {
-    ++hs->count;
-    if(next_sector()) {
-      return 1;
-    }
-  }
-
-  read_sector();
-  uip_send(uip_appdata, 256);
-  return 0;
+  SOCKET_END(&s->sout);
 }
-#else /* __CBM__ */
-static u8_t
-d64output(void)
-{
-
-}
-#endif /* __CBM__ */
 /*-----------------------------------------------------------------------------------*/

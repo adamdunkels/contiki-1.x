@@ -28,14 +28,17 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.h,v 1.2 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: httpd-cgi.h,v 1.3 2004/09/12 07:15:00 adamdunkels Exp $
  *
  */
 
 #ifndef __HTTPD_CGI_H__
 #define __HTTPD_CGI_H__
 
-typedef u8_t (* httpd_cgifunction)(void);
+#include "pt.h"
+#include "httpd.h"
+
+typedef PT_THREAD((* httpd_cgifunction)(struct httpd_state *, char *));
 
 extern httpd_cgifunction httpd_cgitab[];
 

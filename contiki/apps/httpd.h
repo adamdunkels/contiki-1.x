@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.5 2004/08/09 22:07:58 adamdunkels Exp $
+ * $Id: httpd.h,v 1.6 2004/09/12 07:15:00 adamdunkels Exp $
  *
  */
 
@@ -37,19 +37,26 @@
 
 #include "contiki.h"
 
-void httpd_init(void);
-void httpd_appcall(void *state);
+#include "socket.h"
+#include "httpd-fs.h"
 
 struct httpd_state {
-  u8_t state; 
-  u16_t count;
-  u8_t poll;
-  char *dataptr;
-  char *script;
+  struct timer timer;
+  struct socket sin, sout;
+  struct pt outputpt, scriptpt;
+  char inputbuf[50];
+  char filename[20];
+  char state;
+  struct httpd_fs_file file;  
+  int len;
+  char *scriptptr;
+  int scriptlen;
+
+  unsigned short count;
 };
 
-extern struct httpd_state *hs;
 
-void webserver_log_file(u16_t *requester, char *file);
+void httpd_init(void);
+void httpd_appcall(void *state);
 
 #endif /* __HTTPD_H__ */
