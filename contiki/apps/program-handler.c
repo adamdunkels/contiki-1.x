@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.16 2003/08/09 23:30:37 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.17 2003/08/11 22:24:20 adamdunkels Exp $
  *
  */
 
@@ -228,7 +228,11 @@ program_handler_load(char *name)
 void
 program_handler_screensaver(char *name)
 {
-  strncpy(screensaver, name, sizeof(screensaver));
+  if(name == NULL) {
+    screensaver[0] = 0;
+  } else {
+    strncpy(screensaver, name, sizeof(screensaver));
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static
