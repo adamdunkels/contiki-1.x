@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.3 2003/04/10 09:04:50 adamdunkels Exp $
+ * $Id: webclient.c,v 1.4 2003/06/30 21:26:42 adamdunkels Exp $
  *
  */
 
@@ -138,16 +138,20 @@ webclient_get(char *host, u16_t port, char *file)
 {
   struct uip_conn *conn;
   u16_t *ipaddr; 
-
-
-  ipaddr = resolv_lookup(host);
-
-  if(ipaddr == NULL) {
-    return 0;
+  u16_t addr[2];
+  
+  /* First check if the host is an IP address. */
+  ipaddr = &addr[0];
+  if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {    
+    ipaddr = resolv_lookup(host);
+    
+    if(ipaddr == NULL) {
+      return 0;
+    }
   }
   
   conn = uip_connect(ipaddr, port);
-
+  
   if(conn == NULL) {
     return 0;
   }
@@ -331,6 +335,22 @@ newdata(void)
 DISPATCHER_UIPCALL(webclient_appcall, state)
 {
   struct uip_conn *conn;
+  DISPATCHER_UIPCALL_ARG(state);
+
+  if(uip_connected()) {
+    s.timer = 0;
+    s.state = WEBCLIENT_STATE_STATUSLINE;
+    senddata();
+    webclient_connected();
+    dispatcher_markconn(uip_conn, &s);
+    return;
+  }
+
+  
+  if(state == NULL) {
+    uip_abort();
+    return;
+  }
 
   if(s.state == WEBCLIENT_STATE_CLOSE) {
     webclient_closed();
@@ -338,14 +358,8 @@ DISPATCHER_UIPCALL(webclient_appcall, state)
     return;
   }    
   
-  if(uip_connected()) {
-    s.timer = 0;
-    s.state = WEBCLIENT_STATE_STATUSLINE;
-    senddata();
-    webclient_connected();
-    return;
-  }
   
+
   if(uip_aborted()) {
     webclient_aborted();
   }
@@ -377,6 +391,7 @@ DISPATCHER_UIPCALL(webclient_appcall, state)
   }
 
   if(uip_closed()) {
+    dispatcher_markconn(uip_conn, NULL);
     if(s.httpflag != HTTPFLAG_MOVED) {
       /* Send NULL data to signal EOF. */
       webclient_datahandler(NULL, 0);
