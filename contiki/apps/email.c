@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.8 2003/08/11 22:23:24 adamdunkels Exp $
+ * $Id: email.c,v 1.9 2003/08/11 23:01:56 adamdunkels Exp $
  *
  */
 
@@ -79,9 +79,12 @@ static char subject[40];
 static struct ctk_textentry subjecttextentry =
   {CTK_TEXTENTRY(8, 2, 26, 1, subject, 38)};
 
-static char mail[36*16];
+#define MAIL_WIDTH 36
+#define MAIL_HEIGHT 17
+
+static char mail[MAIL_WIDTH * MAIL_HEIGHT];
 struct ctk_textedit mailtextedit =
-  {CTK_TEXTEDIT(0, 3, 36, 17, mail)};
+  {CTK_TEXTEDIT(0, 3, MAIL_WIDTH, MAIL_HEIGHT, mail)};
 
 
 static struct ctk_button sendbutton =
@@ -247,7 +250,7 @@ applyconfig(void)
 static void
 prepare_message(void)
 {
-  char *mptr1, *mptr2;
+  int i;
 
   /* Convert fields to ASCII. */
   petsciiconv_toascii(to, sizeof(to));
@@ -256,7 +259,11 @@ prepare_message(void)
   petsciiconv_toascii(mail + 255, sizeof(mail) - 255);
 
   /* Insert line delimiters. */
-
+  subject[sizeof(subject) - 2] = 0x0a;
+  subject[sizeof(subject) - 1] = 0x00;
+  for(i = 0; i < MAIL_HEIGHT; ++i) {
+    mail[MAIL_WIDTH - 1 + MAIL_WIDTH * i] = 0x0a;
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static
@@ -309,7 +316,16 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
 void
 smtp_done(unsigned char error)
 {
-  ctk_label_set_text(&statuslabel, "SMTP done");
+  if(error == SMTP_ERR_OK) {
+    ctk_label_set_text(&statuslabel, "Mail sent");
+    memset(to, ' ', sizeof(to));
+    memset(cc, ' ', sizeof(cc));
+    memset(subject, ' ', sizeof(subject));
+    memset(mail, ' ', sizeof(mail));
+    ctk_window_open(&composewindow);
+  } else {
+    ctk_label_set_text(&statuslabel, "Mail error");
+  }
   CTK_WIDGET_REDRAW(&statuslabel);  
 }
 /*-----------------------------------------------------------------------------------*/
