@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes-dsc.c,v 1.1 2003/04/17 19:00:00 adamdunkels Exp $
+ * $Id: processes-dsc.c,v 1.2 2003/04/18 00:15:38 adamdunkels Exp $
  *
  */
 
@@ -38,7 +38,7 @@
 extern struct ctk_icon processes_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(processes_dsc,
-    "Displays information about processes",
+    "Process information",
     "processes.prg",
     processes_init,
     &processes_icon);
