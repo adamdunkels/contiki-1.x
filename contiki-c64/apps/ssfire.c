@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire.c,v 1.2 2003/07/31 23:34:42 adamdunkels Exp $
+ * $Id: ssfire.c,v 1.3 2003/08/09 23:28:49 adamdunkels Exp $
  *
  */
 
@@ -40,10 +40,10 @@
 
 #include "ctk.h"
 #include "ctk-draw.h"
+#include "ctk-mouse.h"
 #include "dispatcher.h"
 #include "loader.h"
 
-static unsigned char save;
 
 static DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data);
 static void ssfire_idle(void);
@@ -68,15 +68,17 @@ static const unsigned char flamecolors[16] =
    COLOR_WHITE};
    
 
+static void fire_init(void);
 
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(ssfire_init)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
-    dispatcher_listen(ctk_signal_screensaver_start);
     dispatcher_listen(ctk_signal_screensaver_stop);
-    dispatcher_listen(ctk_signal_screensaver_uninstall);      
+    ctk_mode_set(CTK_MODE_SCREENSAVER);
+    ctk_mouse_hide();
+    fire_init();
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -119,14 +121,8 @@ DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
   
-  if(s == ctk_signal_screensaver_start) {
-    fire_init();
-    save = 1;
-  } else if(s == ctk_signal_screensaver_stop) {
-    save = 0;
-    ctk_draw_init();
-    ctk_desktop_redraw(NULL);
-  } else if(s == ctk_signal_screensaver_uninstall) {
+  if(s == ctk_signal_screensaver_stop ||
+     s == dispatcher_signal_quit) {
     fire_quit();
     ctk_draw_init();
     ctk_desktop_redraw(NULL);
@@ -136,53 +132,52 @@ DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data)
 void
 ssfire_idle(void)
 {
-  if(save) {
+  if(ctk_mode_get() == CTK_MODE_SCREENSAVER) {
   
-  /* Calculate new flames. */
-  asm("ldx #0");
-  asm("loop:");
-  asm("lda _flames+7,x");
-  asm("clc");
-  asm("adc _flames+8,x");
-  asm("adc _flames+9,x");
-  asm("adc _flames+16,x");
-  asm("lsr");
-  asm("lsr");
-  asm("sta _flames,x");
-  asm("inx");
-  asm("cpx #(8*15)");
-  asm("bne loop");
+    /* Calculate new flames. */
+    asm("ldx #0");
+    asm("loop:");
+    asm("lda _flames+7,x");
+    asm("clc");
+    asm("adc _flames+8,x");
+    asm("adc _flames+9,x");
+    asm("adc _flames+16,x");
+    asm("lsr");
+    asm("lsr");
+    asm("sta _flames,x");
+    asm("inx");
+    asm("cpx #(8*15)");
+    asm("bne loop");
 
-  /* Fill last line with pseudo-random data from noise generator on
-     voice 3. */
-  asm("ldx #$05");
-  asm("loop2:");
-  asm("ldy #$20");
-  asm("delay:");
-  asm("dey");
-  asm("bne delay");
-  asm("lda $d41b");
-  asm("and #$0f");
-  asm("sta _flames+8*15+1,x");
-  asm("dex");
-  asm("bpl loop2");
+    /* Fill last line with pseudo-random data from noise generator on
+       voice 3. */
+    asm("ldx #$05");
+    asm("loop2:");
+    asm("ldy #$20");
+    asm("delay:");
+    asm("dey");
+    asm("bne delay");
+    asm("lda $d41b");
+    asm("and #$0f");
+    asm("sta _flames+8*15+1,x");
+    asm("dex");
+    asm("bpl loop2");
 
-  /* Display flames on screen. */  
-  flameptr = flames;
-  colorptr1 = COLOR_RAM + 40*10;
-  colorptr2 = colorptr1 + 0x20;
-  for(y = 0; y < 15; ++y) {
-    for(x = 0; x < 8; ++x) {
-      *colorptr1 = *colorptr2 = flamecolors[*flameptr++];
-      ++colorptr1;
-      ++colorptr2;
+    /* Display flames on screen. */  
+    flameptr = flames;
+    colorptr1 = COLOR_RAM + 40*10;
+    colorptr2 = colorptr1 + 0x20;
+    for(y = 0; y < 15; ++y) {
+      for(x = 0; x < 8; ++x) {
+	*colorptr1 = *colorptr2 = flamecolors[*flameptr++];
+	++colorptr1;
+	++colorptr2;
+      }
+      colorptr1 += 0x20;
+      colorptr2 += 0x20;
     }
-    colorptr1 += 0x20;
-    colorptr2 += 0x20;
-  }
   
   }
 }
 /*-----------------------------------------------------------------------------------*/
 
-/*-----------------------------------------------------------------------------------*/
