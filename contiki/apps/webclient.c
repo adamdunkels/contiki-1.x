@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.10 2003/08/29 20:35:46 adamdunkels Exp $
+ * $Id: webclient.c,v 1.11 2003/09/02 21:46:06 adamdunkels Exp $
  *
  */
 
@@ -152,14 +152,12 @@ webclient_get(char *host, u16_t port, char *file)
     }
   }
   
-  conn = dispatcher_connect(ipaddr, port);
+  conn = dispatcher_connect(ipaddr, htons(port), NULL);
   
   if(conn == NULL) {
     return 0;
   }
   
-  dispatcher_markconn(conn, NULL);
-
   s.port = port;
   strncpy(s.file, file, sizeof(s.file));
   strncpy(s.host, host, sizeof(s.host));

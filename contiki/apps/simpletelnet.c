@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.7 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.8 2003/09/02 21:46:06 adamdunkels Exp $
  *
  */
 
@@ -221,13 +221,11 @@ connect(void)
   }
 
 
-  conn = uip_connect(addrptr, port);
+  conn = dispatcher_connect(addrptr, htons(port), &ts_appstate);
   if(conn == NULL) {
     show("Out of memory error");
     return;
   }
-
-  dispatcher_markconn(conn, &ts_appstate);
 
   show("Connecting...");
 

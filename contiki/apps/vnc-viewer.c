@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-viewer.c,v 1.4 2003/07/31 23:48:42 adamdunkels Exp $
+ * $Id: vnc-viewer.c,v 1.5 2003/09/02 21:46:06 adamdunkels Exp $
  *
  */
 
@@ -86,7 +86,7 @@ vnc_viewer_connect(u16_t *server, u8_t display)
   vnc_draw_init();
 
   memset(vs, 0, sizeof(struct vnc_viewer_state));
-  conn = uip_connect(server, 5900 + display);
+  conn = uip_connect(server, htons(5900 + display));
   if(conn == NULL) {
     return;
   }

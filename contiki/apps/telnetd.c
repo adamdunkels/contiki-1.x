@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.3 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.4 2003/09/02 21:46:06 adamdunkels Exp $
  *
  */
 
@@ -165,7 +165,7 @@ LOADER_INIT_FUNC(telnetd_init, arg)
     CTK_WIDGET_ADD(&window, &loglabel);
     memset(log, ' ', sizeof(log));
 
-    dispatcher_uiplisten(23);
+    dispatcher_uiplisten(HTONS(23));
   }
   ctk_window_open(&window);
 }

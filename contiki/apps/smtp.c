@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: smtp.c,v 1.3 2003/08/11 22:23:54 adamdunkels Exp $
+ * $Id: smtp.c,v 1.4 2003/09/02 21:46:06 adamdunkels Exp $
  *
  */
 
@@ -362,11 +362,10 @@ smtp_send(char *to, char *from, char *subject,
 {
   struct uip_conn *conn;
 
-  conn = uip_connect(smtpserver, 25);
+  conn = dispatcher_connect(smtpserver, HTONS(25), NULL);
   if(conn == NULL) {
     return 0;
   }
-  dispatcher_markconn(conn, NULL);
   
   s.state = STATE_SEND_NONE;
   s.sentlen = s.sendptr = s.textlen = 0;
