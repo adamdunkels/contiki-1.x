@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.2 2003/03/28 12:07:54 adamdunkels Exp $
+ * $Id: webclient.c,v 1.3 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 
@@ -328,8 +328,7 @@ newdata(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void
-webclient_appcall(void *state)
+DISPATCHER_UIPCALL(webclient_appcall, state)
 {
   struct uip_conn *conn;
 

@@ -31,13 +31,15 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: telnet.h,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: telnet.h,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 #ifndef __TELNET_H__
 #define __TELNET_H__
 
 #include "uipopt.h"
+
+#include "dispatcher.h"
 
 struct telnet_state {
   unsigned char flags;
@@ -46,7 +48,7 @@ struct telnet_state {
   u16_t sentlen;
 };
 
-void telnet_app(struct telnet_state *s);
+DISPATCHER_UIPCALL(telnet_app, s);
 unsigned char telnet_send(struct telnet_state *s, char *text, u16_t len);
 unsigned char telnet_close(struct telnet_state *s);
 unsigned char telnet_abort(struct telnet_state *s);

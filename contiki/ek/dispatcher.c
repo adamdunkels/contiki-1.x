@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.5 2003/04/09 19:19:24 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.6 2003/04/10 09:04:53 adamdunkels Exp $
  *
  */
 
@@ -62,6 +62,8 @@ static struct listenport listenports[UIP_LISTENPORTS];
 #else /* CC_FUNCTION_POINTER_ARGS */
 ek_signal_t dispatcher_sighandler_s;
 ek_data_t dispatcher_sighandler_data;
+
+void *dispatcher_uipcall_state;
 #endif /* CC_FUNCTION_POINTER_ARGS */      
 
 /*-----------------------------------------------------------------------------------*/
@@ -190,7 +192,12 @@ dispatcher_uipcall(void)
     if(p->id == s->id &&
        p->uiphandler != NULL) {
       dispatcher_current = p->id;
+#if CC_FUNCTION_POINTER_ARGS
       p->uiphandler(s->state);
+#else /* CC_FUNCTION_POINTER_ARGS */
+      dispatcher_uipcall_state = s->state;
+      p->uiphandler();
+#endif /* CC_FUNCTION_POINTER_ARGS */            
       return;
     }
   }

@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.h,v 1.3 2003/04/09 13:45:09 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.4 2003/04/10 09:04:53 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -54,10 +54,11 @@ struct dispatcher_proc {
   void (* idle)(void);
 #if CC_FUNCTION_POINTER_ARGS  
   void (* signalhandler)(ek_signal_t s, ek_data_t data);
+  void (* uiphandler)(void *state);
 #else /* CC_FUNCTION_POINTER_ARGS */
   void (* signalhandler)(void);
+  void (* uiphandler)(void);
 #endif /* CC_FUNCTION_POINTER_ARGS */
-  void (* uiphandler)(void *state);
 };
 
 #define DISPATCHER_CURRENT() dispatcher_current
@@ -87,6 +88,9 @@ struct dispatcher_uipstate {
 
 #define DISPATCHER_SIGHANDLER_ARGS(s, data)
 
+#define DISPATCHER_UIPCALL(name, state) \
+        void name(void *state)
+
 #else /* CC_FUNCTION_POINTER_ARGS */
 #define DISPATCHER_SIGHANDLER(name, s, data) \
         void name(void)
@@ -96,6 +100,14 @@ struct dispatcher_uipstate {
 
 extern ek_signal_t dispatcher_sighandler_s;
 extern ek_data_t dispatcher_sighandler_data;
+
+#define DISPATCHER_UIPCALL(name, state) \
+        void name(void)
+#define DISPATCHER_UIPCALL_ARG(state) \
+        void *state = dispatcher_uipcall_state
+
+extern void *dispatcher_uipcall_state;
+
 #endif /* CC_FUNCTION_POINTER_ARGS */
 
 #define UIP_APPCALL dispatcher_uipcall

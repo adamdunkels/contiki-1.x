@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.2 2003/04/09 13:45:05 adamdunkels Exp $
+ * $Id: vnc.c,v 1.3 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 
@@ -92,7 +92,7 @@ static struct ctk_button rightbutton =
 static DISPATCHER_SIGHANDLER(vnc_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("VNC client", NULL, vnc_sighandler,
-		   (void (*)(void *))vnc_viewer_app)};
+		   vnc_viewer_app)};
 static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.4 2003/04/09 13:45:06 adamdunkels Exp $
+ * $Id: webserver.c,v 1.5 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 
@@ -84,7 +84,7 @@ static unsigned char onoff;
 #define OFF 0
 
 static DISPATCHER_SIGHANDLER(webserver_sighandler, s, data);
-static void webserver_uipappcall(void *state);
+static DISPATCHER_UIPCALL(webserver_uipappcall, state);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Web server", NULL, webserver_sighandler,
 		   webserver_uipappcall)};
@@ -279,8 +279,8 @@ next_sector(void)
 
 
 /*-----------------------------------------------------------------------------------*/
-static void
-webserver_uipappcall(void *state)
+static
+DISPATCHER_UIPCALL(webserver_uipappcall, state)
 {
   u8_t i;
   int len;

@@ -31,13 +31,14 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: smtp.h,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: smtp.h,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 #ifndef __SMTP_H__
 #define __SMTP_H__
 
 #include "uipopt.h"
+#include "dispatcher.h"
 
 /* Callbacks. */
 #define SMTP_ERR_OK 0
@@ -49,7 +50,7 @@ unsigned char smtp_send(char *to, char *from,
 			char *subject, char *msg,
 			u16_t msglen);
 
-void smtp_appcall(void *);
+DISPATCHER_UIPCALL(smtp_appcall, state);
 
 
 #ifndef UIP_APPCALL

@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: smtp.c,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: smtp.c,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 
@@ -324,8 +324,7 @@ newdata(void)
     
 }
 /*-----------------------------------------------------------------------------------*/
-void
-smtp_appcall(void *state)
+DISPATCHER_UIPCALL(smtp_appcall, state)
 {
   if(uip_connected()) {
     /*    senddata();*/

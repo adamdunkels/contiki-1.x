@@ -32,17 +32,19 @@
  *
  * This file is part of the Contiki VNC client.
  *
- * $Id: vnc-viewer.h,v 1.1 2003/04/08 19:41:23 adamdunkels Exp $
+ * $Id: vnc-viewer.h,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 
 #ifndef __VNC_VIEWER_H__
 #define __VNC_VIEWER_H__
 
+#include "dispatcher.h"
+
 struct vnc_viewer_state;
 
 void vnc_viewer_init(void);
-void vnc_viewer_app(struct vnc_viewer_state *nullptr);
+DISPATCHER_UIPCALL(vnc_viewer_app, nullptr);
 
 void vnc_viewer_connect(u16_t *server, u8_t display);
 void vnc_viewer_close(void);

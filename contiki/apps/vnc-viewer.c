@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-viewer.c,v 1.1 2003/04/08 19:41:23 adamdunkels Exp $
+ * $Id: vnc-viewer.c,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
  *
  */
 
@@ -641,8 +641,7 @@ acked(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void
-vnc_viewer_app(struct vnc_viewer_state *nullptr)
+DISPATCHER_UIPCALL(vnc_viewer_app, nullptr)
 {
   if(vs->close == 1) {
     uip_close();
