@@ -72,6 +72,10 @@
 
 .else
 
+	; Switch to 80 column mode
+	lda	#$00
+	jsr	$C300
+
 	; Get IRQ vector from ROM
 	lda	$FFFE
 	ldx	$FFFF
