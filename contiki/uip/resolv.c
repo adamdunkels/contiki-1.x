@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.3 2003/04/16 18:28:16 adamdunkels Exp $
+ * $Id: resolv.c,v 1.4 2003/08/05 13:51:50 adamdunkels Exp $
  *
  */
 
@@ -132,35 +132,34 @@ parse_name(unsigned char *query)
 static void
 check_entries(void)
 {
-  struct dns_hdr *hdr;
+  register struct dns_hdr *hdr;
   char *query, *nptr, *nameptr;
   u8_t i;
   u8_t n;
-
+  register struct namemap *namemapptr;
+  
   for(i = 0; i < RESOLV_ENTRIES; ++i) {
-
-    if(names[i].state == STATE_NEW ||
-       names[i].state == STATE_ASKING) {
-      if(names[i].state == STATE_ASKING) {
-	--names[i].tmr;
-	if(names[i].tmr == 0) {
-	  ++names[i].retries;
-	  if(names[i].retries == MAX_RETRIES) {
-	    names[i].state = STATE_ERROR;
-	    resolv_found(names[i].name, NULL);
+    namemapptr = &names[i];
+    if(namemapptr->state == STATE_NEW ||
+       namemapptr->state == STATE_ASKING) {
+      if(namemapptr->state == STATE_ASKING) {
+	if(--namemapptr->tmr == 0) {
+	  if(++namemapptr->retries == MAX_RETRIES) {
+	    namemapptr->state = STATE_ERROR;
+	    resolv_found(namemapptr->name, NULL);
 	    continue;
 	  }
-	  names[i].tmr = names[i].retries;	  
+	  namemapptr->tmr = namemapptr->retries;	  
 	} else {
-	  /*	  printf("Timer %d\n", names[i].tmr);*/
+	  /*	  printf("Timer %d\n", namemapptr->tmr);*/
 	  /* Its timer has not run out, so we move on to next
 	     entry. */
 	  continue;
 	}
       } else {
-	names[i].state = STATE_ASKING;
-	names[i].tmr = 1;
-	names[i].retries = 0;
+	namemapptr->state = STATE_ASKING;
+	namemapptr->tmr = 1;
+	namemapptr->retries = 0;
       }
       hdr = (struct dns_hdr *)uip_appdata;
       hdr->id = htons(i);
@@ -169,7 +168,7 @@ check_entries(void)
       hdr->numquestions = HTONS(1);
       hdr->numanswers = hdr->numauthrr = hdr->numextrarr = 0;
       query = (char *)uip_appdata + 12;
-      nameptr = names[i].name;
+      nameptr = namemapptr->name;
       --nameptr;
       /* Convert hostname into suitable query format. */
       do {
@@ -183,7 +182,13 @@ check_entries(void)
 	}
 	*nptr = n;
       } while(*nameptr != 0);
-      nptr = query;
+      {
+	static unsigned char endquery[] =
+	  {0,0,1,0,1};
+	memcpy(query, endquery, 5);
+      }
+#if 0
+      nptr = query;      
       *nptr = 0; /* End of query name. */
       ++nptr;
       *nptr = 0; /* High byte of query type. */
@@ -194,7 +199,8 @@ check_entries(void)
       ++nptr;
       *nptr = 1; /* Low byte of query class. */
       ++nptr;
-      uip_udp_send((unsigned char)(nptr - (char *)uip_appdata));
+#endif
+      uip_udp_send((unsigned char)(query + 5 - (char *)uip_appdata));
       break;
     }
   }
@@ -208,6 +214,7 @@ newdata(void)
   struct dns_hdr *hdr;
   u8_t nquestions, nanswers;
   u8_t i;
+  register struct namemap *namemapptr;
   
   hdr = (struct dns_hdr *)uip_appdata;
   /*  printf("ID %d\n", htons(hdr->id));
@@ -222,18 +229,19 @@ newdata(void)
 
   /* The ID in the DNS header should be our entry into the name
      table. */
-  i = htons(hdr->id); 
+  i = htons(hdr->id);
+  namemapptr = &names[i];
   if(i < RESOLV_ENTRIES &&
-     names[i].state == STATE_ASKING) {
+     namemapptr->state == STATE_ASKING) {
 
     /* This entry is now finished. */
-    names[i].state = STATE_DONE;
-    names[i].err = hdr->flags2 & DNS_FLAG2_ERR_MASK;
+    namemapptr->state = STATE_DONE;
+    namemapptr->err = hdr->flags2 & DNS_FLAG2_ERR_MASK;
 
     /* Check for error. If so, call callback to inform. */
-    if(names[i].err != 0) {
-      names[i].state = STATE_ERROR;
-      resolv_found(names[i].name, NULL);
+    if(namemapptr->err != 0) {
+      namemapptr->state = STATE_ERROR;
+      resolv_found(namemapptr->name, NULL);
       return;
     }
 
@@ -277,9 +285,9 @@ newdata(void)
 	       htons(ans->ipaddr[1]) & 0xff);*/
 	/* XXX: we should really check that this IP address is the one
 	   we want. */
-	names[i].ipaddr[0] = ans->ipaddr[0];
-	names[i].ipaddr[1] = ans->ipaddr[1];
-	resolv_found(names[i].name, names[i].ipaddr);
+	namemapptr->ipaddr[0] = ans->ipaddr[0];
+	namemapptr->ipaddr[1] = ans->ipaddr[1];
+	resolv_found(namemapptr->name, namemapptr->ipaddr);
 	return;
       } else {
 	nameptr = nameptr + 10 + htons(ans->len);
@@ -317,28 +325,31 @@ resolv_query(char *name)
 {
   u8_t i;
   u8_t lseq, lseqi;
-
+  register struct namemap *nameptr;
+      
   lseq = lseqi = 0;
   
   for(i = 0; i < RESOLV_ENTRIES; ++i) {
-    if(names[i].state == STATE_UNUSED) {
+    nameptr = &names[i];
+    if(nameptr->state == STATE_UNUSED) {
       break;
     }
-    if(seqno - names[i].seqno > lseq) {
-      lseq = seqno - names[i].seqno;
+    if(seqno - nameptr->seqno > lseq) {
+      lseq = seqno - nameptr->seqno;
       lseqi = i;
     }
   }
 
   if(i == RESOLV_ENTRIES) {
     i = lseqi;
+    nameptr = &names[i];
   }
 
   /*  printf("Using entry %d\n", i);*/
 
-  strcpy(names[i].name, name);
-  names[i].state = STATE_NEW;
-  names[i].seqno = seqno;
+  strcpy(nameptr->name, name);
+  nameptr->state = STATE_NEW;
+  nameptr->seqno = seqno;
   ++seqno;
 
 }
@@ -347,13 +358,15 @@ u16_t *
 resolv_lookup(char *name)
 {
   u8_t i;
-
+  struct namemap *nameptr;
+  
   /* Walk through the list to see if the name is in there. If it is
      not, we return NULL. */
   for(i = 0; i < RESOLV_ENTRIES; ++i) {
-    if(names[i].state == STATE_DONE &&
-       strcmp(name, names[i].name) == 0) {
-      return names[i].ipaddr;
+    nameptr = &names[i];
+    if(nameptr->state == STATE_DONE &&
+       strcmp(name, nameptr->name) == 0) {
+      return nameptr->ipaddr;
     }
   }
   return NULL;

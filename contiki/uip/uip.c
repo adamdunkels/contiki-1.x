@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.4 2003/07/30 23:31:40 adamdunkels Exp $
+ * $Id: uip.c,v 1.5 2003/08/05 13:51:50 adamdunkels Exp $
  *
  */
 
@@ -215,7 +215,7 @@ uip_init(void)
 struct uip_conn *
 uip_connect(u16_t *ripaddr, u16_t rport)
 {
-  struct uip_conn *conn;
+  register struct uip_conn *conn;
   
   /* Find an unused local port. */
  again:
@@ -226,8 +226,9 @@ uip_connect(u16_t *ripaddr, u16_t rport)
   }
   
   for(c = 0; c < UIP_CONNS; ++c) {
-    if(uip_conns[c].tcpstateflags != CLOSED &&
-       uip_conns[c].lport == lastport)
+    conn = &uip_conns[c];
+    if(conn->tcpstateflags != CLOSED &&
+       conn->lport == lastport)
       goto again;
   }
 
@@ -284,7 +285,7 @@ uip_connect(u16_t *ripaddr, u16_t rport)
 struct uip_udp_conn *
 uip_udp_new(u16_t *ripaddr, u16_t rport)
 {
-  struct uip_udp_conn *conn;
+  register struct uip_udp_conn *conn;
   
   /* Find an unused local port. */
  again:
