@@ -1,4 +1,4 @@
-# Copyright (c) 2002, Adam Dunkels.
+# Copyright (c) 2002-2004, Adam Dunkels.
 # All rights reserved. 
 #
 # Redistribution and use in source and binary forms, with or without 
@@ -9,10 +9,7 @@
 # 2. Redistributions in binary form must reproduce the above copyright 
 #    notice, this list of conditions and the following disclaimer in the 
 #    documentation and/or other materials provided with the distribution. 
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#      This product includes software developed by Adam Dunkels.
-# 4. The name of the author may not be used to endorse or promote
+# 3. The name of the author may not be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.  
 #
@@ -30,27 +27,29 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.9 2004/02/16 21:19:23 adamdunkels Exp $
+# $Id: Makefile,v 1.10 2004/06/06 07:02:44 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
 CC=gcc
 CFLAGS=-Wall -Wstrict-prototypes -Wmissing-prototypes \
-	-g -pg -fpack-struct \
-       -Iapps -Ictk -Iuip -Iconf \
+	-g  \
+       -Iapps -Ictk -Iuip -Iconf -Ilib \
        -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
-	`gtk12-config --cflags`\
+	`pkg-config --cflags gtk+-2.0`\
 	-DWITH_ETHERNET -DWITH_TAPDEV -DWITH_ASCII \
 	-DWITH_WWW -DWITH_EMAIL -DWITH_UIP \
-	-DWITH_CTKVNC 
-LDFLAGS=-pg `gtk12-config --libs`
+	-DWITH_CTKGTK
+LDFLAGS=`pkg-config --libs gtk+-2.0`
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
 %.o: apps/%.c
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
 %.o: ctk/%.c
+	$(CC) $(CFLAGS) -c $(<:.o=.c)
+%.o: lib/%.c
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
 %.o: uip/%.c
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
@@ -68,7 +67,7 @@ LDFLAGS=-pg `gtk12-config --libs`
 
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o http-user-agent-string.o
 EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
-WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o
+WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o http-strings.o
 TELNET=simpletelnet.o telnet.o
 
 CTKGTK=ctk-gtksim.o ctk-conio.o libconio.o
@@ -77,14 +76,18 @@ CTKVNC=ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o
 contiki: contiki-main.o \
  program-handler.o about.o netconf.o processes.o \
  about-dsc.o netconf-dsc.o processes-dsc.o  \
- $(CTKVNC) \
+ $(CTKGTK) \
  ctk.o dispatcher.o arg.o \
- uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o \
- uip_main.o tapdev.o tapdev-drv.o \
- $(EMAIL) email-dsc.o $(WEBSERVER) $(TELNET) telnet-dsc.o \
- vnc.o vnc-viewer.o vnc-draw.o \
- calc.o calc-dsc.o \
- $(WWW) telnetd.o telnetd-dsc.o shell.o memb.o\
+ uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o uipbuf.o uip-split.o uip-fw.o\
+ uiplib.o tapdev.o tapdev-drv.o $(WEBSERVER) $(WWW) \
+# mailget.o popclient.o nntpc.o nntpc-strings.o \
+# newslog.o nntpd.o nntpd-strings.o\
+# $(EMAIL) email-dsc.o $(WEBSERVER) $(TELNET) telnet-dsc.o \
+# vnc.o vnc-viewer.o vnc-draw.o \
+# calc.o calc-dsc.o \
+# $(WWW) telnetd.o telnetd-dsc.o shell.o memb.o\
+# mt.o mtarch.o mtp.o \
+# coderecv.o\
  #maze.o maze-dsc.o
 	gcc $(LDFLAGS) -o $@ $^
 
@@ -92,7 +95,7 @@ clean:
 	rm -f *.o *~ *core contiki *.s
 
 depend:
-	gcc -MM -Iapps -Ictk -Iuip -Iconf \
+	gcc -MM -Iapps -Ictk -Ilib -Iuip -Iconf \
 	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
 	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
 	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
