@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.7 2003/06/30 20:39:53 adamdunkels Exp $
+ * $Id: email.c,v 1.8 2003/08/11 22:23:24 adamdunkels Exp $
  *
  */
 
@@ -44,67 +44,60 @@
 #include "petsciiconv.h"
 #include "loader.h"
 
+#include "ctk-textedit.h"
+
 
 #define MAXNUMMSGS 6
 
 static struct ctk_menu menu;
-unsigned char menuitem_open, menuitem_setup, menuitem_quit;
+unsigned char menuitem_compose, menuitem_setup, menuitem_quit;
 
 /* The main window. */
-static struct ctk_window mainwindow;
+static struct ctk_window composewindow;
 
-static struct ctk_button newmailbutton =
- {CTK_BUTTON(26, 0, 8, "New mail")};
-static struct ctk_button checkbutton =
- {CTK_BUTTON(0, 0, 10, "Check mail")};
-
-static struct ctk_button msgbuttons[MAXNUMMSGS];
-static struct ctk_label msglabels[MAXNUMMSGS];
-static char msgtitles[20][MAXNUMMSGS];
 static struct ctk_separator sep1 =
- {CTK_SEPARATOR(0, 7, 36)};
-static struct ctk_separator sep2 =
  {CTK_SEPARATOR(0, 20, 36)};
 static struct ctk_label statuslabel =
  {CTK_LABEL(6, 21, 23, 1, "")};
 
 
 static struct ctk_label tolabel =
-  {CTK_LABEL(0, 8, 3, 1, "To:")};
+  {CTK_LABEL(0, 0, 3, 1, "To:")};
 static char to[40];
 static struct ctk_textentry totextentry =
-  {CTK_TEXTENTRY(8, 8, 26, 1, to, 38)};
+  {CTK_TEXTENTRY(8, 0, 26, 1, to, 38)};
 
 static struct ctk_label cclabel =
-  {CTK_LABEL(0, 9, 3, 1, "Cc:")};
+  {CTK_LABEL(0, 1, 3, 1, "Cc:")};
 static char cc[40];
 static struct ctk_textentry cctextentry =
-  {CTK_TEXTENTRY(8, 9, 26, 1, cc, 38)};
+  {CTK_TEXTENTRY(8, 1, 26, 1, cc, 38)};
 
 static struct ctk_label subjectlabel =
-  {CTK_LABEL(0, 10, 8, 1, "Subject:")};
+  {CTK_LABEL(0, 2, 8, 1, "Subject:")};
 static char subject[40];
 static struct ctk_textentry subjecttextentry =
-  {CTK_TEXTENTRY(8, 10, 26, 1, subject, 38)};
+  {CTK_TEXTENTRY(8, 2, 26, 1, subject, 38)};
 
-static char mail[36*9];
-static struct ctk_textentry mailtextentry =
-  {CTK_TEXTENTRY(0, 11, 34, 9, mail, 36)};
+static char mail[36*16];
+struct ctk_textedit mailtextedit =
+  {CTK_TEXTEDIT(0, 3, 36, 17, mail)};
+
 
 static struct ctk_button sendbutton =
   {CTK_BUTTON(0, 21, 4, "Send")};
 static struct ctk_button erasebutton =
   {CTK_BUTTON(29, 21, 5, "Erase")};
 
-/* The "Really cancel message?" dialog. */
-static struct ctk_window canceldialog;
-static struct ctk_label canceldialoglabel1 =
-  {CTK_LABEL(2, 1, 22, 1, "Really cancel message?")};
-static struct ctk_label canceldialoglabel2 =
+/* The "Really erase message?" dialog. */
+static struct ctk_window erasedialog;
+static struct ctk_label erasedialoglabel1 =
+  {CTK_LABEL(2, 1, 22, 1, "Really erase message?")};
+static struct ctk_label erasedialoglabel2 =
   {CTK_LABEL(0, 2, 26, 1, "All contents will be lost.")};
-static struct ctk_button cancelyesbutton =
+static struct ctk_button eraseyesbutton =
   {CTK_BUTTON(4, 4, 3, "Yes")};
-static struct ctk_button cancelnobutton =
+static struct ctk_button erasenobutton =
   {CTK_BUTTON(18, 4, 2, "No")};
 
 /* The setup window. */
@@ -148,83 +141,17 @@ static struct dispatcher_proc p =
   {DISPATCHER_PROC("E-mail client", NULL, email_sighandler, smtp_appcall)};
 static ek_id_t id;
 
+
 /*-----------------------------------------------------------------------------------*/
 static void
 email_quit(void)
 {
   ctk_window_close(&setupwindow);
-  ctk_window_close(&mainwindow);
+  ctk_window_close(&composewindow);
   ctk_menu_remove(&menu);
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-make_window(void)
-{
-  unsigned char i;
-  struct ctk_button *button;
-  struct ctk_label *label;
-  
-  /* Create the main window. */
-  ctk_window_new(&mainwindow, 36, 22, "E-mail");
-  ctk_window_move(&mainwindow, 1, 0);
-  
-  CTK_WIDGET_ADD(&mainwindow, &checkbutton);
-  CTK_WIDGET_FOCUS(&mainwindow, &checkbutton);
-  CTK_WIDGET_ADD(&mainwindow, &newmailbutton);
-  CTK_WIDGET_ADD(&mainwindow, &sep1);
-  CTK_WIDGET_ADD(&mainwindow, &sep2);
-  CTK_WIDGET_ADD(&mainwindow, &statuslabel);
-  
-  for(i = 0; i < MAXNUMMSGS; ++i) {
-    button = &msgbuttons[i];
-    CTK_BUTTON_NEW(button, 0, i + 1, 1, " ");
-    CTK_WIDGET_ADD(&mainwindow, button);
-    label = &msglabels[i];
-    CTK_LABEL_NEW(label, 3, i + 1, 33, 1, msgtitles[i]);
-    CTK_WIDGET_ADD(&mainwindow, label);
-  }
-
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-make_composer(void)
-{
-  CTK_WIDGET_ADD(&mainwindow, &tolabel);
-  CTK_WIDGET_ADD(&mainwindow, &cclabel);
-  CTK_WIDGET_ADD(&mainwindow, &subjectlabel);
-  
-  CTK_WIDGET_ADD(&mainwindow, &totextentry);
-  CTK_WIDGET_FOCUS(&mainwindow, &totextentry);  
-  CTK_WIDGET_ADD(&mainwindow, &cctextentry);  
-  CTK_WIDGET_ADD(&mainwindow, &subjecttextentry);
-
-  CTK_WIDGET_ADD(&mainwindow, &mailtextentry);
-  
-  CTK_WIDGET_ADD(&mainwindow, &sendbutton);
-  CTK_WIDGET_ADD(&mainwindow, &erasebutton);
-
-  memset(mail, ' ', sizeof(mail));  
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-make_read(void)
-{
-  CTK_WIDGET_ADD(&mainwindow, &tolabel);
-  CTK_WIDGET_ADD(&mainwindow, &cclabel);
-  CTK_WIDGET_ADD(&mainwindow, &subjectlabel);
-  
-  CTK_WIDGET_ADD(&mainwindow, &totextentry);
-  /*  CTK_WIDGET_FOCUS(&mainwindow, &totextentry);  */
-  CTK_WIDGET_ADD(&mainwindow, &cctextentry);  
-  CTK_WIDGET_ADD(&mainwindow, &subjecttextentry);
-
-  CTK_WIDGET_ADD(&mainwindow, &mailtextentry);
-  
-  CTK_WIDGET_ADD(&mainwindow, &sendbutton);
-  CTK_WIDGET_ADD(&mainwindow, &erasebutton);
 }
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(email_init)
@@ -232,13 +159,13 @@ LOADER_INIT_FUNC(email_init)
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
-    /* Create the "Really cancel message?" dialog. */
-    ctk_dialog_new(&canceldialog, 26, 6);
-    CTK_WIDGET_ADD(&canceldialog, &canceldialoglabel1);
-    CTK_WIDGET_ADD(&canceldialog, &canceldialoglabel2);
-    CTK_WIDGET_ADD(&canceldialog, &cancelyesbutton);
-    CTK_WIDGET_ADD(&canceldialog, &cancelnobutton);
-    CTK_WIDGET_FOCUS(&canceldialog, &cancelnobutton);
+    /* Create the "Really erase message?" dialog. */
+    ctk_dialog_new(&erasedialog, 26, 6);
+    CTK_WIDGET_ADD(&erasedialog, &erasedialoglabel1);
+    CTK_WIDGET_ADD(&erasedialog, &erasedialoglabel2);
+    CTK_WIDGET_ADD(&erasedialog, &eraseyesbutton);
+    CTK_WIDGET_ADD(&erasedialog, &erasenobutton);
+    CTK_WIDGET_FOCUS(&erasedialog, &erasenobutton);
     
     /* Create setup window. */
     ctk_window_new(&setupwindow, 28, 16, "E-mail setup");
@@ -249,36 +176,57 @@ LOADER_INIT_FUNC(email_init)
     CTK_WIDGET_ADD(&setupwindow, &smtpserverlabel);
     CTK_WIDGET_ADD(&setupwindow, &smtpservertextentry);
     CTK_WIDGET_ADD(&setupwindow, &pop3serverlabel);
-    CTK_WIDGET_ADD(&setupwindow, &pop3servertextentry);
+    /*    CTK_WIDGET_ADD(&setupwindow, &pop3servertextentry);*/
     CTK_WIDGET_ADD(&setupwindow, &pop3userlabel);
-    CTK_WIDGET_ADD(&setupwindow, &pop3usertextentry);
+    /*    CTK_WIDGET_ADD(&setupwindow, &pop3usertextentry);*/
     CTK_WIDGET_ADD(&setupwindow, &pop3passwordlabel);
-    CTK_WIDGET_ADD(&setupwindow, &pop3passwordtextentry);
+    /*    CTK_WIDGET_ADD(&setupwindow, &pop3passwordtextentry);*/
     CTK_WIDGET_ADD(&setupwindow, &setupokbutton);
 
     CTK_WIDGET_FOCUS(&setupwindow, &fromaddresstextentry);
     
 
-    /* Create main window. */
-    make_window();
-    make_composer();  
+    /* Create compose window. */
+
+    ctk_window_new(&composewindow, 36, 22, "Compose e-mail");
+    
+    CTK_WIDGET_ADD(&composewindow, &tolabel);
+    CTK_WIDGET_ADD(&composewindow, &cclabel);
+    CTK_WIDGET_ADD(&composewindow, &subjectlabel);
+    
+    CTK_WIDGET_ADD(&composewindow, &totextentry);
+    CTK_WIDGET_FOCUS(&composewindow, &totextentry);  
+    CTK_WIDGET_ADD(&composewindow, &cctextentry);  
+    CTK_WIDGET_ADD(&composewindow, &subjecttextentry);
+    
+    ctk_textedit_add(&composewindow, &mailtextedit);
+    
+    CTK_WIDGET_ADD(&composewindow, &sep1);
+    CTK_WIDGET_ADD(&composewindow, &statuslabel);
+    
+    CTK_WIDGET_ADD(&composewindow, &sendbutton);
+    CTK_WIDGET_ADD(&composewindow, &erasebutton);
+    
+    memset(mail, ' ', sizeof(mail));  
 
     /* Create and add the menu */
     ctk_menu_new(&menu, "E-mail");
     menuitem_setup = ctk_menuitem_add(&menu, "Setup");
-    menuitem_open = ctk_menuitem_add(&menu, "Open");
+    menuitem_compose = ctk_menuitem_add(&menu, "Compose");
     menuitem_quit = ctk_menuitem_add(&menu, "Quit");
     ctk_menu_add(&menu);
 
     /* Attach listeners to signals. */
-    dispatcher_listen(ctk_signal_button_activate);
+    dispatcher_listen(ctk_signal_widget_activate);
     dispatcher_listen(ctk_signal_menu_activate);
     dispatcher_listen(ctk_signal_window_close);
+
+    dispatcher_listen(ctk_signal_keypress);
     
     /* Open setup window */
     ctk_window_open(&setupwindow);
   } else {
-    ctk_window_open(&mainwindow);
+    ctk_window_open(&composewindow);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -318,66 +266,42 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
   unsigned char i;
 
   DISPATCHER_SIGHANDLER_ARGS(s, data);
+
+  ctk_textedit_sighandler(&mailtextedit, s, data);
   
-  if(s == ctk_signal_button_activate) {
+  if(s == ctk_signal_widget_activate) {
     w = (struct ctk_widget *)data;
-    if(w == (struct ctk_widget *)&newmailbutton) {
-      /*      ctk_window_open(&composerwindow);*/
-      ctk_window_close(&mainwindow);
-      make_window();
-      make_composer();
-      ctk_window_open(&mainwindow);
-      ctk_window_redraw(&mainwindow);
-#if 0
-    } else if(w == &replybutton) {
-      /* XXX Fiddle in the from and subject fields into the new
-	 mail. */
-      ctk_window_open(&composerwindow);
-      /*      ctk_redraw();*/
-#endif 
-    } else if(w == (struct ctk_widget *)&checkbutton) {
-      /* XXX Should actually check email. */
-      ctk_label_set_text(&statuslabel, "Checking mail...");
-      ctk_window_redraw(&mainwindow);
-    } else if(w == (struct ctk_widget *)&sendbutton) {
+    if(w == (struct ctk_widget *)&sendbutton) {
       prepare_message();
       smtp_send(to, fromaddress, subject, mail, sizeof(mail));
       ctk_label_set_text(&statuslabel, "Sending message...");
       CTK_WIDGET_REDRAW(&statuslabel);
     } else if(w == (struct ctk_widget *)&erasebutton) {
-      ctk_dialog_open(&canceldialog);      
-    } else if(w == (struct ctk_widget *)&cancelyesbutton) {
+      ctk_dialog_open(&erasedialog);      
+    } else if(w == (struct ctk_widget *)&eraseyesbutton) {
+      memset(to, ' ', sizeof(to));
+      memset(cc, ' ', sizeof(cc));
+      memset(subject, ' ', sizeof(subject));
+      memset(mail, ' ', sizeof(mail));
       ctk_dialog_close();
-    } else if(w == (struct ctk_widget *)&cancelnobutton) {
+    } else if(w == (struct ctk_widget *)&erasenobutton) {
       ctk_dialog_close();
     } else if(w == (struct ctk_widget *)&setupokbutton) {
       applyconfig();
       ctk_window_close(&setupwindow);
-      ctk_window_open(&mainwindow);
-    } else {
-      for(i = 0; i < MAXNUMMSGS; ++i) {
-	if(w == (struct ctk_widget *)&msgbuttons[i]) {
-	  ctk_window_close(&mainwindow);
-	  make_window();
-	  /*	  make_read(); download(i); */
-	  ctk_window_open(&mainwindow);
-	  ctk_window_redraw(&mainwindow);
-	  break;
-	}
-      }
+      ctk_window_open(&composewindow);
     }
   } else if(s == ctk_signal_menu_activate) {
     if((struct ctk_menu *)data == &menu) {
-      if(menu.active == menuitem_open) {
-	ctk_window_open(&mainwindow);
+      if(menu.active == menuitem_compose) {
+	ctk_window_open(&composewindow);
       } else if(menu.active == menuitem_setup) {
 	ctk_window_open(&setupwindow);
       } else if(menu.active == menuitem_quit) {
 	email_quit();
       }
     }
-  } else if(s == ctk_signal_window_close &&
-	    data == (ek_data_t)&mainwindow) {
+  } else if(s == dispatcher_signal_quit) {
     email_quit();
   }
 }
