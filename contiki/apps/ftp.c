@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ftp.c,v 1.5 2004/09/14 08:11:12 adamdunkels Exp $
+ * $Id: ftp.c,v 1.6 2005/02/15 21:35:07 oliverschmidt Exp $
  */
 /* Note to self: It would be nice to have a "View" option in the download dialog. */
 
@@ -272,7 +272,7 @@ start_loadremote(void)
 static void
 make_connectionwindow(void)
 {
-  ctk_dialog_new(&connectionwindow, 24, 11);
+  ctk_dialog_new(&connectionwindow, 25, 11);
   
   CTK_WIDGET_ADD(&connectionwindow, &serverlabel);
   CTK_WIDGET_ADD(&connectionwindow, &serverentry);
