@@ -1,15 +1,11 @@
 /**
 \defgroup uip The uIP TCP/IP stack
 @{
-*/
-
-/**
-\page uip The uIP TCP/IP stack
 
 The uIP TCP/IP stack provides Internet communication abilities to
 Contiki.
 
-\section uIPIntroduction uIP introduction
+\section uip-introduction uIP introduction
 
 With the success of the Internet, the TCP/IP protocol suite has become
 a global standard for communication. TCP/IP is the underlying protocol
@@ -47,7 +43,7 @@ network citizens. The uIP TCP/IP implementation that is not tailored
 for any specific application.
 
 
-\section tcpip TCP/IP communication
+\section uip-tcpip TCP/IP communication
 
 The full TCP/IP suite consists of numerous protocols, ranging from low
 level protocols such as ARP which translates IP addresses to MAC
@@ -97,7 +93,7 @@ and dynamically configurable type-of-service bits for TCP
 connections. Since there are only very few applications that make use
 of those features they can be removed without loss of generality.
 
-\section memory Memory management
+\section uip-memory Memory management
 
 In the architectures for which uIP is intended, RAM is the most
 scarce resource. With only a few kilobytes of RAM available for the
@@ -153,7 +149,7 @@ with as little as 200 bytes of RAM, but such a configuration will
 provide extremely low throughput and will only allow a small number of
 simultaneous connections.
 
-\section api Application program interface (API)
+\section uip-api Application program interface (API)
 
 The Application Program Interface (API) defines the way the
 application program interacts with the TCP/IP stack. The most commonly
@@ -209,7 +205,7 @@ to know when the retransmission should be made. Thus the complexity of
 the application does not necessarily increase because it takes an
 active part in doing retransmissions.
 
-\subsection appevents Application events
+\subsection uip-appevents Application events
 
 The application must be implemented as a C function, UIP_APPCALL(),
 that uIP calls whenever an event occurs. Each event has a corresponing
@@ -219,7 +215,7 @@ to either zero or non-zero. Note that certain events can happen in
 conjunction with each other (i.e., new data can arrive at the same
 time as data is acknowledged).
 
-\subsection connstate The connection pointer
+\subsection uip-connstate The connection pointer
 
 When the application is called by uIP, the global variable uip_conn is
 set to point to the uip_conn structure for the current
@@ -230,7 +226,7 @@ provide. For instance, an application might decide to act as an HTTP
 server if the value of uip_conn->lport is equal to 80 and act as a
 TELNET server if the value is 23.
 
-\subsection recvdata Receiving data
+\subsection uip-recvdata Receiving data
 
 If the uIP test function uip_newdata() is non-zero, the remote host of
 the connection has sent new data. The uip_appdata pointer point to the
@@ -241,7 +237,7 @@ application will therefor have to either act directly on the incoming
 data, or by itself copy the incoming data into a buffer for later
 processing.
 
-\subsection senddata Sending data
+\subsection uip-senddata Sending data
 
 When sending data, the application must check the number of available
 bytes in the send window and adjust the length of the data to be sent
@@ -261,7 +257,7 @@ connection and it is not possible to call uip_send() more than once
 per application invocation; only the data from the last call will be
 sent.
 
-\subsection rexmitdata Retransmitting data
+\subsection uip-rexmitdata Retransmitting data
 
 Retransmissions are driven by the periodic TCP timer. Every time the
 periodic timer is invoked, the retransmission timer for each
@@ -286,7 +282,7 @@ should be made. Thus the complexity of the application does not
 necessarily increase because it takes an active part in doing
 retransmissions.
 
-\subsection closing Closing connections
+\subsection uip-closing Closing connections
 
 The application closes the current connection by calling the
 uip_close() during an application call. This will cause the connection
@@ -298,7 +294,7 @@ If the connection has been closed by the remote end, the test function
 uip_closed() is true. The application may then do any necessary
 cleanups.
 
-\subsection errors Reporting errors
+\subsection uip-errors Reporting errors
 
 There are two fatal errors that can happen to a connection, either
 that the connection was aborted by the remote host, or that the
@@ -307,7 +303,7 @@ aborted. uIP reports this by calling the application function. The
 application can use the two test functions uip_aborted() and
 uip_timedout() to test for those error conditions.
 
-\subsection polling Polling
+\subsection uip-polling Polling
 
 When a connection is idle, uIP polls the application every time the
 periodic timer fires. The application uses the test function
@@ -321,7 +317,7 @@ has been produced. The application can only send data when invoked by
 uIP, and therefore the poll event is the only way to send data on an
 otherwise idle connection.
 
-\subsection listen Listening ports
+\subsection uip-listen Listening ports
 
 uIP maintains a list of listening TCP ports. A new port is opened for
 listening with the uip_listen() function. When a connection request
@@ -332,7 +328,7 @@ the application was invoked because a new connection was created.
 The application can check the lport field in the uip_conn structure to
 check to which port the new connection was connected.
 
-\subsection connect Opening connections
+\subsection uip-connect Opening connections
 
 New connections can be opened from within
 uIP by the function uip_connect(). This function
@@ -373,7 +369,7 @@ void connect_example2(void) {
 }
 \endcode
 
-\section drivers uIP device drivers
+\section uip-drivers uIP device drivers
 
 From the network device driver's standpoint, uIP consists of two C
 functions: uip_input() and uip_periodic(). The uip_input() function
@@ -390,7 +386,7 @@ function is used by uIP to drive protocol timers and retransmissions,
 and when it returns it may have placed an outbound packet in the
 uip_buf buffer.
 
-\section checksums Checksum calculation
+
 
 */
 
