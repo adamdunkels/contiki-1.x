@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.9 2003/08/24 22:36:31 adamdunkels Exp $
+ * $Id: webclient.c,v 1.10 2003/08/29 20:35:46 adamdunkels Exp $
  *
  */
 
@@ -152,7 +152,7 @@ webclient_get(char *host, u16_t port, char *file)
     }
   }
   
-  conn = uip_connect(ipaddr, port);
+  conn = dispatcher_connect(ipaddr, port);
   
   if(conn == NULL) {
     return 0;
@@ -291,7 +291,7 @@ static u16_t
 parse_headers(u16_t len)
 {
   char *cptr;
-  static char c;
+  static char c, i;
   
   while(len > 0 && s.httpheaderlineptr < sizeof(s.httpheaderline)) {
     s.httpheaderline[s.httpheaderlineptr] = *uip_appdata;
@@ -321,9 +321,25 @@ parse_headers(u16_t len)
 		sizeof(http_content_type) - 1, sizeof(s.mimetype));
       } else if(casecmp(s.httpheaderline, http_location,
 			    sizeof(http_location) - 1) == 0) {
-	strncpy(s.file, s.httpheaderline +
-		sizeof(http_location) - 1, sizeof(s.file));
-	s.file[s.httpheaderlineptr - 1] = 0;
+	cptr = s.httpheaderline +
+	  sizeof(http_location) - 1;
+	
+	if(strncmp(cptr, http_http, 7) == 0) {
+	  cptr += 7; 
+	  for(i = 0; i < s.httpheaderlineptr - 7; ++i) {
+	    if(*cptr == 0 ||
+	       *cptr == '/' ||
+	       *cptr == ' ' ||
+	       *cptr == ':') {
+	      s.host[i] = 0;
+	      break;
+	    }
+	    s.host[i] = *cptr;
+	    ++cptr;
+	  }
+	}
+	strncpy(s.file, cptr, sizeof(s.file));
+	s.file[s.httpheaderlineptr - i] = 0;
       }
 
 
@@ -422,11 +438,15 @@ DISPATCHER_UIPCALL(webclient_appcall, state)
       /* Send NULL data to signal EOF. */
       webclient_datahandler(NULL, 0);
     } else {
-      conn = uip_connect(uip_conn->ripaddr, s.port);
+      /*      conn = uip_connect(uip_conn->ripaddr, s.port);
       if(conn != NULL) {
 	dispatcher_markconn(conn, NULL);
 	init_connection();
+	}*/
+      if(resolv_lookup(s.host) == NULL) {
+	resolv_query(s.host);
       }
+      webclient_get(s.host, s.port, s.file);
     }
   }
 }
