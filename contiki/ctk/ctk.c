@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.3 2003/04/02 09:53:59 adamdunkels Exp $
+ * $Id: ctk.c,v 1.4 2003/04/02 11:36:21 adamdunkels Exp $
  *
  */
 
@@ -717,7 +717,7 @@ activate(register struct ctk_widget *w)
   if(w->type == CTK_WIDGET_BUTTON) {
     if(w == (struct ctk_widget *)&windows->closebutton) {
 #if CTK_CONF_WINDOWCLOSE
-      /*dispatcher_emit(ctk_signal_window_close, windows, w->window->owner);*/
+      dispatcher_emit(ctk_signal_window_close, windows, w->window->owner);
       ctk_window_close(windows);
       return REDRAW_ALL;
 #endif /* CTK_CONF_WINDOWCLOSE */
