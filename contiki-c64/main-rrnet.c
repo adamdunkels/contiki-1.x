@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki operating system
  *
- * $Id: main-rrnet.c,v 1.4 2004/09/18 20:52:10 adamdunkels Exp $
+ * $Id: main-rrnet.c,v 1.5 2004/09/18 21:06:47 adamdunkels Exp $
  *
  */
 
@@ -73,19 +73,6 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   u16_t addr[2];
   switch(ev) {
   case EK_EVENT_INIT:
-    uip_ipaddr(addr, 192,168,3,2);
-    uip_sethostaddr(addr);
-    
-    uip_ipaddr(addr, 192,168,3,1);
-    uip_setdraddr(addr);
-    
-    uip_ipaddr(addr, 255,255,255,0);
-    uip_setnetmask(addr);
-    
-    uip_ipaddr(addr, 195,54,122,204);
-    resolv_conf(addr);
-
-    /*    program_handler_load("config.prg", NULL);*/
     break;
   }
 }
