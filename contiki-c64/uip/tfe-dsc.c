@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: tfe-dsc.c,v 1.3 2004/09/09 21:47:19 adamdunkels Exp $
+ * $Id: tfe-dsc.c,v 1.4 2005/03/29 23:17:25 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char tfeicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon tfe_icon =
   {CTK_ICON("TFE driver", tfeicon_bitmap, tfeicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

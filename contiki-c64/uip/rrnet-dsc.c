@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: rrnet-dsc.c,v 1.3 2004/09/09 21:47:19 adamdunkels Exp $
+ * $Id: rrnet-dsc.c,v 1.4 2005/03/29 23:17:25 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char rrneticon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon rrnet_icon =
   {CTK_ICON("RR-Net driver", rrneticon_bitmap, rrneticon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: eth64-dsc.c,v 1.1 2004/09/19 18:54:13 adamdunkels Exp $
+ * $Id: eth64-dsc.c,v 1.2 2005/03/29 23:17:25 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char lan91c96icon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon lan91c96_icon =
   {CTK_ICON("ETH64 driver", lan91c96icon_bitmap, lan91c96icon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
