@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-gtksim.c,v 1.4 2004/07/04 21:04:13 adamdunkels Exp $
+ * $Id: ctk-gtksim.c,v 1.5 2004/08/11 21:21:26 adamdunkels Exp $
  *
  */
 
@@ -256,14 +256,12 @@ quit(void)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_gtksim_init(int *argc, char **argv[])
+ctk_gtksim_init(void)
 {
   GtkWidget *window;
 #if 0
   GtkWidget *vbox;
 #endif
-  
-  gtk_init(argc, argv);
   
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(window, "Contiki GTKsim");

@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-gtksim.h,v 1.4 2004/07/04 21:04:13 adamdunkels Exp $
+ * $Id: ctk-gtksim.h,v 1.5 2004/08/11 21:21:26 adamdunkels Exp $
  *
  */
 
@@ -52,19 +52,21 @@ guint ctk_arch_getkey(void);
 #define CH_ENTER       GDK_Return
 #define CH_TAB         GDK_Tab
 #define CH_F1          GDK_F1
+#define CH_F2          GDK_F2
 #define CH_F3          GDK_F3
+#define CH_F4          GDK_F4
 #define CH_F5          GDK_F5
 #define CH_DEL         GDK_BackSpace
 #define CH_ESC         GDK_Escape
 
-void ctk_gtksim_init(int *argc, char **argv[]);
+void ctk_gtksim_init(void);
 
 void ctk_gtksim_redraw(void);
 
 extern GdkPixmap *ctk_gtksim_pixmap;
 extern GtkWidget *ctk_gtksim_drawing_area;
 
-#define CTK_GTKSIM_SCREEN_WIDTH 1024
-#define CTK_GTKSIM_SCREEN_HEIGHT 768
+#define CTK_GTKSIM_SCREEN_WIDTH 640 /*1024*/
+#define CTK_GTKSIM_SCREEN_HEIGHT 400 /*768*/
 
 #endif /* __CTK_GTKSIM_H__ */

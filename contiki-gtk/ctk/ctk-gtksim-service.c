@@ -59,6 +59,7 @@ s_ctk_draw_init(void)
   image = gtk_image_new_from_file("menubar.png");
   menubar = gtk_image_get_pixbuf(GTK_IMAGE(image));
 
+  ctk_gtksim_init();
   ctk_gtksim_draw_init();
 }
 /*--------------------------------------------------------------------------*/
@@ -83,7 +84,7 @@ s_ctk_draw_clear(unsigned char y1, unsigned char y2)
 		    y1 * RASTER_Y + MENUBAR_HEIGHT,
 		    CTK_GTKSIM_SCREEN_WIDTH,
 		    (y2 - y1) * RASTER_Y,
-		    NULL, 0, 0);    
+		    GDK_RGB_DITHER_NONE, 0, 0);    
   }
 }
 /*--------------------------------------------------------------------------*/
@@ -188,7 +189,7 @@ s_ctk_draw_window(struct ctk_window *window,
 		    y * RASTER_Y + MENUBAR_HEIGHT,
 		    (window->w + 2 * WINDOWBORDER_WIDTH) * RASTER_X,
 		    WINDOWTITLE_HEIGHT * RASTER_Y,
-		    NULL, 0, 0);    
+		    GDK_RGB_DITHER_NONE, 0, 0);    
   }
   
   
@@ -364,7 +365,8 @@ draw_widget(struct ctk_widget *w,
     width = ctk_gtksim_draw_string_width(buttonfont,
 					 w->widget.button.text,
 					 monospace);
-    if(focus == (CTK_FOCUS_WIDGET|CTK_FOCUS_WINDOW)) {
+    if(focus == (CTK_FOCUS_WIDGET|CTK_FOCUS_WINDOW) ||
+       focus == (CTK_FOCUS_WIDGET|CTK_FOCUS_DIALOG)) {
       gdk_draw_rectangle(ctk_gtksim_pixmap,
 			 black,
 			 FALSE,
@@ -473,7 +475,8 @@ draw_widget(struct ctk_widget *w,
 			   RASTER_Y * y + MENUBAR_HEIGHT,
 			   w->widget.textentry.text,
 			   monospace);
-    if(focus == (CTK_FOCUS_WIDGET|CTK_FOCUS_WINDOW)) {
+    if(focus == (CTK_FOCUS_WIDGET|CTK_FOCUS_WINDOW) ||
+       focus == (CTK_FOCUS_WIDGET|CTK_FOCUS_DIALOG)) {
       gdk_draw_line(ctk_gtksim_pixmap,
 		    black,
 		    x * RASTER_X + width + RASTER_X,
@@ -650,7 +653,7 @@ s_ctk_draw_menus(struct ctk_menus *menus)
 		    0, 0,
 		    CTK_GTKSIM_SCREEN_WIDTH,
 		    RASTER_Y + MENUBAR_HEIGHT,
-		    NULL, 0, 0);
+		    GDK_RGB_DITHER_NONE, 0, 0);
   }
   
   x = 1;
@@ -719,9 +722,10 @@ static const struct ctk_draw_service_interface interface =
    s_ctk_mouse_ytoc,
   };
 
+EK_POLLHANDLER(pollhandler);
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_PROCESS(proc, CTK_DRAW_SERVICE_NAME, EK_PRIO_NORMAL,
-	   eventhandler, NULL, (void *)&interface);
+	   eventhandler, pollhandler, (void *)&interface);
 
 /*--------------------------------------------------------------------------*/
 EK_PROCESS_INIT(ctk_gtksim_service_init, arg)
@@ -757,6 +761,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   
   switch(ev) {
   case EK_EVENT_INIT:
+  case EK_EVENT_REPLACE:
     blue = get_color(0, 0, 0xffff);
     white = get_color(0xffff, 0xffff, 0xffff);
     lightgray = get_color(0xefff, 0xefff, 0xefff);
@@ -770,5 +775,10 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     LOADER_UNLOAD();
     break;    
   }
+}
+/*--------------------------------------------------------------------------*/
+EK_POLLHANDLER(pollhandler)
+{
+  ctk_gtksim_redraw();
 }
 /*--------------------------------------------------------------------------*/
