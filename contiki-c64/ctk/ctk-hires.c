@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.7 2003/08/20 19:55:25 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.8 2003/08/24 22:29:41 adamdunkels Exp $
  *
  */
 
@@ -76,6 +76,7 @@ static unsigned char x1, y1, x2, y2;
 
 struct ctk_hires_windowparams ctk_hires_windowparams;
 unsigned char *ctk_hires_bitmapptr;
+
 /*-----------------------------------------------------------------------------------*/
 /* Tables. */
 
@@ -430,22 +431,31 @@ static void __fastcall__
 draw_widget(register struct ctk_widget *w,
 	    unsigned char x, unsigned char y,
 	    unsigned char clipy1, unsigned char clipy2,
-	    unsigned char focus)
+	    unsigned char afocus)
 {
   static unsigned char xpos, ypos, xscroll;
   static unsigned char i;
   static char c;
   static unsigned char len;
   static unsigned char tmp;
+  static unsigned char yclipped;
+  static unsigned char focus;
   char *text;
   
   xpos = x + w->x;
   ypos = y + w->y;  
+
+  yclipped = 0;  
+  if(ypos >= clipy1 && ypos < clipy2) {
+    yclipped = 1;
+  }
+  focus = afocus;
+  
   
   switch(w->type) {
   case CTK_WIDGET_SEPARATOR:
     hires_color(ctk_hires_theme.separatorcolors[focus]);
-    if(ypos >= clipy1 && ypos < clipy2) {
+    if(yclipped) {
       hires_chlinexy(xpos, ypos, w->w);
     }
     break;
@@ -456,8 +466,9 @@ draw_widget(register struct ctk_widget *w,
       if(ypos >= clipy1 && ypos < clipy2) {
 	hires_gotoxy(xpos, ypos);
 	ctk_hires_cputsn(text, w->w);
-	if(w->w - (hires_wherex() - xpos) > 0) {
-	  ctk_hires_cclear(w->w - (hires_wherex() - xpos));
+	tmp = w->w - (hires_wherex() - xpos);
+	if(tmp > 0) {
+	  ctk_hires_cclear(tmp);
 	}
       }
       ++ypos;
@@ -465,7 +476,7 @@ draw_widget(register struct ctk_widget *w,
     }
     break;
   case CTK_WIDGET_BUTTON:
-    if(ypos >= clipy1 && ypos < clipy2) {
+    if(yclipped) {
       hires_color(ctk_hires_theme.buttonleftcolors[focus]);
       hires_gotoxy(xpos, ypos);
       ctk_hires_draw_buttonleft();
@@ -477,7 +488,7 @@ draw_widget(register struct ctk_widget *w,
     }
     break;
   case CTK_WIDGET_HYPERLINK:
-    if(ypos >= clipy1 && ypos < clipy2) {
+    if(yclipped) {
       hires_color(ctk_hires_theme.hyperlinkcolors[focus]);
       hires_underline(1);
       hires_gotoxy(xpos, ypos);
@@ -486,25 +497,27 @@ draw_widget(register struct ctk_widget *w,
     }
     break;
   case CTK_WIDGET_TEXTENTRY:
-    hires_color(ctk_hires_theme.textentrycolors[focus]);
-    text = w->widget.textentry.text;
-    if(focus & CTK_FOCUS_WIDGET &&
-       w->widget.textentry.state != CTK_TEXTENTRY_EDIT) {
-      hires_revers(1);
-    } else {
-      hires_revers(0);
-    }
-    xscroll = 0;
-    tmp = w->w - 1;
-    if(w->widget.textentry.xpos >= tmp) {
-      xscroll = w->widget.textentry.xpos - tmp;
-    }
-    if(ypos >= clipy1 && ypos < clipy2) {
+    if(yclipped) {
+      hires_color(ctk_hires_theme.textentrycolors[focus]);
+      
+      if((focus & CTK_FOCUS_WIDGET) &&
+	 w->widget.textentry.state != CTK_TEXTENTRY_EDIT) {
+	hires_revers(1);
+      } else {
+	hires_revers(0);
+      }
+      xscroll = 0;
+      tmp = w->w - 1;
+      if(w->widget.textentry.xpos >= tmp) {
+	xscroll = w->widget.textentry.xpos - tmp;
+      }
+      text = w->widget.textentry.text;
       if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT) {
 	hires_revers(0);
 	hires_cputcxy(xpos, ypos, '>');
+	text += xscroll;
 	for(i = 0; i < w->w; ++i) {
-	  c = text[i + xscroll];
+	  c = *text;
 	  if(i == w->widget.textentry.xpos - xscroll) {
 	    hires_revers(1);
 	  } else {
@@ -516,6 +529,7 @@ draw_widget(register struct ctk_widget *w,
 	    ctk_hires_cputc(c);
 	  }
 	  hires_revers(0);
+	  ++text;
 	}
 	ctk_hires_cputc('<');
       } else {
@@ -533,7 +547,7 @@ draw_widget(register struct ctk_widget *w,
     hires_revers(0);
     break;
   case CTK_WIDGET_ICON:
-    if(ypos >= clipy1 && ypos < clipy2) {
+    if(yclipped) {
       hires_color(ctk_hires_theme.iconcolors[focus]);
 
       x = xpos;
@@ -707,15 +721,11 @@ ctk_draw_dialog(register struct ctk_window *dialog)
 
   /* Draw dialog frame. */
   
-  hires_cvlinexy(x, y1,
-		 dialog->h);
-  hires_cvlinexy(x2, y1,
-		 dialog->h);
+  hires_cvlinexy(x, y1, dialog->h);
+  hires_cvlinexy(x2, y1, dialog->h);
 
-  hires_chlinexy(x1, y,
-		 dialog->w);
-  hires_chlinexy(x1, y2,
-		 dialog->w);
+  hires_chlinexy(x1, y, dialog->w);
+  hires_chlinexy(x1, y2, dialog->w);
 
   hires_cputcxy(x, y, CH_ULCORNER);
   hires_cputcxy(x, y2, CH_LLCORNER);
@@ -724,7 +734,7 @@ ctk_draw_dialog(register struct ctk_window *dialog)
   
   
   /* Clear window contents. */
-  for(i = y1; i < y2;  ++i) {
+  for(i = y1; i < y2; ++i) {
     hires_cclearxy(x1, i, dialog->w);
   }
   
