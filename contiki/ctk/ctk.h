@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.2 2003/03/28 12:10:39 adamdunkels Exp $
+ * $Id: ctk.h,v 1.3 2003/03/28 12:17:25 adamdunkels Exp $
  *
  */
 
@@ -121,7 +121,7 @@ struct ctk_textentry {
 
 
 #define CTK_ICON(title, bitmap, textmap) \
- NULL, NULL, 0, 0, CTK_WIDGET_ICON, 0, title, 0, 0, 0, bitmap, textmap
+ NULL, NULL, 0, 0, CTK_WIDGET_ICON, 0, title, 0, bitmap, textmap
 struct ctk_icon {
   struct ctk_widget *next;
   struct ctk_window *window;
@@ -130,7 +130,6 @@ struct ctk_icon {
   unsigned char w;
   char *title;
   ek_id_t owner;
-  unsigned char color, fcolor;
   unsigned char *bitmap;
   char *textmap;
 };
@@ -174,7 +173,6 @@ struct ctk_widget_textentry {
 struct ctk_widget_icon {
   char *title;
   ek_id_t owner;
-  unsigned char color, fcolor;
   unsigned char *bitmap;
   char *textmap;
 };
