@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-rs232-blueround,v 1.1 2003/03/19 16:26:18 adamdunkels Exp $
+# $Id: Makefile.c64-rs232-blueround,v 1.2 2003/04/08 19:07:09 adamdunkels Exp $
 #
 
 all: contiki
@@ -40,14 +40,14 @@ include Makefile.common
 CFLAGS:=$(CFLAGS) \
         -DCTK_BLUEROUND \
         -DWITH_UIP -DWITH_RS232 \
-        -DWITH_TELNET -DWITH_WWW 
+        -DWITH_WWW 
 
 contiki:  contiki-main.o petsciiconv.o \
 ctk.o ek.o dispatcher.o \
- contiki.o programs.o \
+ program-handler.o about.o netconf.o processes.o \
  fire.o \
  $(CTK_BLUEROUND) \
  $(UIP) rs232dev.o \
- $(TELNET) $(WWW) 
+ $(WWW) 
 	cl65 -Ln labels -o contiki -t $(SYS) $^
 

@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-tfe,v 1.1 2003/03/19 16:26:18 adamdunkels Exp $
+# $Id: Makefile.c64-tfe,v 1.2 2003/04/08 19:08:23 adamdunkels Exp $
 #
 
 all: contiki
@@ -40,14 +40,15 @@ include Makefile.common
 CFLAGS:=$(CFLAGS) \
         -DCTK_EYECANDY \
         -DWITH_UIP -DWITH_TFE -DWITH_ETHERNET\
-        -DWITH_WEBSERVER -DWITH_WWW 
+        -DWITH_WWW 
 
 contiki:  contiki-main.o petsciiconv.o \
  ctk.o ek.o dispatcher.o \
- contiki.o programs.o \
+ program-handler.o \
  fire.o \
  $(CTK_EYECANDY) \
  $(UIP) uip_arp.o cs8900a.o \
- $(WEBSERVER) $(WWW) 
+ about.o netconf.o processes.o \
+ $(WWW)
 	cl65 -Ln labels -o contiki -t $(SYS) $^
 
