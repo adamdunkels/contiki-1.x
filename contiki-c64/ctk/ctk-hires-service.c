@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires-service.c,v 1.2 2004/09/12 13:30:39 adamdunkels Exp $
+ * $Id: ctk-hires-service.c,v 1.3 2004/12/27 22:04:30 oliverschmidt Exp $
  *
  */
 
@@ -704,8 +704,6 @@ s_ctk_draw_window(register struct ctk_window *window,
      ctk_hires_windowparams.clipy2 > 0) {
     ctk_hires_draw_windowborders();
   }
-  
-  focus = focus & CTK_FOCUS_WINDOW;
   
   /* Draw inactive widgets. */
   for(w = window->inactive; w != NULL; w = w->next) {
