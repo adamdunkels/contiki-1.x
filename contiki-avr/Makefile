@@ -9,10 +9,7 @@
 # 2. Redistributions in binary form must reproduce the above copyright 
 #    notice, this list of conditions and the following disclaimer in the 
 #    documentation and/or other materials provided with the distribution. 
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#      This product includes software developed by Adam Dunkels.
-# 4. The name of the author may not be used to endorse or promote
+# 3. The name of the author may not be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.  
 #
@@ -30,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.4 2003/08/25 12:42:41 adamdunkels Exp $
+# $Id: Makefile,v 1.5 2004/07/04 20:17:37 adamdunkels Exp $
 #
 
 all: contiki.srec
@@ -43,9 +40,9 @@ CC=avr-gcc
 LD=avr-ld
 AS=avr-as
 OBJCOPY=avr-objcopy
-CFLAGS=-Os -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
+CFLAGS=-Os -Iapps -Ictk -Iuip -Iconf \
+	-I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
-	-Iapps -Ictk -Iuip -Iconf \
 	-DWITH_UIP -DWITH_ASCII -DWITH_AVR \
 	-Wall -g -fpack-struct -I../uip -I. -mmcu=atmega128 
 LDFLAGS=-mmcu=atmega128 -Wl,-Map=contiki.map,--cref,-Tdata,0x801100
@@ -78,13 +75,17 @@ LDFLAGS=-mmcu=atmega128 -Wl,-Map=contiki.map,--cref,-Tdata,0x801100
 %.srec:
 	$(OBJCOPY) -O srec $< $@
 
-UIP=uip.o uip_arch.o uip_main.o resolv.o
+UIP=uip.o uip_arch.o uiplib.o resolv.o
 
 WWW=www.o webclient.o http-strings.o http-user-agent-string.o \
     htmlparser.o html-strings.o  www-dsc.o
 EMAIL=email.o smtp.o smtp-strings.o
 WEBSERVER=webserver.o http-strings.o 
 TELNET=simpletelnet.o telnet.o
+
+SYSTEM=ek.o ek-service.o loader-arch.o
+CONTIKIFILES= $(SYSTEM) $(UIP) uip-fw.o uip-fw-service.o timer.o 
+
 
 clean:
 	rm -f *.o *~ *core contiki contiki.srec *.lst *.map
@@ -95,15 +96,16 @@ depend:
 	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
 	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
 
-contiki: contiki-main.o strncasecmp.o \
- ctk.o dispatcher.o arg.o \
- uip.o uip_arch.o uip_arp.o resolv.o uip-signal.o uip_main.o \
+contiki: $(CONIKIFILES) contiki-main.o strncasecmp.o \
+ ctk.o ek.o arg.o timer.o ek-service.o \
+ uip.o uip_arch.o uip_arp.o resolv.o uip-event.o uiplib.o tcpip.o \
  rtl8019.o rtl8019dev.o delay.o debug.o rtl8019-drv.o \
  ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o \
  program-handler.o about.o about-dsc.o \
  processes.o processes-dsc.o calc.o calc-dsc.o \
- webserver.o httpd.o httpd-cgi.o httpd-fs.o webserver-dsc.o \
- $(WWW) weblinks.o weblinks-dsc.o
+ telnetd.o telnetd-dsc.o shell.o memb.o \
+ $(WWW) weblinks.o weblinks-dsc.o \
+# webserver.o httpd.o httpd-cgi.o httpd-fs.o webserver-dsc.o 
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
 
 

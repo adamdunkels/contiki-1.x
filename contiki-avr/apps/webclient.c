@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,16 +29,18 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.3 2003/09/04 19:43:12 adamdunkels Exp $
+ * $Id: webclient.c,v 1.4 2004/07/04 20:17:38 adamdunkels Exp $
  *
  */
 
 #include "uip.h"
 #include "webclient.h"
 #include "resolv.h"
-#include "uip_main.h"
+#include "uiplib.h"
 
 #include "www-conf.h"
+
+#include "tcpip.h"
 
 #include <string.h>
 
@@ -144,7 +143,7 @@ webclient_get(char *host, u16_t port, char *file)
   
   /* First check if the host is an IP address. */
   ipaddr = &addr[0];
-  if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {    
+  if(uiplib_ipaddrconv(host, (unsigned char *)addr) == 0) {    
     ipaddr = resolv_lookup(host);
     
     if(ipaddr == NULL) {
@@ -159,7 +158,7 @@ webclient_get(char *host, u16_t port, char *file)
       (htons(ipaddr[1]) >> 8) == 67)) {
     return 0;
   } else {
-    conn = dispatcher_connect(ipaddr, htons(port), NULL);
+    conn = tcp_connect(ipaddr, htons(port), NULL);
   }
   
   if(conn == NULL) {
@@ -365,17 +364,17 @@ newdata(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(webclient_appcall, state)
+void
+webclient_appcall(void *state)
 {
   struct uip_conn *conn;
-  DISPATCHER_UIPCALL_ARG(state);
 
   if(uip_connected()) {
     s.timer = 0;
     s.state = WEBCLIENT_STATE_STATUSLINE;
     senddata();
     webclient_connected();
-    dispatcher_markconn(uip_conn, &s);
+    tcp_markconn(uip_conn, &s);
     return;
   }
 
@@ -424,14 +423,14 @@ DISPATCHER_UIPCALL(webclient_appcall, state)
   }
 
   if(uip_closed()) {
-    dispatcher_markconn(uip_conn, NULL);
+    tcp_markconn(uip_conn, NULL);
     if(s.httpflag != HTTPFLAG_MOVED) {
       /* Send NULL data to signal EOF. */
       webclient_datahandler(NULL, 0);
     } else {
       conn = uip_connect(uip_conn->ripaddr, s.port);
       if(conn != NULL) {
-	dispatcher_markconn(conn, NULL);
+	tcp_markconn(conn, NULL);
 	init_connection();
       }
     }

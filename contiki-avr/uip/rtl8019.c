@@ -564,7 +564,7 @@ void overrun(void)
  */
 #define TX_PAGES 12         /* Allow for 2 back-to-back frames */
 
-static unsigned char mac[6] = {0x00,0x06,0x98,0x01,0x02,0x26};
+static unsigned char mac[6] = {0x00,0x06,0x98,0x01,0x02,0x29};
 void Delay(long nops)
 {
     volatile long i;

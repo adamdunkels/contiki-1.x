@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -27,43 +27,22 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki operating system.
+ * This file is part of the Contiki Destop OS
  *
- * $Id: ek-conf.h,v 1.2 2004/07/04 20:17:38 adamdunkels Exp $
+ * $Id: telnetd-conf.h,v 1.1 2004/07/04 20:17:38 adamdunkels Exp $
  *
  */
+#ifndef __TELNETD_CONF_H__
+
+#define TELNETD_CONF_LINELEN 32
+#define TELNETD_CONF_NUMLINES 8
+
+#endif /* __TELNETD_CONF_H__ */
 
 
-#ifndef __EK_CONF_H__
-#define __EK_CONF_H__
-
-/*#include <time.h>*/
-
-typedef void *ek_data_t;
-
-typedef unsigned char ek_event_t;
-typedef unsigned char ek_id_t;
-
-/* ek_ticks_t: should be defined to be the largest type that fits the
-   highest timeout value used by the system. For example, if all
-   timeouts are between 1 and 150, the ek_ticks_t can be typedef'd as
-   "unsigned char", but if the maximum timeout is over 256, "unsigned
-   short" is a better choise. */
-typedef unsigned short ek_ticks_t;
-
-/* ek_clock_t: should be defined to be the native clock ticks type
-   used by the underlying system. (Look for time_t or similar.) */
-typedef unsigned long ek_clock_t; 
-
-typedef unsigned char ek_num_events_t;
-
-#define EK_CONF_MAXPROCS 16
-#define EK_CONF_NUMEVENTS 16
 
 
-#ifndef NULL
-#define NULL (void *)0
-#endif /* NULL */
 
 
-#endif /* __EK_CONF_H__ */
+
+

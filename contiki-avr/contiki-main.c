@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,21 +29,23 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.3 2003/08/25 12:42:41 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.4 2004/07/04 20:17:37 adamdunkels Exp $
  *
  */
 
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-vncserver.h"
-#include "dispatcher.h"
+#include "ek.h"
 
 
-#include "uip_main.h"
+#include "uiplib.h"
 #include "uip.h"
 #include "uip_arp.h"
 #include "rtl8019-drv.h"
 #include "resolv.h"
+
+#include "clock.h"
 
 #include "webserver.h"
 #include "program-handler.h"
@@ -59,6 +58,8 @@
 /*#include "directory-dsc.h"*/
 #include "weblinks-dsc.h"
 
+#include "telnetd-dsc.h"
+
 #include "debug.h"
 #include "uip.h"
 #include "uip_arp.h"
@@ -69,7 +70,7 @@
 #include "avr/pgmspace.h"
 
 
-static const struct uip_eth_addr ethaddr = {{0x00,0x06,0x98,0x01,0x02,0x26}};
+static const struct uip_eth_addr ethaddr = {{0x00,0x06,0x98,0x01,0x02,0x29}};
 
 
 static u16_t addr[2];
@@ -103,8 +104,8 @@ SIGNAL(SIG_OVERFLOW0)
   ++count;
 }
 
-unsigned short
-clock(void)
+clock_time_t
+clock_time(void)
 {
   return count;
 }
@@ -136,10 +137,12 @@ main(int argc, char **argv)
 
   init_timer();
   sei();
+
+  ek_init();
   
-  uip_init();
+  tcpip_init(NULL);
   
-  resolv_init();
+  resolv_init(NULL);
   
 
   debug_print8(1);
@@ -149,7 +152,7 @@ main(int argc, char **argv)
 
  
     
-#if 1
+#if 0
   uip_ipaddr(addr, 193,10,67,152);
   uip_sethostaddr(addr);
  
@@ -164,10 +167,10 @@ main(int argc, char **argv)
 
 #else
 
-  uip_ipaddr(addr, 192,168,1,2);
+  uip_ipaddr(addr, 192,168,27,2);
   uip_sethostaddr(addr);
  
-  uip_ipaddr(addr, 192,168,1,1);
+  uip_ipaddr(addr, 192,168,27,1);
   uip_setdraddr(addr);
  
   uip_ipaddr(addr, 255,255,255,0);
@@ -177,10 +180,7 @@ main(int argc, char **argv)
   resolv_conf(addr);
 #endif
 
-  
-    
-  dispatcher_init();
-
+   
   
   ctk_init();
 
@@ -190,20 +190,25 @@ main(int argc, char **argv)
 
   program_handler_init();
 
-  webserver_init(NULL);
+  /*  webserver_init(NULL);*/
 
   
   /*  program_handler_add(&directory_dsc, "Directory", 1);*/
   program_handler_add(&about_dsc, "About", 1);
-  program_handler_add(&webserver_dsc, "Web server", 1);
+  /*  program_handler_add(&webserver_dsc, "Web server", 1);*/
   program_handler_add(&www_dsc, "Web browser", 1);
   /*  program_handler_add(&calc_dsc, "Calculator", 0);*/
   program_handler_add(&processes_dsc, "Processes", 0);
   program_handler_add(&weblinks_dsc, "Web links", 1);
 
+  program_handler_add(&telnetd_dsc, "Shell server", 1);
+
 
   debug_print8(64);
-  dispatcher_run();
+
+  while(1) {
+    ek_run();
+  }
 
   
   return 0;
@@ -212,3 +217,15 @@ main(int argc, char **argv)
   argc = argc;
 }
 /*-----------------------------------------------------------------------------------*/
+char *shell_prompt_text = "contiki-ethernut> ";
+
+unsigned char
+uip_fw_forward(void)
+{
+  return 0;
+}
+void
+uip_fw_periodic(void)
+{
+  
+}

@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,14 +29,14 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: weblinks.c,v 1.2 2003/08/25 12:42:41 adamdunkels Exp $
+ * $Id: weblinks.c,v 1.3 2004/07/04 20:17:38 adamdunkels Exp $
  *
  */
 
 
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "loader.h"
 
 #include "program-handler.h"
@@ -93,20 +90,42 @@ static struct ctk_label hintslabel2 =
   {CTK_LABEL(1, 2, 24, 1, "then click on the links.")};
 
 
-static DISPATCHER_SIGHANDLER(weblinks_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(weblinks_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Web links", NULL, weblinks_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "Web links", EK_PRIO_NORMAL,
+	   eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(weblinks_init, arg)
 {
-  unsigned char y, i;
-  
   arg_free(arg);
 		     
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    id = ek_start(&p);
+  } else {
+    ctk_window_open(&window);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+quit(void)
+{
+  ctk_window_close(&window);
+  ek_exit();
+  id = EK_ID_NONE;
+  LOADER_UNLOAD();
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  unsigned char y, i;    
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
 
     ctk_window_new(&window, WIDTH, HEIGHT, "Web links");
 
@@ -129,28 +148,11 @@ LOADER_INIT_FUNC(weblinks_init, arg)
       
     }
 
-    dispatcher_listen(ctk_signal_window_close);
-  }
-  ctk_window_open(&window);
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-quit(void)
-{
-  ctk_window_close(&window);
-  dispatcher_exit(&p);
-  id = EK_ID_NONE;
-  LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(weblinks_sighandler, s, data)
-{
-  unsigned char i;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_window_close &&
-	    data == (ek_data_t)&window) {
+    ctk_window_open(&window);
+
+  } else if(ev == EK_EVENT_REQUEST_EXIT ||
+	    (ev == ctk_signal_window_close &&
+	     data == (ek_data_t)&window)) {
     quit();
   }
 }

@@ -32,13 +32,15 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: ctk-vncserver-conf.h,v 1.1 2003/09/01 22:27:40 adamdunkels Exp $
+ * $Id: ctk-vncserver-conf.h,v 1.2 2004/07/04 20:17:38 adamdunkels Exp $
  *
  */
 #ifndef __CTK_VNCSERVER_CONF_H__
 #define __CTK_VNCSERVER_CONF_H__
 
 #define CTK_VNCSERVER_CONF_NUMCONNS 8
+
+#define CTK_VNCSERVER_CONF_MAX_ICONS 8
 
 #endif /* __CTK_VNCSERVER_CONF_H__ */
 
