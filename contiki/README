@@ -1,28 +1,31 @@
-This is the source code for the Contiki desktop environment, which is
-a modern Internet-enabled desktop environment for the Commodore 64 and
-a bunch of other systems written by Adam Dunkels. The Contiki desktop
-environment includes a simple window system and GUI, TCP/IP
-networking, a web server, a telnet client, and a web browser. Contiki
-is written in C and is compiled with Ullrich von Bassewitz' cc65 C
-compiler.
+Contiki is an open source, highly portable, networked, multi-tasking
+operating system for memory-constrained systems.
 
-More information about the Contiki desktop environment can be found on
-its web page:
+Contiki runs on a variety of tiny systems ranging from embedded 8-bit
+microcontrollers to old homecomputers such the Commodore 64. Code
+footprint is on the order of kilobytes and memory usage can be
+configured to be as low as tens of bytes.
 
-   http://dunkels.com/adam/contiki/
+Contiki provides a simple event-driven kernel with per-process
+optional preemptive multi-threading, interprocess communication using
+message passing through events, a dynamic process structure with
+support for loading and unloading programs, native TCP/IP support
+using the uIP TCP/IP stack, and a GUI subsystem with either direct
+graphic support for locally connected terminals or networked virtual
+display with VNC or over Telnet.
 
-The cc65 C compiler can be found on the cc65 web page:
+The Contiki source code is split into the following directories:
 
-   http://www.cc65.org/
+  apps/ - Applications
+  conf/ - Example configuration files
+  ctk/  - CTK, the Contiki GUI toolkit
+  doc/  - Files for building documentation from the sources
+  ek/   - Event kernel, multitasking, protothreads
+  lib/  - Libraries 
+  uip/  - The uIP TCP/IP stack
 
-The Contiki desktop environment source code is divided into the
-following directories:
-
-  apps/ - the Contiki applications
-  ctk/  - the ctk conio windowing toolkit on which Contiki builds
-  ek/   - the ek event kernel and the dispatcher
-  lib/  - various library files
-  uip/  - the uIP TCP/IP stack
-
-To build the Contiki desktop environment from sources, GNU make and
-cc65 must be installed. 
+To build a Contiki system, you also need a Contiki port. This contains
+all the architecture specific files needed to build an actual
+system. For most ports, the build procedure is simple: place the
+port's directory in the same directory as the contiki/ directory and
+run "make" (or "gmake" under FreeBSD) in the port's directory.
