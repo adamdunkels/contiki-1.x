@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.2 2003/03/28 12:11:18 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.3 2003/06/30 20:36:28 adamdunkels Exp $
  *
  */
 
@@ -79,12 +79,12 @@ struct arp_entry {
   u8_t time;
 };
 
-static const struct uip_eth_addr ethaddr = {{UIP_ETHADDR0,
-					     UIP_ETHADDR1,
-					     UIP_ETHADDR2,
-					     UIP_ETHADDR3,
-					     UIP_ETHADDR4,
-					     UIP_ETHADDR5}};
+struct uip_eth_addr uip_ethaddr = {{UIP_ETHADDR0,
+				    UIP_ETHADDR1,
+				    UIP_ETHADDR2,
+				    UIP_ETHADDR3,
+				    UIP_ETHADDR4,
+				    UIP_ETHADDR5}};
 
 static struct arp_entry arp_table[UIP_ARPTAB_SIZE];
 static u16_t ipaddr[2];
@@ -233,7 +233,7 @@ uip_arp_arpin(void)
       for(c = 0; c < 6; ++c) {
         BUF->dhwaddr.addr[c] = BUF->shwaddr.addr[c];
 	BUF->shwaddr.addr[c] = 
-	  BUF->ethhdr.src.addr[c] = ethaddr.addr[c];
+	  BUF->ethhdr.src.addr[c] = uip_ethaddr.addr[c];
 	BUF->ethhdr.dest.addr[c] = BUF->dhwaddr.addr[c];
       }
 
@@ -307,7 +307,7 @@ uip_arp_out(void)
     for(c = 0; c < 6; ++c) {     
       BUF->ethhdr.dest.addr[c] = 0xff; /* Broadcast ARP request. */
       BUF->ethhdr.src.addr[c] = 
-	BUF->shwaddr.addr[c] = ethaddr.addr[c];
+	BUF->shwaddr.addr[c] = uip_ethaddr.addr[c];
       BUF->dhwaddr.addr[c] = 0;
     }
     
@@ -331,7 +331,7 @@ uip_arp_out(void)
   /* Build an ethernet header. */
   for(c = 0; c < 6; ++c) {
     IPBUF->ethhdr.dest.addr[c] = arp_table[i].ethaddr.addr[c];
-    IPBUF->ethhdr.src.addr[c] = ethaddr.addr[c];
+    IPBUF->ethhdr.src.addr[c] = uip_ethaddr.addr[c];
   }
   IPBUF->ethhdr.type = HTONS(UIP_ETHTYPE_IP);
 

@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.h,v 1.2 2003/04/16 18:28:16 adamdunkels Exp $
+ * $Id: uip_arp.h,v 1.3 2003/06/30 20:36:28 adamdunkels Exp $
  *
  */
 
@@ -43,7 +43,9 @@
 struct uip_eth_addr {
   u8_t addr[6];
 };
-  
+
+extern struct uip_eth_addr uip_ethaddr;
+
 struct uip_eth_hdr {
   struct uip_eth_addr dest;
   struct uip_eth_addr src;
@@ -101,6 +103,14 @@ void uip_arp_timer(void);
                                  addr[1] = uip_arp_draddr[1]; } while(0)
 #define uip_getnetmask(addr) do { addr[0] = uip_arp_netmask[0]; \
                                   addr[1] = uip_arp_netmask[1]; } while(0)
+
+#define uip_setethaddr(eaddr) do {uip_ethaddr.addr[0] = eaddr.addr[0]; \
+                              uip_ethaddr.addr[1] = eaddr.addr[1];\
+                              uip_ethaddr.addr[2] = eaddr.addr[2];\
+                              uip_ethaddr.addr[3] = eaddr.addr[3];\
+                              uip_ethaddr.addr[4] = eaddr.addr[4];\
+                              uip_ethaddr.addr[5] = eaddr.addr[5];} while(0)
+
 
 
 /* Internal variables that are set using the macros uip_setdraddr and
