@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-drv.c,v 1.10 2004/09/14 07:31:20 adamdunkels Exp $
+ * $Id: rrnet-drv.c,v 1.11 2004/09/17 20:54:05 adamdunkels Exp $
  *
  */
 
@@ -73,7 +73,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
   case EK_EVENT_INIT:
-    uip_setethaddr(&addr);
+  case EK_EVENT_REPLACE:
+    uip_setethaddr(addr);
     asm("lda #1");
     asm("ora $de01");
     asm("sta $de01");

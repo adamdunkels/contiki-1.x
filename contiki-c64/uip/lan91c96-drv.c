@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: lan91c96-drv.c,v 1.6 2004/09/14 07:31:20 adamdunkels Exp $
+ * $Id: lan91c96-drv.c,v 1.7 2004/09/17 20:54:05 adamdunkels Exp $
  *
  */
 
@@ -72,7 +72,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
   case EK_EVENT_INIT:
-    uip_setethaddr(&addr);
+  case EK_EVENT_REPLACE:
+    uip_setethaddr(addr);
     lan91c96_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:

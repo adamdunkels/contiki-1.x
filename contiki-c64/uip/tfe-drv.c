@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.12 2004/09/14 07:31:20 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.13 2004/09/17 20:54:05 adamdunkels Exp $
  *
  */
 
@@ -73,7 +73,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
-    uip_setethaddr(&addr);
+    uip_setethaddr(addr);
     cs8900a_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:
