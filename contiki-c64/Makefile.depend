@@ -42,6 +42,10 @@ about.o: ../contiki/apps/about.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ../contiki/ek/dispatcher.h ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h ../contiki/lib/petsciiconv.h \
  ../contiki/ek/loader.h
+calc.o: ../contiki/apps/calc.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/dispatcher.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h ../contiki/ek/loader.h
 contiki.o: ../contiki/apps/contiki.c ../contiki/uip/uip_main.h \
  ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
  ../contiki/ek/dispatcher.h ../contiki/ek/ek.h conf/ek-conf.h \
