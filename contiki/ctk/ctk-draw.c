@@ -153,3 +153,10 @@ ctk_mouse_ytoc(unsigned short y)
   return 0;
 }
 /*---------------------------------------------------------------------------*/
+void
+ctk_draw_quit(void)
+{
+  ek_post(service.id, EK_EVENT_REQUEST_EXIT, NULL);
+  ek_service_reset(&service);  
+}
+/*---------------------------------------------------------------------------*/
