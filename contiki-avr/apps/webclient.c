@@ -29,18 +29,18 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.4 2004/07/04 20:17:38 adamdunkels Exp $
+ * $Id: webclient.c,v 1.5 2004/08/09 22:25:36 adamdunkels Exp $
  *
  */
 
+#include "ek.h"
+#include "tcpip.h"
 #include "uip.h"
 #include "webclient.h"
 #include "resolv.h"
 #include "uiplib.h"
 
 #include "www-conf.h"
-
-#include "tcpip.h"
 
 #include <string.h>
 
@@ -150,12 +150,14 @@ webclient_get(char *host, u16_t port, char *file)
       return 0;
     }
   }
-  
+
   /* XXX: here we check so that the server does not try to access any
      hosts on the SICS networks. */
-  if(ipaddr[0] == HTONS((193 << 8) | 10) &&
-     ((htons(ipaddr[1]) >> 8) == 66 ||
-      (htons(ipaddr[1]) >> 8) == 67)) {
+  if(!(ipaddr[0] == HTONS((193 << 8) | 10) &&
+       ipaddr[1] == HTONS((64 << 8) | 99)) &&
+     (ipaddr[0] == HTONS((193 << 8) | 10) &&
+      ((htons(ipaddr[1]) >> 8) == 66 ||
+       (htons(ipaddr[1]) >> 8) == 67))) {
     return 0;
   } else {
     conn = tcp_connect(ipaddr, htons(port), NULL);
@@ -165,7 +167,6 @@ webclient_get(char *host, u16_t port, char *file)
     return 0;
   }
   
-
   s.port = port;
   strncpy(s.file, file, sizeof(s.file));
   strncpy(s.host, host, sizeof(s.host));
@@ -176,7 +177,7 @@ webclient_get(char *host, u16_t port, char *file)
 /*-----------------------------------------------------------------------------------*/
 static unsigned char * CC_FASTCALL
 copy_string(unsigned char *dest,
-	    unsigned char *src, unsigned char len)
+	    const unsigned char *src, unsigned char len)
 {
   return strcpy(dest, src) + len;
 }
@@ -273,7 +274,7 @@ parse_statusline(u16_t len)
 }
 /*-----------------------------------------------------------------------------------*/
 static char
-casecmp(char *str1, char *str2, char len)
+casecmp(char *str1, const char *str2, char len)
 {
   static char c;
   
@@ -297,7 +298,7 @@ static u16_t
 parse_headers(u16_t len)
 {
   char *cptr;
-  static char c;
+  static unsigned char i;
   
   while(len > 0 && s.httpheaderlineptr < sizeof(s.httpheaderline)) {
     s.httpheaderline[s.httpheaderlineptr] = *uip_appdata;
@@ -327,9 +328,25 @@ parse_headers(u16_t len)
 		sizeof(http_content_type) - 1, sizeof(s.mimetype));
       } else if(casecmp(s.httpheaderline, http_location,
 			    sizeof(http_location) - 1) == 0) {
-	strncpy(s.file, s.httpheaderline +
-		sizeof(http_location) - 1, sizeof(s.file));
-	s.file[s.httpheaderlineptr - 1] = 0;
+	cptr = s.httpheaderline +
+	  sizeof(http_location) - 1;
+	
+	if(strncmp(cptr, http_http, 7) == 0) {
+	  cptr += 7; 
+	  for(i = 0; i < s.httpheaderlineptr - 7; ++i) {
+	    if(*cptr == 0 ||
+	       *cptr == '/' ||
+	       *cptr == ' ' ||
+	       *cptr == ':') {
+	      s.host[i] = 0;
+	      break;
+	    }
+	    s.host[i] = *cptr;
+	    ++cptr;
+	  }
+	}
+	strncpy(s.file, cptr, sizeof(s.file));
+	/*	s.file[s.httpheaderlineptr - i] = 0;*/
       }
 
 
@@ -367,8 +384,6 @@ newdata(void)
 void
 webclient_appcall(void *state)
 {
-  struct uip_conn *conn;
-
   if(uip_connected()) {
     s.timer = 0;
     s.state = WEBCLIENT_STATE_STATUSLINE;
@@ -378,6 +393,9 @@ webclient_appcall(void *state)
     return;
   }
 
+  if(uip_timedout()) {
+    webclient_timedout();
+  }
   
   if(state == NULL) {
     uip_abort();
@@ -388,17 +406,12 @@ webclient_appcall(void *state)
     webclient_closed();
     uip_abort();
     return;
-  }    
-  
-  
+  }        
 
   if(uip_aborted()) {
     webclient_aborted();
   }
-  if(uip_timedout()) {
-    webclient_timedout();
-  }
-
+  
   
   if(uip_acked()) {
     s.timer = 0;
@@ -428,11 +441,15 @@ webclient_appcall(void *state)
       /* Send NULL data to signal EOF. */
       webclient_datahandler(NULL, 0);
     } else {
-      conn = uip_connect(uip_conn->ripaddr, s.port);
+      /*      conn = uip_connect(uip_conn->ripaddr, s.port);
       if(conn != NULL) {
-	tcp_markconn(conn, NULL);
+	dispatcher_markconn(conn, NULL);
 	init_connection();
+	}*/
+      if(resolv_lookup(s.host) == NULL) {
+	resolv_query(s.host);
       }
+      webclient_get(s.host, s.port, s.file);
     }
   }
 }
