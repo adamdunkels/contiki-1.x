@@ -39,28 +39,33 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.18 2004/09/18 20:17:01 adamdunkels Exp $
+ * $Id: uip.c,v 1.19 2005/02/07 06:59:39 adamdunkels Exp $
  *
  */
 
 /*
-This is a small implementation of the IP and TCP protocols (as well as
-some basic ICMP stuff). The implementation couples the IP, TCP and the
-application layers very tightly. To keep the size of the compiled code
-down, this code also features heavy usage of the goto statement.
+This is a small implementation of the IP, UDP and TCP protocols (as
+well as some basic ICMP stuff). The implementation couples the IP,
+UDP, TCP and the application layers very tightly. To keep the size of
+the compiled code down, this code frequently uses the goto
+statement. While it would be possible to break the uip_process()
+function into many smaller functions, this would increase the code
+size because of the overhead of parameter passing and the fact that
+the optimier would not be as efficient.
 
 The principle is that we have a small buffer, called the uip_buf, in
 which the device driver puts an incoming packet. The TCP/IP stack
-parses the headers in the packet, and calls upon the application. If
-the remote host has sent data to the application, this data is present
-in the uip_buf and the application read the data from there. It is up
-to the application to put this data into a byte stream if needed. The
+parses the headers in the packet, and calls the application. If the
+remote host has sent data to the application, this data is present in
+the uip_buf and the application read the data from there. It is up to
+the application to put this data into a byte stream if needed. The
 application will not be fed with data that is out of sequence.
 
 If the application whishes to send data to the peer, it should put its
-data into the uip_buf, 40 bytes from the start of the buffer. The
-TCP/IP stack will calculate the checksums, and fill in the necessary
-header fields and finally send the packet back to the peer.
+data into the uip_buf. The uip_appdata pointer points to the first
+available byte. The TCP/IP stack will calculate the checksums, and
+fill in the necessary header fields and finally send the packet back
+to the peer.
 */
 
 #include "uip.h"
@@ -99,17 +104,18 @@ struct uip_eth_addr uip_ethaddr = {{0,0,0,0,0,0}};
 #endif
 
 
-u8_t uip_buf[UIP_BUFSIZE+2];   /* The packet buffer that contains
-				incoming packets. */
-u8_t *uip_appdata;  /* The uip_appdata pointer points to
-				application data. */
-u8_t *uip_sappdata;  /* The uip_appdata pointer points to the
-				 application data which is to be sent. */
+u8_t uip_buf[UIP_BUFSIZE + 2];   /* The packet buffer that contains
+				    incoming packets. */
+u8_t *uip_appdata;               /* The uip_appdata pointer points to
+				    application data. */
+u8_t *uip_sappdata;              /* The uip_appdata pointer points to
+				    the application data which is to
+				    be sent. */
 #if UIP_URGDATA > 0
-u8_t *uip_urgdata;  /* The uip_urgdata pointer points to
-				urgent data (out-of-band data), if
-				present. */
-u8_t uip_urglen, uip_surglen;
+u8_t *uip_urgdata;               /* The uip_urgdata pointer points to
+   				    urgent data (out-of-band data), if
+   				    present. */
+u16_t uip_urglen, uip_surglen;
 #endif /* UIP_URGDATA > 0 */
 
 u16_t uip_len, uip_slen;
@@ -160,14 +166,29 @@ static u16_t tmp16;
 #define TCP_URG 0x20
 #define TCP_CTL 0x3f
 
+#define TCP_OPT_END     0   /* End of TCP options list */
+#define TCP_OPT_NOOP    1   /* "No-operation" TCP option */
+#define TCP_OPT_MSS     2   /* Maximum segment size TCP option */
+
+#define TCP_OPT_MSS_LEN 4   /* Length of TCP MSS option. */
+
 #define ICMP_ECHO_REPLY 0
 #define ICMP_ECHO       8     
+
+/* Header sizes. */
+#define UIP_IPH_LEN    20    /* Size of IP header */
+#define UIP_UDPH_LEN    8    /* Size of UDP header */
+#define UIP_TCPH_LEN   20    /* Size of TCP header */
+#define UIP_IPUDPH_LEN 28    /* Size of IP + UDP header */
+#define UIP_IPTCPH_LEN 40    /* Size of IP + TCP header */
+
 
 /* Macros. */
 #define BUF ((uip_tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define FBUF ((uip_tcpip_hdr *)&uip_reassbuf[0])
 #define ICMPBUF ((uip_icmpip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UDPBUF ((uip_udpip_hdr *)&uip_buf[UIP_LLH_LEN])
+
 
 #if UIP_STATISTICS == 1
 struct uip_stats uip_stat;
@@ -207,7 +228,7 @@ uip_init(void)
 
   /* IPv4 initialization. */
 #if UIP_FIXEDADDR == 0
-  uip_hostaddr[0] = uip_hostaddr[1] = 0;
+  /*  uip_hostaddr[0] = uip_hostaddr[1] = 0;*/
 #endif /* UIP_FIXEDADDR */
 
 }
@@ -269,7 +290,7 @@ uip_connect(u16_t *ripaddr, u16_t rport)
   conn->timer = 1; /* Send the SYN next time around. */
   conn->rto = UIP_RTO;
   conn->sa = 0;
-  conn->sv = 16;
+  conn->sv = 16;   /* Initial value of the RTT variance. */
   conn->lport = htons(lastport);
   conn->rport = rport;
   conn->ripaddr[0] = ripaddr[0];
@@ -294,7 +315,7 @@ uip_udp_new(u16_t *ripaddr, u16_t rport)
   }
   
   for(c = 0; c < UIP_UDP_CONNS; ++c) {
-    if(uip_udp_conns[c].lport == lastport) {
+    if(uip_udp_conns[c].lport == htons(lastport)) {
       goto again;
     }
   }
@@ -474,7 +495,7 @@ uip_reass(void)
  nullreturn:
   return 0;
 }
-#endif /* UIP_REASSEMBL */
+#endif /* UIP_REASSEMBLY */
 /*-----------------------------------------------------------------------------------*/
 static void
 uip_add_rcv_nxt(u16_t n)
@@ -491,7 +512,7 @@ uip_process(u8_t flag)
 {
   register struct uip_conn *uip_connr = uip_conn;
   
-  uip_appdata = &uip_buf[40 + UIP_LLH_LEN];
+  uip_appdata = &uip_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
   
   /* Check if we were invoked because of the perodic timer fireing. */
   if(flag == UIP_TIMER) {
@@ -599,7 +620,7 @@ uip_process(u8_t flag)
   if(flag == UIP_UDP_TIMER) {
     if(uip_udp_conn->lport != 0) {
       uip_conn = NULL;
-      uip_appdata = &uip_buf[UIP_LLH_LEN + 28];
+      uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
       uip_len = uip_slen = 0;
       uip_flags = UIP_POLL;
       UIP_UDP_APPCALL();
@@ -625,16 +646,17 @@ uip_process(u8_t flag)
   }
   
   /* Check the size of the packet. If the size reported to us in
-     uip_len doesn't match the size reported in the IP header, the
-     packet has been padded by the network device. We correct the
-     uip_len variable based on the reported length in the IP
-     header. */
-  
-  if(BUF->len[0] != (uip_len >> 8)) { /* IP length, high byte. */
-    uip_len = (uip_len & 0xff) | (BUF->len[0] << 8);
-  }
-  if(BUF->len[1] != (uip_len & 0xff)) { /* IP length, low byte. */
-    uip_len = (uip_len & 0xff00) | BUF->len[1];
+     uip_len is smaller the size reported in the IP header, we assume
+     that the packet has been corrupted in transit. If the size of
+     uip_len is larger than the size reported in the IP packet header,
+     the packet has been padded and we set uip_len to the correct
+     value.. */
+
+  if((BUF->len[0] << 8) + BUF->len[1] <= uip_len) {
+    uip_len = (BUF->len[0] << 8) + BUF->len[1];
+  } else {
+    UIP_LOG("ip: packet shorter than reported in IP header.");
+    goto drop;
   }
 
   /* Check the fragment flag. */
@@ -682,12 +704,10 @@ uip_process(u8_t flag)
     /* Check if the packet is destined for our IP address. */  
     if(BUF->destipaddr[0] != uip_hostaddr[0]) {
       UIP_STAT(++uip_stat.ip.drop);
-      /*    UIP_LOG("ip: packet not for us.");        */
       goto drop;
     }
     if(BUF->destipaddr[1] != uip_hostaddr[1]) {
       UIP_STAT(++uip_stat.ip.drop);
-      /*    UIP_LOG("ip: packet not for us.");        */
       goto drop;
     }
   }
@@ -700,13 +720,16 @@ uip_process(u8_t flag)
     goto drop;
   }
 
-  if(BUF->proto == UIP_PROTO_TCP)  /* Check for TCP packet. If so, jump
-                                     to the tcp_input label. */
+  if(BUF->proto == UIP_PROTO_TCP) { /* Check for TCP packet. If so,
+				       proceed with TCP input
+				       processing. */
     goto tcp_input;
+  }
 
 #if UIP_UDP
-  if(BUF->proto == UIP_PROTO_UDP)
+  if(BUF->proto == UIP_PROTO_UDP) {
     goto udp_input;
+  }
 #endif /* UIP_UDP */
 
   if(BUF->proto != UIP_PROTO_ICMP) { /* We only allow ICMP packets from
@@ -770,12 +793,18 @@ uip_process(u8_t flag)
      work. If the application sets uip_slen, it has a packet to
      send. */
 #if UIP_UDP_CHECKSUMS
-  if(uip_udpchksum() != 0xffff) { 
+  uip_len = uip_len - UIP_IPTCPH_LEN;
+  uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPTCPH_LEN];
+  if(uip_udpchksum() != 0xffff) {
+    printf("checksum 0x%04x\n", uip_udpchksum());
     UIP_STAT(++uip_stat.udp.drop);
     UIP_STAT(++uip_stat.udp.chkerr);
     UIP_LOG("udp: bad checksum.");    
     goto drop;
-  }  
+  }
+  uip_len = uip_len + (UIP_IPTCPH_LEN - UIP_IPUDPH_LEN);
+#else /* UIP_UDP_CHECKSUMS */
+  uip_len = uip_len - UIP_IPUDPH_LEN;
 #endif /* UIP_UDP_CHECKSUMS */
 
   /* Demultiplex this UDP packet between the UDP "connections". */
@@ -805,23 +834,22 @@ uip_process(u8_t flag)
   
  udp_found:
   uip_conn = NULL;
-  uip_len = uip_len - 28;
-  uip_appdata = &uip_buf[UIP_LLH_LEN + 28];
   uip_flags = UIP_NEWDATA;
+  uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPUDPH_LEN];
   uip_slen = 0;
   UIP_UDP_APPCALL();
  udp_send:
   if(uip_slen == 0) {
     goto drop;      
   }
-  uip_len = uip_slen + 28;
+  uip_len = uip_slen + UIP_IPUDPH_LEN;
 
   BUF->len[0] = (uip_len >> 8);
   BUF->len[1] = (uip_len & 0xff);
   
   BUF->proto = UIP_PROTO_UDP;
 
-  UDPBUF->udplen = HTONS(uip_slen + 8);
+  UDPBUF->udplen = HTONS(uip_slen + UIP_UDPH_LEN);
   UDPBUF->udpchksum = 0;
 
   BUF->srcport  = uip_udp_conn->lport;
@@ -832,7 +860,7 @@ uip_process(u8_t flag)
   BUF->destipaddr[0] = uip_udp_conn->ripaddr[0];
   BUF->destipaddr[1] = uip_udp_conn->ripaddr[1];
  
-  uip_appdata = &uip_buf[UIP_LLH_LEN + 40];
+  uip_appdata = &uip_buf[UIP_LLH_LEN + UIP_IPTCPH_LEN];
 
 #if UIP_UDP_CHECKSUMS 
   /* Calculate UDP checksum. */
@@ -862,7 +890,8 @@ uip_process(u8_t flag)
   
   /* Demultiplex this segment. */
   /* First check any active connections. */
-  for(uip_connr = &uip_conns[0]; uip_connr < &uip_conns[UIP_CONNS]; ++uip_connr) {
+  for(uip_connr = &uip_conns[0]; uip_connr <= &uip_conns[UIP_CONNS - 1];
+      ++uip_connr) {
     if(uip_connr->tcpstateflags != CLOSED &&
        BUF->destport == uip_connr->lport &&
        BUF->srcport == uip_connr->rport &&
@@ -876,8 +905,9 @@ uip_process(u8_t flag)
      either this packet is an old duplicate, or this is a SYN packet
      destined for a connection in LISTEN. If the SYN flag isn't set,
      it is an old packet and we send a RST. */
-  if((BUF->flags & TCP_CTL) != TCP_SYN)
+  if((BUF->flags & TCP_CTL) != TCP_SYN) {
     goto reset;
+  }
   
   tmp16 = BUF->destport;
   /* Next, check listening connections. */  
@@ -891,13 +921,14 @@ uip_process(u8_t flag)
  reset:
 
   /* We do not send resets in response to resets. */
-  if(BUF->flags & TCP_RST) 
+  if(BUF->flags & TCP_RST) {
     goto drop;
+  }
 
   UIP_STAT(++uip_stat.tcp.rst);
   
   BUF->flags = TCP_RST | TCP_ACK;
-  uip_len = 40;
+  uip_len = UIP_IPTCPH_LEN;
   BUF->tcpoffset = 5 << 4;
 
   /* Flip the seqno and ackno fields in the TCP header. */
@@ -1007,17 +1038,17 @@ uip_process(u8_t flag)
   if((BUF->tcpoffset & 0xf0) > 0x50) {
     for(c = 0; c < ((BUF->tcpoffset >> 4) - 5) << 2 ;) {
       opt = uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + c];
-      if(opt == 0x00) {
+      if(opt == TCP_OPT_END) {
 	/* End of options. */	
 	break;
-      } else if(opt == 0x01) {
+      } else if(opt == TCP_OPT_NOOP) {
 	++c;
 	/* NOP option. */
-      } else if(opt == 0x02 &&
-		uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + c] == 0x04) {
+      } else if(opt == TCP_OPT_MSS &&
+		uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + c] == TCP_OPT_MSS_LEN) {
 	/* An MSS option with the right option length. */	
 	tmp16 = ((u16_t)uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + c] << 8) |
-	  (u16_t)uip_buf[40 + UIP_LLH_LEN + 3 + c];
+	  (u16_t)uip_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + 3 + c];
 	uip_connr->initialmss = uip_connr->mss =
 	  tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
 	
@@ -1050,12 +1081,12 @@ uip_process(u8_t flag)
   
   /* We send out the TCP Maximum Segment Size option with our
      SYNACK. */
-  BUF->optdata[0] = 2;
-  BUF->optdata[1] = 4;
+  BUF->optdata[0] = TCP_OPT_MSS;
+  BUF->optdata[1] = TCP_OPT_MSS_LEN;
   BUF->optdata[2] = (UIP_TCP_MSS) / 256;
   BUF->optdata[3] = (UIP_TCP_MSS) & 255;
-  uip_len = 44;
-  BUF->tcpoffset = 6 << 4;
+  uip_len = UIP_IPTCPH_LEN + TCP_OPT_MSS_LEN;
+  BUF->tcpoffset = ((UIP_TCPH_LEN + TCP_OPT_MSS_LEN) / 4) << 4;
   goto tcp_send;
 
   /* This label will be jumped to if we found an active connection. */
@@ -1079,17 +1110,20 @@ uip_process(u8_t flag)
   /* uip_len will contain the length of the actual TCP data. This is
      calculated by subtracing the length of the TCP header (in
      c) and the length of the IP header (20 bytes). */
-  uip_len = uip_len - c - 20;
+  uip_len = uip_len - c - UIP_IPH_LEN;
 
   /* First, check if the sequence number of the incoming packet is
      what we're expecting next. If not, we send out an ACK with the
      correct numbers in. */
-  if(uip_len > 0 &&
-     (BUF->seqno[0] != uip_connr->rcv_nxt[0] ||
-      BUF->seqno[1] != uip_connr->rcv_nxt[1] ||
-      BUF->seqno[2] != uip_connr->rcv_nxt[2] ||
-      BUF->seqno[3] != uip_connr->rcv_nxt[3])) {
-    goto tcp_send_ack;
+  if(!(((uip_connr->tcpstateflags & TS_MASK) == SYN_SENT) &&
+       ((BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK)))) {
+    if((uip_len > 0 || ((BUF->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
+       (BUF->seqno[0] != uip_connr->rcv_nxt[0] ||
+	BUF->seqno[1] != uip_connr->rcv_nxt[1] ||
+	BUF->seqno[2] != uip_connr->rcv_nxt[2] ||
+	BUF->seqno[3] != uip_connr->rcv_nxt[3])) {
+      goto tcp_send_ack;
+    }
   }
 
   /* Next, check if the incoming segment acknowledges any outstanding
@@ -1167,20 +1201,20 @@ uip_process(u8_t flag)
        plus one, and we send an ACK. We move into the ESTABLISHED
        state. */
     if((uip_flags & UIP_ACKDATA) &&
-       BUF->flags == (TCP_SYN | TCP_ACK)) {
+       (BUF->flags & TCP_CTL) == (TCP_SYN | TCP_ACK)) {
 
       /* Parse the TCP MSS option, if present. */
       if((BUF->tcpoffset & 0xf0) > 0x50) {
 	for(c = 0; c < ((BUF->tcpoffset >> 4) - 5) << 2 ;) {
-	  opt = uip_buf[40 + UIP_LLH_LEN + c];
-	  if(opt == 0x00) {
+	  opt = uip_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + c];
+	  if(opt == TCP_OPT_END) {
 	    /* End of options. */	
 	    break;
-	  } else if(opt == 0x01) {
+	  } else if(opt == TCP_OPT_NOOP) {
 	    ++c;
 	    /* NOP option. */
-	  } else if(opt == 0x02 &&
-		    uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + c] == 0x04) {
+	  } else if(opt == TCP_OPT_MSS &&
+		    uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 1 + c] == TCP_OPT_MSS_LEN) {
 	    /* An MSS option with the right option length. */
 	    tmp16 = (uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + c] << 8) |
 	      uip_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 3 + c];
@@ -1214,6 +1248,11 @@ uip_process(u8_t flag)
       UIP_APPCALL();
       goto appsend;
     }
+    /* Inform the application that the connection failed */
+    uip_flags = UIP_ABORT;
+    UIP_APPCALL();
+    /* The connection is closed after we send the RST */
+    uip_conn->tcpstateflags = CLOSED;
     goto reset;
 #endif /* UIP_ACTIVE_OPEN */
     
@@ -1306,8 +1345,8 @@ uip_process(u8_t flag)
        When the application is called, the global variable uip_len
        contains the length of the incoming data. The application can
        access the incoming data through the global pointer
-       uip_appdata, which usually points 40 bytes into the uip_buf
-       array.
+       uip_appdata, which usually points UIP_IPTCPH_LEN + UIP_LLH_LEN
+       bytes into the uip_buf array.
 
        If the application wishes to send any data, this data should be
        put into the uip_appdata and the length of the data should be
@@ -1366,8 +1405,6 @@ uip_process(u8_t flag)
 	     retransmit) out more than it previously sent out. */
 	  uip_slen = uip_connr->len;
 	}
-      } else {
-	/*	uip_connr->len = 0;*/
       }
       uip_connr->nrtx = 0;
     apprexmit:
@@ -1465,9 +1502,9 @@ uip_process(u8_t flag)
  tcp_send_ack:
   BUF->flags = TCP_ACK;
  tcp_send_nodata:
-  uip_len = 40;
+  uip_len = UIP_IPTCPH_LEN;
  tcp_send_noopts:
-  BUF->tcpoffset = 5 << 4;
+  BUF->tcpoffset = (UIP_TCPH_LEN / 4) << 4;
  tcp_send:
   /* We're done with the input processing. We are now ready to send a
      reply. Our job is to fill in all the fields of the TCP and IP
