@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.c,v 1.4 2004/08/12 22:53:22 oliverschmidt Exp $
+ * $Id: ctk-console.c,v 1.5 2005/01/29 23:11:09 oliverschmidt Exp $
  *
  */
 
@@ -57,12 +57,8 @@ static unsigned char reversed;
 static BOOL WINAPI
 consolehandler(DWORD event)
 {
-  if(event == CTRL_C_EVENT ||
-     event == CTRL_BREAK_EVENT) {
-    console_exit();
-  }
-
-  return FALSE;
+  console_exit();
+  exit(EXIT_SUCCESS);
 }
 /*-----------------------------------------------------------------------------------*/
 void

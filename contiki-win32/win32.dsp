@@ -17,8 +17,8 @@ CFG=win32 - Win32 Debug PPP
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "win32 - Win32 Debug Sockets" (based on "Win32 (x86) Console Application")
-!MESSAGE "win32 - Win32 Release Sockets" (based on "Win32 (x86) Console Application")
+!MESSAGE "win32 - Win32 Debug RawSock" (based on "Win32 (x86) Console Application")
+!MESSAGE "win32 - Win32 Release RawSock" (based on "Win32 (x86) Console Application")
 !MESSAGE "win32 - Win32 Debug PPP" (based on "Win32 (x86) Console Application")
 !MESSAGE "win32 - Win32 Release PPP" (based on "Win32 (x86) Console Application")
 !MESSAGE 
@@ -30,22 +30,22 @@ CFG=win32 - Win32 Debug PPP
 CPP=cl.exe
 RSC=rc.exe
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir "win32___Win32_Debug_Sockets"
-# PROP BASE Intermediate_Dir "win32___Win32_Debug_Sockets"
+# PROP BASE Output_Dir "win32___Win32_Debug_RawSock"
+# PROP BASE Intermediate_Dir "win32___Win32_Debug_RawSock"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug_Sockets"
-# PROP Intermediate_Dir "Debug_Sockets"
+# PROP Output_Dir "Debug_RawSock"
+# PROP Intermediate_Dir "Debug_RawSock"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "_DEBUG" /D "WITH_SOCKETS" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /W3 /Gm /GX /Zi /Od /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "_DEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -53,24 +53,24 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug/Contiki.exe" /pdbtype:sept
-# ADD LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug_Sockets/Contiki.exe" /pdbtype:sept
+# ADD LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug_RawSock/Contiki.exe" /pdbtype:sept
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "win32___Win32_Release_Sockets"
-# PROP BASE Intermediate_Dir "win32___Win32_Release_Sockets"
+# PROP BASE Output_Dir "win32___Win32_Release_RawSock"
+# PROP BASE Intermediate_Dir "win32___Win32_Release_RawSock"
 # PROP BASE Ignore_Export_Lib 0
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release_Sockets"
-# PROP Intermediate_Dir "Release_Sockets"
+# PROP Output_Dir "Release_RawSock"
+# PROP Intermediate_Dir "Release_RawSock"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_SOCKETS" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -78,7 +78,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release/Contiki.exe"
-# ADD LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release_Sockets/Contiki.exe"
+# ADD LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release_RawSock/Contiki.exe"
 
 !ELSEIF  "$(CFG)" == "win32 - Win32 Debug PPP"
 
@@ -102,7 +102,7 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug_Sockets/Contiki.exe" /pdbtype:sept
+# ADD BASE LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug_RawSock/Contiki.exe" /pdbtype:sept
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /out:"Debug_PPP/Contiki.exe" /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "win32 - Win32 Release PPP"
@@ -127,15 +127,15 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release_Sockets/Contiki.exe"
+# ADD BASE LINK32 ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release_RawSock/Contiki.exe"
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /out:"Release_PPP/Contiki.exe"
 
 !ENDIF 
 
 # Begin Target
 
-# Name "win32 - Win32 Debug Sockets"
-# Name "win32 - Win32 Release Sockets"
+# Name "win32 - Win32 Debug RawSock"
+# Name "win32 - Win32 Release RawSock"
 # Name "win32 - Win32 Debug PPP"
 # Name "win32 - Win32 Release PPP"
 # Begin Group "contiki-apps"
@@ -417,11 +417,11 @@ SOURCE=..\contiki\lib\timer.h
 
 SOURCE=..\contiki\ppp\ahdlc.c
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -436,11 +436,11 @@ SOURCE=..\contiki\ppp\ahdlc.c
 
 SOURCE=..\contiki\ppp\ahdlc.h
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -455,11 +455,11 @@ SOURCE=..\contiki\ppp\ahdlc.h
 
 SOURCE=..\contiki\ppp\ipcp.c
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -474,11 +474,11 @@ SOURCE=..\contiki\ppp\ipcp.c
 
 SOURCE=..\contiki\ppp\ipcp.h
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -493,11 +493,11 @@ SOURCE=..\contiki\ppp\ipcp.h
 
 SOURCE=..\contiki\ppp\lcp.c
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -512,11 +512,11 @@ SOURCE=..\contiki\ppp\lcp.c
 
 SOURCE=..\contiki\ppp\lcp.h
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -531,11 +531,11 @@ SOURCE=..\contiki\ppp\lcp.h
 
 SOURCE=..\contiki\ppp\pap.c
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -550,11 +550,11 @@ SOURCE=..\contiki\ppp\pap.c
 
 SOURCE=..\contiki\ppp\pap.h
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -569,11 +569,11 @@ SOURCE=..\contiki\ppp\pap.h
 
 SOURCE="..\contiki\ppp\ppp-service.c"
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -588,11 +588,11 @@ SOURCE="..\contiki\ppp\ppp-service.c"
 
 SOURCE=..\contiki\ppp\ppp.c
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -607,11 +607,11 @@ SOURCE=..\contiki\ppp\ppp.c
 
 SOURCE=..\contiki\ppp\ppp.h
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -774,11 +774,11 @@ SOURCE=.\lib\debug.c
 
 SOURCE=.\ppp\ppp_arch.c
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -793,11 +793,11 @@ SOURCE=.\ppp\ppp_arch.c
 
 SOURCE=.\ppp\ppp_arch.h
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 # PROP Exclude_From_Build 1
 
@@ -816,9 +816,9 @@ SOURCE=.\ppp\ppp_arch.h
 
 SOURCE=".\uip\rawsock-service.c"
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 !ELSEIF  "$(CFG)" == "win32 - Win32 Debug PPP"
 
@@ -835,9 +835,9 @@ SOURCE=".\uip\rawsock-service.c"
 
 SOURCE=.\uip\rawsock.c
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 !ELSEIF  "$(CFG)" == "win32 - Win32 Debug PPP"
 
@@ -854,9 +854,9 @@ SOURCE=.\uip\rawsock.c
 
 SOURCE=.\uip\rawsock.h
 
-!IF  "$(CFG)" == "win32 - Win32 Debug Sockets"
+!IF  "$(CFG)" == "win32 - Win32 Debug RawSock"
 
-!ELSEIF  "$(CFG)" == "win32 - Win32 Release Sockets"
+!ELSEIF  "$(CFG)" == "win32 - Win32 Release RawSock"
 
 !ELSEIF  "$(CFG)" == "win32 - Win32 Debug PPP"
 

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.5 2005/01/26 23:36:39 oliverschmidt Exp $
+ * $Id: main.c,v 1.6 2005/01/29 23:11:39 oliverschmidt Exp $
  *
  */
 
@@ -71,7 +71,7 @@ main(int argc)
 {
   u16_t addr[2];
 
-#ifdef WITH_SOCKETS
+#ifdef WITH_RAWSOCK
   if(argc != 2) {
     cprintf("\n"
             "usage: Contiki <addr>\n"
@@ -85,39 +85,36 @@ main(int argc)
             "  - Contiki needs administrative rights to run.\n"
 	    "\n"
             "  - The IP address to be used by Contiki has to be different from the Host IP\n"
-            "    address specified here.\n"
-	    "\n"
-            "  - Contiki doesn't respond to ARP requests for it's IP address. A workaround\n"
-            "    is to add a static entry into the ARP cache of communication peers.\n");
+            "    address specified here.\n");
     exit(EXIT_FAILURE);
   }
-#endif /* WITH_SOCKETS */
+#endif /* WITH_RAWSOCK */
 
   ek_init();
+
   tcpip_init(NULL);
+  resolv_init(NULL);
 
   console_init();
   ctk_init();
 
-  resolv_init(NULL);
-
   program_handler_init();
 
-#if 1
+#if 0
   uip_ipaddr(addr, 192,168,0,4);
   uip_sethostaddr(addr);
  
-/* uip_ipaddr(addr, 192,168,0,1); */
-/* resolv_conf(addr);             */
+  uip_ipaddr(addr, 192,168,0,1);
+  resolv_conf(addr);
 #endif
 
-#ifdef WITH_SOCKETS
+#ifdef WITH_RAWSOCK
   rawsock_service_init(NULL);
-#endif /* WITH_SOCKETS */
+#endif /* WITH_RAWSOCK */
 
 #ifdef WITH_PPP
-//  ppp_arch_init();
-//  ppp_service_init(NULL);
+  ppp_arch_init();
+  ppp_service_init(NULL);
 #endif /* WITH_PPP */
 
   program_handler_add(&netconf_dsc,   "Network setup",  1);
@@ -127,9 +124,6 @@ main(int argc)
   program_handler_add(&calc_dsc,      "Calculator",     1);
   program_handler_add(&processes_dsc, "Processes",      1);
   program_handler_add(&about_dsc,     "About Contiki",  0);
-
-//  ppp_init();
-//  ppp_connect();
 
   while(1) {
     ek_run();
