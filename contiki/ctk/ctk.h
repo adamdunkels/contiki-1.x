@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.20 2004/07/04 11:42:47 adamdunkels Exp $
+ * $Id: ctk.h,v 1.21 2004/08/09 20:30:50 adamdunkels Exp $
  *
  */
 
@@ -642,6 +642,8 @@ struct ctk_desktop {
 
 /* General ctk functions. */
 void ctk_init(void);
+void ctk_restore(void);
+
 void ctk_mode_set(unsigned char mode);
 unsigned char ctk_mode_get(void);
 /*void ctk_redraw(void);*/
@@ -848,6 +850,7 @@ void ctk_widget_redraw(struct ctk_widget *w);
  (widg)->len = (textlen); \
  (widg)->state = CTK_TEXTENTRY_NORMAL; \
  (widg)->xpos = 0; \
+ (widg)->ypos = 0; \
  } while(0)
 
 
