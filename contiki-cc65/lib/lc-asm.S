@@ -1,7 +1,7 @@
 ;---------------------------------------------------------------------
 	.importzp ptr1
 	.export _lc_get
-	.export _lc_call
+	.export _lc_resume
 ;---------------------------------------------------------------------
 .code
 _lc_get:
@@ -21,9 +21,14 @@ _lc_get:
 :
 	rts
 ;---------------------------------------------------------------------
-_lc_call:	
+_lc_resume:	
 	sta ptr1
 	stx ptr1+1
+
+	ora ptr1+1		; Don't resume a NULL continuation
+	bne :+
+	rts
+:		
 	pla
 	pla
 	jmp (ptr1)
