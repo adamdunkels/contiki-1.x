@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.3 2003/04/09 13:45:05 adamdunkels Exp $
+ * $Id: about.c,v 1.4 2003/04/11 20:10:28 adamdunkels Exp $
  *
  */
 
@@ -47,21 +47,19 @@ static struct ctk_window aboutdialog;
 static struct ctk_label aboutlabel1 =
   {CTK_LABEL(5, 0, 23, 1, "The Contiki Desktop OS")};
 static struct ctk_label aboutlabel2 =
-  {CTK_LABEL(3, 3, 28, 1, "A modern, Internet-enabled")};
+  {CTK_LABEL(3, 2, 28, 1, "A modern, Internet-enabled")};
 static struct ctk_label aboutlabel3 =
-  {CTK_LABEL(2, 4, 28, 1, "operating system and desktop")};
+  {CTK_LABEL(6, 3, 20, 1, "operating system and")};
 static struct ctk_label aboutlabel4 =
-  {CTK_LABEL(0, 5, 32, 1, "environment for the Commodore 64")};
-static struct ctk_label aboutlabel5 =
-  {CTK_LABEL(4, 6, 26, 1, "written by Adam Dunkels")};
+  {CTK_LABEL(6, 4, 20, 1, "desktop environment.")};
 
 static char abouturl_petscii[] = "http://dunkels.com/adam/contiki/";
 static char abouturl_ascii[40];
 static struct ctk_hyperlink abouturl = 
-  {CTK_HYPERLINK(0, 8, 32, "http://dunkels.com/adam/contiki/",
+  {CTK_HYPERLINK(0, 6, 32, "http://dunkels.com/adam/contiki/",
 		 abouturl_ascii)};
 static struct ctk_button aboutclose =
-  {CTK_BUTTON(12, 10, 5, "Close")};
+  {CTK_BUTTON(12, 8, 5, "Close")};
 
 
 static DISPATCHER_SIGHANDLER(about_sighandler, s, data);
@@ -78,12 +76,11 @@ LOADER_INIT_FUNC(about_init)
     strcpy(abouturl_ascii, abouturl_petscii);
     petsciiconv_toascii(abouturl_ascii, sizeof(abouturl_ascii));
     
-    ctk_dialog_new(&aboutdialog, 32, 11);
+    ctk_dialog_new(&aboutdialog, 32, 9);
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel1);
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel2);
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel3);
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel4);
-    CTK_WIDGET_ADD(&aboutdialog, &aboutlabel5);
     CTK_WIDGET_ADD(&aboutdialog, &abouturl);
     CTK_WIDGET_ADD(&aboutdialog, &aboutclose);
     CTK_WIDGET_FOCUS(&aboutdialog, &aboutclose);
