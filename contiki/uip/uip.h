@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.18 2005/02/27 09:52:43 adamdunkels Exp $
+ * $Id: uip.h,v 1.19 2005/03/09 10:21:04 adamdunkels Exp $
  *
  */
 
@@ -1252,6 +1252,22 @@ void uip_process(u8_t flag);
 #define UIP_STOPPED      16
 
 #define UIP_TCPIP_HLEN 40
+
+/**
+ * The buffer size available for user data in the \ref uip_buf buffer.
+ *
+ * This macro holds the available size for user data in the \ref
+ * uip_buf buffer. The macro is intended to be used for checking
+ * bounds of available user data.
+ *
+ * Example:
+ \code
+ snprintf(uip_appdata, UIP_APPDATA_SIZE, "%u\n", i);
+ \endcode
+ *
+ * \hideinitializer
+ */
+#define UIP_APPDATA_SIZE (UIP_BUFSIZE - UIP_LLH_LEN - UIP_TCPIP_HLEN)
 
 /* The TCP and IP headers. */
 typedef struct {
