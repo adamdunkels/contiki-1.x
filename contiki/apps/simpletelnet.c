@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.5 2003/04/10 09:04:49 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.6 2003/08/12 21:09:04 adamdunkels Exp $
  *
  */
 
@@ -106,7 +106,6 @@ LOADER_INIT_FUNC(simpletelnet_init)
 
     /* Create Telnet window. */
     ctk_window_new(&telnetwindow, 38, 20, "Simple telnet");
-    ctk_window_move(&telnetwindow, 0, 1);
     
     CTK_WIDGET_ADD(&telnetwindow, &telnethostlabel);
     CTK_WIDGET_ADD(&telnetwindow, &telnetportlabel);
