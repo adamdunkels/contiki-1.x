@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: www.c,v 1.2 2003/03/28 12:09:13 adamdunkels Exp $
  *
  */
 
@@ -457,6 +457,7 @@ sighandler(ek_signal_t s, ek_data_t data)
     log_back();
     open_link(w->widget.hyperlink.url);
     CTK_WIDGET_FOCUS(&mainwindow, &stopbutton);
+    ctk_window_open(&mainwindow);
     run = 1;
   } else if(s == ctk_signal_hyperlink_hover) {
     strncpy(statustexturl, w->widget.hyperlink.url,
