@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.4 2005/01/26 21:33:29 oliverschmidt Exp $
+ * $Id: config.c,v 1.5 2005/03/13 22:15:54 oliverschmidt Exp $
  *
  */
 
@@ -49,7 +49,7 @@
 #include "config.h"
 
 
-static config_t config = {0, 4, "TFE.drv"};
+static config_t config = {0, 4, "LANceGS.drv"};
 
 /*-----------------------------------------------------------------------------------*/
 static void
