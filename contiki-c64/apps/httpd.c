@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.c,v 1.1 2003/08/09 13:14:33 adamdunkels Exp $
+ * $Id: httpd.c,v 1.2 2003/08/20 19:52:41 adamdunkels Exp $
  *
  */
 
@@ -337,7 +337,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
   if(!uip_poll()) {
     if(rhs->state == HTTP_DIR) {
       struct c64_fs_dirent de;
-      c64_fs_readdir_raw(&rhs->f.d, &de);
+      c64_fs_readdir_dirent(&rhs->f.d, &de);
       uip_send(appdata,
 	       sprintf((char *)appdata,
 		       "<tr><td><a href=\"/8/%s\">%s</a></td><td>%d</td></tr>\r\n",
