@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: uip-signal.h,v 1.1 2003/04/25 08:42:13 adamdunkels Exp $
+ * $Id: uip-signal.h,v 1.2 2003/07/31 23:20:24 adamdunkels Exp $
  *
  */
 
@@ -41,7 +41,7 @@
 
 #include "ek.h"
 
-extern ek_signal_t uip_signal_uninstall;
+/*extern ek_signal_t uip_signal_uninstall;*/
 
 void uip_signal_init(void);
 
