@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: pt.h,v 1.8 2005/03/14 13:53:37 adamdunkels Exp $
+ * $Id: pt.h,v 1.9 2005/04/01 08:13:45 adamdunkels Exp $
  */
 
 /**
@@ -69,9 +69,9 @@ struct pt {
  PT_THREAD(consumer(struct pt *p, int event)) {
    PT_BEGIN(p);
    while(1) {
-     PT_WAIT_UNTIL(event == AVAILABLE);
+     PT_WAIT_UNTIL(p, event == AVAILABLE);
      consume();
-     PT_WAIT_UNTIL(event == CONSUMED);
+     PT_WAIT_UNTIL(p, event == CONSUMED);
      acknowledge_consumed();
    }
    PT_END(p);
@@ -107,6 +107,8 @@ struct pt {
  }
  \endcode
  *
+ * \sa PT_SPAWN()
+ *
  * \hideinitializer
  */
 #define PT_INIT(pt)   LC_INIT((pt)->lc)
@@ -128,9 +130,9 @@ struct pt {
  PT_THREAD(producer(struct pt *p, int event)) {
    PT_BEGIN(p);
    while(1) {
-     PT_WAIT_UNTIL(event == CONSUMED || event == DROPPED);
+     PT_WAIT_UNTIL(p, event == CONSUMED || event == DROPPED);
      produce();
-     PT_WAIT_UNTIL(event == PRODUCED);
+     PT_WAIT_UNTIL(p, event == PRODUCED);
    }
    
    PT_END(p);
@@ -140,12 +142,6 @@ struct pt {
  * \hideinitializer
  */
 #define PT_BEGIN(pt) LC_RESUME((pt)->lc)
-/*\
-  do {						\
-    if((pt)->lc != LC_NULL) {			\
-      LC_RESUME((pt)->lc);			\
-    } 						\
-    } while(0)*/
 
 /**
  * Block and wait until condition is true.
@@ -209,7 +205,7 @@ struct pt {
  PT_THREAD(child(struct pt *p, int event)) {
    PT_BEGIN(p);
 
-   PT_WAIT_UNTIL(event == EVENT1);   
+   PT_WAIT_UNTIL(p, event == EVENT1);   
    
    PT_END(p);
  }
@@ -224,6 +220,8 @@ struct pt {
    PT_END(p);
  }
  \endcode
+ *
+ * \sa PT_SPAWN()
  *
  * \hideinitializer 
  */
