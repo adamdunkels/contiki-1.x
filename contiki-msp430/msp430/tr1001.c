@@ -8,10 +8,13 @@
  * tranciever as well as a simple packet framing format, simimilar to
  * PPP (AHDLC) framing.
  *
+ * \note A lot of the stuff in this file is currently a "hack" form
+ * (particularly the "MAC" stuff and the ackowledgements)!
  */
 
 #include "tr1001.h"
 #include "uip.h"
+#include "uip-fw.h"
 
 #include "sensors.h"
 
@@ -76,21 +79,41 @@ static unsigned char rxstate = RXSTATE_READY;
  * The structure of the packet header.
  */
 struct tr1001_hdr {
-  u8_t to;        /**< The ID of the receiver of the packet, or 0 if
-		     the packet is a broadcast. */
-  u8_t from;      /**< The ID of the sender of the packet, or 0 if
-		     the sender has no ID or is anonymous. */
   u8_t type;      /**< The packet type. */
-  u8_t num;       /**< (?). */
+  u8_t id;        /**< A packet identifier. */
   u8_t len[2];    /**< The 16-bit length of the packet in network byte
 		     order. */
 };
 
 /**
- * \internal Determines if the negencoding should be used or not. This
+ * \internal The length of the packet header.
+ */
+#define TR1001_HDRLEN 4
+
+/**
+ * \internal 
+ * The "data" packet type.
+ */
+#define TR1001_TYPE_DATA 1
+
+/**
+ * \internal 
+ * The "acknowledgement" packet type.
+ */
+#define TR1001_TYPE_ACK  2
+
+/**
+ * \internal
+ * Determines if the negencoding should be used or not. This
  * causes each byte which is sent out to be sent twice, first normally
  * and second with all bits inverted. */
 #define TR1001_CONF_NEGENCODING 1
+
+/**
+ * \internal
+ * The incremental packet identifier.
+ */
+static u8_t packet_id;
 
 /*------------------------------------------------------------------------------*/
 /**
@@ -284,7 +307,7 @@ tr1001_poll(void)
     if(rxlen > UIP_BUFSIZE - UIP_LLH_LEN) {
       rxlen = UIP_BUFSIZE - UIP_LLH_LEN;
     }
-    memcpy(&uip_buf[UIP_LLH_LEN], rxbuf + 6, rxlen);
+    memcpy(&uip_buf[UIP_LLH_LEN], rxbuf + TR1001_HDRLEN, rxlen);
     tmplen = rxlen;
     rxclear();
     return tmplen;
@@ -340,7 +363,7 @@ interrupt (UART0RX_VECTOR)
   case RXSTATE_RAWHEADER:
     rxbuf[rxpos] = c;
     ++rxpos;
-    if(rxpos == 6) {
+    if(rxpos == TR1001_HDRLEN) {
       rxlen = ((((struct tr1001_hdr *)rxbuf)->len[0] << 8) +
 	       ((struct tr1001_hdr *)rxbuf)->len[1]);
       rxstate = RXSTATE_RAWDATA;
@@ -357,7 +380,7 @@ interrupt (UART0RX_VECTOR)
        error flag. */
     if(NEG(c) == rxbuf[rxpos]) {
       ++rxpos;
-      if(rxpos == 6) {
+      if(rxpos == TR1001_HDRLEN) {
 	rxlen = ((((struct tr1001_hdr *)rxbuf)->len[0] << 8) +
 		 ((struct tr1001_hdr *)rxbuf)->len[1]);
 	rxstate = RXSTATE_DATA1;
@@ -379,7 +402,7 @@ interrupt (UART0RX_VECTOR)
        error flag. */
     if(NEG(c) == rxbuf[rxpos]) {
       ++rxpos;
-      if(rxpos == rxlen + 6) {
+      if(rxpos == rxlen + TR1001_HDRLEN) {
 	rxstate = RXSTATE_FULL;
       } else if(rxpos > sizeof(rxbuf)) {
 	rxstate = RXSTATE_ERROR;
@@ -393,7 +416,7 @@ interrupt (UART0RX_VECTOR)
   case RXSTATE_RAWDATA:
     rxbuf[rxpos] = c;
     ++rxpos;
-    if(rxpos == rxlen + 6) {
+    if(rxpos == rxlen + TR1001_HDRLEN) {
       rxstate = RXSTATE_FULL;
     } else if(rxpos > sizeof(rxbuf)) {
       rxstate = RXSTATE_ERROR;
@@ -429,33 +452,26 @@ delay_hack(int d)
 }
 /*------------------------------------------------------------------------------*/
 /**
- * Send out a packet from the uip_buf buffer.
+ * \internal
  *
- * This function causes a packet to be sent out after a small random
- * delay, but without doing any MAC layer collision detection or
- * back-offs. The packet is sent with a 6 byte header that contains a
- * "to" address, a "from" address, a "type" identifier, a "num" field
- * (?) and the length of the packet in network byte order.
+ * Prepare a transmission.
+ *
+ * This function does the necessary setup before a packet can be sent
+ * out.  
  */
 /*------------------------------------------------------------------------------*/
-void
-tr1001_send(void)
+static void
+prepare_transmission(void)
 {
   unsigned short i, laststate;
-  static unsigned char to = 0,
-    from = 0,
-    type = 0,
-    num = 0;
-
- 
-
+    
   /* Delay the transmission for a while. The length of the delay is
      based on the lowest bits of the battery sensor, which seems to be
      jumping up and down somewhat unpredictably (but I might very well
      be wrong). */
-  P2OUT &= 0xFE;
+  /*  P2OUT &= 0xFE;*/
   delay_hack(400 * (sensors_battery & 0x0f));
-  P2OUT |= 0x01;  
+  /*  P2OUT |= 0x01;  */
   
   /* First check that we don't currently are receiveing a packet, and
      if so we wait until the reception has been completed. Reception
@@ -482,7 +498,6 @@ tr1001_send(void)
     laststate = rxstate;
   }
 
-  beep();
   /* Turn on OOK mode with transmission. */
   txook();
 
@@ -490,6 +505,87 @@ tr1001_send(void)
      state. */
   delay_hack(400);
   
+}
+/*------------------------------------------------------------------------------*/
+/**
+ * Send a packet and wait for an acknowledgement.
+ *
+ * This function calls tr1001_send() to send out a packet, and waits
+ * for an acknowledgement from the receiver.
+ *
+ */
+/*------------------------------------------------------------------------------*/
+u8_t
+tr1001_send_acked(void)
+{
+  unsigned short tmplen, count;
+  struct tr1001_hdr *ackhdr = (struct tr1001_hdr *)rxbuf;
+  ek_clock_t start;
+  
+  
+  tr1001_send();
+
+  start = ek_clock();
+  count = 0;
+  P2OUT &= 0xFB;
+  /* Block while checking if a packet has arrived. */
+  while((volatile u8_t)rxstate != RXSTATE_FULL &&
+	(volatile u8_t)rxstate != RXSTATE_ERROR) {
+    /* Wait no more than one second. */
+    if((ek_clock_t)(ek_clock() - start) > (ek_clock_t)CLK_TCK) {
+      break;
+    }
+  }
+  P2OUT |= 0x04;
+    
+  
+  if(rxstate == RXSTATE_FULL) {
+    if(ackhdr->type == TR1001_TYPE_ACK &&
+       ackhdr->id == packet_id) {
+      beep();
+      rxclear();
+      return UIP_FW_OK;
+    }
+  }
+
+  if(rxstate == RXSTATE_ERROR) {
+    rxclear();
+    blink();
+  }
+  return UIP_FW_DROPPED;
+}
+/*------------------------------------------------------------------------------*/
+/**
+ * Send out a packet from the uip_buf buffer.
+ *
+ * This function causes a packet to be sent out after a small random
+ * delay, but without doing any MAC layer collision detection or
+ * back-offs. The packet is sent with a 4 byte header that contains a
+ * a "type" identifier, an 8-bit packet ID field and the length of the
+ * packet in network byte order.
+ */
+/*------------------------------------------------------------------------------*/
+u8_t
+tr1001_send(void)
+{
+  u8_t *hdr;
+  u16_t hdrlen;
+  u8_t *data;
+  u16_t datalen;
+  int i;
+
+  hdr = &uip_buf[UIP_LLH_LEN];
+  hdrlen = UIP_TCPIP_HLEN;
+  data = uip_appdata;
+  if(uip_len < UIP_TCPIP_HLEN) {
+    datalen = 0;
+  } else {
+    datalen = uip_len - UIP_TCPIP_HLEN;
+  }
+
+  /* Prepare the transmission. */
+  prepare_transmission();
+
   /* Send first preamble byte. */
   send(0xaa);
 
@@ -506,25 +602,17 @@ tr1001_send(void)
   send(0x07f);
 
   /* Send packet header. */
-  send2(to);
-  send2(from);
-  send2(type);
-  send2(num);
+  send2(TR1001_TYPE_DATA);
+  send2(++packet_id);
   send2(uip_len >> 8);
   send2(uip_len & 0xff);
 
   /* Send packet data. */
-  if(uip_len < 40) {
-    for(i = 0; i < uip_len; ++i) {
-      send2(uip_buf[UIP_LLH_LEN + i]);
-    }
-  } else {
-    for(i = 0; i < 40; ++i) {
-      send2(uip_buf[UIP_LLH_LEN + i]);
-    }
-    for(;i < uip_len; ++i) {
-      send2(uip_appdata[i - 40]);
-    }
+  for(i = 0; i < hdrlen; ++i) {
+    send2(hdr[i]);
+  }
+  for(i = 0;i < datalen; ++i) {
+    send2(data[i]);
   }
 
   /* Send trailing bytes. */
@@ -534,6 +622,57 @@ tr1001_send(void)
   /* Turn on reception again. */
   rxon();
 
-  /*tr1001_send_raw(&uip_buf[UIP_LLH_LEN], uip_len);*/
+  return UIP_FW_OK;
+}
+/*------------------------------------------------------------------------------*/
+/**
+ * Acknowledge a received packet.
+ *
+ * This function sends out an acknowledgement packet for the
+ * previously received packet, which must be present in the uip_buf
+ * buffer.
+ *
+ * \retval UIP_FW_OK The acknowledgement was successfully.
+ * \retval UIP_FW_DROPPED The acknowledgement was dropped before transmission.
+ */
+/*------------------------------------------------------------------------------*/
+u8_t
+tr1001_ack(void)
+{
+  /* Prepare the transmission. */
+  prepare_transmission();
+
+  /* Send first preamble byte. */
+  send(0xaa);
+
+  /* Send second preamble byte. */
+  send(0xaa);
+
+  /* Send sync byte. */
+  send(0x0ff);
+
+  /* Send first start byte. */
+  send(0x01);
+
+  /* Send second start byte. */
+  send(0x07f);
+
+  /* Send packet header. */
+  send2(TR1001_TYPE_ACK);
+  send2(((struct tr1001_hdr *)uip_buf)->id);
+  send2(0);
+  send2(0);
+
+  /* Send trailing bytes. */
+  send(0xaa);
+  send(0xaa);
+
+  /* Turn on reception again. */
+  rxon();
+
+  /*  beep();*/
+    
+  return UIP_FW_OK;
+  
 }
 /*------------------------------------------------------------------------------*/
