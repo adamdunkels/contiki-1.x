@@ -28,21 +28,25 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.4 2004/07/04 21:20:34 adamdunkels Exp $
+ * $Id: shell.c,v 1.5 2004/09/01 20:44:28 adamdunkels Exp $
  *
  */
 
 #include "program-handler.h"
 #include "loader.h"
+#include "cfs.h"
 #include "uip.h"
 #include "uip_arp.h"
 #include "resolv.h"
+
+#include "uip-event.h"
 
 #include "shell.h"
 
 #include <string.h>
 
 static char showingdir = 0;
+static struct cfs_dir dir;
 static unsigned int totsize;
 
 struct ptentry {
@@ -92,7 +96,7 @@ inttostr(register char *str, unsigned int i)
     str[0] = ' ';
   }
   str[1] = '0' + (i / 10) % 10;
-  if(str[1] == '0') {
+  if(str[0] == ' ' && str[1] == '0') {
     str[1] = ' ';
   }
   str[2] = '0' + i % 10;
@@ -111,7 +115,7 @@ processes(char *str)
      matching process. */
   for(p = EK_PROCS(); p != NULL; p = p->next) {
     inttostr(idstr, p->id);
-    shell_output(idstr, p->name);
+    shell_output(idstr, (char *)p->name);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -141,11 +145,14 @@ static void
 runfile(char *str)
 {
   nullterminate(str);
-  
-  /* Call loader function. */
-  program_handler_load(str, NULL);
 
-  shell_output("Starting program ", str);  
+  if(strlen(str) > 0) {
+    /* Call loader function. */
+    program_handler_load(str, NULL);
+    shell_output("Starting program ", str);  
+  } else {
+    shell_output("Must supply a program name", "");  
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -178,7 +185,7 @@ killproc(char *str)
     shell_output("Killing process ", procstr);
     ek_post(procnum, EK_EVENT_REQUEST_EXIT, NULL);
   } else {
-    shell_output("Could not parse process number", "");
+    shell_output("Invalid process number", "");
   }
   
 }
@@ -199,8 +206,15 @@ help(char *str)
 static void
 directory(char *str)
 {
-  shell_output("Cannot open directory", "");
-  showingdir = 0;
+  if(cfs_opendir(&dir, "/") != 0) {
+    shell_output("Cannot open directory", "");
+    showingdir = 0;
+  } else {
+    shell_output("Disk directory:", "");
+    showingdir = 1;
+    totsize = 0;
+    ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_CONTINUE, NULL);
+  }
   
 }
 /*-----------------------------------------------------------------------------------*/
@@ -224,9 +238,14 @@ static struct ptentry configparsetab[] =
 void
 shell_init(void)
 {
+}
+/*-----------------------------------------------------------------------------------*/
+void
+shell_start(void)
+{
   showingdir = 0;
   shell_output("Contiki command shell", "");
-  shell_output("Type '?' for help", "");  
+  shell_output("Type '?' and return for help", "");  
   shell_prompt("contiki-gtk> "); 
 }
 /*-----------------------------------------------------------------------------------*/
@@ -236,27 +255,35 @@ shell_input(char *cmd)
   if(showingdir != 0) {
     showingdir = 0;
     shell_output("Directory stopped", "");
+    cfs_closedir(&dir);
   }
   parse(cmd, configparsetab);
-  shell_prompt("contiki-gtk> "); 
-}
-/*-----------------------------------------------------------------------------------*/
-void
-shell_idle(void)
-{
-  static char size[10];
-  if(showingdir != 0) {
+  if(showingdir == 0) {
+    shell_prompt("contiki-gtk> ");
   }
 }
 /*-----------------------------------------------------------------------------------*/
 void
-shell_start(void)
+shell_eventhandler(ek_event_t ev, ek_data_t data)
 {
-  /*  printf("Start\n");*/
- 
-  shell_output("Contiki command shell", "");
-  shell_output("Type '?' for help", "");
-  shell_prompt("contiki-gtk> ");
-  
+  static struct cfs_dirent dirent;
+  static char size[10];
+
+  if(ev == EK_EVENT_CONTINUE) {
+    if(showingdir != 0) {
+      if(cfs_readdir(&dir, &dirent) != 0) {
+	cfs_closedir(&dir);
+	showingdir = 0;
+	inttostr(size, totsize);
+	shell_output("Total number of blocks: ", size);
+	shell_prompt("contiki-gtk> ");
+      } else {
+	totsize += dirent.size;
+	inttostr(size, dirent.size);
+	shell_output(size, dirent.name);
+	ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_CONTINUE, NULL);
+      }
+    }
+  }
 }
 /*-----------------------------------------------------------------------------------*/
