@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.1 2003/04/10 07:25:26 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.2 2003/08/05 14:37:49 adamdunkels Exp $
  *
  */
 
@@ -73,11 +73,8 @@ main(int argc, char **argv)
   
   program_handler_init();
   
-  ctk_redraw();
   ek_run();
 
-  clrscr();
-  
   return 0;
 
   argv = argv;
