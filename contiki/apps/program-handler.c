@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.8 2003/04/24 17:21:12 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.9 2003/04/25 08:49:19 adamdunkels Exp $
  *
  */
 
@@ -184,7 +184,8 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
     }
 
     for(i = 0; i < CTK_CONF_MAXMENUITEMS; ++i) {
-      if(data == (ek_data_t)contikidsc[i]->icon) {
+      if(contikidsc[i] != NULL &&
+	 data == (ek_data_t)contikidsc[i]->icon) {
 	RUN(contikidsc[i]->prgname, contikidsc[i]->init);
 	break;
       }

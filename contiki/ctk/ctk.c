@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.16 2003/04/24 17:17:26 adamdunkels Exp $
+ * $Id: ctk.c,v 1.17 2003/04/25 08:49:17 adamdunkels Exp $
  *
  */
 
@@ -679,6 +679,9 @@ switch_focus_widget(unsigned char direction)
   }
  
   focus = window->focused;
+  if(focus == NULL) {
+    focus = window->active;
+  }
   add_redrawwidget(focus);
   
   if((direction & 1) == 0) {
