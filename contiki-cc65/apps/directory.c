@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.4 2003/08/24 22:41:55 adamdunkels Exp $
+ * $Id: directory.c,v 1.5 2004/06/06 06:40:25 adamdunkels Exp $
  *
  */
 
@@ -241,7 +241,7 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
     } else {
       for(i = 0; dscs[i] != NULL; ++i) {
 	if(data == (ek_data_t)(dscs[i]->icon)) {
-	  program_handler_load(dscs[i]->prgname);
+	  program_handler_load(dscs[i]->prgname, NULL);
 	  if(autoexit) {
 	    ctk_window_close(&window);
 	    quit();
