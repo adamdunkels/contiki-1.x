@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.4 2003/09/02 21:46:06 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.5 2003/10/08 10:29:04 adamdunkels Exp $
  *
  */
 
@@ -39,6 +39,8 @@
 #include "petsciiconv.h"
 #include "uip_arp.h"
 #include "resolv.h"
+
+#include "memb.h"
 
 #include "shell.h"
 
@@ -61,42 +63,66 @@ static DISPATCHER_SIGHANDLER(sighandler, s, data);
 static DISPATCHER_UIPCALL(telnetd_app, ts);
 
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Remote command shell", shell_idle, sighandler,
+  {DISPATCHER_PROC("Shell server", shell_idle, sighandler,
 		   telnetd_app)};
 static ek_id_t id;
 
 #define LINELEN 36
-#define NUMLINES 16
-static char lines[NUMLINES][LINELEN];
+#define NUMLINES 24
+/*static char lines[NUMLINES][LINELEN];*/
+MEMB(linemem, LINELEN, NUMLINES);
+
 static u8_t i;
 
 struct telnetd_state {
   char *lines[NUMLINES];
   char buf[LINELEN];
   char bufptr;
+  u8_t state;
+#define STATE_NORMAL 0
+#define STATE_IAC    1
+#define STATE_WILL   2
+#define STATE_WONT   3
+#define STATE_DO     4  
+#define STATE_DONT   5
+  
+#define STATE_CLOSE  6
 };
 static struct telnetd_state s;
 
+#define TELNET_IAC   255
+#define TELNET_WILL  251
+#define TELNET_WONT  252
+#define TELNET_DO    253
+#define TELNET_DONT  254
 /*-----------------------------------------------------------------------------------*/
 static char *
 alloc_line(void)
 {  
-  for(i = 0; i < NUMLINES; ++i) {
+  /*  for(i = 0; i < NUMLINES; ++i) {
     if(*(lines[i]) == 0) {
       return lines[i];
     }
   }
-  return NULL;
+  return NULL;*/
+  return memb_alloc(&linemem);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 dealloc_line(char *line)
 {
-  *line = 0;
+  /*  *line = 0;*/
+  memb_free(&linemem, line);
 }
 /*-----------------------------------------------------------------------------------*/
 void
 shell_quit(char *str)
+{
+  s.state = STATE_CLOSE;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+quit(char *str)
 {
   ctk_window_close(&window);
   dispatcher_exit(&p);
@@ -104,10 +130,37 @@ shell_quit(char *str)
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
+static void
+sendline(char *line)
+{
+  static unsigned int i;
+  for(i = 0; i < NUMLINES; ++i) {
+    if(s.lines[i] == NULL) {
+      s.lines[i] = line;
+      break;
+    }
+  }
+  if(i == NUMLINES) {
+    dealloc_line(line);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+void
+shell_prompt(char *str)
+{
+  char *line;
+  line = alloc_line();
+  if(line != NULL) {
+    strncpy(line, str, LINELEN);
+    petsciiconv_toascii(line, LINELEN);
+    sendline(line);
+  }         
+}
+/*-----------------------------------------------------------------------------------*/
 void
 shell_output(char *str1, char *str2)
 {
-  static unsigned char i, len;
+  static unsigned len;
   char *line;
   
   for(i = 1; i < YSIZE; ++i) {
@@ -121,8 +174,6 @@ shell_output(char *str1, char *str2)
   if(len < XSIZE) {
     strncpy(&log[(YSIZE - 1) * XSIZE] + len, str2, XSIZE - len);
   }
-
-  CTK_WIDGET_REDRAW(&loglabel);
 
   line = alloc_line();
   if(line != NULL) {
@@ -138,18 +189,16 @@ shell_output(char *str1, char *str2)
       line[len+2] = 0;
     }
     petsciiconv_toascii(line, LINELEN);
-    for(i = 0; i < NUMLINES; ++i) {
-      if(s.lines[i] == NULL) {
-	s.lines[i] = line;
-	break;
-      }
-    }
-    if(i == NUMLINES) {
-      dealloc_line(line);
-    }
+    sendline(line);
     /*  } else {
-	printf("COld not aloce\n");*/
+	for(i = 1; i < YSIZE; ++i) {
+	memcpy(&log[(i - 1) * XSIZE], &log[i * XSIZE], XSIZE);
+	}
+	memset(&log[(YSIZE - 1) * XSIZE], 0, XSIZE);
+	strncpy(&log[(YSIZE - 1) * XSIZE], "Could not alloc line", XSIZE);*/
   }
+
+  CTK_WIDGET_REDRAW(&loglabel);
 }
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(telnetd_init, arg)
@@ -161,7 +210,7 @@ LOADER_INIT_FUNC(telnetd_init, arg)
     dispatcher_listen(ctk_signal_window_close);
     dispatcher_listen(ctk_signal_widget_activate);    
 
-    ctk_window_new(&window, XSIZE, YSIZE, "Remote command shell");
+    ctk_window_new(&window, XSIZE, YSIZE, "Shell server");
     CTK_WIDGET_ADD(&window, &loglabel);
     memset(log, ' ', sizeof(log));
 
@@ -176,8 +225,8 @@ DISPATCHER_SIGHANDLER(sighandler, s, data)
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
   if(s == ctk_signal_window_close ||
-	    s == dispatcher_signal_quit) {
-    shell_quit(NULL);
+     s == dispatcher_signal_quit) {
+    quit(NULL);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -199,28 +248,110 @@ senddata(void)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
+getchar(u8_t c)
+{
+  if(c == ISO_cr) {
+    return;
+  }
+  
+  s.buf[s.bufptr] = c;  
+  if( s.buf[s.bufptr] == ISO_nl ||
+     s.bufptr == sizeof(s.buf) - 1) {    
+    if(s.bufptr > 0) {
+      s.buf[s.bufptr] = 0;
+      petsciiconv_topetscii(s.buf, LINELEN);
+    }
+    shell_input(s.buf);
+    s.bufptr = 0;
+  } else {
+    ++s.bufptr;
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+sendopt(u8_t option, u8_t value)
+{
+  char *line;
+  line = alloc_line();
+  if(line != NULL) {
+    line[0] = TELNET_IAC;
+    line[1] = option;
+    line[2] = value;
+    line[3] = 0;
+    sendline(line);
+  }       
+}
+/*-----------------------------------------------------------------------------------*/
+static void
 newdata(void)
 {
   u16_t len;
-
+  u8_t c;
+    
+  
   len = uip_datalen();
   
   while(len > 0 && s.bufptr < sizeof(s.buf)) {
-
-    s.buf[s.bufptr] = *uip_appdata;
+    c = *uip_appdata;
     ++uip_appdata;
     --len;
-    if(s.buf[s.bufptr] == ISO_cr ||
-       s.buf[s.bufptr] == ISO_nl) {
-      s.buf[s.bufptr] = 0;
-      petsciiconv_topetscii(s.buf, LINELEN);
-      shell_output(s.buf, "");
-      shell_input(s.buf);
-      s.bufptr = 0;
-    } else {
-      ++s.bufptr;
-    }
-  }
+    switch(s.state) {
+    case STATE_IAC:
+      if(c == TELNET_IAC) {
+	getchar(c);
+	s.state = STATE_NORMAL;
+      } else {
+	switch(c) {
+	case TELNET_WILL:
+	  s.state = STATE_WILL;
+	  break;
+	case TELNET_WONT:
+	  s.state = STATE_WONT;
+	  break;
+	case TELNET_DO:
+	  s.state = STATE_DO;
+	  break;
+	case TELNET_DONT:
+	  s.state = STATE_DONT;
+	  break;
+	default:
+	  s.state = STATE_NORMAL;
+	  break;
+	}
+      }
+      break;
+    case STATE_WILL:
+      /* Reply with a DONT */
+      sendopt(TELNET_DONT, c);
+      s.state = STATE_NORMAL;
+      break;
+      
+    case STATE_WONT:
+      /* Reply with a DONT */
+      sendopt(TELNET_DONT, c);
+      s.state = STATE_NORMAL;
+      break;
+    case STATE_DO:
+      /* Reply with a WONT */
+      sendopt(TELNET_WONT, c);
+      s.state = STATE_NORMAL;
+      break;
+    case STATE_DONT:
+      /* Reply with a WONT */
+      sendopt(TELNET_WONT, c);
+      s.state = STATE_NORMAL;
+      break;
+    case STATE_NORMAL:
+      if(c == TELNET_IAC) {
+	s.state = STATE_IAC;
+      } else {
+	getchar(c);
+      }      
+      break;
+    } 
+
+    
+  }  
   
 }
 /*-----------------------------------------------------------------------------------*/
@@ -228,16 +359,22 @@ static
 DISPATCHER_UIPCALL(telnetd_app, ts)
 {
   if(uip_connected()) {
+    memb_init(&linemem);
     dispatcher_markconn(uip_conn, &s);
     for(i = 0; i < NUMLINES; ++i) {
       s.lines[i] = NULL;
     }
     s.bufptr = 0;
+    s.state = STATE_NORMAL;
 
-    shell_output("Contiki remote command shell", "");
-    shell_output("Type '?' for help", "");
-
+    shell_init();
     senddata();
+    return;
+  }
+
+  if(s.state == STATE_CLOSE) {
+    s.state = STATE_NORMAL;
+    uip_close();
     return;
   }
   
