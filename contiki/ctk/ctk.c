@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.21 2003/08/05 13:50:51 adamdunkels Exp $
+ * $Id: ctk.c,v 1.22 2003/08/07 00:03:26 adamdunkels Exp $
  *
  */
 
@@ -607,7 +607,8 @@ ctk_widget_redraw(struct ctk_widget *widget)
 	window = widget->window;
 	if(window == dialog) {
 	  ctk_draw_widget(widget, CTK_FOCUS_DIALOG, 0, height);
-	} else if(window == windows ||
+	} else if(dialog == NULL &&
+		  window == windows ||
 		  window == &desktop_window) {
 	  ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);
 	}
