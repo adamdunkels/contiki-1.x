@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: slip-dsc.c,v 1.1 2003/04/25 08:48:25 adamdunkels Exp $
+ * $Id: slip-dsc.c,v 1.2 2004/06/27 12:53:30 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(slip_dsc,
     slip_init,
     &slip_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char slipicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -54,12 +55,15 @@ static unsigned char slipicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char slipicon_textmap[9] = {
   'R', 'S', ' ',
   '2', '3', '2',
   '/', 'I', 'P'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon slip_icon =
   {CTK_ICON("SLIP", slipicon_bitmap, slipicon_textmap)};
