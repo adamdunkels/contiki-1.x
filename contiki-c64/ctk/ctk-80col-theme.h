@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS for the C64
  *
- * $Id: ctk-80col-theme.h,v 1.1 2004/09/05 20:58:13 adamdunkels Exp $
+ * $Id: ctk-80col-theme.h,v 1.2 2004/09/06 06:33:39 adamdunkels Exp $
  *
  */
 #ifndef __CTK_80COL_THEME_H__
@@ -52,7 +52,7 @@ struct ctk_80col_theme {
   /* Button corner patterns. */
   unsigned char buttonleftpattern[8],
     buttonrightpattern[8];
-#if 0
+
   /* Menu border patterns. */
   unsigned char menuleftpattern[8],
     menurightpatterns[8];
@@ -69,7 +69,7 @@ struct ctk_80col_theme {
     bitmapcolors[6],
     textmapcolors[6],
     iconcolors[6];
-
+#if 0
   
   /* Button corner colors. */
   unsigned char buttonleftcolors[6],

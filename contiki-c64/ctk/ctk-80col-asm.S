@@ -15,7 +15,7 @@
 	.import		_ctk_80col_cursx
 	.import		_ctk_80col_cursy
 	.import		_ctk_80col_color
-	.import		_ctk_80col_underline
+	.import		_ctk_80col_underline	
 	.import		_ctk_80col_reversed
 
 	.import		_ctk_80col_yscreenaddr
@@ -84,10 +84,12 @@ color1:	.res 1
 wpcolor1     = 4	
 color2:	.res 1
 wpcolor2     = 5	
-titlelen:	.res 1
-wptitlelen   = 6
+titlecolor:  .res 1
+wptitlecolor = 6
+titlelen:    .res 1
+wptitlelen   = 7
 title:	.res 2
-wptitle      = 7	
+wptitle      = 8
 	
 ;---------------------------------------------------------------------
 .data
@@ -663,7 +665,7 @@ _ctk_80col_draw_windowborders:
 
 	
 	ldy #0
-	lda _ctk_80col_windowparams + wpcolor1	
+	lda _ctk_80col_windowparams + wptitlecolor	
 :	
 	sta (ptr1),y
 	iny

@@ -28,8 +28,9 @@ unsigned char ctk_80col_righttab[256];
 
 #define COLOR(bg, fg) ((fg << 4) | (bg))
 
+#define COLOR_DIALOG            0x01
 #define COLOR_FOCUS_WINDOW      0xbf
-#define COLOR_BACKGROUND_WINDOW 0x0b
+#define COLOR_BACKGROUND_WINDOW 0x0c
 
 #define color(c) ctk_80col_color = c
 
@@ -148,6 +149,87 @@ struct ctk_80col_theme ctk_80col_theme =
     
     /* buttonright[8]; */
     {0xfb,0xfb,0xfb,0xfb,0xfb,0xfb,0xfb,0xa3},
+
+      /* Menu border patterns. */
+    /*    unsigned char menuleftpattern[8], */
+    {0x0f,0x3f,0x3f,0x7f,0x7f,0xff,0xff,0xff},
+    
+    /* menurightpatterns[8]; */
+    {0xf0,0xfc,0xfc,0xfe,0xfe,0xff,0xff,0xff},
+    
+    /* Window and widget colors. */
+    /*    unsigned char windowcolors[6], */
+    {COLOR(COLOR_GRAY2, COLOR_BLACK),
+     COLOR(COLOR_GRAY2, COLOR_BLACK),
+     COLOR(COLOR_GRAY3, COLOR_GRAY1),
+     COLOR(COLOR_GRAY3, COLOR_GRAY1),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK)},
+    
+    /* separatorcolors[6], */
+    {COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_GRAY3, COLOR_GRAY2),
+     COLOR(COLOR_GRAY3, COLOR_GRAY2),
+     COLOR(COLOR_WHITE, COLOR_GRAY1),
+     COLOR(COLOR_WHITE, COLOR_GRAY1)},
+    
+    /* labelcolors[6], */
+    {COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK)},
+    
+    /* buttoncolors[6], */
+    {COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_GRAY1, COLOR_GRAY2),
+     COLOR(COLOR_GRAY3, COLOR_GRAY1),
+     COLOR(COLOR_GRAY1, COLOR_GRAY3),
+     COLOR(COLOR_GRAY3, COLOR_GRAY1),
+     COLOR(COLOR_GRAY1, COLOR_GRAY3)},
+    
+    /* hyperlinkcolors[6], */
+    {COLOR(COLOR_GRAY2, COLOR_LIGHTBLUE),
+     COLOR(COLOR_GRAY2, COLOR_LIGHTBLUE),
+     COLOR(COLOR_WHITE, COLOR_BLUE),
+     COLOR(COLOR_BLUE, COLOR_WHITE),
+     COLOR(COLOR_WHITE, COLOR_BLUE),
+     COLOR(COLOR_BLUE, COLOR_WHITE)},
+    
+    /* textentrycolors[6],  */
+    {COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_GRAY2, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_GRAY3, COLOR_BLACK),
+     COLOR(COLOR_GRAY3, COLOR_BLACK)},
+    
+    /* bitmapcolors[6], */
+    {COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_GRAY1, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_GRAY1),
+     COLOR(COLOR_GRAY3, COLOR_BLACK),
+     COLOR(COLOR_GRAY3, COLOR_BLACK),
+     COLOR(COLOR_GRAY3, COLOR_BLACK)},
+    
+    /* textmapcolors[6], */
+    {COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_GRAY2, COLOR_GRAY1),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_WHITE, COLOR_BLACK)},
+    
+    /* iconcolors[6]; */
+    {COLOR(COLOR_GRAY3, COLOR_GRAY1),
+     COLOR(COLOR_GRAY1, COLOR_GRAY2),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_BLACK, COLOR_YELLOW),
+     COLOR(COLOR_WHITE, COLOR_BLACK),
+     COLOR(COLOR_BLACK, COLOR_YELLOW)},
+    
     
   };
 char ctk_80col_versionstring[] = CONTIKI_VERSION_STRING;
@@ -799,9 +881,10 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
   } else {
     ctk_80col_windowparams.clipy1 = clipy1 - y;
   }
-  ctk_80col_windowparams.clipy2 = clipy2 - y;
-  ctk_80col_windowparams.color1 = 0xbf/*ctk_80col_theme.windowcolors[focus+1]*/;
-  ctk_80col_windowparams.color2 = 0xbf/*ctk_80col_theme.windowcolors[focus]*/;
+  ctk_80col_windowparams.clipy2 = clipy2 - y + 1;
+  ctk_80col_windowparams.color1 = ctk_80col_theme.windowcolors[focus];
+  ctk_80col_windowparams.color2 = ctk_80col_theme.windowcolors[focus];
+  ctk_80col_windowparams.titlecolor = ctk_80col_theme.windowcolors[focus+1];
   ctk_80col_windowparams.title = window->title;
   ctk_80col_windowparams.titlelen = window->titlelen/2;
 
@@ -846,8 +929,10 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
     cputcxy(x2, y2, CH_LRCORNER);
   }
   */
-  draw_window_contents(window, focus & CTK_FOCUS_WINDOW, clipy1, clipy2,
-		       x1, x2, y + 1, y2);
+  if(ctk_mode_get() != CTK_MODE_WINDOWMOVE) {
+    draw_window_contents(window, focus & CTK_FOCUS_WINDOW, clipy1, clipy2,
+			 x1, x2, y + 1, y2);
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -870,7 +955,7 @@ s_ctk_draw_dialog(struct ctk_window *dialog)
 
   /* Draw dialog frame. */
   
-  cvlinexy(x, y1,
+  /*  cvlinexy(x, y1,
 	   dialog->h);
   cvlinexy(x2, y1,
 	   dialog->h);
@@ -884,11 +969,24 @@ s_ctk_draw_dialog(struct ctk_window *dialog)
   cputcxy(x, y2, CH_LLCORNER);
   cputcxy(x2, y, CH_URCORNER);
   cputcxy(x2, y2, CH_LRCORNER);
-  
+  */
+  gotoxy(x, y);
+  ctk_80col_windowparams.w = (dialog->w-1)/2;
+  ctk_80col_windowparams.h = dialog->h;
+  ctk_80col_windowparams.clipy1 = 0;
+  ctk_80col_windowparams.clipy2 = SCREEN_HEIGHT;
+  ctk_80col_windowparams.color1 = ctk_80col_theme.windowcolors[4];
+  ctk_80col_windowparams.color2 = ctk_80col_theme.windowcolors[4];
+  ctk_80col_windowparams.titlecolor = ctk_80col_theme.windowcolors[5];
+
+  ctk_80col_draw_windowborders();  
   
   /* Clear dialog contents. */
+  color(COLOR_DIALOG);
   for(i = y1; i < y2; ++i) {
-    cclearxy(x1, i, dialog->w);
+    gotoxy((x1 & 0xfe) + 2, i);
+    ctk_80col_cclear((dialog->w + 1)/2 - 2);
+    /*    cclearxy(x1, i, dialog->w);*/
   }
 
   draw_window_contents(dialog, CTK_FOCUS_DIALOG, 0, sizey,

@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-80col-asm.h,v 1.1 2004/09/05 07:09:41 adamdunkels Exp $
+ * $Id: ctk-80col-asm.h,v 1.2 2004/09/06 06:33:39 adamdunkels Exp $
  *
  */
 
@@ -52,6 +52,7 @@ struct ctk_80col_windowparams {
   unsigned char clipy2;
   unsigned char color1;
   unsigned char color2;
+  unsigned char titlecolor;
   unsigned char titlelen;
   char *title;
 };
