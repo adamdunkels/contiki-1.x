@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.12 2005/03/16 22:39:21 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.13 2005/03/29 23:14:39 oliverschmidt Exp $
  *
  */
 
@@ -414,7 +414,7 @@ L9:
 #ifdef DEBUG
   printf("\n## %02x\n", *(unsigned char *)(ETHIST));
 #endif
-  return;
+
 }
 #pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
