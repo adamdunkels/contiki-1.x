@@ -43,7 +43,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp.c,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: ppp.c,v 1.2 2004/08/22 21:10:02 oliverschmidt Exp $
  *
  */
 
@@ -100,9 +100,6 @@ uip_ipaddr_t our_ipaddr;
 u8_t ppp_flags;
 u8_t ppp_id;
 u8_t ppp_retry;
-
-u8_t *ppp_username;
-u8_t *ppp_password;
 
 #if PACKET_RX_DEBUG
 u16_t ppp_rx_frame_count=0;
@@ -274,7 +271,7 @@ ppp_raise(u8_t config, u8_t *username, u8_t *password)
 #endif
 /*---------------------------------------------------------------------------*/
 void
-ppp_connect(u8_t *username, u8_t *password)
+ppp_connect(void)
 {
   /* Initialize PPP engine */
   /* init_ppp(); */
@@ -284,9 +281,6 @@ ppp_connect(u8_t *username, u8_t *password)
   
   /* Enable PPP */
   ppp_flags = PPP_RX_READY;
-
-  ppp_username = username;
-  ppp_password = password;
 }
 /*---------------------------------------------------------------------------*/
 void
@@ -321,7 +315,7 @@ ppp_poll(void)
   if(lcp_state & LCP_TX_UP) {
     /* If LCP wants PAP, try to authenticate, else bring up IPCP */
     if((lcp_state & LCP_RX_AUTH) && (!(pap_state & PAP_TX_UP))) {
-      pap_task(uip_buf, ppp_username, ppp_password);  
+      pap_task(uip_buf);  
     } else {
       ipcp_task(uip_buf);
     }

@@ -44,7 +44,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: pap.h,v 1.2 2004/08/22 12:37:00 oliverschmidt Exp $
+ * $Id: pap.h,v 1.3 2004/08/22 21:10:02 oliverschmidt Exp $
  *
  */
 
@@ -71,10 +71,13 @@ typedef struct _pappkt {
 /* Export pap_state */
 extern u8_t pap_state;
 
+extern u8_t pap_username[];
+extern u8_t pap_password[];
+
 /* Function prototypes */
 void	pap_init(void);
 void	pap_rx(u8_t *, u16_t);
-void	pap_task(u8_t *buffer, u8_t *username, u8_t *password);	
+void	pap_task(u8_t *buffer);	
 
 #endif /* __PAP_H__ */
 

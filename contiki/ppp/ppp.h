@@ -42,7 +42,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp.h,v 1.2 2004/08/22 12:37:00 oliverschmidt Exp $
+ * $Id: ppp.h,v 1.3 2004/08/22 21:10:02 oliverschmidt Exp $
  *
  */
 #include "uip.h"
@@ -92,6 +92,9 @@
 #define USE_NOACCMBUG		0x2
 #define USE_GETDNS		0x4
 
+#define ppp_setusername(un)	strncpy(pap_username, un, PAP_USERNAME_SIZE)
+#define ppp_setpassword(pw)	strncpy(pap_password, pw, PAP_PASSWORD_SIZE)
+
 /*
  * Export Variables
  */
@@ -121,7 +124,7 @@ extern u8_t ppp_retry;
  * Function Prototypes
  */
 void ppp_init(void);
-void ppp_connect(u8_t *username, u8_t *password);
+void ppp_connect(void);
 
 void ppp_send(void);
 void ppp_poll(void);

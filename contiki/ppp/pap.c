@@ -41,7 +41,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: pap.c,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: pap.c,v 1.2 2004/08/22 21:10:02 oliverschmidt Exp $
  *
  */
 
@@ -64,6 +64,9 @@
 
 
 u8_t pap_state;
+
+u8_t pap_username[PAP_USERNAME_SIZE];
+u8_t pap_password[PAP_PASSWORD_SIZE];
 
 /*u16_t			pap_tx_time;
   u8_t			pap_timeout;*/
@@ -114,7 +117,7 @@ pap_rx(u8_t *buffer, u16_t count)
  */
 /*---------------------------------------------------------------------------*/
 void
-pap_task(u8_t *buffer, u8_t *username, u8_t *password)	
+pap_task(u8_t *buffer)	
 {
   u8_t *bptr;
   u16_t t;
@@ -142,22 +145,14 @@ pap_task(u8_t *buffer, u8_t *username, u8_t *password)
       bptr = pkt->data;
       
       /* Write options */
-      if(username) {
-	t = strlen(username);
-      } else {
-	t = 0;
-      }
+      t = strlen(pap_username);
       /* Write peer length */
       *bptr++ = (u8_t)t;	
-      bptr = memcpy(bptr, username, t);
+      bptr = memcpy(bptr, pap_username, t);
 
-      if(password) {
-	t = strlen(password);
-      } else {
-	t = 0;
-      }
+      t = strlen(pap_password);
       *bptr++ = (u8_t)t;
-      bptr = memcpy(bptr, password, t);
+      bptr = memcpy(bptr, pap_password, t);
 			
       /* Write length */
       t = bptr - buffer;
