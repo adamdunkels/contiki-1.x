@@ -1,5 +1,5 @@
 #ifndef __CLOCK_CONF_H__
-#define __CLOCK_CONF_H___
+#define __CLOCK_CONF_H__
 
 typedef unsigned short clock_time_t;
 
