@@ -32,7 +32,7 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: calc.c,v 1.2 2003/04/11 20:12:34 adamdunkels Exp $
+ * $Id: calc.c,v 1.3 2003/04/24 17:19:23 adamdunkels Exp $
  *
  */
 
@@ -49,18 +49,43 @@ static struct ctk_window window;
 
 static char input[16];
 static struct ctk_label inputlabel =
-  {CTK_LABEL(0, 0, 15, 1, input)};
+  {CTK_LABEL(0, 0, 12, 1, input)};
 
-static struct ctk_button addbutton =
-  {CTK_BUTTON(0, 1, 1, "+")};
-static struct ctk_button subbutton =
-  {CTK_BUTTON(3, 1, 1, "-")};
-static struct ctk_button mulbutton =
-  {CTK_BUTTON(6, 1, 1, "*")};
+static struct ctk_button button7 =
+  {CTK_BUTTON(0, 2, 1, "7")};
+static struct ctk_button button8 =
+  {CTK_BUTTON(3, 2, 1, "8")};
+static struct ctk_button button9 =
+  {CTK_BUTTON(6, 2, 1, "9")};
+static struct ctk_button button4 =
+  {CTK_BUTTON(0, 3, 1, "4")};
+static struct ctk_button button5 =
+  {CTK_BUTTON(3, 3, 1, "5")};
+static struct ctk_button button6 =
+  {CTK_BUTTON(6, 3, 1, "6")};
+static struct ctk_button button1 =
+  {CTK_BUTTON(0, 4, 1, "1")};
+static struct ctk_button button2 =
+  {CTK_BUTTON(3, 4, 1, "2")};
+static struct ctk_button button3 =
+  {CTK_BUTTON(6, 4, 1, "3")};
+static struct ctk_button button0 =
+  {CTK_BUTTON(0, 5, 3, " 0 ")};
+
+static struct ctk_button cbutton =
+  {CTK_BUTTON(0, 1, 1, "C")};
+
 static struct ctk_button divbutton =
   {CTK_BUTTON(9, 1, 1, "/")};
+static struct ctk_button mulbutton =
+  {CTK_BUTTON(9, 2, 1, "*")};
+
+static struct ctk_button subbutton =
+  {CTK_BUTTON(9, 3, 1, "-")};
+static struct ctk_button addbutton =
+  {CTK_BUTTON(9, 4, 1, "+")};
 static struct ctk_button calcbutton =
-  {CTK_BUTTON(12, 1, 1, "=")};
+  {CTK_BUTTON(9, 5, 1, "=")};
 
 static DISPATCHER_SIGHANDLER(calc_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -82,17 +107,40 @@ LOADER_INIT_FUNC(calc_init)
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
-    ctk_window_new(&window, 15, 2, "Calc");
+    ctk_window_new(&window, 12, 6, "Calc");
 
     CTK_WIDGET_ADD(&window, &inputlabel);
 
-    CTK_WIDGET_ADD(&window, &addbutton);
-    CTK_WIDGET_ADD(&window, &subbutton);
-    CTK_WIDGET_ADD(&window, &mulbutton);
-    CTK_WIDGET_ADD(&window, &divbutton);
-    CTK_WIDGET_ADD(&window, &calcbutton);
+    CTK_WIDGET_ADD(&window, &cbutton);
     
-    CTK_WIDGET_FOCUS(&window, &addbutton);
+    CTK_WIDGET_ADD(&window, &divbutton);
+	    
+    CTK_WIDGET_ADD(&window, &button7);
+    CTK_WIDGET_ADD(&window, &button8);
+    CTK_WIDGET_ADD(&window, &button9);
+
+    CTK_WIDGET_ADD(&window, &mulbutton);
+
+   
+
+    CTK_WIDGET_ADD(&window, &button4);
+    CTK_WIDGET_ADD(&window, &button5);
+    CTK_WIDGET_ADD(&window, &button6);
+
+    CTK_WIDGET_ADD(&window, &subbutton);
+
+    CTK_WIDGET_ADD(&window, &button1);
+    CTK_WIDGET_ADD(&window, &button2);
+    CTK_WIDGET_ADD(&window, &button3);
+    
+    CTK_WIDGET_ADD(&window, &addbutton);
+    
+    CTK_WIDGET_ADD(&window, &button0);
+
+    CTK_WIDGET_ADD(&window, &calcbutton);
+	
+
+
         
     dispatcher_listen(ctk_signal_button_activate);
     dispatcher_listen(ctk_signal_window_close);
@@ -120,7 +168,7 @@ input_to_operand1(void)
   unsigned char i;
 
   operand1 = 0;
-  for(m = 1, i = 14;
+  for(m = 1, i = 11;
       i > 9; --i, m *= 10) {
     if(input[i] >= '0' &&
        input[i] <= '9') {
@@ -128,7 +176,7 @@ input_to_operand1(void)
     }
     input[i] = ' ';
   }
-  input[14] = ' ';
+  input[11] = ' ';
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -136,15 +184,15 @@ operand2_to_input(void)
 {
   unsigned char i;
   
-  input[10] = (operand2/10000) % 10 + '0';
-  input[11] = (operand2/1000) % 10 + '0';
-  input[12] = (operand2/100) % 10 + '0';
-  input[13] = (operand2/10) % 10 + '0';
-  input[14] = operand2 % 10 + '0';
+  input[7] = (operand2/10000) % 10 + '0';
+  input[8] = (operand2/1000) % 10 + '0';
+  input[9] = (operand2/100) % 10 + '0';
+  input[10] = (operand2/10) % 10 + '0';
+  input[11] = operand2 % 10 + '0';
 
   for(i = 0; i < 4; ++i) {
-    if(input[10 + i] == '0') {
-      input[10 + i] = ' ';
+    if(input[7 + i] == '0') {
+      input[7 + i] = ' ';
     } else {
       break;
     }
@@ -182,10 +230,10 @@ DISPATCHER_SIGHANDLER(calc_sighandler, s, data)
   if(s == ctk_signal_keypress) {
     if((char)data >= '0' &&
        (char)data <= '9') {
-      for(i = 0; i < 14; ++i) {
+      for(i = 0; i < 11; ++i) {
 	input[i] = input[i + 1];
       }
-      input[14] = (char)data;
+      input[11] = (char)data;
     } else if((char)data == ' ') {
       for(i = 0; i < sizeof(input); ++i) {
 	input[i] = ' ';
