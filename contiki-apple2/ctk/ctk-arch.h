@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.6 2004/12/26 14:13:35 oliverschmidt Exp $
+ * $Id: ctk-arch.h,v 1.7 2005/03/29 20:31:55 oliverschmidt Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
@@ -51,10 +51,6 @@
 #ifndef CH_DEL
 #define CH_DEL		0x04	/* Ctrl-D */
 #endif /* CH_DEL */
-
-#define bgcolor(c)
-#define bordercolor(c)
-#define textcolor(c)
 
 #ifdef __APPLE2ENH__
 
