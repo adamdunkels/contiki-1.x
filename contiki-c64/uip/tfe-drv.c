@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.11 2004/09/09 21:49:17 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.12 2004/09/14 07:31:20 adamdunkels Exp $
  *
  */
 
@@ -39,6 +39,9 @@
 #include "uip_arp.h"
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
+
+static const struct uip_eth_addr addr =
+  {{0x00,0x00,0x00,0x64,0x64,0x64}};
 
 static const struct packet_service_state state =
   {
@@ -70,6 +73,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
+    uip_setethaddr(&addr);
     cs8900a_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:

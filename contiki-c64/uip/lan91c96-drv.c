@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: lan91c96-drv.c,v 1.5 2004/08/09 21:01:52 adamdunkels Exp $
+ * $Id: lan91c96-drv.c,v 1.6 2004/09/14 07:31:20 adamdunkels Exp $
  *
  */
 
@@ -39,6 +39,9 @@
 #include "uip_arp.h"
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
+
+static const struct uip_eth_addr addr =
+  {{0x00,0x0d,0x60,0x80,0x3d,0xb9}};
 
 static const struct packet_service_state state =
   {
@@ -69,6 +72,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
   case EK_EVENT_INIT:
+    uip_setethaddr(&addr);
     lan91c96_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:

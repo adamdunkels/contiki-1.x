@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-drv.c,v 1.9 2004/08/09 20:57:39 adamdunkels Exp $
+ * $Id: rrnet-drv.c,v 1.10 2004/09/14 07:31:20 adamdunkels Exp $
  *
  */
 
@@ -39,6 +39,9 @@
 #include "uip_arp.h"
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
+
+static const struct uip_eth_addr addr =
+  {{0x00,0x00,0x00,0x64,0x64,0x64}};
 
 static const struct packet_service_state state =
   {
@@ -70,6 +73,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
   case EK_EVENT_INIT:
+    uip_setethaddr(&addr);
     asm("lda #1");
     asm("ora $de01");
     asm("sta $de01");
