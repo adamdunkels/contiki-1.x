@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: pt.h,v 1.9 2005/04/01 08:13:45 adamdunkels Exp $
+ * $Id: pt.h,v 1.10 2005/04/01 09:07:49 adamdunkels Exp $
  */
 
 /**
@@ -232,6 +232,34 @@ struct pt {
  *
  * This macro spawns a child protothread and waits until it exits. The
  * macro can only be used within a protothread.
+ *
+ * Example:
+ \code
+ static struct pt parent_pt, child_pt;
+ int should_spawn_flag;
+
+ PT_THREAD(child(struct pt *pt)) {
+   PT_BEGIN(pt);
+
+   while(all_items_processed()) {
+     process_item();
+     PT_WAIT_UNTIL(pt, item_processed());
+   }
+   
+   PT_END(pt);
+ }
+ 
+ PT_THREAD(parent(void)) {
+   PT_BEGIN(&parent_pt);
+
+   if(should_spawn_flag) {
+     PT_SPAWN(&parent_pt, &child_pt, child(&child_pt));
+   }
+   
+   PT_END(&parent_pt);
+ }
+ \endcode
+ *
  *
  * \param pt A pointer to the protothread control structure.
  * \param child A pointer to the child protothread's control structure.
