@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.2 2003/04/24 17:05:41 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.3 2003/07/31 23:23:25 adamdunkels Exp $
  *
  */
 
@@ -572,7 +572,7 @@ draw_widget(struct ctk_widget *w,
   case CTK_WIDGET_LABEL:
     hires_color(ctk_hires_theme.labelcolors[focus]);
     text = w->widget.label.text;
-    for(i = 0; i < w->widget.label.h; ++i) {
+    for(i = 0; i < w->h; ++i) {
       if(ypos >= clipy1 && ypos < clipy2) {
 	hires_gotoxy(xpos, ypos);
 	ctk_hires_cputsn(text, w->w);
@@ -685,7 +685,7 @@ draw_widget(struct ctk_widget *w,
   case CTK_WIDGET_BITMAP:
     hires_color(ctk_hires_theme.bitmapcolors[focus]);
     ctk_hires_bitmapptr = w->widget.bitmap.bitmap;
-    for(i = 0; i < w->widget.bitmap.h; ++i) {
+    for(i = 0; i < w->h; ++i) {
       if(ypos >= clipy1 && ypos < clipy2) {
 	hires_gotoxy(xpos, ypos);
 	ctk_hires_draw_bitmapline(w->w);
@@ -746,7 +746,6 @@ ctk_draw_window(register struct ctk_window *window,
 		unsigned char clipy1, unsigned char clipy2)
 {
   register struct ctk_widget *w;
-  
   x = window->x;
   y = window->y + 1;
 
@@ -781,7 +780,7 @@ ctk_draw_window(register struct ctk_window *window,
      ctk_hires_windowparams.clipy2 > 0) {
     ctk_hires_draw_windowborders();
   }
-  
+
   focus = focus & CTK_FOCUS_WINDOW;
   
   /* Draw inactive widgets. */
@@ -914,9 +913,8 @@ void
 ctk_draw_menus(struct ctk_menus *menus)
 {
   struct ctk_menu *m;
-  
+    
   /* Draw menus */
-
   hires_color(ctk_hires_theme.menucolor); 
   hires_gotoxy(0, 0);
   hires_revers(0);
@@ -925,7 +923,7 @@ ctk_draw_menus(struct ctk_menus *menus)
     if(m != menus->open) {
       ctk_hires_cputsn(m->title, m->titlelen);
       ctk_hires_cputc(' ');
-    } else {
+    } else {     
       draw_menu(m);
     }
   }
