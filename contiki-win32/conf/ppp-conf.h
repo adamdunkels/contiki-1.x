@@ -44,7 +44,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp-conf.h,v 1.1 2004/08/20 12:30:26 oliverschmidt Exp $
+ * $Id: ppp-conf.h,v 1.2 2004/08/22 12:38:04 oliverschmidt Exp $
  *
  */
 
@@ -67,4 +67,4 @@
 #define IPCP_GET_PRI_DNS		1	
 #define IPCP_GET_SEC_DNS		1
 
-#endif 
+#endif /* __PPP_CONF_H__ */

@@ -29,10 +29,11 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h,v 1.2 2004/07/31 14:50:16 oliverschmidt Exp $
+ * $Id: uip-conf.h,v 1.3 2004/08/22 12:38:04 oliverschmidt Exp $
  *
  */
 #ifndef __UIP_CONF_H__
+#define __UIP_CONF_H__
 
 #define UIP_CONF_MAX_CONNECTIONS 40
 #define UIP_CONF_MAX_LISTENPORTS 40
