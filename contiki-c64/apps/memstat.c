@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.4 2003/07/31 23:34:04 adamdunkels Exp $
+ * $Id: memstat.c,v 1.5 2003/08/05 13:55:32 adamdunkels Exp $
  *
  */
 
@@ -140,6 +140,9 @@ DISPATCHER_SIGHANDLER(memstat_sighandler, s, data)
     }
   } else if(s == ctk_signal_window_close &&
 	    data == (ek_data_t)&window) {
+    quit();
+  } else if(s == dispatcher_signal_quit) {
+    ctk_window_close(&window);
     quit();
   }
 }
