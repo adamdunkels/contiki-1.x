@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc-draw.c,v 1.1 2003/04/11 20:30:15 adamdunkels Exp $
+ * $Id: vnc-draw.c,v 1.2 2004/07/18 13:23:28 oliverschmidt Exp $
  *
  */
 
@@ -246,6 +246,7 @@ c64_set_viewport_y(unsigned short y)
 
 #endif /* 0 */
 #if 0
+#pragma optimize(push, off)
 void
 c64_scroll_up(unsigned char c)
 {
@@ -343,7 +344,9 @@ c64_scroll_up(unsigned char c)
   asm("pla");
   asm("sta $f7");
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 c64_scroll_down(unsigned char c)
 {
@@ -443,7 +446,9 @@ c64_scroll_down(unsigned char c)
   asm("pla");
   asm("sta $f7");
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 c64_scroll_right(unsigned char c)
 {
@@ -562,7 +567,9 @@ c64_scroll_right(unsigned char c)
   asm("pla");
   asm("sta $f7");
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
 void
 c64_scroll_left(unsigned char c)
 {
@@ -677,6 +684,7 @@ c64_scroll_left(unsigned char c)
   asm("pla");
   asm("sta $f7");
 }
+#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 
 
