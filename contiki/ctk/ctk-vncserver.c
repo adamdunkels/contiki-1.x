@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.9 2004/07/04 11:40:56 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.10 2004/08/09 20:27:07 adamdunkels Exp $
  *
  */
 
@@ -55,6 +55,7 @@
 #include "vnc-server.h"
 #include "vnc-out.h"
 
+#include "ctk-vncfont.h"
 #include "ctk-vncserver.h"
 #include "ctk-vncserver-conf.h"
 
@@ -948,6 +949,18 @@ unsigned char
 ctk_draw_width(void)
 {
   return sizex;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_mouse_xtoc(unsigned short x)
+{
+  return x / CTK_VNCFONT_WIDTH;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+ctk_mouse_ytoc(unsigned short y)
+{
+  return y / CTK_VNCFONT_HEIGHT;
 }
 /*-----------------------------------------------------------------------------------*/
 /** \internal
