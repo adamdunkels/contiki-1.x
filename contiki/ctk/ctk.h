@@ -32,14 +32,16 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.12 2003/08/09 23:32:37 adamdunkels Exp $
+ * $Id: ctk.h,v 1.13 2003/08/11 22:27:51 adamdunkels Exp $
  *
  */
 
 #ifndef __CTK_H__
 #define __CTK_H__
 
+
 #include "ctk-conf.h"
+#include "ctk-arch.h"
 #include "ek.h"
 
 #include "cc.h"
@@ -356,8 +358,8 @@ void ctk_icon_add(struct ctk_widget *icon, ek_id_t id);
 /* Functions for manipulating widgets. */
 #define CTK_WIDGET_ADD(win, widg) \
  ctk_widget_add(win, (struct ctk_widget *)widg)
-void ctk_widget_add(struct ctk_window *window,
-		    struct ctk_widget *widget);
+void CC_FASTCALL ctk_widget_add(struct ctk_window *window,
+				struct ctk_widget *widget);
 
 #define CTK_WIDGET_FOCUS(win, widg) \
   (win)->focused = (struct ctk_widget *)(widg)
