@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.1 2003/07/04 10:54:52 adamdunkels Exp $
+ * $Id: uip_arch.c,v 1.2 2004/08/09 22:24:19 adamdunkels Exp $
  *
  */
 
@@ -42,8 +42,6 @@
 #define BUF ((uip_tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define IP_PROTO_TCP    6
 
-/*-----------------------------------------------------------------------------------*/
-#if UIP_BUFSIZE > 255
 /*-----------------------------------------------------------------------------------*/
 void
 uip_add_rcv_nxt(u16_t n)
@@ -98,45 +96,6 @@ uip_add32(u8_t *op32, u16_t op16)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-#else /* UIP_BUFSIZE > 255 */
-/*-----------------------------------------------------------------------------------*/
-void
-uip_add_rcv_nxt(u8_t n)
-{
-  uip_conn->rcv_nxt[3] += n;
-  if(uip_conn->rcv_nxt[3] < n) {
-    ++uip_conn->rcv_nxt[2];  
-    if(uip_conn->rcv_nxt[2] == 0) {
-      ++uip_conn->rcv_nxt[1];    
-      if(uip_conn->rcv_nxt[1] == 0) {
-	++uip_conn->rcv_nxt[0];
-      }
-    }
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-void
-uip_add32(u8_t *op32, u8_t op8)
-{
-  uip_acc32[3] = op32[3] + op8;
-  uip_acc32[2] = op32[2];
-  uip_acc32[1] = op32[1];
-  uip_acc32[0] = op32[0];
-  
-  if(uip_acc32[3] < op8) {
-    ++uip_acc32[2];  
-    if(uip_acc32[2] == 0) {
-      ++uip_acc32[1];    
-      if(uip_acc32[1] == 0) {
-	++uip_acc32[0];
-      }
-    }
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-#endif /* UIP_BUFSIZE > 255 */
-
-unsigned short ipsum(void *data, unsigned short len);
 
 static u16_t
 chksum(u16_t *sdata, u16_t len)
@@ -180,18 +139,8 @@ uip_tcpchksum(void)
 
   /* Compute the checksum of the data in the TCP packet and add it to
      the TCP header checksum. */
-#if WITH_FAST_IPSUM==1
-  {u16_t len;
-  len = (u16_t)(((((u16_t)(BUF->len[0]) << 8) + BUF->len[1]) - 40));
-  if(len > 80) {
-    len = 80;
-  }
-  sum = chksum((u16_t *)uip_appdata, len);
-  }
-#else /* WITH_FAST_IPSUM */
   sum = chksum((u16_t *)uip_appdata,
 	       (u16_t)(((((u16_t)(BUF->len[0]) << 8) + BUF->len[1]) - 40)));
-#endif /* WITH_FAST_IPSUM */
 
   if((sum += hsum) < hsum) {
     ++sum;
