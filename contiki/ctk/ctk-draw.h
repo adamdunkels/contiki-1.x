@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-draw.h,v 1.1 2003/03/19 14:13:34 adamdunkels Exp $
+ * $Id: ctk-draw.h,v 1.2 2003/04/08 07:20:48 adamdunkels Exp $
  *
  */
 
@@ -43,6 +43,9 @@
 
 #include "ctk-arch.h"
 
+
+/* See the file doc/ctk.txt for documentation on these function
+   declarations. */
 
 void ctk_draw_init(void);
 
