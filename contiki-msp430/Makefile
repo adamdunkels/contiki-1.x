@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/09/04 19:46:32 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2003/09/05 21:23:37 adamdunkels Exp $
 #
 
 all: contiki
@@ -97,7 +97,8 @@ contiki: contiki-main.o strncasecmp.o sensors.o \
  uip.o uip_arch.o resolv.o uip-signal.o uip_main.o \
  rs232.o rs232dev.o slip-drv.o \
  ctk.o ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o \
- $(WEBSERVER) program-handler.o sensorview.o sensorview-dsc.o
+ program-handler.o sensorview.o sensorview-dsc.o \
+ $(WEBSERVER) 
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
 
 
@@ -111,6 +112,6 @@ upload: erase
 upload-remote: contiki
 	scp contiki sidewalker.sics.se:/tmp
 	ssh sidewalker.sics.se "/adam/contiki-msp430/jtag/pyjtag/jtag.py -l /dev/ppi0 -e"
-	ssh sidewalker.sics.se "/adam/contiki-msp430/jtag/pyjtag/jtag.py -l /dev/ppi0 -D -p /tmp/contiki"
-	ssh sidewalker.sics.se "/adam/contiki-msp430/jtag/pyjtag/jtag.py -l /dev/ppi0 -D -r"
+	ssh sidewalker.sics.se "/adam/contiki-msp430/jtag/pyjtag/jtag.py -l /dev/ppi0 -D -D -S -R 2048 -p /tmp/contiki"
+	ssh sidewalker.sics.se "/adam/contiki-msp430/jtag/pyjtag/jtag.py -l /dev/ppi0 -r"
 
