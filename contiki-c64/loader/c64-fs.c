@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.4 2003/08/06 23:12:30 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.5 2003/08/09 13:27:41 adamdunkels Exp $
  *
  */
 
@@ -47,13 +47,13 @@ struct directory_entry {
   unsigned char track, sect;
   unsigned char name[16];
   unsigned char reltrack, relsect, relreclen;
-  unsigned char unused1, unused2, unused3;
+  unsigned char unused1, unused2, unused3, unused4;
   unsigned char tmptrack, tmpsect;
   unsigned char blockslo, blockshi;
 };
 
-static unsigned char dirbuf[256];
-static unsigned char dirbuftrack = 0, dirbufsect = 0;
+unsigned char _c64_fs_dirbuf[256];
+unsigned char _c64_fs_dirbuftrack = 0, _c64_fs_dirbufsect = 0;
 
 unsigned char _c64_fs_filebuf[256];
 unsigned char _c64_fs_filebuftrack = 0, _c64_fs_filebufsect = 0;
@@ -87,6 +87,12 @@ c64_fs_open(const char *name, register struct c64_fs_file *f)
     }
   }
 
+  /* The file was not found in the directory. We flush the directory
+     buffer cache now in order to prevent a nasty problem from
+     happening: If the first directory block of an empty disk was
+     cached, *all* subsequent file opens would return "file not
+     found". */
+  _c64_fs_dirbuftrack = 0; /* There are no disk blocks on track 0. */
   return -1;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -126,7 +132,8 @@ c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
       _c64_fs_filebuftrack = f->track = _c64_fs_filebuf[0];
       _c64_fs_filebufsect = f->sect = _c64_fs_filebuf[1];
       f->ptr = 2;
-      c64_dio_read_block(_c64_fs_filebuftrack, _c64_fs_filebufsect, _c64_fs_filebuf);
+      c64_dio_read_block(_c64_fs_filebuftrack,
+			 _c64_fs_filebufsect, _c64_fs_filebuf);
     }
     
     ++buf;
@@ -140,17 +147,17 @@ c64_fs_close(struct c64_fs_file *f)
   
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-readdirbuf(unsigned char track, unsigned char sect)
+void
+_c64_fs_readdirbuf(unsigned char track, unsigned char sect)
 {
-  if(dirbuftrack == track &&
-     dirbufsect == sect) {
+  if(_c64_fs_dirbuftrack == track &&
+     _c64_fs_dirbufsect == sect) {
     /* Buffer already contains requested block, return. */
     return;
   }
-  c64_dio_read_block(track, sect, dirbuf);
-  dirbuftrack = track;
-  dirbufsect = sect;
+  c64_dio_read_block(track, sect, _c64_fs_dirbuf);
+  _c64_fs_dirbuftrack = track;
+  _c64_fs_dirbufsect = sect;
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
@@ -168,30 +175,34 @@ c64_fs_readdir(register struct c64_fs_dir *d,
 	       register struct c64_fs_dirent *f)
 {
   struct directory_entry *de;
+  register char *nameptr;
   int i;
   
-  readdirbuf(d->track, d->sect);
-  de = (struct directory_entry *)&dirbuf[d->ptr];
+  _c64_fs_readdirbuf(d->track, d->sect);
+  de = (struct directory_entry *)&_c64_fs_dirbuf[d->ptr];
+  nameptr = de->name;
   for(i = 0; i < 16; ++i) {
-    if(de->name[i] == 0xa0) {
-      de->name[i] = 0;
+    if(*nameptr == 0xa0) {
+      *nameptr = 0;
       break;
     }
+    ++nameptr;
   }
   strncpy(f->name, de->name, 16);
   f->track = de->track;
   f->sect = de->sect;
+  f->size = de->blockslo + (de->blockshi >> 8);
 
   /* Save directory entry as a cache for a file open that might follow
      this readdir. */
   memcpy(&lastdirent, f, sizeof(struct c64_fs_dirent));
   
   if(d->ptr == 226) {
-    if(dirbuf[0] == 0) {
+    if(_c64_fs_dirbuf[0] == 0) {
       return 1;
     }
-    d->track = dirbuf[0];
-    d->sect = dirbuf[1];
+    d->track = _c64_fs_dirbuf[0];
+    d->sect = _c64_fs_dirbuf[1];
     d->ptr = 2;
   } else {
     d->ptr += 32;
