@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.7 2003/08/29 20:35:13 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.8 2004/02/24 10:03:25 adamdunkels Exp $
  *
  */
 
@@ -81,7 +81,13 @@ timer(void)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
     send();
-  }   
+  }
+
+  /* Call the ARP timer function every 10 seconds. */
+  if(++arptimer == 20) {
+    uip_arp_timer();
+    arptimer = 0;
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static void

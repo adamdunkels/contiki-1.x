@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-drv.c,v 1.5 2003/08/24 22:35:23 adamdunkels Exp $
+ * $Id: rrnet-drv.c,v 1.6 2004/02/24 10:03:25 adamdunkels Exp $
  *
  */
 
@@ -81,7 +81,13 @@ timer(void)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
     send();
-  }   
+  }
+
+  /* Call the ARP timer function every 10 seconds. */
+  if(++arptimer == 20) {
+    uip_arp_timer();
+    arptimer = 0;
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -117,7 +123,9 @@ rrnet_drv_idle(void)
   if((current - start) >= CLK_TCK/2) {
     timer();
     start = current;
-  }    
+  }
+
+  
 }
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(rrnet_drv_init, arg)
