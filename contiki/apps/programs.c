@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: programs.c,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: programs.c,v 1.2 2003/04/02 11:32:25 adamdunkels Exp $
  *
  */
 
@@ -176,8 +176,9 @@ sighandler(ek_signal_t s, ek_data_t data)
 {
   if(s == ctk_signal_menu_activate) {
     if((struct ctk_menu *)data == &menu) {
-      if(menu.active == menuitem_www) {
+      if(0) {
 #ifdef WITH_WWW
+      } else if(menu.active == menuitem_www) {
 	www_init();
 	ctk_redraw();
 #endif /* WITH_WWW */
