@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.12 2003/08/05 13:48:43 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.13 2003/08/05 22:02:52 adamdunkels Exp $
  *
  */
 
@@ -153,13 +153,48 @@ program_handler_init(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
+#ifdef WITH_LOADER_ARCH
+#define NUM_LOADERNAMES 8
+#define NAMELEN 16
+static char loadernames[(NAMELEN + 1) * NUM_LOADERNAMES];
+static char *
+loadername_copy(char *name)
+{
+  char i;
+  char *loadernamesptr;
+
+  loadernamesptr = loadernames;
+  /* Allocate a place in the loadernames table. */
+  for(i = 0; i < NUM_LOADERNAMES; ++i) {
+    if(*loadernamesptr == 0) {
+      strncpy(loadernamesptr, name, NAMELEN);
+      return loadernamesptr;
+    }
+    loadernamesptr += NAMELEN + 1;
+  }
+  return NULL;
+}
+
+static void
+loadername_free(char *name)
+{
+  *name = 0;
+}
+#endif /* WITH_LOADER_ARCH */
+/*-----------------------------------------------------------------------------------*/
 void
 program_handler_load(char *name)
 {
 #ifdef WITH_LOADER_ARCH
-  dispatcher_emit(loader_signal_load, name, id);
-  ctk_label_set_text(&loadingname, name);
-  ctk_dialog_open(&loadingdialog);
+  name = loadername_copy(name);
+  if(name != NULL) {
+    dispatcher_emit(loader_signal_load, name, id);
+    ctk_label_set_text(&loadingname, name);
+    ctk_dialog_open(&loadingdialog);
+  } else {
+    ctk_label_set_text(&errortype, "Out of memory");
+    ctk_dialog_open(&errordialog);
+  }
   /*  ctk_redraw(); */
   /*  ctk_window_redraw(&loadingdialog);*/
 #endif /* WITH_LOADER_ARCH */
@@ -217,6 +252,7 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 #if WITH_LOADER_ARCH
     ctk_dialog_close();
     err = LOADER_LOAD(data);
+    loadername_free(data);
     if(err != LOADER_OK) {
       ctk_label_set_text(&errortype, errormsgs[err]);
       ctk_dialog_open(&errordialog);
