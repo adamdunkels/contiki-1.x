@@ -32,13 +32,17 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.1 2003/04/02 09:17:27 adamdunkels Exp $
+ * $Id: ctk-arch.h,v 1.2 2003/09/04 19:18:09 adamdunkels Exp $
  *
  */
 
 #ifndef __CTK_ARCH_H__
 #define __CTK_ARCH_H__
 
+#if WITH_CTKVNC
+#include "ctk-vncarch.h"
+#else
 #include "ctk-gtksim.h"
+#endif
 
 #endif /* __CTK_ARCH_H__ */
