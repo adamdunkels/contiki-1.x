@@ -20,8 +20,8 @@ OldPotY:        .res    1
  
 SID_ADConv1     = $D419
 SID_ADConv2     = $D41A
-CIA1_PRA        = $DC00
-CIA1_PRB        = $DC01
+CIA1_PRA        = $DC00	
+CIA1_PRB        = $DC01	
 CIA1_DDRB       = $DC03	
 
 
@@ -132,26 +132,18 @@ _ctk_mouse_1351:
         stx     _ctk_mouse_joyy+1
 
 	;; Get mouse button
-
-
-	lda	#$11
-	sta	CIA1_DDRB
-	ldx	#0
-	lda	CIA1_PRB
-	lsr
-	lsr
-	lsr
-	lsr
-	sta $d020
-	and	#$10
-	bne	@NOLEFTB
-	ldx	#1
-@NOLEFTB:
-	txa
+        lda     #$7F
+        sta     CIA1_PRA
+        lda     CIA1_PRB                ; Read joystick #0
+        ldx     #0
+        and     #$1F
+        eor     #$1F
+	
 	ora     _ctk_mouse_firebutton
 	sta	_ctk_mouse_firebutton
 	
 	lda	#0
+	sta	CIA1_PRA
 	sta	CIA1_DDRB	
 	rts	
 ;---------------------------------------------------------------------			
