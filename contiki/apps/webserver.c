@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.6 2003/05/28 05:21:51 adamdunkels Exp $
+ * $Id: webserver.c,v 1.7 2003/07/31 23:26:07 adamdunkels Exp $
  *
  */
 
@@ -45,58 +45,45 @@
 
 #include "loader.h"
 
+#include "webserver.h"
 #include "httpd.h"
 
 /* The main window. */
 static struct ctk_window mainwindow;
 
 static struct ctk_label message =
-  {CTK_LABEL(0, 0, 14, 1, "Web server is ")};
-static struct ctk_label onoffmessage =
-  {CTK_LABEL(14, 0, 3, 1, "On ")};
-
-
-static struct ctk_button onbutton =
-  {CTK_BUTTON(0, 5, 2, "On")};
-static struct ctk_label statuslabel =
-  {CTK_LABEL(4, 5, 8, 1, "")};
-static struct ctk_button offbutton =
-  {CTK_BUTTON(12, 5, 3, "Off")};
-
-static unsigned char onoff;
-#define ON  1
-#define OFF 0
+  {CTK_LABEL(0, 0, 15, 1, "Latest requests")};
 
 static DISPATCHER_SIGHANDLER(webserver_sighandler, s, data);
 
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Web server", NULL, webserver_sighandler,
-		   httpd_appcall)};
+{DISPATCHER_PROC("Web server", NULL, webserver_sighandler,
+		 httpd_appcall)};
 static ek_id_t id;
 
+
+#define LOG_WIDTH  30
+#define LOG_HEIGHT 20
+static char log[LOG_WIDTH*LOG_HEIGHT];
+
+static struct ctk_label loglabel =
+{CTK_LABEL(0, 1, LOG_WIDTH, LOG_HEIGHT, log)};
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(webserver_init)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
 
-    ctk_window_new(&mainwindow, 17, 6, "Web server");
-    ctk_window_move(&mainwindow, 21, 16);
-  
-    CTK_WIDGET_ADD(&mainwindow, &message);
-    CTK_WIDGET_ADD(&mainwindow, &onoffmessage);
+    ctk_window_new(&mainwindow, LOG_WIDTH, LOG_HEIGHT+1, "Web server");
 
-    CTK_WIDGET_ADD(&mainwindow, &onbutton);
-    CTK_WIDGET_ADD(&mainwindow, &offbutton);
     
-    CTK_WIDGET_FOCUS(&mainwindow, &onbutton);
-    
+    CTK_WIDGET_ADD(&mainwindow, &message);
+    CTK_WIDGET_ADD(&mainwindow, &loglabel);
+ 
     /* Attach listeners to signals. */
-    dispatcher_listen(ctk_signal_button_activate);
+    dispatcher_listen(ctk_signal_window_close);
 
     httpd_init();
-    
-    onoff = ON;
   }
 
   ctk_window_open(&mainwindow);
@@ -105,21 +92,38 @@ LOADER_INIT_FUNC(webserver_init)
 static
 DISPATCHER_SIGHANDLER(webserver_sighandler, s, data)
 {
-  struct ctk_button *b;
   unsigned char i;
   DISPATCHER_SIGHANDLER_ARGS(s, data);
   
-  if(s == ctk_signal_button_activate) {
-    b = (struct ctk_button *)data;
-    if(b == &onbutton) {
-      ctk_label_set_text(&onoffmessage, "On ");
-      CTK_WIDGET_REDRAW(&onoffmessage);
-      onoff = ON;
-    } else if(b == &offbutton) {
-      ctk_label_set_text(&onoffmessage, "Off");
-      CTK_WIDGET_REDRAW(&onoffmessage);
-      onoff = OFF;
-    }
+  if(s == ctk_signal_window_close ||
+     s == dispatcher_signal_quit) {
+    ctk_window_close(&mainwindow);
+    dispatcher_exit(&p);
+    id = EK_ID_NONE;
+    LOADER_UNLOAD();    
   }
+}
+/*-----------------------------------------------------------------------------------*/
+void
+webserver_log_file(u16_t *requester, char *file)
+{
+  int size;
+  
+  /* Scroll previous entries upwards */
+  memcpy(log, &log[LOG_WIDTH], LOG_WIDTH * (LOG_HEIGHT - 1));
+
+  /* Print out IP address of requesting host. */
+  size = sprintf(&log[LOG_WIDTH * (LOG_HEIGHT - 1)],
+		 "%d.%d.%d.%d: ",
+		 htons(requester[0]) >> 8,
+		 htons(requester[0]) & 0xff,
+		 htons(requester[1]) >> 8,
+		 htons(requester[1]) & 0xff);
+  
+  /* Copy filename into last line. */		 
+  strncpy(&log[LOG_WIDTH * (LOG_HEIGHT - 1) + size], file, LOG_WIDTH - size);
+	   
+  /* Update log display. */
+  CTK_WIDGET_REDRAW(&loglabel);
 }
 /*-----------------------------------------------------------------------------------*/
