@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.c,v 1.6 2004/08/09 20:36:39 adamdunkels Exp $
+ * $Id: ek.c,v 1.7 2004/09/01 18:19:43 adamdunkels Exp $
  *
  */
 
@@ -126,7 +126,7 @@ struct event_data {
 static ek_num_events_t nevents, fevent;
 static struct event_data events[EK_CONF_NUMEVENTS];
 
-unsigned char ek_poll_request;
+volatile unsigned char ek_poll_request;
 
 
 /**
@@ -236,13 +236,35 @@ ek_alloc_event(void)
 static void
 procs_add(struct ek_proc *p)
 {
+  static struct ek_proc *q, *r;
+  
   /* The process should be placed on the process list according to the
      process' priority. The higher the priority, the earlier on the
      list. */
+  r = NULL;
+  for(q = ek_procs; q != NULL; q = q->next) {
+    if(p->prio >= q->prio) {
+      p->next = q;
+      if(r == NULL) {
+	ek_procs = p;
+      } else {
+	r->next = p;       
+      }
+      return;
+    }
+    r = q;
+  }
+
+  if(q == NULL) {
+    if(r == NULL) {
+      p->next = ek_procs;
+      ek_procs = p;
+    } else {
+      r->next = p;
+      p->next = NULL;
+    } 
+  }
   
-  /* XXX: not implemented, just place first on list... */
-  p->next = ek_procs;
-  ek_procs = p;
 }
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -482,6 +504,12 @@ ek_process_poll(void)
   
   /* Call poll handlers. */
   for(p = ek_procs; p != NULL; p = p->next) {
+    
+    if(ek_poll_request) {
+      ek_poll_request = 0;
+      p = ek_procs;
+    }
+
     if(p->pollhandler != NULL) {
       ek_current = p;
       p->pollhandler();
@@ -508,7 +536,10 @@ int
 ek_run(void)
 {
   /* Process "poll" events. */
-  ek_process_poll();
+  do {
+    ek_poll_request = 0;
+    ek_process_poll();
+  } while(ek_poll_request != 0);
   
   /* Process one event */
   ek_process_event();
