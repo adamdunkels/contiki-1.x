@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS for the C64
  *
- * $Id: ctk-hires-theme-default.c,v 1.1 2003/04/17 15:09:44 adamdunkels Exp $
+ * $Id: ctk-hires-theme-default.c,v 1.2 2003/04/24 17:08:31 adamdunkels Exp $
  *
  */
 
@@ -154,8 +154,8 @@ struct ctk_hires_theme ctk_hires_theme =
      COLOR(COLOR_WHITE, COLOR_BLACK)},
     
     /* iconcolors[6]; */
-    {COLOR(COLOR_WHITE, COLOR_BLACK),
-     COLOR(COLOR_BLACK, COLOR_YELLOW),
+    {COLOR(COLOR_GRAY3, COLOR_GRAY1),
+     COLOR(COLOR_GRAY1, COLOR_GRAY2),
      COLOR(COLOR_WHITE, COLOR_BLACK),
      COLOR(COLOR_BLACK, COLOR_YELLOW),
      COLOR(COLOR_WHITE, COLOR_BLACK),
