@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory-dsc.c,v 1.2 2004/06/27 12:45:57 oliverschmidt Exp $
+ * $Id: directory-dsc.c,v 1.3 2005/03/18 00:51:41 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char directoryicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon directory_icon =
   {CTK_ICON("Directory", directoryicon_bitmap, directoryicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
