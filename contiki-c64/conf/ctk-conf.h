@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.5 2003/08/09 23:38:15 adamdunkels Exp $
+ * $Id: ctk-conf.h,v 1.6 2004/06/27 12:44:21 oliverschmidt Exp $
  *
  */
 
@@ -51,25 +51,32 @@
    window.  */
 #define CTK_CONF_WINDOWSWITCH_KEY     CH_F3
 
-
+/* Defines which key that is to be used for switching to the prevoius
+   widget.  */
 #define CTK_CONF_WIDGETUP_KEY         CH_F5
+
+/* Defines which key that is to be used for switching to the next
+   widget.  */
 #define CTK_CONF_WIDGETDOWN_KEY       CH_F7
 
 /* Toggles mouse support (must have support functions in the
 architecture specific files to work). */
 #define CTK_CONF_MOUSE_SUPPORT        1 /* 1342 bytes */
 
-/* Toggles support for desktop icons. */
+/* Toggles support for icons. */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
+
+/* Toggles support for icon bitmaps. */
+#define CTK_CONF_ICON_BITMAPS         1
+
+/* Toggles support for icon textmaps. */
+#define CTK_CONF_ICON_TEXTMAPS        1
 
 /* Toggles support for movable windows. */
 #define CTK_CONF_WINDOWMOVE           1 /* 333 bytes */
 
 /* Toggles support for closable windows. */
 #define CTK_CONF_WINDOWCLOSE          1 /* 14 bytes */
-
-/* Toggles support for multiline text entry editing. */
-#define CTK_CONF_TEXTENTRY_MULTILINE  0 /* 118 bytes */
 
 /* Toggles support for menus. */
 #define CTK_CONF_MENUS                1 /* 1384 bytes */
