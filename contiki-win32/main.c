@@ -32,9 +32,11 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.1 2004/07/15 00:31:10 oliverschmidt Exp $
+ * $Id: main.c,v 1.2 2004/07/31 14:49:33 oliverschmidt Exp $
  *
  */
+
+#include <stdlib.h>
 
 #include "ctk.h"
 #include "ctk-draw.h"
@@ -66,18 +68,51 @@ clock_time(void)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-main(void)
+main(int argc)
 {
+  u16_t addr[2];
+
+  if(argc != 2) {
+    cprintf("\n"
+            "usage: Contiki <addr>\n"
+            "\n"
+            "  <addr> Host IP address of interface to be used by Contiki\n"
+	    "\n"
+            "notes:\n"
+	    "\n"
+            "  - Contiki needs Windows 2000 or later to run.\n"
+	    "\n"
+            "  - Contiki needs administrative rights to run.\n"
+	    "\n"
+            "  - The IP address to be used by Contiki has to be different from the Host IP\n"
+            "    address specified here.\n"
+	    "\n"
+            "  - Contiki doesn't respond to ARP requests for it's IP address. A workaround\n"
+            "    is to add a static entry into the ARP cache of communication peers.\n");
+    exit(EXIT_FAILURE);
+  }
+
   ek_init();
   tcpip_init(NULL);
-  
+
+  console_init();
   ctk_init();
 
   resolv_init(NULL);
-  
+
   uip_event_init();
-  
+
   program_handler_init();
+
+#if 0
+  uip_ipaddr(addr, 192,168,0,3);
+  uip_sethostaddr(addr);
+ 
+/* uip_ipaddr(addr, 192,168,0,1); */
+/* resolv_conf(addr);             */
+#endif
+
+  rawsock_service_init(NULL);
 
   program_handler_add(&netconf_dsc,   "Network setup",  1);
   program_handler_add(&www_dsc,       "Web browser",    1);
@@ -89,6 +124,7 @@ main(void)
 
   while(1) {
     ek_run();
+    _sleep(0);
   }
 }
 /*-----------------------------------------------------------------------------------*/
