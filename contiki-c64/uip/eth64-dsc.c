@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: lan91c96-dsc.c,v 1.2 2004/09/09 21:47:19 adamdunkels Exp $
+ * $Id: eth64-dsc.c,v 1.1 2004/09/19 18:54:13 adamdunkels Exp $
  *
  */
 

@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: lan91c96-drv.c,v 1.7 2004/09/17 20:54:05 adamdunkels Exp $
+ * $Id: eth64-drv.c,v 1.1 2004/09/19 18:54:13 adamdunkels Exp $
  *
  */
 
@@ -55,7 +55,7 @@ EK_PROCESS(proc, PACKET_SERVICE_NAME ": ETH64", EK_PRIO_NORMAL,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tapdev_service_init, arg)
+LOADER_INIT_FUNC(eth64_drv_init, arg)
 {
   arg_free(arg);
   ek_service_start(PACKET_SERVICE_NAME, &proc);
