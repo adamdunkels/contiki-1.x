@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev.c,v 1.1 2003/09/04 19:46:33 adamdunkels Exp $
+ * $Id: rs232dev.c,v 1.2 2005/02/23 22:45:38 oliverschmidt Exp $
  *
  */
 
@@ -136,7 +136,7 @@ rs232dev_send(void)
 
   ptr = &uip_buf[UIP_LLH_LEN];
   for(i = 0; i < uip_len; ++i) {
-    if(i == 40) {
+    if(i == UIP_TCPIP_HLEN) {
       ptr = (char *)uip_appdata;
     }
     c = *ptr++;
