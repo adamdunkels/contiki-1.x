@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.4 2003/08/24 22:32:56 adamdunkels Exp $
+ * $Id: ctk-arch.h,v 1.5 2004/06/06 06:21:29 adamdunkels Exp $
  *
  */
 
@@ -50,6 +50,8 @@
 #if CTK_VNCSERVER
 #include "ctk-vncarch.h"
 #endif
+
+#define ctk_arch_isprint(c) isprint(c)
 
 /*#include "fire.h"*/
 
