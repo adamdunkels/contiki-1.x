@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.1 2003/03/19 16:26:19 adamdunkels Exp $
+ * $Id: uip_arch.c,v 1.2 2003/07/30 22:40:36 adamdunkels Exp $
  *
  */
 
@@ -308,19 +308,11 @@ uip_tcpchksum(void)
   chksum_tmp = chksum();
 
   chksum_ptr = (u16_t)uip_appdata;
-#ifdef WITH_TFE
-  asm("lda _uip_buf+3+14");
-#else /* WITH_TFE */
-  asm("lda _uip_buf+3");
-#endif /* WITH_TFE */
+  asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
   asm("sec");
   asm("sbc #40");
   asm("sta _chksum_len");
-#ifdef WITH_TFE
-  asm("lda _uip_buf+2+14");
-#else /* WITH_TFE */
-  asm("lda _uip_buf+2");
-#endif /* WITH_TFE */
+  asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
   asm("sbc #0");
   asm("sta _chksum_len+1");
 
@@ -348,19 +340,11 @@ uip_tcpchksum(void)
   asm("bcs tcpchksum_loop1");
 
 
-#ifdef WITH_TFE
-  asm("lda _uip_buf+3+14");
-#else /* WITH_TFE */
-  asm("lda _uip_buf+3");
-#endif /* WITH_TFE */
+  asm("lda _uip_buf+3+%b", UIP_LLH_LEN);
   asm("sec");
   asm("sbc #20");
   asm("sta _chksum_len");
-#ifdef WITH_TFE
-  asm("lda _uip_buf+2+14");
-#else /* WITH_TFE */
-  asm("lda _uip_buf+2");
-#endif /* WITH_TFE */
+  asm("lda _uip_buf+2+%b", UIP_LLH_LEN);
   asm("sbc #0");
   asm("sta _chksum_len+1");
   
@@ -370,19 +354,11 @@ uip_tcpchksum(void)
   asm("php");
   asm("tcpchksum_loop2:");
   asm("plp");
-#ifdef WITH_TFE
-  asm("lda _uip_buf+14,y");
-#else /* WITH_TFE */
-  asm("lda _uip_buf,y");
-#endif /* WITH_TFE */  
+  asm("lda _uip_buf+%b,y", UIP_LLH_LEN);
   asm("adc _chksum_tmp");
   asm("sta _chksum_tmp");
   asm("iny");
-#ifdef WITH_TFE 
-  asm("lda _uip_buf+14,y");
-#else /* WITH_TFE */
-  asm("lda _uip_buf,y");
-#endif /* WITH_TFE */  
+  asm("lda _uip_buf+%b,y", UIP_LLH_LEN);
   asm("adc _chksum_tmp+1");
   asm("sta _chksum_tmp+1");
   asm("iny");

@@ -31,10 +31,9 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.2 2003/07/30 22:40:36 adamdunkels Exp $
+ * $Id: rrnet-drv.c,v 1.1 2003/07/30 22:40:36 adamdunkels Exp $
  *
  */
-
 
 #define NULL (void *)0
 
@@ -52,12 +51,13 @@
 static u8_t i, arptimer;
 static u16_t start, current;
 
-static void tfe_drv_idle(void);
-static DISPATCHER_SIGHANDLER(tfe_drv_sighandler, s, data);
+static void rrnet_drv_idle(void);
+static DISPATCHER_SIGHANDLER(rrnet_drv_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("TCP/IP/TFE driver", tfe_drv_idle,
-		   tfe_drv_sighandler, NULL)};
+  {DISPATCHER_PROC("TCP/IP/RR-Net driver", rrnet_drv_idle,
+		   rrnet_drv_sighandler, NULL)};
 static ek_id_t id;
+
 
 
 
@@ -86,7 +86,7 @@ timer(void)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-tfe_drv_idle(void)
+rrnet_drv_idle(void)
 {
   /* Poll Ethernet device to see if there is a frame avaliable. */
   uip_len = cs8900a_poll();
@@ -124,7 +124,7 @@ tfe_drv_idle(void)
   }    
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tfe_drv_init)
+LOADER_INIT_FUNC(rrnet_drv_init)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
@@ -132,6 +132,9 @@ LOADER_INIT_FUNC(tfe_drv_init)
     arptimer = 0;
     start = ek_clock();
 
+    asm("lda #1");
+    asm("ora $de01");
+    asm("sta $de01");
     cs8900a_init();
     
     dispatcher_listen(uip_signal_uninstall);
@@ -139,7 +142,7 @@ LOADER_INIT_FUNC(tfe_drv_init)
 }
 /*-----------------------------------------------------------------------------------*/
 static
-DISPATCHER_SIGHANDLER(tfe_drv_sighandler, s, data)
+DISPATCHER_SIGHANDLER(rrnet_drv_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
