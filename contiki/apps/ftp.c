@@ -338,7 +338,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 	ctk_dialog_close();
       } else if((struct ctk_button *)data == &downloadbutton) {
 	ctk_dialog_close();
-	fd = cfs_open(localfilename, 0);
+	fd = cfs_open(localfilename, CFS_WRITE);
 	if(fd > 0) {
 	  show_statustext("Downloading ", remotefilename);
 	  ftpc_get(connection, remotefilename);
