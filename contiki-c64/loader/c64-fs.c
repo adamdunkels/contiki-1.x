@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.3 2003/08/05 14:04:24 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.4 2003/08/06 23:12:30 adamdunkels Exp $
  *
  */
 
@@ -55,8 +55,8 @@ struct directory_entry {
 static unsigned char dirbuf[256];
 static unsigned char dirbuftrack = 0, dirbufsect = 0;
 
-static unsigned char filebuf[256];
-static unsigned char filebuftrack = 0, filebufsect = 0;
+unsigned char _c64_fs_filebuf[256];
+unsigned char _c64_fs_filebuftrack = 0, _c64_fs_filebufsect = 0;
 
 static struct c64_fs_dirent lastdirent;
 
@@ -97,31 +97,36 @@ c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
 
   /* Check if current block is already in buffer, and if not read it
      from disk. */
-  if(filebuftrack != f->track ||
-     filebufsect != f->sect) {
-    filebuftrack = f->track;
-    filebufsect = f->sect;
-    c64_dio_read_block(filebuftrack, filebufsect, filebuf);
+  if(_c64_fs_filebuftrack != f->track ||
+     _c64_fs_filebufsect != f->sect) {
+    _c64_fs_filebuftrack = f->track;
+    _c64_fs_filebufsect = f->sect;
+    c64_dio_read_block(_c64_fs_filebuftrack, _c64_fs_filebufsect, _c64_fs_filebuf);
   }
 
+  if(_c64_fs_filebuf[0] == 0 &&
+     f->ptr == _c64_fs_filebuf[1]) {
+    return 0; /* EOF */
+  }
+  
   for(i = 0; i < len; ++i) {
-    *buf = filebuf[f->ptr];
+    *buf = _c64_fs_filebuf[f->ptr];
     
     ++f->ptr;
-    if(filebuf[0] == 0) {
-      if(f->ptr == filebuf[1]) {
+    if(_c64_fs_filebuf[0] == 0) {
+      if(f->ptr == _c64_fs_filebuf[1]) {
 	/* End of file reached, we return the amount of bytes read so
 	   far. */
-	return i;
+	return i + 1;
       }
     } else if(f->ptr == 0) {
 
       /* Read new block into buffer and set buffer state
 	 accordingly. */
-      filebuftrack = f->track = filebuf[0];
-      filebufsect = f->sect = filebuf[1];
+      _c64_fs_filebuftrack = f->track = _c64_fs_filebuf[0];
+      _c64_fs_filebufsect = f->sect = _c64_fs_filebuf[1];
       f->ptr = 2;
-      c64_dio_read_block(filebuftrack, filebufsect, filebuf);
+      c64_dio_read_block(_c64_fs_filebuftrack, _c64_fs_filebufsect, _c64_fs_filebuf);
     }
     
     ++buf;
