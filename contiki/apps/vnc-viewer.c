@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-viewer.c,v 1.5 2003/09/02 21:46:06 adamdunkels Exp $
+ * $Id: vnc-viewer.c,v 1.6 2003/11/27 15:46:45 adamdunkels Exp $
  *
  */
 
@@ -44,7 +44,7 @@
 #include "uip.h"
 #include "vnc-viewer.h"
 
-#include <string.h> /* XXX for bcopy */
+#include <string.h> /* XXX for memcpy */
 #include <stdio.h>  /* XXX for printf */
 
 /* RFB server initial handshaking string. */
@@ -242,7 +242,7 @@ buffer_data(u8_t *data, u16_t datalen)
     return;
   }
   
-  bcopy(data, &(vs->buffer[vs->buffersize]), datalen);
+  memcpy(&(vs->buffer[vs->buffersize]), data, datalen);
 
   vs->buffersize += datalen;
   vs->bufferleft -= datalen;
