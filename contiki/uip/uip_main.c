@@ -31,34 +31,30 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_main.c,v 1.4 2003/08/12 21:14:21 adamdunkels Exp $
+ * $Id: uip_main.c,v 1.5 2003/08/20 20:58:38 adamdunkels Exp $
  *
  */
 
 
 /* uip_main.c: initialization code and main event loop. */
 
-#define NULL (void *)0
-
 #include "uip.h"
 #include "uip_arp.h"
 
-#ifdef WITH_TFE
-#include "cs8900a.h"
-#endif /* WITH_TFE */
+#include "uip_main.h"
 
 #include "ek.h"
 
+u16_t uip_arp_draddr[2], uip_arp_netmask[2];
+
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+#ifndef NULL
+#define NULL (void *)0
+#endif /* NULL */
 
 static u8_t i, arptimer;
 static u16_t start, current;
 
-/*-----------------------------------------------------------------------------------*/
-void
-uip_main_init(void)
-{
-}
 /*-----------------------------------------------------------------------------------*/
 unsigned char
 uip_main_ipaddrconv(char *addrstr, unsigned char *ipaddr)

@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.4 2003/08/05 13:51:50 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.5 2003/08/20 20:58:38 adamdunkels Exp $
  *
  */
 
@@ -70,8 +70,6 @@ struct ethip_hdr {
 #define ARP_REPLY   2
 
 #define ARP_HWTYPE_ETH 1
-
-u16_t uip_arp_draddr[2], uip_arp_netmask[2];
 
 struct arp_entry {
   u16_t ipaddr[2];
