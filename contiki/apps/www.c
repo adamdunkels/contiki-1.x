@@ -32,10 +32,11 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.21 2003/09/04 19:35:32 adamdunkels Exp $
+ * $Id: www.c,v 1.22 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
+#include <string.h>
 
 #include "ctk.h"
 #include "dispatcher.h"
@@ -48,6 +49,7 @@
 
 #include "program-handler.h"
 
+#include "uiplib.h"
 
 #include "loader.h"
 
@@ -359,7 +361,7 @@ open_url(void)
   
   /* Try to lookup the hostname. If it fails, we initiate a hostname
      lookup and print out an informative message on the statusbar. */
-  if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {    
+  if(uiplib_ipaddrconv(host, (unsigned char *)addr) == 0) {    
     if(resolv_lookup(host) == NULL) {
       resolv_query(host);
       show_statustext("Resolving host...");

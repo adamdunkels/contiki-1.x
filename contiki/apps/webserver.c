@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.9 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: webserver.c,v 1.10 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
@@ -40,7 +40,6 @@
 #include "ctk.h"
 #include "dispatcher.h"
 #include "http-strings.h"
-#include "uip_main.h"
 #include "petsciiconv.h"
 
 #include "loader.h"

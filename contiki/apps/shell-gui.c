@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.5 2003/10/14 11:23:04 adamdunkels Exp $
+ * $Id: shell-gui.c,v 1.6 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
@@ -39,7 +39,6 @@
 #include "loader.h"
 
 #include "uip.h"
-#include "uip_main.h"
 #include "uip_arp.h"
 #include "resolv.h"
 

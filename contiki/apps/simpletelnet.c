@@ -32,12 +32,12 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.8 2003/09/02 21:46:06 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.9 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
 #include "petsciiconv.h"
-#include "uip_main.h"
+#include "uiplib.h"
 #include "uip.h"
 #include "ctk.h"
 #include "dispatcher.h"
@@ -202,7 +202,7 @@ connect(void)
   *cptr = 0;
 
   addrptr = &addr[0];  
-  if(uip_main_ipaddrconv(telnethost, (unsigned char *)addr) == 0) {
+  if(uiplib_ipaddrconv(telnethost, (unsigned char *)addr) == 0) {
     addrptr = resolv_lookup(telnethost);
     if(addrptr == NULL) {
       resolv_query(telnethost);

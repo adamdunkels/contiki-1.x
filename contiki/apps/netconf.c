@@ -32,12 +32,12 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.10 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: netconf.c,v 1.11 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
-#include "uip_main.h"
 #include "uip.h"
+#include "uiplib.h"
 #include "uip_arp.h"
 #include "resolv.h"
 #include "ctk.h"
@@ -212,24 +212,24 @@ apply_tcpipconfig(void)
 
 #ifdef WITH_UIP
   nullterminate(ipaddr);
-  if(uip_main_ipaddrconv(ipaddr, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(ipaddr, (unsigned char *)addr)) {
     uip_sethostaddr(addr);
   }
   
 #ifdef WITH_ETHERNET
   nullterminate(netmask);
-  if(uip_main_ipaddrconv(netmask, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(netmask, (unsigned char *)addr)) {
     uip_setnetmask(addr);
   }
 
   nullterminate(gateway);
-  if(uip_main_ipaddrconv(gateway, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(gateway, (unsigned char *)addr)) {
     uip_setdraddr(addr);
   }
 #endif /* WITH_ETHERNET */
   
   nullterminate(dnsserver);
-  if(uip_main_ipaddrconv(dnsserver, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(dnsserver, (unsigned char *)addr)) {
     resolv_conf(addr);
   }
 #endif /* WITH_UIP */

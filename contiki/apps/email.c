@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.11 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: email.c,v 1.12 2004/02/24 09:57:49 adamdunkels Exp $
  *
  */
 
@@ -40,7 +40,7 @@
 #include "ctk.h"
 #include "dispatcher.h"
 #include "smtp.h"
-#include "uip_main.h"
+#include "uiplib.h"
 #include "petsciiconv.h"
 #include "loader.h"
 
@@ -243,7 +243,7 @@ applyconfig(void)
   for(cptr = smtpserver; *cptr != ' ' && *cptr != 0; ++cptr);
   *cptr = 0;
   
-  if(uip_main_ipaddrconv(smtpserver, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(smtpserver, (unsigned char *)addr)) {
     smtp_configure("contiki", addr);
   }
 }

@@ -43,13 +43,13 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.22 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.23 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
+#include <string.h>
 
 #include "petsciiconv.h"
-#include "uip_main.h"
 #include "uip.h"
 #include "ctk.h"
 #include "ctk-draw.h"

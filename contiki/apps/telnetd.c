@@ -28,13 +28,12 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.7 2003/11/27 15:53:00 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.8 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
 #include "loader.h"
 #include "uip.h"
-#include "uip_main.h"
 #include "petsciiconv.h"
 #include "uip_arp.h"
 #include "resolv.h"

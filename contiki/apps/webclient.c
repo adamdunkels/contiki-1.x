@@ -32,14 +32,14 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.15 2003/11/27 15:47:11 adamdunkels Exp $
+ * $Id: webclient.c,v 1.16 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
 #include "uip.h"
 #include "webclient.h"
 #include "resolv.h"
-#include "uip_main.h"
+#include "uiplib.h"
 
 #include "www-conf.h"
 
@@ -144,7 +144,7 @@ webclient_get(char *host, u16_t port, char *file)
   
   /* First check if the host is an IP address. */
   ipaddr = &addr[0];
-  if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {    
+  if(uiplib_ipaddrconv(host, (unsigned char *)addr) == 0) {    
     ipaddr = resolv_lookup(host);
     
     if(ipaddr == NULL) {

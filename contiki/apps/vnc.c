@@ -32,14 +32,17 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.6 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: vnc.c,v 1.7 2004/02/24 09:57:50 adamdunkels Exp $
  *
  */
 
+#include <string.h>
+
 #include "petsciiconv.h"
-#include "uip_main.h"
+#include "uiplib.h"
 #include "uip.h"
 #include "ctk.h"
+#include "ctk-mouse.h"
 #include "dispatcher.h"
 #include "resolv.h"
 #include "telnet.h"
@@ -159,7 +162,7 @@ connect(void)
   *cptr = 0;
 
   addrptr = &addr[0];  
-  if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {
+  if(uiplib_ipaddrconv(host, (unsigned char *)addr) == 0) {
     addrptr = resolv_lookup(host);
     if(addrptr == NULL) {
       resolv_query(host);
