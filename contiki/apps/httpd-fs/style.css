@@ -11,41 +11,42 @@ body
 {
 
   background-color: #fffeec;
-  color:TEXTCOLOR;
+  color:black;
 
   font-size:8pt;
   font-family:arial,helvetica;
 }
 
+.wrap {
+  width: 98%;
+  margin: 0 auto;
+  text-align: left;
+  font-family:arial,helvetica;        
+}
+
 .menublock
 {
-  position:absolute;
-  top:10px;
-  left:0%;
-  width:14%;
+  margin: 4px;
+  width:15%;
   float:left;
 
   padding:10px;
-  margin:4px;
 	
   border: solid 1px;
   background-color: #fffcd2;
   text-align:left;
   
-  font-size:10pt;
+  font-size:9pt;
+  font-family:arial,helvetica;  
 }
 
 .contentblock
 {  
-  position:absolute;
-  top:10px;
-  left:17%;
-  width:52%;
+  margin: 4px;
+  width:50%;
   float:left;
 
   padding:10px;
-  margin:4px;
-  margin-bottom:30px;
 
   border: 1px dotted;
   background-color: white;
@@ -57,22 +58,60 @@ body
 
 .newsblock
 {
-  position:absolute;
-  top:10px;
-  left:72%;
+  margin: 4px;
   width:24%;
   float:left;
 
+
   padding:10px;
-  margin:4px;
 
   border: solid 1px;
   background-color: #fffcd2;
   text-align:left;
   font-size:8pt;
-
+  font-family:arial,helvetica;
 }
 
+.printable
+{
+  margin: 4px;
+  width:24%;
+  float:left;
+
+
+  padding:10px;
+
+  border: 0;
+  background-color: #fffeec;
+  text-align:right;
+  font-size:8pt;
+  font-family:arial,helvetica;
+}
+
+div.rfig
+{
+  border: solid 1px; 
+
+  text-align: left;
+
+  padding: 10px;
+  margin:10px;
+
+  font-size:8pt;
+
+  float:right;
+}
+
+pre.example
+{
+  border: solid 1px; 
+  padding: 10px;
+  margin:10px;
+  text-align: left;
+  font-size:8pt;
+  font-family:arial,helvetica;
+  white-space:pre;  
+}
 
 
 p.intro
@@ -81,13 +120,20 @@ p.intro
   margin-right:20px;
 
   font-size:10pt;
-  font-weight:bold;
+/*  font-weight:bold; */
   font-family:arial,helvetica;  
 }
 
 p.clink
 {
   font-size:12pt;
+  font-family:courier,monospace;  
+  text-align:center;
+}
+
+p.clink9
+{
+  font-size:9pt;
   font-family:courier,monospace;  
   text-align:center;
 }
@@ -139,6 +185,7 @@ p.rfig
   float:right;
 }
 
+
 p.lfig
 {
   border: solid 1px; 
@@ -158,6 +205,14 @@ p
   padding-left:10px;
 }
 
+p.mailaddr
+{
+  padding-left:10px;
+  font-size:7pt;
+  font-family:courier,terminal;
+  text-align:right; 
+}
+
 p.right
 {
   text-align:right; 
@@ -173,7 +228,7 @@ p.border-title
   margin:4px;
   margin-bottom:10px;
 
-  color: TITLECOLOR;
+  color: black;
   background-color: #fffcba;
   border: solid 1px;
 

@@ -30,13 +30,15 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd.c,v 1.8 2005/02/23 21:18:05 oliverschmidt Exp $
+ * $Id: httpd.c,v 1.9 2005/02/27 09:33:51 adamdunkels Exp $
  */
 
 #include "contiki.h"
 #include "httpd.h"
 #include "httpd-fs.h"
 #include "httpd-cgi.h"
+#include "psock.h"
+#include "http-strings.h"
 
 #include <string.h>
 
@@ -45,6 +47,15 @@
 
 #define SEND_STRING(s, str) PSOCK_SEND(s, str, strlen(str)) 
 MEMB(conns, sizeof(struct httpd_state), 8);
+
+#define ISO_nl      0x0a
+#define ISO_space   0x20
+#define ISO_bang    0x21
+#define ISO_percent 0x25
+#define ISO_period  0x2e
+#define ISO_slash   0x2f
+#define ISO_colon   0x3a
+
 
 /*---------------------------------------------------------------------------*/
 static unsigned short
@@ -76,11 +87,21 @@ PT_THREAD(send_file(struct httpd_state *s))
   PSOCK_END(&s->sout);  
 }
 /*---------------------------------------------------------------------------*/
+static
+PT_THREAD(send_part_of_file(struct httpd_state *s))
+{
+  PSOCK_BEGIN(&s->sout);
+
+  PSOCK_SEND(&s->sout, s->file.data, s->len);
+  
+  PSOCK_END(&s->sout);  
+}
+/*---------------------------------------------------------------------------*/
 static void
 next_scriptstate(struct httpd_state *s)
 {
   char *p;
-  p = strchr(s->scriptptr, '\n') + 1;
+  p = strchr(s->scriptptr, ISO_nl) + 1;
   s->scriptlen -= (unsigned short)(p - s->scriptptr);
   s->scriptptr = p;
 }
@@ -88,40 +109,57 @@ next_scriptstate(struct httpd_state *s)
 static
 PT_THREAD(handle_script(struct httpd_state *s))
 {
+  char *ptr;
+  
   PT_BEGIN(&s->scriptpt);
 
-  s->scriptptr = s->file.data;
-  s->scriptlen = s->file.len;
 
-  while(s->scriptlen > 0) {
-    switch(*s->scriptptr) {
-    case 't':
-      s->file.data = &s->scriptptr[2];
-      s->file.len = (unsigned short)(strchr(&s->scriptptr[2], '\n') -
-				     &s->scriptptr[2]);
-      PT_WAIT_THREAD(&s->scriptpt, send_file(s));
+  while(s->file.len > 0) {
+
+    /* Check if we should start executing a script. */
+    if(*s->file.data == ISO_percent &&
+       *(s->file.data + 1) == ISO_bang) {
+      s->scriptptr = s->file.data + 3;
+      s->scriptlen = s->file.len - 3;
+      if(*(s->scriptptr - 1) == ISO_colon) {
+	httpd_fs_open(s->scriptptr + 1, &s->file);
+	PT_WAIT_THREAD(&s->scriptpt, send_file(s));       
+      } else {
+	PT_WAIT_THREAD(&s->scriptpt,
+		       httpd_cgi(s->scriptptr)(s, s->scriptptr));
+      }
       next_scriptstate(s);
-      break;
-    case 'i':
-      httpd_fs_open(&s->scriptptr[2], &s->file);
-      PT_WAIT_THREAD(&s->scriptpt, send_file(s));
-      next_scriptstate(s);
-      break;
-    case 'c':
-      PT_WAIT_THREAD(&s->scriptpt,
-		     httpd_cgitab[s->scriptptr[2] - 'a'](s, &s->scriptptr[4]));
-      next_scriptstate(s);
-      break;
-    case '#':
-      next_scriptstate(s);
-      break;
-    case '.':
-      PT_EXIT(&s->scriptpt);
-      break;
-    default:
-      uip_abort();
-      PT_EXIT(&s->scriptpt);
-      break;
+      
+      /* The script is over, so we reset the pointers and continue
+	 sending the rest of the file. */
+      s->file.data = s->scriptptr;
+      s->file.len = s->scriptlen;
+    } else {
+      /* See if we find the start of script marker in the block of HTML
+	 to be sent. */
+
+      if(s->file.len > uip_mss()) {
+	s->len = uip_mss();
+      } else {
+	s->len = s->file.len;
+      }
+
+      if(*s->file.data == ISO_percent) {
+	ptr = strchr(s->file.data + 1, ISO_percent);
+      } else {
+	ptr = strchr(s->file.data, ISO_percent);
+      }
+      if(ptr != NULL &&
+	 ptr != s->file.data) {
+	s->len = (int)(ptr - s->file.data);
+	if(s->len >= uip_mss()) {
+	  s->len = uip_mss();
+	}
+      }
+      PT_WAIT_THREAD(&s->scriptpt, send_part_of_file(s));
+      s->file.data += s->len;
+      s->file.len -= s->len;
+      
     }
   }
   
@@ -129,28 +167,30 @@ PT_THREAD(handle_script(struct httpd_state *s))
 }
 /*---------------------------------------------------------------------------*/
 static
-PT_THREAD(send_headers(struct httpd_state *s, char *statushdr))
+PT_THREAD(send_headers(struct httpd_state *s, const char *statushdr))
 {
   char *ptr;
 
   PSOCK_BEGIN(&s->sout);
 
   SEND_STRING(&s->sout, statushdr);
-  SEND_STRING(&s->sout, "Server: Contiki/1.2-devel0\r\n");
 
-  ptr = strrchr(s->filename, '.');
+  ptr = strrchr(s->filename, ISO_period);
   if(ptr == NULL) {
-    SEND_STRING(&s->sout, "Content-type: text/plain\r\n\r\n");
-  } else if(strncmp(".html", ptr, 5) == 0) {
-    SEND_STRING(&s->sout, "Content-type: text/html\r\n\r\n");
-  } else if(strncmp(".css", ptr, 4) == 0) {
-    SEND_STRING(&s->sout, "Content-type: text/css\r\n\r\n");
-  } else if(strncmp(".png", ptr, 4) == 0) {
-    SEND_STRING(&s->sout, "Content-type: image/png\r\n\r\n");
-  } else if(strncmp(".jpg", ptr, 4) == 0) {
-    SEND_STRING(&s->sout, "Content-type: image/jpeg\r\n\r\n");	
+    SEND_STRING(&s->sout, http_content_type_binary);
+  } else if(strncmp(http_html, ptr, 5) == 0 ||
+	    strncmp(http_shtml, ptr, 6) == 0) {
+    SEND_STRING(&s->sout, http_content_type_html);
+  } else if(strncmp(http_css, ptr, 4) == 0) {
+    SEND_STRING(&s->sout, http_content_type_css);
+  } else if(strncmp(http_png, ptr, 4) == 0) {
+    SEND_STRING(&s->sout, http_content_type_png);
+  } else if(strncmp(http_gif, ptr, 4) == 0) {
+    SEND_STRING(&s->sout, http_content_type_gif);
+  } else if(strncmp(http_jpg, ptr, 4) == 0) {
+    SEND_STRING(&s->sout, http_content_type_jpg);	
   } else {
-    SEND_STRING(&s->sout, "Content-type: application/octet-stream\r\n\r\n");
+    SEND_STRING(&s->sout, http_content_type_plain);
   }
   PSOCK_END(&s->sout);
 }
@@ -158,18 +198,23 @@ PT_THREAD(send_headers(struct httpd_state *s, char *statushdr))
 static
 PT_THREAD(handle_output(struct httpd_state *s))
 {
+  char *ptr;
+  
   PT_BEGIN(&s->outputpt);
  
   if(!httpd_fs_open(s->filename, &s->file)) {
-    httpd_fs_open("/404.html", &s->file);
+    httpd_fs_open(http_404_html, &s->file);
     PT_WAIT_THREAD(&s->outputpt,
-		   send_headers(s, "HTTP/1.0 404 Not found\r\n"));
+		   send_headers(s,
+		   http_header_404));
     PT_WAIT_THREAD(&s->outputpt,
 		   send_file(s));
   } else {
     PT_WAIT_THREAD(&s->outputpt,
-		   send_headers(s, "HTTP/1.0 200 OK\r\n"));
-    if(strncmp(s->filename, "/cgi/", 5) == 0) {
+		   send_headers(s,
+		   http_header_200));
+    ptr = strchr(s->filename, ISO_period);
+    if(ptr != NULL && strncmp(ptr, http_shtml, 6) == 0) {
       PT_INIT(&s->scriptpt);
       PT_WAIT_THREAD(&s->outputpt, handle_script(s));
     } else {
@@ -186,35 +231,35 @@ PT_THREAD(handle_input(struct httpd_state *s))
 {
   PSOCK_BEGIN(&s->sin);
 
-  PSOCK_READTO(&s->sin, ' ');
+  PSOCK_READTO(&s->sin, ISO_space);
 
   
-  if(strncmp(s->inputbuf, "GET ", 4) != 0) {
+  if(strncmp(s->inputbuf, http_get, 4) != 0) {
     PSOCK_CLOSE_EXIT(&s->sin);
   }
-  PSOCK_READTO(&s->sin, ' ');
+  PSOCK_READTO(&s->sin, ISO_space);
 
-  if(s->inputbuf[0] != '/') {
+  if(s->inputbuf[0] != ISO_slash) {
     PSOCK_CLOSE_EXIT(&s->sin);
   }
 
-  if(s->inputbuf[1] == ' ') {
-    strncpy(s->filename, "/index.html", sizeof(s->filename));
+  if(s->inputbuf[1] == ISO_space) {
+    strncpy(s->filename, http_index_html, sizeof(s->filename));
   } else {
     s->inputbuf[PSOCK_DATALEN(&s->sin) - 1] = 0;
     strncpy(s->filename, &s->inputbuf[0], sizeof(s->filename));
   }
 
-  webserver_log_file(uip_conn->ripaddr, s->filename);
+  httpd_log_file(uip_conn->ripaddr, s->filename);
   
   s->state = STATE_OUTPUT;
 
   while(1) {
-    PSOCK_READTO(&s->sin, '\n');
+    PSOCK_READTO(&s->sin, ISO_nl);
 
-    if(strncmp(s->inputbuf, "Referer:", 8) == 0) {
+    if(strncmp(s->inputbuf, http_referer, 8) == 0) {
       s->inputbuf[PSOCK_DATALEN(&s->sin) - 2] = 0;
-      webserver_log(&s->inputbuf[9]);
+      httpd_log(&s->inputbuf[9]);
     }
   }
   
@@ -248,19 +293,19 @@ httpd_appcall(void *state)
     tcp_markconn(uip_conn, s);
     PSOCK_INIT(&s->sin, s->inputbuf, sizeof(s->inputbuf) - 1);
     PSOCK_INIT(&s->sout, s->inputbuf, sizeof(s->inputbuf) - 1);
-    /*    PSOCK_INIT(&s->scgi, s->inputbuf, sizeof(s->inputbuf) - 1);*/
     PT_INIT(&s->outputpt);
     s->state = STATE_WAITING;
-    timer_set(&s->timer, CLOCK_SECOND * 10);
+    timer_set(&s->timer, CLOCK_SECOND * 100);
     handle_connection(s);
   } else if(s != NULL) {
     if(uip_poll()) {
+      
       if(timer_expired(&s->timer)) {
 	uip_abort();
+	memb_free(&conns, s);
       }
-    } else {
-      timer_reset(&s->timer);
-    }
+    } 
+    timer_restart(&s->timer);
     handle_connection(s);
   } else {
     uip_abort();

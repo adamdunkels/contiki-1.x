@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.h,v 1.3 2004/09/12 07:15:00 adamdunkels Exp $
+ * $Id: httpd-cgi.h,v 1.4 2005/02/27 09:33:51 adamdunkels Exp $
  *
  */
 
@@ -40,6 +40,6 @@
 
 typedef PT_THREAD((* httpd_cgifunction)(struct httpd_state *, char *));
 
-extern httpd_cgifunction httpd_cgitab[];
+httpd_cgifunction httpd_cgi(char *name);
 
 #endif /* __HTTPD_CGI_H__ */

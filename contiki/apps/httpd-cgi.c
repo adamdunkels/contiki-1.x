@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.8 2005/02/23 21:18:05 oliverschmidt Exp $
+ * $Id: httpd-cgi.c,v 1.9 2005/02/27 09:33:51 adamdunkels Exp $
  *
  */
 
@@ -56,11 +56,18 @@ static PT_THREAD(file_stats(struct httpd_state *s, char *arg));
 static PT_THREAD(tcp_stats(struct httpd_state *s, char *arg));
 static PT_THREAD(processes(struct httpd_state *s, char *arg));
 
-httpd_cgifunction httpd_cgitab[] = {
-  file_stats,    /* CGI function "a" */
-  tcp_stats,     /* CGI function "b" */
-  processes,     /* CGI function "c" */
+struct cgifunction {
+  char *name;
+  httpd_cgifunction function;
 };
+
+static struct cgifunction cgitab[] = {
+  {"file-stats", file_stats},
+  {"tcp-connections", tcp_stats},
+  {"processes", processes},
+  {NULL, NULL}
+};
+
 
 static const char closed[] =   /*  "CLOSED",*/
 {0x43, 0x4c, 0x4f, 0x53, 0x45, 0x44, 0};
@@ -101,24 +108,45 @@ static const char *states[] = {
   last_ack};
   
 
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+static
+PT_THREAD(nullfunction(struct httpd_state *s, char *ptr))
+{
+  PSOCK_BEGIN(&s->sout);  
+  PSOCK_END(&s->sout);
+}
+/*---------------------------------------------------------------------------*/
+httpd_cgifunction
+httpd_cgi(char *name)
+{
+  struct cgifunction *f;
+
+  /* Find the matching name in the table, return the function. */
+  for(f = cgitab; f->name != NULL; ++f) {
+    if(strncmp(f->name, name, strlen(f->name)) == 0) {
+      return f->function;
+    }
+  }
+  return nullfunction;
+}
+/*---------------------------------------------------------------------------*/
 static unsigned short
 generate_file_stats(void *arg)
 {
   char *f = (char *)arg;
   return sprintf((char *)uip_appdata, "%5u", httpd_fs_count(f));
 }
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 static
 PT_THREAD(file_stats(struct httpd_state *s, char *ptr))
 {
   PSOCK_BEGIN(&s->sout);
 
-  PSOCK_GENERATOR_SEND(&s->sout, generate_file_stats, ptr);
+  PSOCK_GENERATOR_SEND(&s->sout, generate_file_stats, strchr(ptr, ' ') + 1);
   
   PSOCK_END(&s->sout);
 }
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 static unsigned short
 make_tcp_stats(void *arg)
 {
@@ -140,7 +168,7 @@ make_tcp_stats(void *arg)
 		 (uip_outstanding(conn))? '*':' ',
 		 (uip_stopped(conn))? '!':' ');
 }
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 static
 PT_THREAD(tcp_stats(struct httpd_state *s, char *ptr))
 {
@@ -155,7 +183,7 @@ PT_THREAD(tcp_stats(struct httpd_state *s, char *ptr))
 
   PSOCK_END(&s->sout);
 }
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 static unsigned short
 make_processes(void *s)
 {
@@ -170,7 +198,7 @@ make_processes(void *s)
 		 p->id, name, p->prio,
 		 p->pollhandler, p->eventhandler, p->procstate);
 }
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 static
 PT_THREAD(processes(struct httpd_state *s, char *ptr))
 {
@@ -187,4 +215,4 @@ PT_THREAD(processes(struct httpd_state *s, char *ptr))
   
   PSOCK_END(&s->sout);
 }
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/

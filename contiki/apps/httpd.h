@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.7 2005/02/23 21:18:05 oliverschmidt Exp $
+ * $Id: httpd.h,v 1.8 2005/02/27 09:33:51 adamdunkels Exp $
  *
  */
 
@@ -58,5 +58,8 @@ struct httpd_state {
 
 void httpd_init(void);
 void httpd_appcall(void *state);
+
+void httpd_log(char *msg);
+void httpd_log_file(u16_t *requester, char *file);
 
 #endif /* __HTTPD_H__ */
