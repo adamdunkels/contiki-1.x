@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.7 2003/10/14 11:12:50 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.8 2003/11/27 15:50:54 adamdunkels Exp $
  *
  */
 
@@ -242,7 +242,7 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_UDP_APPCALL  udp_appcall
+#define UIP_UDP_APPCALL  dispatcher_uipcall
 
 /** @} */
 /*------------------------------------------------------------------------------*/
@@ -301,7 +301,11 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
+#ifndef UIP_CONF_RECEIVE_WINDOW
 #define UIP_RECEIVE_WINDOW   32768
+#else
+#define UIP_RECEIVE_WINDOW UIP_CONF_RECEIVE_WINDOW
+#endif
 
 /**
  * Determines if support for TCP urgent data notification should be
@@ -336,7 +340,7 @@ typedef unsigned short uip_stats_t;
  *
  * This should not need to be changed.
  */
-#define UIP_MAXSYNRTX      3
+#define UIP_MAXSYNRTX      5
 
 /**
  * The TCP maximum segment size.
@@ -441,8 +445,11 @@ void uip_log(char *msg);
  *
  * \hideinitializer
  */
+#ifdef UIP_CONF_LLH_LEN
+#define UIP_LLH_LEN UIP_CONF_LLH_LEN
+#else /* UIP_CONF_LLH_LEN */
 #define UIP_LLH_LEN     14
-
+#endif /* UIP_CONF_LLH_LEN */
 
 /** @} */
 /*------------------------------------------------------------------------------*/
