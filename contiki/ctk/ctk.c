@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.11 2003/04/09 19:22:19 adamdunkels Exp $
+ * $Id: ctk.c,v 1.12 2003/04/11 20:22:03 adamdunkels Exp $
  *
  */
 
@@ -98,11 +98,10 @@ ek_signal_t ctk_signal_keypress,
   ctk_signal_menu_activate,
   ctk_signal_window_close,
   ctk_signal_pointer_move,
-  ctk_signal_pointer_down,
-  ctk_signal_pointer_up;
+  ctk_signal_pointer_button;
 
 #if CTK_CONF_MOUSE_SUPPORT
-unsigned short mouse_last_x, mouse_last_y, mouse_last_button;
+unsigned short mouse_x, mouse_y, mouse_button;
 #endif /* CTK_CONF_MOUSE_SUPPORT */
 
 static unsigned short screensaver_timer;
@@ -151,16 +150,18 @@ ctk_init(void)
   menus.menus = menus.desktopmenu = &desktopmenu;
 #endif /* CTK_CONF_MENUS */
 
+#if CTK_CONF_MOUSE_SUPPORT
   ctk_mouse_init();
+  ctk_mouse_show();
+#endif /* CTK_CONF_MOUSE_SUPPORT */
   
   ctk_draw_init();
 
   height = ctk_draw_height();
   width = ctk_draw_width();
-
+  
   desktop_window.active = NULL;
-
-
+  
   ctk_signal_keypress = dispatcher_sigalloc();
   ctk_signal_timer = dispatcher_sigalloc();
   ctk_signal_button_activate = dispatcher_sigalloc();
@@ -171,8 +172,7 @@ ctk_init(void)
   ctk_signal_window_close = dispatcher_sigalloc();
 
   ctk_signal_pointer_move = dispatcher_sigalloc();
-  ctk_signal_pointer_down = dispatcher_sigalloc();
-  ctk_signal_pointer_up = dispatcher_sigalloc();
+  ctk_signal_pointer_button = dispatcher_sigalloc();
   
   dispatcher_listen(ctk_signal_timer);
   dispatcher_timer(ctk_signal_timer, NULL, CLK_TCK);
@@ -605,7 +605,7 @@ ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-focus_widget(struct ctk_widget *focus)
+select_widget(struct ctk_widget *focus)
 {
   struct ctk_window *window;
 
@@ -679,7 +679,7 @@ switch_focus_widget(unsigned char direction)
     focus = window->active;
   }
 
-  focus_widget(focus);
+  select_widget(focus);
 }
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_MENUS
@@ -897,9 +897,30 @@ textentry_input(ctk_arch_key_t c,
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_MENUS
 static unsigned char
-menus_input(ctk_arch_key_t c)
+activate_menu(void)
 {
   struct ctk_window *w;
+    
+  lastmenu = menus.open;
+  if(menus.open == &desktopmenu) {
+    for(w = windows; w != NULL; w = w->next) {
+      if(w->title == desktopmenu.items[desktopmenu.active].title) {
+	ctk_window_open(w);
+	menus.open = NULL;
+	return REDRAW_ALL;
+      }
+    }
+  } else {
+    dispatcher_emit(ctk_signal_menu_activate, menus.open,
+		    DISPATCHER_BROADCAST);
+  }
+  menus.open = NULL;
+  return REDRAW_MENUPART;
+}
+/*-----------------------------------------------------------------------------------*/
+static unsigned char
+menus_input(ctk_arch_key_t c)
+{
 
   if(menus.open->nitems > maxnitems) {
     maxnitems = menus.open->nitems;
@@ -925,27 +946,15 @@ menus_input(ctk_arch_key_t c)
     return REDRAW_MENUS;
     
   case CH_ENTER:
-    lastmenu = menus.open;
-    if(menus.open == &desktopmenu) {
-      for(w = windows; w != NULL; w = w->next) {
-	if(w->title == desktopmenu.items[desktopmenu.active].title) {
-	  ctk_window_open(w);
-	  menus.open = NULL;
-	  return REDRAW_ALL;
-	}
-      }
-    } else {
-      dispatcher_emit(ctk_signal_menu_activate, menus.open,
-		      DISPATCHER_BROADCAST);
-    }
-    menus.open = NULL;
-    return REDRAW_MENUPART;
+    return activate_menu();
 
   case CTK_CONF_MENU_KEY:
     lastmenu = menus.open;
     menus.open = NULL;
     return REDRAW_MENUPART;
   }
+
+  return REDRAW_NONE;
 }
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
@@ -957,7 +966,11 @@ ctk_idle(void)
   register struct ctk_window *window;
   register struct ctk_widget *widget;
 #if CTK_CONF_MOUSE_SUPPORT 
-  static unsigned char mxc, myc, mouse_clicked;
+  static unsigned char mxc, myc, mouse_button_changed, mouse_moved,
+    mouse_clicked;
+  static unsigned char menux;
+  struct ctk_menu *menu;
+
 #endif /* CTK_CONF_MOUSE_SUPPORT */
   
 #if CTK_CONF_MENUS
@@ -967,96 +980,229 @@ ctk_idle(void)
     maxnitems = 0;
   }
 #endif /* CTK_CONF_MENUS */
+
+#if CTK_CONF_MOUSE_SUPPORT
+  mouse_button_changed = mouse_moved = mouse_clicked = 0;
+
+  /* See if there is any change in the buttons. */
+  if(ctk_mouse_button() != mouse_button) {
+    mouse_button = ctk_mouse_button();
+    mouse_button_changed = 1;
+    if(mouse_button == 0) {
+      mouse_clicked = 1;
+    }
+  }
   
+  /* Check if the mouse pointer has moved. */
+  if(ctk_mouse_x() != mouse_x ||
+     ctk_mouse_y() != mouse_y) {
+    mouse_x = ctk_mouse_x();
+    mouse_y = ctk_mouse_y();
+    mouse_moved = 1;
+  }
+
+  mxc = ctk_mouse_xtoc(mouse_x);
+  myc = ctk_mouse_ytoc(mouse_y); 
+#endif /* CTK_CONF_MOUSE_SUPPORT */
+
+
   if(mode == CTK_MODE_SCREENSAVER) {
 #ifdef CTK_SCREENSAVER_RUN
     CTK_SCREENSAVER_RUN();
 #endif /* CTK_SCREENSAVER_RUN */
-    if(ctk_arch_keyavail()) {
+    if(ctk_arch_keyavail()
+#if CTK_CONF_MOUSE_SUPPORT
+       || mouse_moved || mouse_button_changed
+#endif /* CTK_CONF_MOUSE_SUPPORT */
+       ) {
       mode = CTK_MODE_NORMAL;
       ctk_draw_init();
       ctk_redraw();
     }
   } else if(mode == CTK_MODE_NORMAL) {
 #if CTK_CONF_MOUSE_SUPPORT 
-    if(dialog != NULL) {
-      window = dialog;
-    } else {
-      window = windows;
-    }
-
-    /* If there has been a change in the mouse button(s), we send out
-       a signal. */
-    mouse_clicked = 0;
-    if(ctk_mouse_button() != mouse_last_button) {
-      mouse_last_button = ctk_mouse_button();
-      if(mouse_last_button == 0) {
-	dispatcher_emit(ctk_signal_pointer_up, NULL, window->owner);
-      } else {
-	dispatcher_emit(ctk_signal_pointer_down, (ek_data_t)mouse_last_button,
-			window->owner);
-	mouse_clicked = 1;
-      }
-    }
-    
-    /* Check if the mouse pointer has moved, and if so we emit a
-       signal. */
-    if(ctk_mouse_x() != mouse_last_x ||
-       ctk_mouse_y() != mouse_last_y ||
-       mouse_clicked != 0) {            
-      mouse_last_x = ctk_mouse_x();
-      mouse_last_y = ctk_mouse_y();
-      dispatcher_emit(ctk_signal_pointer_move, NULL, window->owner);
-
-      /* Find out which widget currently is under the mouse pointer
-	 and give it focus, unless it already has focus. */
-      mxc = ctk_mouse_xtoc(mouse_last_x);
-      myc = ctk_mouse_ytoc(mouse_last_y) - 1;
- 	
-      /* Check if the mouse is in the current window. */
-      if(mxc >= window->x &&
-	 mxc <= window->x + window->w &&
-	 myc >= window->y &&
-	 myc <= window->y + window->h) {
-	
-	mxc = mxc - window->x - 1;
-	myc = myc - window->y - 1;
-	
-	
-	redraw |= REDRAW_WIDGETS;
-	add_redrawwidget(window->focused);
-	window->focused = NULL;
-	
-	/* Now find the appropriate widget to assign focus to. */
-	for(widget = window->active; widget != NULL; widget = widget->next) {
-	  if(mxc >= widget->x &&
-	     mxc <= widget->x + widget->w &&
-	     myc == widget->y /* &&
-	     ((widget->type == CTK_WIDGET_BITMAP ||
-	       widget->type == CTK_WIDGET_TEXTENTRY ||
-	       widget->type == CTK_WIDGET_ICON) &&
-	       (myc <= widget->y + ((struct ctk_bitmap *)widget)->h))*/) {
-	    focus_widget(widget);
-	    if(mouse_clicked != 0) {
-	      redraw |= activate(widget);
+    /* If there is any change in the mouse conditions, find out in
+       which window the mouse pointer currently is in order to send
+       the correct signals, or bring a window to focus. */
+    if(mouse_moved || mouse_button_changed) {
+      ctk_mouse_show();
+      screensaver_timer = 0;
+      
+      if(myc == 0) {
+	/* Here we should do whatever needs to be done when the mouse
+	   moves around and clicks in the menubar. */
+	if(mouse_clicked) {
+	  /* Find out which menu that the mouse pointer is in. Start
+	     with the ->next menu after the desktop menu. We assume
+	     that the menus start one character from the left screen
+	     side and that the desktop menu is farthest to the
+	     right. */
+	  menux = 1;
+	  for(menu = menus.menus->next; menu != NULL; menu = menu->next) {
+	    if(mxc >= menux && mxc <= menux + menu->titlelen) {
+	      break;
 	    }
-	    break;
+	    menux += menu->titlelen;
 	  }
+	  
+	  /* Also check desktop menu. */
+	  if(mxc >= width - 7 &&
+	     mxc <= width - 1) {
+	    menu = &desktopmenu;
+	  }
+	  
+	  menus.open = menu;
+	  redraw |= REDRAW_MENUPART;
 	}
       } else {
-	redraw |= REDRAW_WIDGETS;
-	add_redrawwidget(window->focused);
-	window->focused = NULL;
+	--myc;
+
+	if(menus.open != NULL) {
+	  /* Do whatever needs to be done when a menu is open. */
+
+	  if(menus.open == &desktopmenu) {
+	    menux = width - CTK_CONF_MENUWIDTH;
+	  } else {
+	    menux = 1;
+	    for(menu = menus.menus->next; menu != menus.open;
+		menu = menu->next) {
+	      menux += menu->titlelen;
+	    }
+	  }
+
+	  if(mxc >= menux && mxc <= menux + CTK_CONF_MENUWIDTH) {
+	    menus.open->active = myc;
+	  }
+	  
+	  if(mouse_clicked) {
+	    if(mxc >= menux && mxc <= menux + CTK_CONF_MENUWIDTH) {
+	      redraw |= activate_menu();
+	    } else {
+	      lastmenu = menus.open;
+	      menus.open = NULL;
+	      redraw |= REDRAW_MENUPART;
+	    }
+	  } else {
+	    redraw |= REDRAW_MENUS;	  
+	  }
+	} else {
+
+	  /* Walk through the windows from top to bottom to see in which
+	     window the mouse pointer is. */
+	  if(dialog != NULL) {
+	    window = dialog;
+	  } else {	  	 	  
+	    for(window = windows; window != NULL; window = window->next) {
+	      /* Check if the mouse is within the window. */
+	      if(mxc >= window->x &&
+		 mxc <= window->x + window->w &&
+		 myc >= window->y &&
+		 myc <= window->y + window->h) {
+		break;       	
+	      }
+	    }
+	  }
+
+
+	  /* If we didn't find any window, and there are no windows
+	     open, the mouse pointer will definately be within the
+	     background desktop window. */
+	  if(window == NULL &&
+	     windows == NULL) {
+	    window = &desktop_window;
+	  }
+
+	  /* If the mouse pointer moves around outside of the currently
+	     focused window (or dialog), we should not have any focused
+	     widgets in the focused window so we make sure that there
+	     are none. */
+	  if(windows != NULL &&
+	     window != windows &&
+	     windows->focused != NULL){	  
+	    add_redrawwidget(windows->focused);
+	    windows->focused = NULL;
+	    redraw |= REDRAW_WIDGETS;
+	  }
+
+	  if(window != NULL) {
+	    /* If the mouse was clicked outside of the current window, we
+	       bring the clicked window to front. */
+	    if(dialog == NULL &&
+	       window != &desktop_window &&	   
+	       window != windows &&
+	       mouse_clicked) {
+	      /* Bring window to front. */
+	      ctk_window_open(window);
+	      redraw |= REDRAW_ALL;
+	    } else {
+	  
+	      /* Find out which widget currently is under the mouse pointer
+		 and give it focus, unless it already has focus. */
+	      mxc = mxc - window->x - 1;
+	      myc = myc - window->y - 1;      
+	    
+	      /* See if the mouse pointer is on a widget. If so, it should be
+		 selected and, if the button is clicked, activated. */
+	      for(widget = window->active; widget != NULL;
+		  widget = widget->next) {
+		if(mxc >= widget->x &&
+		   mxc <= widget->x + widget->w &&
+		   (myc == widget->y ||
+		    ((widget->type == CTK_WIDGET_BITMAP ||
+		      /*widget->type == CTK_WIDGET_TEXTMAP ||*/
+		      widget->type == CTK_WIDGET_ICON) &&
+		     (myc >= widget->y &&
+		      myc <= widget->y + ((struct ctk_bitmap *)widget)->h)))) {
+		  break;
+		}
+	      }
+	    
+	    
+	      if(mouse_moved) {
+		dispatcher_emit(ctk_signal_pointer_move, NULL,
+				window->owner);
+
+		
+
+		if(window->focused != NULL &&
+		   widget != window->focused) {
+		  add_redrawwidget(window->focused);
+		  if(CTK_WIDGET_TYPE(window->focused) ==
+		     CTK_WIDGET_TEXTENTRY) {
+		    ((struct ctk_textentry *)(window->focused))->state =
+		      CTK_TEXTENTRY_NORMAL;
+		  }
+		  window->focused = NULL;
+		}
+		redraw |= REDRAW_WIDGETS;
+		if(widget != NULL) {
+		  select_widget(widget);
+		}
+	      }
+	    
+	      if(mouse_button_changed) {
+		dispatcher_emit(ctk_signal_pointer_button,
+				(ek_data_t)mouse_button,
+				window->owner);
+		if(mouse_clicked && widget != NULL) {
+		  select_widget(widget);
+		  redraw |= activate(widget);
+		}
+	      }
+	    }
+	  }    
+	}
       }
     }
 #endif /* CTK_CONF_MOUSE_SUPPORT */
     
     while(ctk_arch_keyavail()) {
+
+      ctk_mouse_hide();
       
       screensaver_timer = 0;
       
-      c = ctk_arch_getkey();
-      
+      c = ctk_arch_getkey();      
       
       if(dialog != NULL) {
 	window = dialog;
@@ -1136,35 +1282,44 @@ ctk_idle(void)
 	redraw_widgetptr = 0;
       }
     }
-    if(redraw & REDRAW_ALL) {
-      do_redraw_all(1, height);
-#if CTK_CONF_MENUS
-    } else if(redraw & REDRAW_MENUPART) {
-      do_redraw_all(1, maxnitems + 1);
-    } else if(redraw & REDRAW_MENUS) {
-      ctk_draw_menus(&menus);
-#endif /* CTK_CONF_MENUS */
-    } else if(redraw & REDRAW_FOCUS) {
-      if(dialog != NULL) {
-	ctk_window_redraw(dialog);
-      } else if(windows != NULL) {
-	ctk_window_redraw(windows);	
-      } else {
-	ctk_window_redraw(&desktop_window);	
-      }
-    } else if(redraw & REDRAW_WIDGETS) {
-      for(i = 0; i < redraw_widgetptr; ++i) {
-	ctk_widget_redraw(redraw_widgets[i]);
-      }
-    }    
-    redraw = 0;
-    redraw_widgetptr = 0;
 #if CTK_CONF_WINDOWMOVE
   } else if(mode == CTK_MODE_WINDOWMOVE) {
 
     redraw = 0;
 
     window = windows;
+
+#if CTK_CONF_MOUSE_SUPPORT
+
+    /* If the mouse has moved, we move the window as well. */
+    if(mouse_moved) {
+
+      if(window->w + mxc + 2 >= width) {
+	window->x = width - 2 - window->w;
+      } else {
+	window->x = mxc;
+      }
+
+      if(window->h + myc + 2 >= height) {
+	window->y = height - 2 - window->h;
+      } else {
+	window->y = myc;
+      }
+      if(window->y > 0) {
+	--window->y;
+      }
+
+      redraw = REDRAW_ALL;
+    }		  
+    
+    /* Check if the mouse has been clicked, and stop moving the window
+       if so. */
+    if(mouse_button_changed &&
+       mouse_button == 0) {
+      mode = CTK_MODE_NORMAL;
+      redraw = REDRAW_ALL;      
+    }
+#endif /* CTK_CONF_MOUSE_SUPPORT */
     
     while(mode == CTK_MODE_WINDOWMOVE && ctk_arch_keyavail()) {
     
@@ -1206,12 +1361,37 @@ ctk_idle(void)
 	break;
       }
     }
-    if(redraw & REDRAW_ALL) {
+    /*    if(redraw & REDRAW_ALL) {
       do_redraw_all(1, height);
     }
-    redraw = 0;
+    redraw = 0;*/
 #endif /* CTK_CONF_WINDOWMOVE */
   }
+
+  if(redraw & REDRAW_ALL) {
+    do_redraw_all(1, height);
+#if CTK_CONF_MENUS
+  } else if(redraw & REDRAW_MENUPART) {
+    do_redraw_all(1, maxnitems + 1);
+  } else if(redraw & REDRAW_MENUS) {
+    ctk_draw_menus(&menus);
+#endif /* CTK_CONF_MENUS */
+  } else if(redraw & REDRAW_FOCUS) {
+    if(dialog != NULL) {
+      ctk_window_redraw(dialog);
+    } else if(windows != NULL) {
+      ctk_window_redraw(windows);	
+    } else {
+      ctk_window_redraw(&desktop_window);	
+    }
+  } else if(redraw & REDRAW_WIDGETS) {
+    for(i = 0; i < redraw_widgetptr; ++i) {
+      ctk_widget_redraw(redraw_widgets[i]);
+    }
+  }    
+  redraw = 0;
+  redraw_widgetptr = 0;
+  
 }
 /*-----------------------------------------------------------------------------------*/
 static
