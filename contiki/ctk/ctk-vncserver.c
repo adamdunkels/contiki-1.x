@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.7 2004/06/27 18:32:10 oliverschmidt Exp $
+ * $Id: ctk-vncserver.c,v 1.8 2004/06/27 20:59:05 oliverschmidt Exp $
  *
  */
 
@@ -288,13 +288,20 @@ dealloc_state(struct vnc_server_state *s)
   s->state = VNC_DEALLOCATED;
 }
 /*-----------------------------------------------------------------------------------*/
-static char tmp[40];
 static void
 cputsn(char *str, unsigned char len)
 {
-  strncpy(tmp, str, len);
-  tmp[len] = 0;
-  cputs(tmp);
+  char c;
+
+  while(len > 0) {
+    --len;
+    c = *str;
+    if(c == 0) {
+      break;
+    }
+    cputc(c);
+    ++str;
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 /** 
