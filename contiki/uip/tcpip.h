@@ -9,11 +9,11 @@
  * sure that the uIP TCP/IP connections are connected to the correct
  * process.
  *
- * Contiki also includes an optional socket-like library for TCP
- * connections.
+ * Contiki also includes an optional protosocket library that provides
+ * an API similar to the BSD socket API.
  *
  * \sa \ref uip "The uIP TCP/IP stack"
- * \sa \ref socket "Socket-like library"
+ * \sa \ref psock "Protosockets library"
  *
  */
 
@@ -55,7 +55,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tcpip.h,v 1.5 2005/02/07 07:07:24 adamdunkels Exp $
+ * $Id: tcpip.h,v 1.6 2005/02/22 22:34:46 adamdunkels Exp $
  */
 #ifndef __TCPIP_H__
 #define __TCPIP_H__
@@ -145,14 +145,107 @@ void tcp_listen(u16_t port);
  */
 void tcp_unlisten(u16_t port);
 
+/**
+ * Open a TCP connection to the specified IP address and port.
+ *
+ * This function opens a TCP connection to the specified port at the
+ * host specified with an IP address. Additionally, an opaque pointer
+ * can be attached to the connection. This pointer will be sent
+ * together with uIP events to the process.
+ *
+ * \note The port number must be provided in network byte order so a
+ * conversion with HTONS() usually is necessary.
+ *
+ * \note This function will only create the connection. The connection
+ * is not opened directly. uIP will try to open the connection the
+ * next time the uIP stack is scheduled by Contiki.
+ *
+ * Example:
+ \code
+ static struct uip_conn *conn;
+ 
+ EK_EVENTHANDLER(eventhandler, ev, data)
+ {
+   u16_t addr[2];
+   
+   if(ev == EK_EVENT_INIT) {
+     uip_ipaddr(addr, 192,168,1,1);
+     conn = tcp_connect(addr, HTONS(80), NULL);
+   }
+ }
+ \endcode
+ *
+ * \param ripaddr Pointer to the IP address of the remote host.
+ * \param port Port number in network byte order.
+ * \param appstate Pointer to application defined data.
+ *
+ * \return A pointer to the newly created connection, or NULL if
+ * memory could not be allocated for the connection.
+ *
+ */
 struct uip_conn *tcp_connect(u16_t *ripaddr, u16_t port,
 			     void *appstate);
 
+/**
+ * Create a new UDP connection.
+ *
+ * This function creates a new UDP connection with the specified
+ * remote endpoint.
+ *
+ * \note The port number must be provided in network byte order so a
+ * conversion with HTONS() usually is necessary.
+ *
+ * \sa udp_bind()
+ *
+ * \param ripaddr Pointer to the IP address of the remote host.
+ * \param port Port number in network byte order.
+ * \param appstate Pointer to application defined data.
+ *
+ * \return A pointer to the newly created connection, or NULL if
+ * memory could not be allocated for the connection.
+ */
 struct uip_udp_conn *udp_new(u16_t *ripaddr, u16_t port,
 			     void *appstate);
+
+/**
+ * Bind a UDP connection to a local port.
+ *
+ * This function binds a UDP conncetion to a specified local port.
+ *
+ * When a connction is created with udp_new(), it gets a local port number assigned automatically. If the application needs to bind the connection to a specified local port, this function should be used.
+ *
+ * \note The port number must be provided in network byte order so a
+ * conversion with HTONS() usually is necessary.
+ *
+ * Example
+ \code
+  EK_EVENTHANDLER(eventhandler, ev, data)
+  {
+    u16_t addr[2];
+  
+    if(ev == EK_EVENT_INIT) {
+      uip_ipaddr(addr, 255,255,255,255);
+      conn = udp_new(addr, HTONS(PORT), NULL);
+      if(conn != NULL) {
+        udp_bind(conn, HTONS(PORT));
+      }
+    }
+  }
+ \endcode
+ *
+ * \param conn A pointer to the UDP connection that is to be bound.
+ * \param port The port number in network byte order to which to bind
+ * the connection.
+ */
+#define udp_bind(conn, port) uip_udp_bind(conn, port)
+
+/**
+ * The uIP event.
+ *
+ * This event is posted to a process whenever a uIP event has occured.
+ */
 extern ek_event_t tcpip_event;
 
-#define udp_bind(conn, port) uip_udp_bind(conn, port)
 
 
 void tcpip_set_forwarding(unsigned char f);
@@ -160,7 +253,30 @@ void tcpip_input(void);
 void tcpip_output(void);
 
 
+/**
+ * Cause a specified TCP connection to be polled.
+ *
+ * This function causes uIP to poll the specified TCP connection. The
+ * function is used when the application has data that is to be sent
+ * immediately and do not wish to wait for the periodic uIP polling
+ * mechanism.
+ *
+ * \param conn A pointer to the TCP connection that should be polled.
+ *
+ */
 void tcpip_poll_tcp(struct uip_conn *conn);
+
+/**
+ * Cause a specified UDP connection to be polled.
+ *
+ * This function causes uIP to poll the specified UDP connection. The
+ * function is used when the application has data that is to be sent
+ * immediately and do not wish to wait for the periodic uIP polling
+ * mechanism.
+ *
+ * \param conn A pointer to the UDP connection that should be polled.
+ *
+ */
 void tcpip_poll_udp(struct uip_udp_conn *conn);
 
 #endif /* __TCPIP_H__ */
