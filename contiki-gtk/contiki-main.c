@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.12 2004/07/04 21:15:53 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.13 2004/08/11 21:26:22 adamdunkels Exp $
  *
  */
 
@@ -42,11 +42,18 @@
 #include "uip.h"
 #include "ctk.h"
 
+#include "ctk-vncserver.h"
+#include "ctk-termtelnet.h"
+
+#include "cfs-posix.h"
+
 #include "uip-fw.h"
 
 #include "about-dsc.h"
 #include "calc-dsc.h"
+#include "editor-dsc.h"
 #include "email-dsc.h"
+#include "ftp-dsc.h"
 #include "netconf-dsc.h"
 #include "processes-dsc.h"
 #include "shell-dsc.h"
@@ -64,8 +71,6 @@ idle_callback(gpointer data)
 {
 
   ek_run();
-
-  ctk_gtksim_redraw();
   return TRUE;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -73,15 +78,21 @@ int
 main(int argc, char **argv)
 {
   u16_t addr[2];
-
-  ek_init();
-
-  tcpip_init(NULL);
   
-  ctk_gtksim_init(&argc, &argv);
+  /*  html_test();*/
+
+  gtk_init(&argc, &argv);
+  
+  ek_init();
+  
+  tcpip_init(NULL);
+
   ctk_gtksim_service_init(NULL);
   ctk_init();
 
+  /*  ctk_vncserver_init(NULL);*/
+  /*  ctk_termtelnet_init(NULL);*/
+  
   uip_init();
   uip_ipaddr(addr, 192,168,2,2);
   uip_sethostaddr(addr);
@@ -106,6 +117,8 @@ main(int argc, char **argv)
   program_handler_init();
   program_handler_add(&about_dsc, "About", 1);
   program_handler_add(&netconf_dsc, "Network setup", 1);
+  program_handler_add(&ftp_dsc, "FTP client", 1);
+  program_handler_add(&editor_dsc, "Editor", 1);
   program_handler_add(&www_dsc, "Web browser", 1);
   program_handler_add(&processes_dsc, "Processes", 1);
   program_handler_add(&shell_dsc, "Command shell", 1);
@@ -113,86 +126,14 @@ main(int argc, char **argv)
   program_handler_add(&email_dsc, "E-mail", 1);
   
   gtk_timeout_add(20, idle_callback, NULL);
-  
+
+
+  cfs_posix_init(NULL);
+
+  /*  sock_httpd_init(NULL);*/
+ 
   gtk_main();
-  
-#if 0  
-  uip_init();
-  resolv_init(NULL);
-
-  /* XXX: just for making it easier to test. */
-  uip_ipaddr(addr, 192,168,2,2);
-  uip_sethostaddr(addr);
-
-  uip_ipaddr(addr, 192,168,2,1);
-  uip_setdraddr(addr);
-
-  uip_ipaddr(addr, 255,255,255,0);
-  uip_setnetmask(addr);
-
-  uip_fw_init();
-  uip_fw_default(&tapif);
-  
-  
-  tapdev_drv_init();
-
-  /*  mt_init();
-
-  mtp_start(&p1, &t1, test1, NULL);
-  mtp_start(&p2, &t2, test2, NULL);*/
-  
-#if WITH_CTKVNC
-  ctk_init();
-  ctk_vncserver_init(NULL);
-#else
-  ctk_gtksim_init(&argc, &argv);
-  ctk_init();
-#endif
-  
-#endif /* 0 */
-
-  
-  
-#if 0
-  program_handler_init();
-  
-
-
-  /*  vnc_init();*/
-  program_handler_add(&about_dsc, "About", 1);
-  program_handler_add(&netconf_dsc, "Network setup", 1);
-  program_handler_add(&processes_dsc, "Processes", 0);
-  
-  program_handler_add(&www_dsc, "Web browser", 1);
-  
-  program_handler_add(&webserver_dsc, "Web server", 1);
-  /*  program_handler_add(&telnet_dsc, "Telnet", 1);*/
-  
-  /*  program_handler_add(&calc_dsc, "Calculator", 0);*/
-  
-  /*  program_handler_add(&presenter_dsc, "Presenter", 1);*/
-
-  /*  program_handler_add(&email_dsc, "E-mail", 1);
-  
-  program_handler_add(&telnetd_dsc, "Telnet daemon", 1);*/
-  /*  program_handler_add(&maze_dsc, "3D maze", 1);*/
-
-  /*program_handler_add(&wget_dsc, "Web downloader", 1);*/
-  
-  /*  ctk_redraw();*/
- /* maze_init();*/
-
-#endif
-
-  /*  mailget_init(NULL);*/
-
-  
-  /*  newslog_init(NULL);*/
-  
-
-  /*webserver_init();*/
     
-  gtk_main();
     
   return 0;
 
@@ -215,3 +156,8 @@ clock_time(void)
 /*-----------------------------------------------------------------------------------*/
 
 void nntpc_done(int i) {}
+
+void log_message(char *m1, char *m2)
+{
+  printf("%s%s\n", m1, m2);
+}
