@@ -317,6 +317,10 @@ SOURCE=..\contiki\ek\ek.h
 
 SOURCE=..\contiki\ek\loader.h
 # End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ek\log.h
+# End Source File
 # End Group
 # Begin Group "contiki-lib"
 
@@ -391,6 +395,10 @@ SOURCE="..\contiki\uip\uip-fw.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\uip\uip-split.h"
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\uip\uip.c
 # End Source File
 # Begin Source File
@@ -448,6 +456,10 @@ SOURCE=".\conf\ctk-conio-conf.h"
 # Begin Source File
 
 SOURCE=".\conf\ek-conf.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\conf\log-conf.h"
 # End Source File
 # Begin Source File
 
