@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h,v 1.1 2003/07/04 10:54:52 adamdunkels Exp $
+ * $Id: www-conf.h,v 1.2 2003/08/12 21:16:31 adamdunkels Exp $
  *
  */
 #ifndef __WWW_CONF_H__
@@ -64,4 +64,5 @@
 #define WWW_CONF_MAX_INPUTNAMELEN   40
 #define WWW_CONF_MAX_INPUTVALUELEN  40
 
+#define WWW_CONF_PAGEVIEW 1
 #endif /* __WWW_CONF_H__ */
