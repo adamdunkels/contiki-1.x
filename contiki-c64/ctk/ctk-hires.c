@@ -32,9 +32,11 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.9 2004/02/16 20:57:36 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.10 2004/02/24 09:50:58 adamdunkels Exp $
  *
  */
+
+#include "contiki-version.h"
 
 #include "ctk.h"
 #include "ctk-draw.h"
@@ -282,7 +284,6 @@ clear_line(unsigned char line)
 
   
   if(lineptr == 24) {
-#define CONTIKI_VERSION_STRING "Contiki 1.2-pre0"
     hires_color(ctk_hires_theme.backgroundpatterncolors[24]);
     hires_gotoxy(0, 24);
     ctk_hires_cputsn(CONTIKI_VERSION_STRING,
