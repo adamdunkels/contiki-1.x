@@ -70,8 +70,8 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX- /Os /Gf /Gy /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# SUBTRACT CPP /Z<none> /Ox /Og
+# ADD CPP /nologo /W3 /Os /Gf /Gy /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_RAWSOCK" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# SUBTRACT CPP /Ox /Og
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -122,7 +122,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "WITH_ASCII" /D "WITH_UIP" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX- /Os /Gf /Gy /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_PPP" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /W3 /Os /Gf /Gy /I "conf" /I "ctk" /I "lib" /I "ppp" /I "uip" /I "../contiki/apps" /I "../contiki/ctk" /I "../contiki/ek" /I "../contiki/lib" /I "../contiki/ppp" /I "../contiki/uip" /D "NDEBUG" /D "WITH_PPP" /D "WITH_ASCII" /D "WITH_UIP" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # SUBTRACT CPP /Ox /Og
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
@@ -234,6 +234,30 @@ SOURCE="..\contiki\apps\http-user-agent-string.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\apps\httpd-cgi.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\httpd-cgi.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\httpd-fs.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\httpd-fs.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\httpd.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\httpd.h
+# End Source File
+# Begin Source File
+
 SOURCE="..\contiki\apps\netconf-dsc.c"
 # End Source File
 # Begin Source File
@@ -311,6 +335,22 @@ SOURCE=..\contiki\apps\webclient.c
 # Begin Source File
 
 SOURCE=..\contiki\apps\webclient.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\webserver-dsc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\webserver-dsc.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\webserver.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\webserver.h
 # End Source File
 # Begin Source File
 
@@ -427,6 +467,10 @@ SOURCE="..\contiki\lib\ctk-textedit.c"
 # Begin Source File
 
 SOURCE="..\contiki\lib\ctk-textedit.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\lib\memb.c
 # End Source File
 # Begin Source File
 
@@ -683,6 +727,14 @@ SOURCE=..\contiki\uip\resolv.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\contiki\uip\socket.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\uip\socket.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\uip\tcpip.c
 # End Source File
 # Begin Source File
@@ -716,6 +768,14 @@ SOURCE=..\contiki\uip\uip_arch.h
 # Begin Source File
 
 SOURCE=..\contiki\uip\uip_arp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\uip\uipbuf.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\uip\uipbuf.h
 # End Source File
 # Begin Source File
 
