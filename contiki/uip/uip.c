@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.23 2005/03/09 10:21:56 adamdunkels Exp $
+ * $Id: uip.c,v 1.24 2005/03/14 07:18:15 adamdunkels Exp $
  *
  */
 
@@ -517,6 +517,8 @@ uip_process(u8_t flag)
 	UIP_APPCALL();
 	goto appsend;      
     }
+    goto drop;
+    
     /* Check if we were invoked because of the perodic timer fireing. */
   } else if(flag == UIP_TIMER) {
 #if UIP_REASSEMBLY
