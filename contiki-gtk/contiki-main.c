@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.8 2003/09/01 22:24:52 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.9 2003/09/04 19:19:36 adamdunkels Exp $
  *
  */
 
@@ -143,7 +143,7 @@ main(int argc, char **argv)
   /*program_handler_add(&wget_dsc, "Web downloader", 1);*/
   
   /*  ctk_redraw();*/
-  maze_init();
+ /* maze_init();*/
   gtk_main();
     
   return 0;
