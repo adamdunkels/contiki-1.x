@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.5 2003/08/20 20:58:38 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.6 2003/08/24 22:40:46 adamdunkels Exp $
  *
  */
 
@@ -99,8 +99,6 @@ uip_arp_init(void)
 {
   for(i = 0; i < UIP_ARPTAB_SIZE; ++i) {
     memset(arp_table[i].ipaddr, 0, 4);
-    /*    arp_table[i].ipaddr[0] =
-	  arp_table[i].ipaddr[1] = 0;*/
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -115,8 +113,6 @@ uip_arp_timer(void)
     if((tabptr->ipaddr[0] | tabptr->ipaddr[1]) != 0 &&
        arptime - tabptr->time >= UIP_ARP_MAXAGE) {
       memset(tabptr->ipaddr, 0, 4);
-      /*      tabptr->ipaddr[0] =
-	      tabptr->ipaddr[1] = 0;*/
     }
   }
 
@@ -142,9 +138,6 @@ uip_arp_update(u16_t *ipaddr, struct uip_eth_addr *ethaddr)
 	 ipaddr[1] == tabptr->ipaddr[1]) {
 	 
 	/* An old entry found, update this and return. */
-	/*	for(c = 0; c < 6; ++c) {
-	  tabptr->ethaddr.addr[c] = ethaddr->addr[c];
-	  }*/
 	memcpy(tabptr->ethaddr.addr, ethaddr->addr, 6);
 	tabptr->time = arptime;
 
@@ -182,13 +175,8 @@ uip_arp_update(u16_t *ipaddr, struct uip_eth_addr *ethaddr)
 
   /* Now, i is the ARP table entry which we will fill with the new
      information. */
-  /*  tabptr->ipaddr[0] = ipaddr[0];
-      tabptr->ipaddr[1] = ipaddr[1];*/
   memcpy(tabptr->ipaddr, ipaddr, 4);
   memcpy(tabptr->ethaddr.addr, ethaddr->addr, 6);
-  /*  for(c = 0; c < 6; ++c) {
-    tabptr->ethaddr.addr[c] = ethaddr->addr[c];
-    }*/
   tabptr->time = arptime;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -198,15 +186,6 @@ uip_arp_ipin(void)
 
   /* Only insert/update an entry if the source IP address of the
      incoming IP packet comes from a host on the local network. */
-  /*  if((IPBUF->srcipaddr[0] & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)) !=
-     (uip_hostaddr[0]
-      & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)))
-    return;
-  if((IPBUF->srcipaddr[1] & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)) !=
-     (uip_hostaddr[1]
-      & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)))
-    return;
-  */
   if((IPBUF->srcipaddr[0] & uip_arp_netmask[0]) !=
      (uip_hostaddr[0] & uip_arp_netmask[0])) {
     return;
@@ -244,13 +223,7 @@ uip_arp_arpin(void)
       memcpy(BUF->shwaddr.addr, uip_ethaddr.addr, 6);
       memcpy(BUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
       memcpy(BUF->ethhdr.dest.addr, BUF->dhwaddr.addr, 6);
-      /*      for(c = 0; c < 6; ++c) {
-        BUF->dhwaddr.addr[c] = BUF->shwaddr.addr[c];
-	BUF->shwaddr.addr[c] = 
-	  BUF->ethhdr.src.addr[c] = uip_ethaddr.addr[c];
-	  BUF->ethhdr.dest.addr[c] = BUF->dhwaddr.addr[c];
-	}*/
-
+      
       BUF->dipaddr[0] = BUF->sipaddr[0];
       BUF->dipaddr[1] = BUF->sipaddr[1];
       BUF->sipaddr[0] = uip_hostaddr[0];
@@ -286,12 +259,6 @@ uip_arp_out(void)
      packet with an ARP request for the IP address. */
 
   /* Check if the destination address is on the local network. */
-  /*  if((IPBUF->destipaddr[0] & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)) !=
-     (uip_hostaddr[0]
-      & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)) ||
-     (IPBUF->destipaddr[1] & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)) !=
-     (uip_hostaddr[1]
-     & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3))) {*/
   if((IPBUF->destipaddr[0] & uip_arp_netmask[0]) !=
      (uip_hostaddr[0] & uip_arp_netmask[0]) ||
      (IPBUF->destipaddr[1] & uip_arp_netmask[1]) !=
@@ -299,8 +266,6 @@ uip_arp_out(void)
     /* Destination address was not on the local network, so we need to
        use the default router's IP address instead of the destination
        address when determining the MAC address. */
-    /*    ipaddr[0] = HTONS((UIP_DRIPADDR0 << 8) | UIP_DRIPADDR1);
-	  ipaddr[1] = HTONS((UIP_DRIPADDR2 << 8) | UIP_DRIPADDR3);*/
     ipaddr[0] = uip_arp_draddr[0];
     ipaddr[1] = uip_arp_draddr[1];
   } else {
@@ -324,16 +289,6 @@ uip_arp_out(void)
     memset(BUF->dhwaddr.addr, 0x00, 6);
     memcpy(BUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
     memcpy(BUF->shwaddr.addr, uip_ethaddr.addr, 6);
-
-
-#if 0
-    for(c = 0; c < 6; ++c) {     
-      BUF->ethhdr.dest.addr[c] = 0xff; /* Broadcast ARP request. */
-      BUF->ethhdr.src.addr[c] = 
-	BUF->shwaddr.addr[c] = uip_ethaddr.addr[c];
-      BUF->dhwaddr.addr[c] = 0;
-    }
-#endif /* 0 */
     
     BUF->dipaddr[0] = ipaddr[0];
     BUF->dipaddr[1] = ipaddr[1];
@@ -355,10 +310,7 @@ uip_arp_out(void)
   /* Build an ethernet header. */
   memcpy(IPBUF->ethhdr.dest.addr, tabptr->ethaddr.addr, 6);
   memcpy(IPBUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
-  /*  for(c = 0; c < 6; ++c) {    
-    IPBUF->ethhdr.dest.addr[c] = tabptr->ethaddr.addr[c];
-    IPBUF->ethhdr.src.addr[c] = uip_ethaddr.addr[c];
-    }*/
+  
   IPBUF->ethhdr.type = HTONS(UIP_ETHTYPE_IP);
 
   uip_len += sizeof(struct uip_eth_hdr);
