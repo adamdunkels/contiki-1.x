@@ -2,6 +2,8 @@
 #include "contiki.h"
 #include "ircc.h"
 
+#include "irc-conf.h"
+
 #include "ircc-strings.h"
 
 #include <string.h>
@@ -59,13 +61,13 @@ PT_THREAD(setup_connection(struct ircc_state *s))
   SOCKET_BEGIN(&s->s);
   
   ptr = s->outputbuf;
-  ptr = copystr(ptr, ircc_nick, sizeof(s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_nick, sizeof(s->outputbuf));
   ptr = copystr(ptr, s->nick, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, ircc_crnl_user, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_crnl_user, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->nick, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, ircc_contiki, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_contiki, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->server, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, ircc_colon_contiki, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_colon_contiki, sizeof(s->outputbuf) - (ptr - s->outputbuf));
 
   SEND_STRING(&s->s, s->outputbuf);
 
@@ -77,9 +79,9 @@ PT_THREAD(join_channel(struct ircc_state *s))
 {
   SOCKET_BEGIN(&s->s);
   
-  SEND_STRING(&s->s, ircc_join_);
+  SEND_STRING(&s->s, ircc_strings_join);
   SEND_STRING(&s->s, s->channel);
-  SEND_STRING(&s->s, ircc_crnl);
+  SEND_STRING(&s->s, ircc_strings_crnl);
 
   ircc_sent(s);
   
@@ -91,9 +93,9 @@ PT_THREAD(part_channel(struct ircc_state *s))
 {
   SOCKET_BEGIN(&s->s);
 
-  SEND_STRING(&s->s, ircc_part_);
+  SEND_STRING(&s->s, ircc_strings_part);
   SEND_STRING(&s->s, s->channel);
-  SEND_STRING(&s->s, ircc_crnl);
+  SEND_STRING(&s->s, ircc_strings_crnl);
 
   ircc_sent(s);
   
@@ -105,9 +107,9 @@ PT_THREAD(list_channel(struct ircc_state *s))
 {
   SOCKET_BEGIN(&s->s);
 
-  SEND_STRING(&s->s, ircc_list_);
+  SEND_STRING(&s->s, ircc_strings_list);
   SEND_STRING(&s->s, s->channel);
-  SEND_STRING(&s->s, ircc_crnl);
+  SEND_STRING(&s->s, ircc_strings_crnl);
 
   ircc_sent(s);
   
@@ -122,11 +124,11 @@ PT_THREAD(send_message(struct ircc_state *s))
   SOCKET_BEGIN(&s->s);
 
   ptr = s->outputbuf;
-  ptr = copystr(ptr, ircc_privmsg, sizeof(s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_privmsg, sizeof(s->outputbuf));
   ptr = copystr(ptr, s->channel, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, ircc_colon, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_colon, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->msg, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, ircc_crnl, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_crnl, sizeof(s->outputbuf) - (ptr - s->outputbuf));
 
   SEND_STRING(&s->s, s->outputbuf);
 
@@ -143,12 +145,12 @@ PT_THREAD(send_actionmessage(struct ircc_state *s))
   SOCKET_BEGIN(&s->s);
 
   ptr = s->outputbuf;
-  ptr = copystr(ptr, ircc_privmsg, sizeof(s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_privmsg, sizeof(s->outputbuf));
   ptr = copystr(ptr, s->channel, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, ircc_colon, sizeof(s->outputbuf) - (ptr - s->outputbuf));
-  ptr = copystr(ptr, ircc_action, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_colon, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_action, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->msg, sizeof(s->outputbuf) - (ptr - s->outputbuf)); 
-  ptr = copystr(ptr, ircc_actioncrnl, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_strings_ctcpcrnl, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   
 
   SEND_STRING(&s->s, s->outputbuf);
@@ -276,6 +278,8 @@ parse(char *msg, struct parse_result *dummy)
   parse_command();
   parse_params();
 
+  /*  printf("user %s host %s name %s command %s middle %s trailing %s\n",
+      r.user, r.host, r.name, r.command, r.middle, r.trailing);*/
 }
 
 /*---------------------------------------------------------------------------*/
@@ -294,7 +298,7 @@ PT_THREAD(handle_input(struct ircc_state *s))
     
     s->inputbuf[SOCKET_DATALEN(&s->s)] = 0;
 
-    if(strncmp(s->inputbuf, ircc_ping, 5) == 0) {
+    if(strncmp(s->inputbuf, ircc_strings_ping, 5) == 0) {
       strncpy(s->outputbuf, s->inputbuf, sizeof(s->outputbuf));
       
       /* Turn "PING" into "PONG" */
@@ -313,12 +317,36 @@ PT_THREAD(handle_input(struct ircc_state *s))
 	}
       }
       
-      if(r.command != NULL && strncmp(r.command, ircc_join_, 4) == 0) {
-	  ircc_text_output(s, "Joined channel", r.name);
-      } else if(r.command != NULL && strncmp(r.command, ircc_part_, 4) == 0) {
+      if(r.command != NULL && strncmp(r.command, ircc_strings_join, 4) == 0) {
+	ircc_text_output(s, "Joined channel", r.name);
+      } else if(r.command != NULL && strncmp(r.command, ircc_strings_part, 4) == 0) {
 	ircc_text_output(s, "Left channel", r.name);
-      } else {
-	ircc_text_output(s, r.name, r.trailing);
+      } else if(r.trailing != NULL) {
+	if(strncmp(r.trailing, ircc_strings_action,
+		   strlen(ircc_strings_action)) == 0) {
+	  ptr = strchr(&r.trailing[1], 1);
+	  if(ptr != NULL) {
+	    *ptr = 0;
+	  }
+	  
+	  ircc_text_output(s, r.name,
+			   &r.trailing[strlen(ircc_strings_action)]);
+	} else if(strncmp(r.trailing, ircc_strings_version_query,
+			  strlen(ircc_strings_version_query)) == 0) {
+	  if(r.name != NULL) {
+	    strncpy(s->outputbuf, r.name, sizeof(s->outputbuf));
+	    SEND_STRING(&s->s, ircc_strings_notice);
+	    /* user is temporarily stored in outputbuf. */
+	    SEND_STRING(&s->s, s->outputbuf); 
+	    SEND_STRING(&s->s, ircc_strings_colon);
+	    SEND_STRING(&s->s, ircc_strings_version);
+	    SEND_STRING(&s->s, ircc_strings_version_string);
+	    SEND_STRING(&s->s, IRC_CONF_SYSTEM_STRING);
+	    SEND_STRING(&s->s, ircc_strings_ctcpcrnl);
+	  }
+	} else {
+	  ircc_text_output(s, r.name, r.trailing);
+	}
       }
     }
   }
@@ -414,7 +442,6 @@ ircc_connect(struct ircc_state *s, char *servername, u16_t *ipaddr,
   if(s->conn == NULL) {
     return NULL;
   }
-  uip_set_mss(s->conn, 120);
   s->server = servername;  
   s->nick = nick;
   return s;
