@@ -41,14 +41,16 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.8 2004/06/27 20:59:05 oliverschmidt Exp $
+ * $Id: ctk-vncserver.c,v 1.9 2004/07/04 11:40:56 adamdunkels Exp $
  *
  */
 
 #include "ctk.h"
 #include "ctk-draw.h"
 
-#include "dispatcher.h"
+#include "contiki.h"
+
+#include "ek.h"
 #include "loader.h"
 #include "vnc-server.h"
 #include "vnc-out.h"
@@ -107,18 +109,26 @@ static unsigned char sizex, sizey;
 
 #define MENUCOLOR           15
 
-static DISPATCHER_UIPCALL(ctk_vncserver_appcall, state);
+/*static DISPATCHER_UIPCALL(ctk_vncserver_appcall, state);
 
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("CTK VNC server", NULL, NULL,
 		   ctk_vncserver_appcall)};
-static ek_id_t id;
+		   static ek_id_t id;*/
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "CTK VNC server", EK_PRIO_NORMAL,
+	   eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 static struct vnc_server_state conns[CTK_VNCSERVER_CONF_NUMCONNS];
 
 #define PRINTF(x) 
 
 #define revers(x)
+
+unsigned char ctk_draw_windowborder_height = 1;
+unsigned char ctk_draw_windowborder_width = 1;
+unsigned char ctk_draw_windowtitle_height = 1;
 
 
 /*-----------------------------------------------------------------------------------*/
@@ -1024,11 +1034,10 @@ ctk_arch_getkey(void)
  * The uIP event handler.
  */
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_UIPCALL(ctk_vncserver_appcall, state)
+void
+ctk_vncserver_appcall(void *state)
 {
   static struct vnc_server_state *vs;
-  DISPATCHER_UIPCALL_ARG(state);
 
   vs = (struct vnc_server_state *)(state);
 
@@ -1044,7 +1053,7 @@ DISPATCHER_UIPCALL(ctk_vncserver_appcall, state)
 	uip_close();
 	return;
       }
-      dispatcher_markconn(uip_conn, (void *)vs);
+      tcp_markconn(uip_conn, (void *)vs);
     }
   } else if(uip_closed() || uip_aborted()) {
     if(vs != NULL) {
@@ -1057,17 +1066,26 @@ DISPATCHER_UIPCALL(ctk_vncserver_appcall, state)
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(ctk_vncserver_init, arg)
 {
-  u8_t i;
-
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    dispatcher_uiplisten(HTONS(5900));
+    id = ek_start(&p);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  u8_t i;
+  EK_EVENTHANDLER_ARGS(ev, data);
 
+  if(ev == EK_EVENT_INIT) {
+    tcp_listen(HTONS(5900));
+    
     for(i = 0; i < CTK_VNCSERVER_CONF_NUMCONNS; ++i) {
       conns[i].state = VNC_DEALLOCATED;
     }
+  } else if(ev == tcpip_event) {
+    ctk_vncserver_appcall(data);
   }
 }
 /*-----------------------------------------------------------------------------------*/
