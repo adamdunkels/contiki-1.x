@@ -1,0 +1,54 @@
+
+#include "packet-service.h"
+
+static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
+
+static const struct tcpip_packetservice_state state =
+  {
+    TCPIP_PACKETSERVICE_VERSION,
+    output
+  };
+
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_POLLHANDLER(pollhandler);
+EK_PROCESS(proc, TCPIP_PACKETSERVICE_NAME, EK_PRIO_NORMAL,
+	   eventhandler, pollhandler, (void *)&state);
+
+/*---------------------------------------------------------------------------*/
+EK_PROCESS_INIT(packet_service_init, arg)
+{
+  ek_service_start(tcpip_packetservice_name, &proc);
+}
+/*---------------------------------------------------------------------------*/
+static void
+output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
+{
+  printf("packet-service: output (%p, %d) (%p, %d)\n",
+	 hdr, hdrlen, data, datalen);
+}
+/*---------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  printf("packet-service: event %d\n", ev);
+  switch(ev) {
+  case EK_EVENT_STARTED:
+    break;
+  case EK_EVENT_REQUEST_REPLACE:
+    ek_replace((struct ek_proc *)data, state);
+    LOADER_UNLOAD();
+    break;
+  case EK_EVENT_REQUEST_EXIT:
+    ek_exit();
+    LOADER_UNLOAD();
+    break;
+  default:
+    break;
+  }
+
+}
+/*---------------------------------------------------------------------------*/
+EK_POLLHANDLER(pollhandler)
+{
+
+}
+/*---------------------------------------------------------------------------*/
