@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev.c,v 1.4 2003/08/24 22:41:55 adamdunkels Exp $
+ * $Id: rs232dev.c,v 1.5 2004/09/03 10:04:30 adamdunkels Exp $
  *
  */
 
@@ -45,7 +42,7 @@
  * suggestions, and improvements to this code!
  */
 
-#include <rs232.h>
+#include <serial.h>
 #include <time.h>
 #include <string.h>
 
@@ -64,19 +61,17 @@
 #define SLIP_ESC_ESC 0335
 
 
-#define SIO_RECV(c)  while(rs232_get(&c) == RS_ERR_NO_DATA)
-#define SIO_POLL(c)  (rs232_get(&c) != RS_ERR_NO_DATA)
-#define SIO_SEND(c)  rs232_put(c)
+#define SIO_RECV(c)  while(ser_get(&c) == SER_ERR_NO_DATA)
+#define SIO_POLL(c)  (ser_get(&c) != SER_ERR_NO_DATA)
+#define SIO_SEND(c)  ser_put(c)
 
 #define MAX_SIZE (UIP_BUFSIZE - UIP_LLH_LEN)
 
 static u8_t slip_buf[MAX_SIZE + 2];
 
-#if MAX_SIZE > 255
 static u16_t len, tmplen;
-#else
-static u8_t len, tmplen;
-#endif /* MAX_SIZE > 255 */
+
+static char loaded = 0;
 
 #if 1
 #define printf(x)
@@ -86,7 +81,7 @@ static u8_t len, tmplen;
 
 
 /*-----------------------------------------------------------------------------------*/
-static void
+/*static void
 rs232_err(char err)
 {
   switch(err) {
@@ -109,8 +104,7 @@ rs232_err(char err)
     printf("RS232 overflow\n");
     break;
   }
-
-}
+}*/
 /*-----------------------------------------------------------------------------------*/
 /*
  * rs232dev_send():
@@ -125,14 +119,10 @@ rs232_err(char err)
 void
 rs232dev_send(void)
 {
-#if MAX_SIZE > 255
   u16_t i;
-#else
-  u8_t i;
-#endif /* MAX_SIZE > 255 */
   u8_t *ptr;
   u8_t c;
-
+  
   SIO_SEND(SLIP_END);
 
   ptr = &uip_buf[UIP_LLH_LEN];
@@ -169,18 +159,18 @@ rs232dev_send(void)
  *
  */
 /*-----------------------------------------------------------------------------------*/
-#if MAX_SIZE > 255
 u16_t
-#else 
-u8_t
-#endif /* MAX_SIZE > 255 */
 rs232dev_poll(void)
 {
   u8_t c;
   static u8_t lastc;
   
+  if(loaded == 0) {
+    return 0;
+  }
+  
   while(SIO_POLL(c)) {
-    /*    printf("c %x\n", c);*/
+
     switch(c) {
     case SLIP_ESC:
       lastc = c;
@@ -211,8 +201,7 @@ rs232dev_poll(void)
       } else {
 	lastc = c;
       }
-      
-      
+            
       slip_buf[len] = c;
       ++len;
       
@@ -237,15 +226,47 @@ void
 rs232dev_init(void)
 {
   char err;
+  struct ser_params p;
   
-  err = rs232_init(0);
-  rs232_err(err);
-  err = rs232_params(RS_BAUD_9600 | RS_BITS_8 | RS_STOP_1, RS_PAR_NONE);
-  rs232_err(err);
+  err = ser_load_driver("c64-swlink.ser");
+
+  if(err != SER_ERR_OK) {
+    asm("inc $d020");
+    return;
+  }
+  
+  p.baudrate = SER_BAUD_9600;
+  p.databits = SER_BITS_8;
+  p.stopbits = SER_STOP_1;
+  p.parity = SER_PAR_NONE;
+  p.handshake = SER_HS_HW;
+
+  err = ser_open(&p);
+
+  if(err != SER_ERR_OK) {
+    asm("inc $d020");
+    return;
+  }
+  
+
+  loaded = 1;
+  
+  /*  err = rs232_init(0); */
+  /*  rs232_err(err);*/
+  /*  err = rs232_params(RS_BAUD_9600 | RS_BITS_8 | RS_STOP_1, RS_PAR_NONE);*/
+  /*  rs232_err(err);*/
 
   len = 0;
 
   return;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+rs232dev_unload(void)
+{
+  if(loaded){
+    ser_unload();
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 

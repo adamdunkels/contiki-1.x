@@ -28,12 +28,14 @@
  *
  * This file is part of the Contiki OS
  *
- * $Id: slip-drv.c,v 1.7 2004/08/13 08:38:46 adamdunkels Exp $
+ * $Id: slip-drv.c,v 1.8 2004/09/03 10:04:30 adamdunkels Exp $
  *
  */
 
 #include "contiki.h"
 #include "rs232dev.h"
+
+#include "packet-service.h"
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
@@ -45,7 +47,7 @@ static const struct packet_service_state state =
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
-EK_PROCESS(proc, PACKET_SERVICE_NAME ": SLIP", EK_PRIO_NORMAL,
+EK_PROCESS(proc, PACKET_SERVICE_NAME ": SLIP", EK_PRIO_HIGH,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
@@ -70,10 +72,12 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     break;
   case EK_EVENT_REQUEST_REPLACE:
     ek_replace((struct ek_proc *)data, NULL);
+    rs232dev_unload();
     LOADER_UNLOAD();
     break;
   case EK_EVENT_REQUEST_EXIT:
     ek_exit();
+    rs232dev_unload();
     LOADER_UNLOAD();
     break;
   default:
