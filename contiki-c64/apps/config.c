@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.2 2003/08/09 23:27:57 adamdunkels Exp $
+ * $Id: config.c,v 1.3 2003/08/12 21:06:41 adamdunkels Exp $
  *
  */
 
@@ -232,6 +232,7 @@ configscript(void)
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(config_init)
 {
+  program_handler_screensaver(NULL);
   configscript();
   LOADER_UNLOAD();
 }
