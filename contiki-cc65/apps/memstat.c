@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.4 2004/07/04 17:55:55 adamdunkels Exp $
+ * $Id: memstat.c,v 1.5 2004/09/09 21:29:03 adamdunkels Exp $
  *
  */
 
@@ -114,7 +114,7 @@ EK_EVENTHANDLER(memstat_eventhandler, ev, data)
 
   if(ev == EK_EVENT_INIT) {
     ctk_window_new(&window, 24, 5, "Memory stats");
-    ctk_window_move(&window, 0, 1);
+    /*    ctk_window_move(&window, 0, 1);*/
 
     CTK_WIDGET_ADD(&window, &freemsg);
     CTK_WIDGET_ADD(&window, &freenum);
