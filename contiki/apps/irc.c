@@ -1,4 +1,5 @@
 
+#include "irc-conf.h"
 #include "contiki.h"
 #include "ircc.h"
 
@@ -9,9 +10,12 @@
 
 #include <string.h>
 
+#define LOG_WIDTH IRC_CONF_WIDTH
+#define LOG_HEIGHT IRC_CONF_HEIGHT
+/*
 #define LOG_WIDTH 78
 #define LOG_HEIGHT 21
-
+*/
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_PROCESS(p, "IRC client", EK_PRIO_NORMAL,
 	   eventhandler, NULL, NULL);
@@ -136,6 +140,10 @@ parse_line(void)
       ircc_text_output(&s, "Leaving channel", "");
     } else if(strncmp(&line[1], "quit", 4) == 0) {
       ircc_quit(&s);
+    } else if(strncmp(&line[1], "me", 2) == 0) {
+      petsciiconv_toascii(&line[4], strlen(&line[4]));
+      ircc_actionmsg(&s, &line[4]);
+      ircc_text_output(&s, "*", &line[4]);
     } else {
       ircc_text_output(&s, &line[1], "Not implemented");
       ircc_sent(&s);
@@ -155,6 +163,7 @@ ircc_sent(struct ircc_state *s)
   /*  ctk_textedit_init(&lineedit);*/
   CTK_TEXTENTRY_CLEAR(&lineedit);
   CTK_WIDGET_REDRAW(&lineedit);
+  CTK_WIDGET_FOCUS(&window, &lineedit);
 }
 /*---------------------------------------------------------------------------*/
 EK_EVENTHANDLER(eventhandler, ev, data)
