@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.6 2004/08/09 22:21:42 adamdunkels Exp $
+# $Id: Makefile,v 1.7 2004/09/13 10:34:30 adamdunkels Exp $
 #
 
 all: contiki.srec
@@ -40,7 +40,7 @@ CC=avr-gcc
 LD=avr-ld
 AS=avr-as
 OBJCOPY=avr-objcopy
-CFLAGS=-Os -Iapps -Ictk -Iuip -Iconf \
+CFLAGS=-Os -Iapps -Ictk -Ilib -Iuip -Iconf \
 	-I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
 	-DWITH_UIP -DWITH_ASCII -DWITH_AVR \
@@ -89,6 +89,8 @@ CONTIKIFILES= $(SYSTEM) $(UIP) uip-fw.o uip-fw-service.o timer.o
 CTKVNC=ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o
 CTKTELNET=libconio.o ctk-term.o ctk-term-in.o ctk-term-out.o ctk-termtelnet.o
 
+IRC=irc.o ircc.o socket.o uipbuf.o ctk-textedit.o irc-dsc.o ircc-strings.o
+
 clean:
 	rm -f *.o *~ *core contiki contiki.srec *.lst *.map
 
@@ -102,12 +104,12 @@ contiki: $(CONIKIFILES) contiki-main.o strncasecmp.o \
  ctk.o ek.o arg.o timer.o ek-service.o \
  uip.o uip_arch.o uip_arp.o resolv.o uip-event.o uiplib.o tcpip.o uip-split.o \
  rtl8019.o rtl8019dev.o delay.o debug.o rtl8019-drv.o \
- $(CTKVNC) \
- program-handler.o about.o about-dsc.o \
- processes.o processes-dsc.o calc.o calc-dsc.o \
- telnetd.o telnetd-dsc.o shell.o memb.o netconf.o netconf-dsc.o \
+ $(CTKVNC) program-handler.o  \
+ webserver.o httpd.o httpd-cgi.o httpd-fs.o webserver-dsc.o \
+ netconf.o netconf-dsc.o \
  $(WWW) weblinks.o weblinks-dsc.o \
- webserver.o httpd.o httpd-cgi.o httpd-fs.o webserver-dsc.o 
+ about.o about-dsc.o \
+ processes.o processes-dsc.o calc.o calc-dsc.o 
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
 
 
