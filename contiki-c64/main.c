@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki operating system
  *
- * $Id: main.c,v 1.15 2004/09/12 13:13:00 adamdunkels Exp $
+ * $Id: main.c,v 1.16 2004/09/12 13:19:04 adamdunkels Exp $
  *
  */
 
@@ -119,7 +119,9 @@ main(void)
   log_message("Starting ", CONTIKI_VERSION_STRING);
   
   ek_init();
-  
+
+  ek_start(&init);
+    
   log_message(": TCP/IP", "");
     
   tcpip_init(NULL);
@@ -138,7 +140,6 @@ main(void)
   program_handler_add(&configedit_dsc, "Configuration", 1);
   program_handler_add(&processes_dsc, "Processes", 1);  
   
-  ek_start(&init);
   
   log_message("Starting process scheduling", "");  
 
