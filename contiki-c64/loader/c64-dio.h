@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: c64-dio.h,v 1.1 2003/08/04 00:12:50 adamdunkels Exp $
+ * $Id: c64-dio.h,v 1.2 2004/02/16 20:58:54 adamdunkels Exp $
  *
  */
 #ifndef __C64_DIO_H__
@@ -40,12 +37,14 @@
 
 void c64_dio_init(unsigned char drive);
 
-void c64_dio_read_block(unsigned char track,
-			unsigned char sector,
-			unsigned char *buf);
+unsigned char c64_dio_read_block(unsigned char track,
+				 unsigned char sector,
+				 unsigned char *buf);
 
-void c64_dio_write_block(unsigned char track,
-			 unsigned char sector,
-			 unsigned char *buf);
+unsigned char c64_dio_write_block(unsigned char track,
+				  unsigned char sector,
+				  unsigned char *buf);
+
+#define C64_DIO_OK 0
 
 #endif /* __C64_DIO_H__ */

@@ -1,3 +1,16 @@
+/**
+ * \addtogroup c64fs
+ * @{
+ *
+ */
+
+/**
+ * \file
+ * C64 direct disk I/O.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ */ 
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +24,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +42,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: c64-dio.c,v 1.1 2003/08/04 00:12:50 adamdunkels Exp $
+ * $Id: c64-dio.c,v 1.2 2004/02/16 20:58:54 adamdunkels Exp $
  *
  */
 
@@ -40,7 +50,21 @@
 #include "c64-dio-asm.h"
 
 /*-----------------------------------------------------------------------------------*/
-void
+/**
+ * Read a block of data (256 bytes) from the disk.
+ *
+ * \param track The track of the disk block to be read.
+ *
+ * \param sector The sector of the disk block to be read.
+ *
+ * \param ptr A pointer to a buffer than must be able to accomodate
+ * 256 bytes of data.
+ *
+ * \return An error code or C64_DIO_OK if the data was successfully
+ * read.
+ */
+/*-----------------------------------------------------------------------------------*/
+unsigned char
 c64_dio_read_block(unsigned char track,
 		   unsigned char sector,
 		   unsigned char *ptr)
@@ -48,10 +72,24 @@ c64_dio_read_block(unsigned char track,
   c64_dio_asm_track = track;
   c64_dio_asm_sector = sector;
   c64_dio_asm_ptr = ptr;
-  c64_dio_asm_read_block();
+  return c64_dio_asm_read_block();
 }
 /*-----------------------------------------------------------------------------------*/
-void
+/**
+ * Write a block of data (256 bytes) to the disk.
+ *
+ * \param track The track of the disk block to be written.
+ *
+ * \param sector The sector of the disk block to be written.
+ *
+ * \param ptr A pointer to a buffer containing the 256 bytes of data
+ * to be written.
+ *
+ * \return An error code or C64_DIO_OK if the data was successfully
+ * written.
+ */
+/*-----------------------------------------------------------------------------------*/
+unsigned char
 c64_dio_write_block(unsigned char track,
 		   unsigned char sector,
 		   unsigned char *ptr)
@@ -59,8 +97,18 @@ c64_dio_write_block(unsigned char track,
   c64_dio_asm_track = track;
   c64_dio_asm_sector = sector;
   c64_dio_asm_ptr = ptr;
-  c64_dio_asm_write_block();
+  return c64_dio_asm_write_block();
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Initialize the direct disk I/O routines for a particular disk drive.
+ *
+ * This function must be called before any of the other direct disk
+ * I/O functions can be used.
+ *
+ * \param drive The drive number of the disk drive for which the
+ * direct disk I/O should be enabled.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 c64_dio_init(unsigned char drive)
@@ -68,3 +116,4 @@ c64_dio_init(unsigned char drive)
   c64_dio_asm_init(drive);
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */
