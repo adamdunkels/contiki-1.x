@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, Adam Dunkels.
+ * Copyright (c) 2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -29,116 +26,67 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop OS fpr the C64
+ * This file is part of the Contiki OS
  *
- * $Id: slip-drv.c,v 1.6 2003/09/05 21:04:37 adamdunkels Exp $
+ * $Id: slip-drv.c,v 1.7 2004/08/13 08:38:46 adamdunkels Exp $
  *
  */
 
-
-/* uip_main.c: initialization code and main event loop. */
-
-#include "uip.h"
-#include "uip_arp.h"
-#include "uip-signal.h"
+#include "contiki.h"
 #include "rs232dev.h"
-#include "loader.h"
-#include "ek.h"
 
-#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
-static u8_t i, arptimer;
-static u16_t start, current;
+static const struct packet_service_state state =
+  {
+    PACKET_SERVICE_VERSION,
+    output
+  };
 
-static void slip_drv_idle(void);
-static DISPATCHER_SIGHANDLER(slip_drv_sighandler, s, data);
-static struct dispatcher_proc p =
-  {DISPATCHER_PROC("TCP/IP/SLIP driver", slip_drv_idle,
-		   slip_drv_sighandler, NULL)};
-static ek_id_t id;
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_POLLHANDLER(pollhandler);
+EK_PROCESS(proc, PACKET_SERVICE_NAME ": SLIP", EK_PRIO_NORMAL,
+	   eventhandler, pollhandler, (void *)&state);
 
-
-/*-----------------------------------------------------------------------------------*/
-static void
-timer(void)
-{
-  for(i = 0; i < UIP_CONNS; ++i) {
-    uip_periodic(i);
-    if(uip_len > 0) {
-      rs232dev_send();
-    }
-  }
-
-  for(i = 0; i < UIP_UDP_CONNS; i++) {
-    uip_udp_periodic(i);
-    /* If the above function invocation resulted in data that
-       should be sent out on the network, the global variable
-       uip_len is set to a value > 0. */
-    if(uip_len > 0) {
-      rs232dev_send();
-    }
-  }   
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-slip_drv_idle(void)
-{
-  uip_len = rs232dev_poll();
-  if(uip_len > 0) {
-    uip_input();
-    if(uip_len > 0) {
-      rs232dev_send();
-    }
-  }
-
-  /* Check the clock so see if we should call the periodic uIP
-     processing. */
-  current = ek_clock();
-
-  if((current - start) >= CLK_TCK/2) {
-    timer();
-    start = current;
-  } 
-}
-/*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(slip_drv_init, arg)
+/*---------------------------------------------------------------------------*/
+LOADER_INIT_FUNC(tapdev_service_init, arg)
 {
   arg_free(arg);
-  
-  if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-
-    rs232dev_init();
-    
-    arptimer = 0;
-    start = ek_clock();
-
-    dispatcher_listen(uip_signal_poll);
-    dispatcher_listen(uip_signal_poll_udp);
-    dispatcher_listen(uip_signal_uninstall);    
-  }
+  ek_service_start(PACKET_SERVICE_NAME, &proc);
 }
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(slip_drv_sighandler, s, data)
+/*---------------------------------------------------------------------------*/
+static void
+output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
 {
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-
-  if(s == uip_signal_poll) {
-    uip_periodic_conn(data);
-    if(uip_len > 0) {
-      rs232dev_send();
-    }
-  } else if(s == uip_signal_poll_udp) {
-    uip_udp_periodic_conn(data);
-    if(uip_len > 0) {
-      rs232dev_send();
-    }    
-  } else if(s == dispatcher_signal_quit ||
-     s == uip_signal_uninstall) {
-    dispatcher_exit(&p);
-    id = EK_ID_NONE;
-    LOADER_UNLOAD();   
+  rs232dev_send();
+}
+/*---------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  switch(ev) {
+  case EK_EVENT_INIT:
+  case EK_EVENT_REPLACE:
+    rs232dev_init();
+    break;
+  case EK_EVENT_REQUEST_REPLACE:
+    ek_replace((struct ek_proc *)data, NULL);
+    LOADER_UNLOAD();
+    break;
+  case EK_EVENT_REQUEST_EXIT:
+    ek_exit();
+    LOADER_UNLOAD();
+    break;
+  default:
+    break;
   }
 }
-/*-----------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+EK_POLLHANDLER(pollhandler)
+{  
+  uip_len = rs232dev_poll();
+  if(uip_len > 0) {
+    tcpip_input();
+  }
+
+}
+/*---------------------------------------------------------------------------*/
