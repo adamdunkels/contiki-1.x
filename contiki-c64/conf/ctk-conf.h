@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.3 2003/04/11 20:26:05 adamdunkels Exp $
+ * $Id: ctk-conf.h,v 1.4 2003/04/24 17:14:50 adamdunkels Exp $
  *
  */
 
@@ -74,5 +74,8 @@ architecture specific files to work). */
 #define CTK_CONF_MENUWIDTH            16
 /* The maximum number of menu items in each menu. */
 #define CTK_CONF_MAXMENUITEMS         10
+
+/* Toggles support for screen savers. */
+#define CTK_CONF_SCREENSAVER          1
 
 #endif /* __CTK_CONF_H__ */
