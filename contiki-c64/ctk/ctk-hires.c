@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.4 2003/08/05 13:57:01 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.5 2003/08/09 13:26:22 adamdunkels Exp $
  *
  */
 
@@ -62,15 +62,15 @@ unsigned char ctk_hires_reversed;
 unsigned char ctk_hires_color;
 unsigned char ctk_hires_underline;
 
-static unsigned char cchar;
+/*static unsigned char cchar;
 
 static unsigned char tmp01;
 static unsigned char tmph, tmpl, tmpborder;
-static unsigned char *tmpptr;
+static unsigned char *tmpptr;*/
 
 
 static unsigned char x, y, i;
-static unsigned char h;
+/*static unsigned char h;*/
 static unsigned char wfocus;
 static unsigned char x1, y1, x2, y2;
 
@@ -119,7 +119,7 @@ struct ctk_hires_theme *ctk_hires_theme_ptr = &ctk_hires_theme;
 #define hires_color(c)   ctk_hires_color = c
 #define hires_underline(c)   ctk_hires_underline = c
 /*-----------------------------------------------------------------------------------*/
-static void
+static void __fastcall__
 hires_cvline(unsigned char length)
 {
   unsigned char i;
@@ -131,42 +131,42 @@ hires_cvline(unsigned char length)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void __fastcall__
 hires_gotoxy(unsigned char x, unsigned char y)
 {
   ctk_hires_cursx = x;
   ctk_hires_cursy = y;
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void __fastcall__
 hires_cclearxy(unsigned char x, unsigned char y, unsigned char length)
 {
   hires_gotoxy(x, y);
   ctk_hires_cclear(length);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void __fastcall__
 hires_chlinexy(unsigned char x, unsigned char y, unsigned char length)
 {
   hires_gotoxy(x, y);
   ctk_hires_chline(length);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void __fastcall__
 hires_cvlinexy(unsigned char x, unsigned char y, unsigned char length)
 {
   hires_gotoxy(x, y);
   hires_cvline(length);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void __fastcall__
 hires_cputcxy(unsigned char x, unsigned char y, char c)
 {
   hires_gotoxy(x, y);
   ctk_hires_cputc(c);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void 
 clear_line(unsigned char line)
 {
   lineptr = line;
@@ -429,126 +429,7 @@ ctk_draw_init(void)
   return;
 }
 /*-----------------------------------------------------------------------------------*/
-#if 0
-static void
-draw_bitmap_icon(unsigned char *bitmap)
-{
-  tmpptr = bitmap;
-
-  /* Find screen address. */
-  asm("lda _ctk_hires_cursy");
-  asm("asl");
-  asm("tax");
-  asm("lda _ctk_hires_yscreenaddr,x");
-  asm("sta ptr1");
-  asm("lda _ctk_hires_yscreenaddr+1,x");
-  asm("sta ptr1+1");
-
-  /* Turn off interrupts, prepare $01 to store color data in RAM under
-     I/O area. */
-  asm("sei");
-  asm("lda $01");
-  asm("sta _tmp01");
-  asm("and #$f8");
-  asm("sta $01");
-
-  /* Actually store color value in color RAM. */
-  asm("ldy _ctk_hires_cursx");
-  asm("lda _ctk_hires_color");
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("sta (ptr1),y");
-  asm("tya");
-  asm("clc");
-  asm("adc #$26");
-  asm("tay");
-  asm("lda _ctk_hires_color");
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("sta (ptr1),y");
-  asm("tya");
-  asm("clc");
-  asm("adc #$26");
-  asm("tay");
-  asm("lda _ctk_hires_color");
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("sta (ptr1),y");
-
-
-
-  /* Find hires address. */
-  asm("lda _ctk_hires_cursy");
-  asm("asl");
-  asm("tax");
-  asm("lda _ctk_hires_yhiresaddr,x");
-  asm("sta ptr2");
-  asm("lda _ctk_hires_yhiresaddr+1,x");
-  asm("sta ptr2+1");
-
-  /* Add X coordinate to the hires address. */
-  asm("lda #0");
-  asm("sta ptr1+1");
-  asm("lda _ctk_hires_cursx");
-  asm("asl");
-  asm("rol ptr1+1");
-  asm("asl");
-  asm("rol ptr1+1");
-  asm("asl");
-  asm("rol ptr1+1");
-  asm("clc");
-  asm("adc ptr2");
-  asm("sta ptr2");
-  asm("lda ptr2+1");
-  asm("adc ptr1+1");
-  asm("sta ptr2+1");
-
-  asm("lda _tmpptr");
-  asm("sta ptr1");
-  asm("lda _tmpptr+1");
-  asm("sta ptr1+1");
-
-  asm("ldx #3");
-  asm("iconloop1:");
-  asm("ldy #0");
-  asm("iconloop2:");
-  asm("lda (ptr1),y");
-  asm("sta (ptr2),y");
-  asm("iny");
-  asm("cpy #$18");
-  asm("bne iconloop2");
-  asm("lda ptr1");
-  asm("clc");
-  asm("adc #$18");
-  asm("sta ptr1");
-  asm("lda ptr1+1");
-  asm("adc #0");
-  asm("sta ptr1+1");
-  asm("lda ptr2");
-  asm("clc");
-  asm("adc #$40");
-  asm("sta ptr2");
-  asm("lda ptr2+1");
-  asm("adc #1");
-  asm("sta ptr2+1");
-  asm("dex");
-  asm("bne iconloop1");
-
-  
-  
-  asm("lda _tmp01");
-  asm("sta $01");  
-  asm("cli");
-}
-#endif /* 0 */
-/*-----------------------------------------------------------------------------------*/
-static void
+static void __fastcall__
 draw_widget(register struct ctk_widget *w,
 	    unsigned char x, unsigned char y,
 	    unsigned char clipy1, unsigned char clipy2,
@@ -841,11 +722,6 @@ ctk_draw_dialog(register struct ctk_window *dialog)
   
   /* Clear window contents. */
   for(i = y1; i < y2;  ++i) {
-    hires_cclearxy(x1, i, dialog->w);
-  }
-  
-  /* Clear dialog contents. */
-  for(i = y1; i < y2; ++i) {
     hires_cclearxy(x1, i, dialog->w);
   }
   
