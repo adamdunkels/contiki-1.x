@@ -1,10 +1,13 @@
 
+#include "contiki.h"
 
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-draw-service.h"
 
 #include "ctk-80col-asm.h"
+
+#include "ctk-80col-theme.h"
 
 #include <string.h>
 
@@ -23,6 +26,75 @@ unsigned char ctk_80col_underline = 0;
 unsigned char ctk_80col_lefttab[256];
 unsigned char ctk_80col_righttab[256];
 
+#define COLOR(bg, fg) ((fg << 4) | (bg))
+
+#define COLOR_FOCUS_WINDOW      0xbf
+#define COLOR_BACKGROUND_WINDOW 0x0b
+
+#define color(c) ctk_80col_color = c
+
+#define BGCOLOR1 7
+#define BGCOLOR2 10
+#define BGCOLOR3 4
+#define BGCOLOR4 6
+
+unsigned char ctk_80col_screencolors[25] =
+  {COLOR(BGCOLOR4,BGCOLOR1),
+   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
+   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
+   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
+   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
+   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
+   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
+   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
+   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
+   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
+   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
+   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
+   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3)};
+
+unsigned char ctk_80col_screenpattern[25*8] =
+  {0x88,0x00,0x22,0x00,0x88,0x00,0x22,0x00,
+   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+   0xff,0xdd,0xff,0x77,0xff,0xdd,0xff,0x77,
+   0xff,0x55,0xff,0x55,0xff,0x55,0xff,0x55,
+   0xee,0x55,0xbb,0x55,0xee,0x55,0xbb,0x55,
+   0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,
+   0xaa,0x44,0xaa,0x11,0xaa,0x44,0xaa,0x11,
+   0xaa,0x00,0xaa,0x00,0xaa,0x00,0xaa,0x00,
+   0x88,0x00,0x22,0x00,0x88,0x00,0x22,0x00,
+   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+   0xff,0xdd,0xff,0x77,0xff,0xdd,0xff,0x77,
+   0xff,0x55,0xff,0x55,0xff,0x55,0xff,0x55,
+   0xee,0x55,0xbb,0x55,0xee,0x55,0xbb,0x55,
+   0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,
+   0xaa,0x44,0xaa,0x11,0xaa,0x44,0xaa,0x11,
+   0xaa,0x00,0xaa,0x00,0xaa,0x00,0xaa,0x00,
+   0x88,0x00,0x22,0x00,0x88,0x00,0x22,0x00,
+   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+   0xff,0xdd,0xff,0x77,0xff,0xdd,0xff,0x77,
+   0xff,0x55,0xff,0x55,0xff,0x55,0xff,0x55,
+   0xee,0x55,0xbb,0x55,0xee,0x55,0xbb,0x55,
+   0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,
+   0xaa,0x44,0xaa,0x11,0xaa,0x44,0xaa,0x11,
+   0xaa,0x00,0xaa,0x00,0xaa,0x00,0xaa,0x00,
+   0x88,0x00,0x22,0x00,0x88,0x00,0x22,0x00};
+
+unsigned short ctk_80col_yscreenaddr[25] =
+  {0 * 40 + SCREENADDR, 1 * 40 + SCREENADDR,
+   2 * 40 + SCREENADDR, 3 * 40 + SCREENADDR,
+   4 * 40 + SCREENADDR, 5 * 40 + SCREENADDR,
+   6 * 40 + SCREENADDR, 7 * 40 + SCREENADDR,
+   8 * 40 + SCREENADDR, 9 * 40 + SCREENADDR,
+   10 * 40 + SCREENADDR, 11 * 40 + SCREENADDR,
+   12 * 40 + SCREENADDR, 13 * 40 + SCREENADDR,
+   14 * 40 + SCREENADDR, 15 * 40 + SCREENADDR,
+   16 * 40 + SCREENADDR, 17 * 40 + SCREENADDR,
+   18 * 40 + SCREENADDR, 19 * 40 + SCREENADDR,
+   20 * 40 + SCREENADDR, 21 * 40 + SCREENADDR,
+   22 * 40 + SCREENADDR, 23 * 40 + SCREENADDR,
+   24 * 40 + SCREENADDR};
+
 unsigned short ctk_80col_yhiresaddr[25] =
   {0 * 320 + HIRESADDR, 1 * 320 + HIRESADDR,
    2 * 320 + HIRESADDR, 3 * 320 + HIRESADDR,
@@ -37,6 +109,51 @@ unsigned short ctk_80col_yhiresaddr[25] =
    20 * 320 + HIRESADDR, 21 * 320 + HIRESADDR,
    22 * 320 + HIRESADDR, 23 * 320 + HIRESADDR,
    24 * 320 + HIRESADDR};
+
+
+struct ctk_80col_theme ctk_80col_theme =
+  {
+    /* Version string. */
+    /*    char version[8]; */
+    {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+
+    /* Window borders patterns. */
+    /* unsigned char ulcorner[8], */ /* Upper left corner. */
+    {0xff,0xc0,0x80,0xbf,0x80,0xbf,0x80,0x80},
+    
+    /* titlebar[8], */            /* Title bar pattern. */
+    {0xff,0x00,0x00,0xff,0x00,0xff,0x00,0x00},
+    
+    /* urcorner[8],       */       /* Upper right corner. */
+    {0xff,0x03,0x01,0xfd,0x01,0xfd,0x01,0x01},
+    
+    /* rightborder[8],     */      /* Right border. */
+    {0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01},
+    
+    /* lrcorner[8],      */        /* Lower right corner. */
+    {0x01,0x01,0x01,0x01,0x01,0x01,0x03,0xff},
+    
+    /* lowerborder[8], */          /* Lower border. */
+    {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff},
+    
+    /* llcorner[8],  */            /* Lower left corner. */
+    {0x80,0x80,0x80,0x80,0x80,0x80,0xc0,0xff},
+    
+    /* leftborder[8]; */          /* Left border. */
+    {0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80},
+
+    /* Button corner patterns. */
+    /*    unsigned char buttonleft[8], */
+    {0xc5,0xdf,0xdf,0xdf,0xdf,0xdf,0xdf,0xdf},
+    
+    /* buttonright[8]; */
+    {0xfb,0xfb,0xfb,0xfb,0xfb,0xfb,0xfb,0xa3},
+    
+  };
+char ctk_80col_versionstring[] = CONTIKI_VERSION_STRING;
+char ctk_80col_versionstring_len = sizeof(CONTIKI_VERSION_STRING) - 1;
+
+struct ctk_80col_windowparams ctk_80col_windowparams;
 
 /*---------------------------------------------------------------------------*/
 /*void
@@ -116,7 +233,7 @@ ctk_80col_init(void)
   VIC.ctrl2 = 0xc8;  /* $D016 */
   CIA2.pra  = 0x00;  /* $DD00 */
 
-  VIC.bordercolor = 0x0f; /* $D020 */
+  VIC.bordercolor = 0x06; /* $D020 */
   VIC.bgcolor0 = 0x0b; /* $D021 */  
 
   /* Fill color memory. */
@@ -190,6 +307,18 @@ ctk_80col_init(void)
   /*  ctk_draw_clear(0, 24);*/
 
   for(i = 0; i < 256; ++i) {
+#if 0
+    ctk_80col_lefttab[i] =
+      ((i & 0x40) << 1) |
+      ((i & 0x20) << 1) |
+      ((i & 0x08) << 2) |
+      ((i & 0x02) << 3);
+    ctk_80col_righttab[i] =
+      ((i & 0x40) >> 3) |
+      ((i & 0x20) >> 3) |
+      ((i & 0x08) >> 2) |
+      ((i & 0x02) >> 1);
+#else
     ctk_80col_lefttab[i] =
       ((i & 0x40) << 1) |
       ((i & 0x10) << 2) |
@@ -200,6 +329,7 @@ ctk_80col_init(void)
       ((i & 0x10) >> 2) |
       ((i & 0x04) >> 1) |
       ((i & 0x01));
+#endif
   }
   
 #if 0
@@ -508,7 +638,13 @@ draw_widget(struct ctk_widget *w,
       } else {
 	revers(0);
       }
-      gotoxy(xpos, ypos);
+      /*      gotoxy(xpos, ypos);*/
+      if(xpos >= 73) {
+	xpos = 73;
+      }
+      if(xpos <= 2) {
+	xpos = 2;
+      }
       if(w->widget.icon.textmap != NULL) {
 	ctk_80col_bitmapptr = w->widget.icon.bitmap;
 	for(i = 0; i < 3; ++i) {
@@ -517,7 +653,7 @@ draw_widget(struct ctk_widget *w,
 	    /*	    cputc(w->widget.icon.textmap[0 + 3 * i]);
 	    cputc(w->widget.icon.textmap[1 + 3 * i]);
 	    cputc(w->widget.icon.textmap[2 + 3 * i]);*/
-	    gotoxy(xpos-3, ypos);
+	    gotoxy(xpos, ypos);
 	    ctk_80col_draw_bitmapline(3);	    
 	  }
 	  ctk_80col_bitmapptr += 3 * 8;
@@ -553,7 +689,7 @@ s_ctk_draw_widget(struct ctk_widget *w,
   struct ctk_window *win = w->window;
   unsigned char posx, posy;
 
-  posx = win->x + 1;
+  posx = (win->x & 0xfe) + 1;
   posy = win->y + 2;
 
   if(w == win->focused) {
@@ -581,14 +717,17 @@ s_ctk_draw_clear_window(struct ctk_window *window,
   unsigned char h;
 
   if(focus & CTK_FOCUS_WINDOW) {
+    color(COLOR_FOCUS_WINDOW);
   } else {
+    color(COLOR_BACKGROUND_WINDOW);
   }
     
   h = window->y + 2 + window->h;
   /* Clear window contents. */
   for(i = window->y + 2; i < h; ++i) {
     if(i >= clipy1 && i < clipy2) {
-      cclearxy(window->x + 1, i, window->w);
+      gotoxy((window->x & 0xfe) + 1, i);
+      ctk_80col_cclear((window->w + 1)/2);
     }
   }
 }
@@ -639,19 +778,38 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
     return;
   }
     
-  x = window->x;
+  x = window->x & 0xfe;
   y = window->y + 1;
   
-  if(focus & CTK_FOCUS_WINDOW) {
+/*  if(focus & CTK_FOCUS_WINDOW) {
   } else {
-  }
+  }*/
 
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + window->w;
   y2 = y1 + window->h;
 
-  /* Draw window frame. */  
+  /* Draw window frame. */
+  gotoxy(x, y);
+  ctk_80col_windowparams.w = (window->w-1)/2;
+  ctk_80col_windowparams.h = window->h;
+  if(clipy1 < y) {
+    ctk_80col_windowparams.clipy1 = 0;
+  } else {
+    ctk_80col_windowparams.clipy1 = clipy1 - y;
+  }
+  ctk_80col_windowparams.clipy2 = clipy2 - y;
+  ctk_80col_windowparams.color1 = 0xbf/*ctk_80col_theme.windowcolors[focus+1]*/;
+  ctk_80col_windowparams.color2 = 0xbf/*ctk_80col_theme.windowcolors[focus]*/;
+  ctk_80col_windowparams.title = window->title;
+  ctk_80col_windowparams.titlelen = window->titlelen/2;
+
+  if(ctk_80col_windowparams.clipy1 < ctk_80col_windowparams.clipy2 &&
+     ctk_80col_windowparams.clipy2 > 0) {
+    ctk_80col_draw_windowborders();
+  }
+  /*  
   if(y >= clipy1) {
     cputcxy(x, y, CH_ULCORNER);
     gotoxy(wherex() + window->titlelen + 2, wherey());
@@ -687,7 +845,7 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
     chlinexy(x1, y2, window->w);
     cputcxy(x2, y2, CH_LRCORNER);
   }
-
+  */
   draw_window_contents(window, focus & CTK_FOCUS_WINDOW, clipy1, clipy2,
 		       x1, x2, y + 1, y2);
 }
@@ -700,7 +858,7 @@ s_ctk_draw_dialog(struct ctk_window *dialog)
   unsigned char x1, y1, x2, y2;
   
 
-  x = dialog->x;
+  x = dialog->x & 0xfe;
   y = dialog->y + 1;
 
 

@@ -3,8 +3,12 @@
 	.importzp       ptr1, ptr2, ptr3, ptr4, sreg
 	.importzp	sp
 
+	.import		pushax
 	.import		incsp2
 
+	.import		_ctk_80col_screencolors
+	.import		_ctk_80col_screenpattern	
+		
 	.import		_ctk_80col_lefttab
 	.import		_ctk_80col_righttab
 	
@@ -14,12 +18,16 @@
 	.import		_ctk_80col_underline
 	.import		_ctk_80col_reversed
 
+	.import		_ctk_80col_yscreenaddr
 	.import		_ctk_80col_yhiresaddr
 
 	.import		_ctk_80col_windowparams
 	
 	.import		_ctk_80col_bitmapptr
 
+	.import		_ctk_80col_versionstring
+	.import		_ctk_80col_versionstring_len	
+	
 	.import		_ctk_80col_theme
 			
 	.export		_ctk_80col_cclear
@@ -29,6 +37,8 @@
 	
 	.export		_ctk_80col_clear_line
 	.export		_ctk_80col_draw_bitmapline
+	
+	.export		_ctk_80col_draw_windowborders
 
 ;---------------------------------------------------------------------
 
@@ -111,7 +121,19 @@ setupptrs:
 	adc ptr1+1
 	sta ptr2+1
 
-
+	;; Find screen address. 
+	lda _ctk_80col_cursy
+	asl
+	tax
+	lda _ctk_80col_cursx
+	lsr
+	clc
+	adc _ctk_80col_yscreenaddr,x
+	sta ptr1
+	lda _ctk_80col_yscreenaddr+1,x
+	adc #0
+	sta ptr1+1
+	
 	;; Turn off interrupts, prepare $01 to store color data in RAM
 	;; under I/O area.		
 	sei
@@ -136,6 +158,13 @@ _ctk_80col_cclear:
 		
 	jsr setupptrs		
 
+	ldy tmpl
+	lda _ctk_80col_color
+:		
+	sta (ptr1),y
+	dey
+	bpl :-
+	
 	;; Store either $00 or $ff in hires memory, depending on the
 	;; reversed flag		
 	
@@ -166,7 +195,7 @@ _ctk_80col_cclear:
 	inc _ctk_80col_cursx
 
 	dex
-	bne @loop1
+	bpl @loop1
 
 	jmp restore01
 ;---------------------------------------------------------------------
@@ -331,7 +360,7 @@ _ctk_80col_cputsn:
 	sta tmpl
 	cmp #0
 	bne :+
-	rts
+        jmp incsp2	
 :		
 
 	jsr setupptrs
@@ -471,8 +500,13 @@ _ctk_80col_cputsn:
         jmp incsp2	
 ;---------------------------------------------------------------------
 _ctk_80col_clear_line:
+	sta tmpl
 	asl
 	tax
+	lda _ctk_80col_yscreenaddr,x
+	sta ptr1
+	lda _ctk_80col_yscreenaddr+1,x
+	sta ptr1+1	
 	lda _ctk_80col_yhiresaddr,x
 	sta ptr2
 	lda _ctk_80col_yhiresaddr+1,x
@@ -484,12 +518,43 @@ _ctk_80col_clear_line:
 	and #$f8
 	sta $01
 
-	ldy #0
+	ldy #39
+	ldx tmpl
+	lda _ctk_80col_screencolors,x
 :	
-	lda #$55
+	sta (ptr1),y
+	dey
+	bpl :-
+
+	lda tmpl
+	asl
+	asl
+	asl
+	tax
+	ldy #0
+:
+	lda _ctk_80col_screenpattern,x
 	sta (ptr2),y
 	iny
-	lda #$aa
+	lda _ctk_80col_screenpattern+1,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+2,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+3,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+4,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+5,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+6,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+7,x
 	sta (ptr2),y
 	iny
 	bne :-
@@ -497,16 +562,49 @@ _ctk_80col_clear_line:
 	inc ptr2+1
 	
 :	
-	lda #$55
+	lda _ctk_80col_screenpattern,x
 	sta (ptr2),y
 	iny
-	lda #$aa
+	lda _ctk_80col_screenpattern+1,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+2,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+3,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+4,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+5,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+6,x
+	sta (ptr2),y
+	iny
+	lda _ctk_80col_screenpattern+7,x
 	sta (ptr2),y
 	iny
 	cpy #$40
 	bne :-
+
+	lda tmpl
+	cmp #24
+	bne :+			
+
+	sta _ctk_80col_cursy
+	lda #0
+	sta _ctk_80col_cursx
+
+	jsr restore01
 		
-	
+	lda #<_ctk_80col_versionstring
+	ldx #>_ctk_80col_versionstring
+ 	jsr pushax		
+	lda _ctk_80col_versionstring_len
+	jmp _ctk_80col_cputsn
+:		
 	jmp restore01	
 ;---------------------------------------------------------------------	
 _ctk_80col_draw_bitmapline:
@@ -548,4 +646,339 @@ _ctk_80col_draw_bitmapline:
 	
 	jmp restore01	
 ;---------------------------------------------------------------------
+_ctk_80col_draw_windowborders:
+
+	jsr setupptrs
+
+	lda _ctk_80col_windowparams + wpclipy1
+	beq :+
+	jmp @nofirstline
+:		
+	
+	;; Draw first line of the border, including the window title
+
+	;; Start with filling color memory
+	lda _ctk_80col_windowparams + wpw
+	sta tmpw	
+
+	
+	ldy #0
+	lda _ctk_80col_windowparams + wpcolor1	
+:	
+	sta (ptr1),y
+	iny
+	cpy tmpw
+	bcc :-
+
+	dec tmpw
+
+	;; Set color for upper right corner
+	sta (ptr1),y	
+	iny
+	sta (ptr1),y
+		
+	
+	;; Turn on font ROM for drawing the title
+	lda tmp01
+	and #$f8
+	ora #$01
+	sta $01
+
+	;; Use a temporary pointer (ptr3) rather than ptr2 so we can
+	;; reuse it later.
+	lda ptr2
+	sta ptr3
+	lda ptr2+1
+	sta ptr3+1
+		
+	;; Draw upper left corner
+	ldy #7
+:	
+	lda _ctk_80col_theme+ulcornerpattern,y
+	sta (ptr3),y
+	dey
+	bpl :-
+
+	lda ptr3
+	clc
+	adc #$8
+	sta ptr3
+	bcc :+
+	inc ptr3+1
+:
+
+	
+	;; Draw window title bar pattern
+@titlebarloop:	
+	ldy #7
+:
+	lda _ctk_80col_theme+titlebarpattern,y
+	sta (ptr3),y
+	dey
+	bpl :-
+
+	lda ptr3
+	clc
+	adc #$8
+	sta ptr3
+	bcc :+
+	inc ptr3+1
+:
+	;; Loop until we are three characters away from right border
+	;; to avoid flickering since we would be overwriting the close
+	;; button.
+	dec tmpw
+	bpl @titlebarloop
+
+	;; Draw upper right corner piece
+	ldy #7
+:
+	lda _ctk_80col_theme+urcornerpattern,y
+	sta (ptr3),y
+	dey
+	bpl :-
+
+
+@nofirstline:
+
+
+	ldx _ctk_80col_windowparams + wph
+	inx
+	stx tmph
+
+	;; Draw left and right borders
+
+	;; Fill color memory (pointer in ptr1, setup by setupptrs)
+
+	;; First check how much we actually should draw by inspecting
+	;; the clipy1 and clipy2 fields in the _ctk_80col_windowparams 
+	;; structure		
+
+	lda #1
+	sta tmpy
+	
+	ldx _ctk_80col_windowparams + wpclipy1
+@clipy1loop:
+	cpx #0
+	beq @clipy1loopend
+	lda ptr1
+	clc
+	adc #$28
+	sta ptr1
+	bcc :+
+	inc ptr1+1
+:
+	lda ptr3
+	clc
+	adc #$40
+	sta ptr3
+	lda ptr3+1
+	adc #1
+	sta ptr3+1
+
+	inc tmpy
+	
+	dex
+	jmp @clipy1loop
+@clipy1loopend:	
+
+	lda ptr1
+	clc
+	adc #$28
+	sta ptr1
+	bcc :+
+	inc ptr1+1
+:
+		
+	ldx tmpy
+	ldy _ctk_80col_windowparams + wpw
+	iny
+	sty tmpw
+@bordercloop:
+	cpx _ctk_80col_windowparams + wpclipy2
+	beq @bordercloopend
+	
+	ldy tmpw
+	lda _ctk_80col_windowparams + wpcolor2
+	sta (ptr1),y
+	ldy #0
+	lda _ctk_80col_windowparams + wpcolor1
+	sta (ptr1),y
+
+	lda ptr1
+	clc
+	adc #$28
+	sta ptr1
+	bcc :+
+	inc ptr1+1
+:
+	
+	inx
+	cpx tmph
+	bcc @bordercloop
+	beq @bordercloop	
+@bordercloopend:
+
+	
+	;; Fill color memory for lower border, if clipy2 allows
+	cpx _ctk_80col_windowparams + wpclipy2
+	beq @noclowerborder
+
+	lda ptr1
+	sec
+	sbc #$28
+	sta ptr1
+	bcs :+
+	dec ptr1+1
+:
+		
+	ldy _ctk_80col_windowparams + wpw
+	lda _ctk_80col_windowparams + wpcolor2		
+@lbordercloop:	
+	sta (ptr1),y
+	dey
+	bne @lbordercloop
+	
+@noclowerborder:	
+		
+	;; Draw right border
+	ldx tmpy
+@rborderloop:
+	cpx _ctk_80col_windowparams + wpclipy2
+	beq @rborderloopend
+
+	lda ptr3
+	clc
+	adc #$40
+	sta ptr3
+	lda ptr3+1
+	adc #1
+	sta ptr3+1
+
+	ldy #7
+:
+	lda _ctk_80col_theme+rborderpattern,y		
+	sta (ptr3),y
+	dey
+	bpl :-
+
+	inx
+	cpx tmph
+	bne @rborderloop	
+@rborderloopend:
+	
+ 	cpx _ctk_80col_windowparams + wpclipy2 
+ 	beq @norbordercorner
+	
+	lda ptr3
+	clc
+	adc #$40
+	sta ptr3
+	lda ptr3+1
+	adc #1
+	sta ptr3+1
+	
+	;; Draw lower right corner, if clipy2 allows it
+	ldy #7
+:		
+	lda _ctk_80col_theme+lrcornerpattern,y
+	sta (ptr3),y
+	dey
+	bpl :-
+
+@norbordercorner:	
+
+	stx tmpy
+		
+	;; Draw lower border
+	ldx _ctk_80col_windowparams + wpw
+
+@lowerborderloop:
+	lda ptr3
+	sec
+	sbc #$8
+	sta ptr3
+	bcs :+
+	dec ptr3+1
+:	
+
+	lda tmpy
+	cmp _ctk_80col_windowparams + wpclipy2
+	beq @nolowerborder
+	
+	ldy #7
+:	
+	lda _ctk_80col_theme+lowerborderpattern,y
+	sta (ptr3),y
+	dey
+	bpl :-
+@nolowerborder:	
+		
+	dex
+	bne @lowerborderloop
+
+	lda ptr3
+	sec
+	sbc #$8
+	sta ptr3
+	bcs :+
+	dec ptr3+1
+:	
+
+
+	ldx tmpy
+ 	cpx tmph
+ 	bne @nolbordercorner
+	
+	;; Draw lower left corner, if clipy2 allows it
+	ldy #7
+:		
+	lda _ctk_80col_theme+llcornerpattern,y
+	sta (ptr3),y
+	dey
+	bpl :-
+
+	lda ptr3
+	sec
+	sbc #$40
+	sta ptr3
+	lda ptr3+1
+	sbc #1
+	sta ptr3+1
+
+@nolbordercorner:	
+				
+	;; Draw left border
+
+	
+		
+@lborderloop:
+	cpx #1
+	beq @lborderloopend
+	cpx _ctk_80col_windowparams + wpclipy1
+	bcc @lborderloopend
+	
+	ldy #7
+:
+	lda _ctk_80col_theme+lborderpattern,y	
+	sta (ptr3),y
+	dey
+	bpl :-
+
+	lda ptr3
+	sec
+	sbc #$40
+	sta ptr3
+	lda ptr3+1
+	sbc #1
+	sta ptr3+1
+	
+	dex
+	jmp @lborderloop
+	
+@lborderloopend:		
+
+	
+	jmp restore01
+;---------------------------------------------------------------------	
 	
