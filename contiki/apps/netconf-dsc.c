@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf-dsc.c,v 1.1 2003/04/17 19:00:00 adamdunkels Exp $
+ * $Id: netconf-dsc.c,v 1.2 2003/06/30 20:47:02 adamdunkels Exp $
  *
  */
 
@@ -58,9 +58,9 @@ static unsigned char tcpipconficon_bitmap[3*3*8] = {
 };
 
 static char tcpipconficon_textmap[9] = {
-  't', 'c', 'p',
-  '/', 'i', 'p',
-  'c', 'f', 'g'
+  'T', 'C', 'P',
+  '/', 'I', 'P',
+  'C', 'f', 'g'
 };
 
 
