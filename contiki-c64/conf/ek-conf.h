@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek-conf.h,v 1.2 2003/04/18 00:13:16 adamdunkels Exp $
+ * $Id: ek-conf.h,v 1.3 2003/08/15 18:45:54 adamdunkels Exp $
  *
  */
 
@@ -58,13 +58,13 @@ typedef unsigned short ek_ticks_t;
    used by the underlying system. (Look for time_t or similar.) */
 typedef unsigned long ek_clock_t; 
 
-#define EK_CONF_NUMSIGNALS   32    /* Must be 2^n */
+#define EK_CONF_NUMSIGNALS   16    /* Must be 2^n */
 typedef unsigned char ek_num_signals_t;
 
 #define EK_CONF_NUMTIMERS    4    /* Must be 2^n */
 typedef unsigned char ek_num_timers_t;
 
-#define EK_CONF_NUMLISTENERS  32    /* Must be 2^n */
+#define EK_CONF_NUMLISTENERS  16    /* Must be 2^n */
 typedef unsigned char ek_num_listeners_t;
 
 #endif /* __EK_CONF_H__ */
