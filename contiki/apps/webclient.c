@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.5 2003/06/30 23:23:12 adamdunkels Exp $
+ * $Id: webclient.c,v 1.6 2003/07/31 23:32:04 adamdunkels Exp $
  *
  */
 
@@ -120,7 +120,7 @@ init_connection(void)
     sizeof(http_crnl) - 1 +
     sizeof(http_host) - 1 +
     sizeof(http_crnl) - 1 +
-    sizeof(http_user_agent_fields) - 1 +
+    strlen(http_user_agent_fields) +
     strlen(s.file) + strlen(s.host);
   s.getrequestptr = 0;
 
@@ -194,7 +194,7 @@ senddata(void)
     cptr = copy_string(cptr, http_crnl, sizeof(http_crnl) - 1);
 
     cptr = copy_string(cptr, http_user_agent_fields,
-		       sizeof(http_user_agent_fields) - 1);
+		       strlen(http_user_agent_fields));
     
     len = s.getrequestleft > uip_mss()?
       uip_mss():
