@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.3 2003/07/31 23:23:25 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.4 2003/08/05 13:57:01 adamdunkels Exp $
  *
  */
 
@@ -549,7 +549,7 @@ draw_bitmap_icon(unsigned char *bitmap)
 #endif /* 0 */
 /*-----------------------------------------------------------------------------------*/
 static void
-draw_widget(struct ctk_widget *w,
+draw_widget(register struct ctk_widget *w,
 	    unsigned char x, unsigned char y,
 	    unsigned char clipy1, unsigned char clipy2,
 	    unsigned char focus)
@@ -722,7 +722,7 @@ ctk_draw_widget(struct ctk_widget *w,
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_draw_clear_window(struct ctk_window *window,
+ctk_draw_clear_window(register struct ctk_window *window,
 		      unsigned char focus,
 		      unsigned char clipy1,
 		      unsigned char clipy2)
@@ -877,7 +877,7 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-draw_menu(struct ctk_menu *m)
+draw_menu(register struct ctk_menu *m)
 {
   unsigned char x, x2, y;
   
