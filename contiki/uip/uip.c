@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.16 2004/09/17 20:48:39 adamdunkels Exp $
+ * $Id: uip.c,v 1.17 2004/09/17 20:59:23 adamdunkels Exp $
  *
  */
 
@@ -86,6 +86,18 @@ const u16_t uip_netmask[2] =
 u16_t uip_hostaddr[2];       
 u16_t uip_draddr[2], uip_netmask[2];
 #endif /* UIP_FIXEDADDR */
+
+#if UIP_FIXEDETHADDR
+const struct uip_eth_addr uip_ethaddr = {{UIP_ETHADDR0,
+					  UIP_ETHADDR1,
+					  UIP_ETHADDR2,
+					  UIP_ETHADDR3,
+					  UIP_ETHADDR4,
+					  UIP_ETHADDR5}};
+#else
+struct uip_eth_addr uip_ethaddr = {{0,0,0,0,0,0}};
+#endif
+
 
 u8_t uip_buf[UIP_BUFSIZE+2];   /* The packet buffer that contains
 				incoming packets. */

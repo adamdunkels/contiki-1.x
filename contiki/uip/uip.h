@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.12 2004/07/04 17:00:50 adamdunkels Exp $
+ * $Id: uip.h,v 1.13 2004/09/17 20:59:23 adamdunkels Exp $
  *
  */
 
@@ -1311,6 +1311,13 @@ extern u16_t uip_hostaddr[2], uip_netmask[2], uip_draddr[2];
 #endif /* UIP_FIXEDADDR */
 
 
+
+/**
+ * Representation of a 48-bit Ethernet address.
+ */
+struct uip_eth_addr {
+  u8_t addr[6];
+};
 
 #endif /* __UIP_H__ */
 

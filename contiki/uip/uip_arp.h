@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.h,v 1.9 2004/06/06 06:17:16 adamdunkels Exp $
+ * $Id: uip_arp.h,v 1.10 2004/09/17 20:59:23 adamdunkels Exp $
  *
  */
 
@@ -54,13 +54,6 @@
 
 #include "uip.h"
 
-
-/**
- * Representation of a 48-bit Ethernet address.
- */
-struct uip_eth_addr {
-  u8_t addr[6];
-};
 
 extern struct uip_eth_addr uip_ethaddr;
 

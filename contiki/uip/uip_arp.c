@@ -54,7 +54,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.12 2004/06/06 06:16:41 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.13 2004/09/17 20:59:23 adamdunkels Exp $
  *
  */
 
@@ -101,17 +101,6 @@ struct arp_entry {
   struct uip_eth_addr ethaddr;
   u8_t time;
 };
-
-#if UIP_FIXEDETHADDR
-const struct uip_eth_addr uip_ethaddr = {{UIP_ETHADDR0,
-					  UIP_ETHADDR1,
-					  UIP_ETHADDR2,
-					  UIP_ETHADDR3,
-					  UIP_ETHADDR4,
-					  UIP_ETHADDR5}};
-#else
-struct uip_eth_addr uip_ethaddr = {{0,0,0,0,0,0}};
-#endif
 
 static struct arp_entry arp_table[UIP_ARPTAB_SIZE];
 static u16_t ipaddr[2];
