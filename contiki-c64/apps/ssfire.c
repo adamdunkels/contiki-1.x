@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire.c,v 1.3 2003/08/09 23:28:49 adamdunkels Exp $
+ * $Id: ssfire.c,v 1.4 2003/08/24 22:31:23 adamdunkels Exp $
  *
  */
 
@@ -56,9 +56,6 @@ static ek_id_t id;
 
 static unsigned char flames[8*17];
 
-static unsigned char *flameptr, *colorptr1, *colorptr2;
-static unsigned char x, y;
-
 
 static const unsigned char flamecolors[16] =
   {COLOR_BLACK,  COLOR_BLACK, COLOR_BLACK,
@@ -71,8 +68,10 @@ static const unsigned char flamecolors[16] =
 static void fire_init(void);
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(ssfire_init)
+LOADER_INIT_FUNC(ssfire_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     dispatcher_listen(ctk_signal_screensaver_stop);
@@ -95,6 +94,15 @@ fire_init(void)
 {
   unsigned char *ptr, *cptr;
   
+  /* Fill screen with inverted spaces. */
+  cptr = COLOR_RAM;
+  for(ptr = (unsigned char *)0x0400;
+      ptr != (unsigned char *)0x07e8;
+      ++ptr) {
+    *ptr = 0xa0;
+    *cptr++ = 0x00;
+  }
+
   SID.v3.freq = 0xffff;
   SID.v3.ctrl = 0x80;
   SID.amp = 0;  
@@ -106,14 +114,6 @@ fire_init(void)
   VIC.bgcolor0 = 0x00; /* $D021 */  
   CIA2.pra  = 0x03;  /* $DD00 */
 
-  /* Fill screen with inverted spaces. */
-  cptr = COLOR_RAM;
-  for(ptr = (unsigned char *)0x0400;
-      ptr != (unsigned char *)0x07e8;
-      ++ptr) {
-    *ptr = 0xa0;
-    *cptr++ = 0x00;
-  }
 }
 /*-----------------------------------------------------------------------------------*/
 static
@@ -129,9 +129,13 @@ DISPATCHER_SIGHANDLER(ssfire_sighandler, s, data)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+static unsigned char *flameptr, *colorptr1, *colorptr2;
+static unsigned char x, y;
+
 void
 ssfire_idle(void)
 {
+
   if(ctk_mode_get() == CTK_MODE_SCREENSAVER) {
   
     /* Calculate new flames. */
@@ -169,12 +173,11 @@ ssfire_idle(void)
     colorptr2 = colorptr1 + 0x20;
     for(y = 0; y < 15; ++y) {
       for(x = 0; x < 8; ++x) {
-	*colorptr1 = *colorptr2 = flamecolors[*flameptr++];
-	++colorptr1;
-	++colorptr2;
+	colorptr1[x] = colorptr2[x] = flamecolors[flameptr[x]];
       }
-      colorptr1 += 0x20;
-      colorptr2 += 0x20;
+      colorptr1 += 0x28;
+      colorptr2 += 0x28;
+      flameptr += 8;
     }
   
   }
