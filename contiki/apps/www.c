@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.3 2003/04/02 09:54:39 adamdunkels Exp $
+ * $Id: www.c,v 1.4 2003/04/08 07:20:11 adamdunkels Exp $
  *
  */
 
@@ -212,6 +212,7 @@ www_init(void)
     /* Attach as a listener to a number of signals ("Button activate",
        "Hyperlink activate" and "Hyperlink hover", and the resolver's
        signal. */
+    dispatcher_listen(ctk_signal_window_close);
     dispatcher_listen(ctk_signal_button_activate);
     dispatcher_listen(ctk_signal_hyperlink_activate);
     dispatcher_listen(ctk_signal_hyperlink_hover);
@@ -468,6 +469,9 @@ sighandler(ek_signal_t s, ek_data_t data)
     } else {
       show_statustext("Host not found.");
     }
+  } else if(s == ctk_signal_window_close) {
+    dispatcher_exit(&p);
+    id = 0;
   }
 }
 /*-----------------------------------------------------------------------------------*/
