@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.14 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: webclient.c,v 1.15 2003/11/27 15:47:11 adamdunkels Exp $
  *
  */
 
@@ -385,6 +385,9 @@ DISPATCHER_UIPCALL(webclient_appcall, state)
     return;
   }
 
+  if(uip_timedout()) {
+    webclient_timedout();
+  }
   
   if(state == NULL) {
     uip_abort();
@@ -395,17 +398,12 @@ DISPATCHER_UIPCALL(webclient_appcall, state)
     webclient_closed();
     uip_abort();
     return;
-  }    
-  
-  
+  }        
 
   if(uip_aborted()) {
     webclient_aborted();
   }
-  if(uip_timedout()) {
-    webclient_timedout();
-  }
-
+  
   
   if(uip_acked()) {
     s.timer = 0;
