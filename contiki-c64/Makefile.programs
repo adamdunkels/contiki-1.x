@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.32 2004/09/19 19:59:01 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.33 2004/12/24 15:16:31 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -36,7 +36,7 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      netconf.prg netconf.dsc \
      processes.prg processes.dsc \
      www.prg www.dsc \
-     simpletelnet.prg telnet.dsc \
+     telnet.prg telnet.dsc \
      memstat.prg memstat.dsc \
      webserver.prg webserver.dsc \
      wget.prg wget.dsc \
@@ -103,7 +103,7 @@ dhcp.prg: dhcp.o dhcpc.o lc-asm.o
 
 webserver.prg: $(WEBSERVER) #c64-fs-raw.o
 
-simpletelnet.prg: $(TELNET)
+telnet.prg: $(TELNET)
 
 tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o uip_arp.o
 
