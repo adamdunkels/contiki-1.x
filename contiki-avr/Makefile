@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.2 2003/08/12 21:15:55 adamdunkels Exp $
+# $Id: Makefile,v 1.3 2003/08/20 21:54:32 adamdunkels Exp $
 #
 
 all: contiki.srec
@@ -96,7 +96,7 @@ depend:
 	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
 
 contiki: contiki-main.o strncasecmp.o \
- ctk.o ek.o dispatcher.o \
+ ctk.o dispatcher.o \
  uip.o uip_arch.o uip_arp.o resolv.o uip-signal.o uip_main.o \
  rtl8019.o rtl8019dev.o delay.o debug.o rtl8019-drv.o \
  ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o \
