@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.3 2003/08/09 23:27:57 adamdunkels Exp $
+ * $Id: configedit.c,v 1.4 2003/08/09 23:40:17 adamdunkels Exp $
  *
  */
 
@@ -199,6 +199,12 @@ loadtheme(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
+loadscreensaver(char *str)
+{
+  return copystr(screensaver, str, sizeof(screensaver));
+}
+/*-----------------------------------------------------------------------------------*/
+static char *
 ipaddrconf(char *str)
 {
   return copystr(ipaddr, str, sizeof(ipaddr));
@@ -225,6 +231,7 @@ dnsconf(char *str)
 static struct ptentry initparsetab[] =
   {{'l', loaddriver},
    {'t', loadtheme},
+   {'s', loadscreensaver},
    {'i', ipaddrconf},
    {'n', netmaskconf},
    {'r', drconf},
