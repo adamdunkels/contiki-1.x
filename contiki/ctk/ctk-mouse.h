@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -32,47 +32,36 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h.example,v 1.2 2003/04/09 00:30:45 adamdunkels Exp $
+ * $Id: ctk-mouse.h,v 1.1 2003/04/09 00:30:46 adamdunkels Exp $
  *
  */
+#ifndef __CTK_MOUSE_H__
+#define __CTK_MOUSE_H__
 
-#ifndef __CTK_CONF_H__
-#define __CTK_CONF_H__
+#include "ctk-conf.h"
 
-/*
- * This file is used for setting various compile time settings for the
- * CTK GUI toolkit.
-*/
+#if CTK_CONF_MOUSE_SUPPORT
 
-/* Defines which key that is to be used for activating the menus */
-#define CTK_CONF_MENU_KEY             CH_F1
+void ctk_mouse_init(void);
 
-/* Defines which key that is to be used for switching the frontmost
-   window.  */
-#define CTK_CONF_WINDOWSWITCH_KEY     CH_F3
+unsigned short ctk_mouse_x(void);
+unsigned short ctk_mouse_y(void);
 
-/* Toggles mouse support (must have support functions in the
-architecture specific files to work). */
-#define CTK_CONF_MOUSE_SUPPORT        0
+unsigned char ctk_mouse_xtoc(unsigned short x);
+unsigned char ctk_mouse_ytoc(unsigned short y);
 
-/* Toggles support for desktop icons. */
-#define CTK_CONF_ICONS                1 /* 107 bytes */
+unsigned char ctk_mouse_button(void);
 
-/* Toggles support for movable windows. */
-#define CTK_CONF_WINDOWMOVE           1 /* 333 bytes */
+#else
 
-/* Toggles support for closable windows. */
-#define CTK_CONF_WINDOWCLOSE          1 /* 14 bytes */
+#define ctk_mouse_init()
+#define ctk_mouse_x() 0
+#define ctk_mouse_y() 0
+#define ctk_mouse_xtoc(x) 0
+#define ctk_mouse_ytoc(y) 0
 
-/* Toggles support for multiline text entry editing. */
-#define CTK_CONF_TEXTENTRY_MULTILINE  1 /* 118 bytes */
+#define ctk_mouse_button() 0
 
-/* Toggles support for menus. */
-#define CTK_CONF_MENUS                1 /* 1384 bytes */
+#endif /* CTK_CONF_MOUSE_SUPPORT */
 
-/* Defines the default width of a menu. */
-#define CTK_CONF_MENUWIDTH            16
-/* The maximum number of menu items in each menu. */
-#define CTK_CONF_MAXMENUITEMS         10
-
-#endif /* __CTK_CONF_H__ */
+#endif /* __CTK_MOUSE_H__ */

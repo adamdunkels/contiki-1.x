@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.6 2003/04/08 19:28:15 adamdunkels Exp $
+ * $Id: ctk.c,v 1.7 2003/04/09 00:30:46 adamdunkels Exp $
  *
  */
 
@@ -42,6 +42,7 @@
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-conf.h"
+#include "ctk-mouse.h"
 
 static unsigned char height, width;
 
@@ -82,12 +83,11 @@ static unsigned char iconx, icony;
 #define ICONY_DELTA  5
 #define ICONY_MAX    (height - 4)
 
-static void idle(void);
-static void sighandler(ek_signal_t s, ek_data_t data);
+static void ctk_idle(void);
+static void ctk_sighandler(ek_signal_t s, ek_data_t data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("CTK Contiki GUI", idle, sighandler, NULL)};
+  {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, ctk_sighandler, NULL)};
 static ek_id_t ctkid;
-
 
 ek_signal_t ctk_signal_keypress,
   ctk_signal_timer,
@@ -96,8 +96,12 @@ ek_signal_t ctk_signal_keypress,
   ctk_signal_hyperlink_activate,
   ctk_signal_hyperlink_hover,
   ctk_signal_menu_activate,
-  ctk_signal_window_close;
-		       
+  ctk_signal_window_close,
+  ctk_signal_pointer_move,
+  ctk_signal_pointer_down,
+  ctk_signal_pointer_up;
+
+unsigned short mouse_last_x, mouse_last_y;
 
 static unsigned short screensaver_timer;
 #define SCREENSAVER_TIMEOUT (5*60)
@@ -145,6 +149,8 @@ ctk_init(void)
   menus.menus = menus.desktopmenu = &desktopmenu;
 #endif /* CTK_CONF_MENUS */
 
+  ctk_mouse_init();
+  
   ctk_draw_init();
 
   height = ctk_draw_height();
@@ -161,6 +167,10 @@ ctk_init(void)
   ctk_signal_hyperlink_hover = dispatcher_sigalloc();
   ctk_signal_menu_activate = dispatcher_sigalloc();
   ctk_signal_window_close = dispatcher_sigalloc();
+
+  ctk_signal_pointer_move = dispatcher_sigalloc();
+  ctk_signal_pointer_down = dispatcher_sigalloc();
+  ctk_signal_pointer_up = dispatcher_sigalloc();
   
   dispatcher_listen(ctk_signal_timer);
   dispatcher_timer(ctk_signal_timer, NULL, CLK_TCK);
@@ -919,13 +929,13 @@ menus_input(ctk_arch_key_t c)
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
 static void
-idle(void)     
+ctk_idle(void)     
 {
   static ctk_arch_key_t c;
-  static unsigned char i;  
+  static unsigned char i, mxc, myc;  
   register struct ctk_window *window;
-  register struct ctk_widget *widget;
-
+  register struct ctk_widget *widget;  
+  
 #if CTK_CONF_MENUS
   if(menus.open != NULL) {
     maxnitems = menus.open->nitems;
@@ -943,7 +953,55 @@ idle(void)
       ctk_draw_init();
       ctk_redraw();
     }
-  } else if(mode == CTK_MODE_NORMAL) {  
+  } else if(mode == CTK_MODE_NORMAL) {
+
+    /* Check if the mouse pointer has moved, and if so we emit a
+       signal. */
+    if(ctk_mouse_x() != mouse_last_x ||
+       ctk_mouse_y() != mouse_last_y) {
+
+      window = windows;
+      
+      mouse_last_x = ctk_mouse_x();
+      mouse_last_y = ctk_mouse_y();
+      dispatcher_emit(ctk_signal_pointer_move, NULL, window->owner);
+
+      /* Find out which widget currently is under the mouse pointer
+	 and give it focus, unless it already has focus. */
+      mxc = ctk_mouse_xtoc(mouse_last_x);
+      myc = ctk_mouse_ytoc(mouse_last_y);
+
+ 	
+      /* Check if the mouse even is in the current window. */
+      if(mxc >= window->x &&
+	 mxc <= window->x + window->w &&
+	 myc >= window->y &&
+	 myc <= window->y + window->h) {
+	
+	mxc -= window->x;
+	myc -= window->y;
+	
+	redraw |= REDRAW_WIDGETS;
+	add_redrawwidget(window->focused);
+	window->focused = NULL;
+	
+	/* Now find the appropriate widget to assign focus to. */
+	for(widget = window->active; widget != NULL; widget = widget->next) {
+	  if(mxc >= widget->x &&
+	     mxc <= widget->x + widget->w &&
+	     myc - widget->y == 0 /* &&
+	     ((widget->type == CTK_WIDGET_BITMAP ||
+	       widget->type == CTK_WIDGET_TEXTENTRY ||
+	       widget->type == CTK_WIDGET_ICON) &&
+	       (myc <= widget->y + ((struct ctk_bitmap *)widget)->h))*/) {
+	    CTK_WIDGET_FOCUS(window, widget);
+	    add_redrawwidget(widget);
+	    break;
+	  }
+	}
+      }
+    }
+    
     while(ctk_arch_keyavail()) {
       
       screensaver_timer = 0;
@@ -1108,7 +1166,7 @@ idle(void)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-sighandler(ek_signal_t s, ek_data_t data)
+ctk_sighandler(ek_signal_t s, ek_data_t data)
 {
   if(s == ctk_signal_timer) {
     if(mode == CTK_MODE_NORMAL) {
@@ -1126,4 +1184,3 @@ sighandler(ek_signal_t s, ek_data_t data)
 }
 /*-----------------------------------------------------------------------------------*/
 
-/*-----------------------------------------------------------------------------------*/
