@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.9 2003/08/11 23:01:56 adamdunkels Exp $
+ * $Id: email.c,v 1.10 2003/08/12 21:08:51 adamdunkels Exp $
  *
  */
 
@@ -172,7 +172,6 @@ LOADER_INIT_FUNC(email_init)
     
     /* Create setup window. */
     ctk_window_new(&setupwindow, 28, 16, "E-mail setup");
-    ctk_window_move(&setupwindow, 5, 3);
     
     CTK_WIDGET_ADD(&setupwindow, &fromaddresslabel);
     CTK_WIDGET_ADD(&setupwindow, &fromaddresstextentry);
