@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.2 2003/08/12 21:12:37 adamdunkels Exp $
  *
  */
 
@@ -672,7 +672,7 @@ ctk_draw_dialog(struct ctk_window *dialog)
   draw_window_contents(dialog, CTK_FOCUS_DIALOG, 0, sizey,
 		       x1, x2, y1, y2);
 
-  update_area(dialog->x, dialog->y, dialog->w, dialog->h);
+  update_area(dialog->x, dialog->y, dialog->w + 4, dialog->h + 4);
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -844,7 +844,7 @@ DISPATCHER_UIPCALL(ctk_vncserver_appcall, state)
   DISPATCHER_UIPCALL_ARG(state);
 
   vs = (struct vnc_server_state *)(state);
-  
+
   if(uip_connected()) {
 
     /* Since we've just been connected, the state pointer should be
