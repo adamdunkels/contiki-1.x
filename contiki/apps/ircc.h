@@ -14,8 +14,8 @@ struct ircc_state {
   
   char *msg;
   char channel[32];
-  char outputbuf[80];
-  char inputbuf[120];
+  char outputbuf[200];
+  char inputbuf[400];
   char *nick;
   char *server;
 };
@@ -38,5 +38,7 @@ void ircc_text_output(struct ircc_state *s, char *text1, char *text2);
 
 void ircc_connected(struct ircc_state *s);
 void ircc_closed(struct ircc_state *s);
+
+void ircc_quit(struct ircc_state *s);
 
 #endif /* __IRCC_H__ */
