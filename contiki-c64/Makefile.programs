@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.7 2003/04/18 00:14:13 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.8 2003/04/24 17:12:54 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -45,25 +45,19 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      calc.prg calc.dsc \
      directory.prg directory.dsc \
      blueround.prg blueround.dsc \
-     default.prg default.dsc
+     enabler.prg enabler.dsc \
+     springlight.prg springlight.dsc \
+     default.prg default.dsc \
+     ssfire.sav
 
-include Makefile.common 
+SYS=c64
 
-CFLAGS:=$(CFLAGS) \
+include $(CONTIKICC65)/Makefile.common 
+
+CFLAGS:=$(CFLAGSCOMMON) \
         -DCTK_HIRES \
 	-DWITH_LOADER_ARCH \
-        -DWITH_UIP -DWITH_RS232 \
-	-DWITH_WWW -DWITH_TELNET 
-
-
-%.prg:  %.o contiki-labels.o
-	cl65 --module -t c64 -o $@ loader-arch-module.o $^
-
-%.dsc:  %-dsc.o 
-	cl65 --module -t c64 -o $@ loader-arch-dsc.o $^ 
-
-#about.dsc: about-dsc.o
-#	cl65 --module -t c64 -o $@ $^
+        -DWITH_UIP -DWITH_RS232 
 
 email.prg: $(EMAIL) 
 
@@ -71,6 +65,7 @@ www.prg: $(WWW)
 
 simpletelnet.prg: $(TELNET)
 
+VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
 vnc.prg: $(VNC)
 
 blueround.prg: themeloader.o ctk-hires-theme-blueround.o contiki-labels.o
@@ -78,3 +73,10 @@ blueround.prg: themeloader.o ctk-hires-theme-blueround.o contiki-labels.o
 
 default.prg: themeloader.o ctk-hires-theme-default.o contiki-labels.o
 	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+enabler.prg: themeloader.o ctk-hires-theme-enabler.o contiki-labels.o
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+springlight.prg: themeloader.o ctk-hires-theme-springlight.o contiki-labels.o
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
