@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/04/02 09:17:18 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2003/04/08 18:20:17 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -70,7 +70,7 @@ WEBSERVER=webserver.o http-strings.o
 TELNET=simpletelnet.o telnet.o
 
 contiki: contiki-main.o \
- programs.o contiki.o \
+ program-handler.o about.o netconf.o processes.o \
  ctk-gtksim.o \
  ctk.o ek.o dispatcher.o \
  uip.o uip_arch.o uip_arp.o tapdev.o resolv.o \

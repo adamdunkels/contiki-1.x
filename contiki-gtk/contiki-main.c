@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.1 2003/04/02 09:17:19 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.2 2003/04/08 18:20:19 adamdunkels Exp $
  *
  */
 
@@ -41,9 +41,7 @@
 #include "ctk-draw.h"
 #include "dispatcher.h"
 
-#include "programs.h"
-#include "email.h"
-#include "www.h"
+#include "program-handler.h"
 
 #include "uip_main.h"
 #include "uip.h"
@@ -69,13 +67,9 @@ main(int argc, char **argv)
   ek_init();
   ctk_init();
 
-  contiki_init();
-  
-  programs_init();
+  program_handler_init();
   
   gtk_timeout_add(20, idle_callback, NULL);
-
-
   
   ctk_redraw();
   gtk_main();
