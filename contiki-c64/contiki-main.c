@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.2 2003/04/08 19:11:19 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.3 2003/04/09 09:01:52 adamdunkels Exp $
  *
  */
 
@@ -49,7 +49,7 @@
 #include "cs8900a.h"
 #endif /* WITH_TFE */
 #include "resolv.h"
-
+#include "rs232dev.h"
 
 /*-----------------------------------------------------------------------------------*/
 int
