@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.4 2004/09/12 20:03:56 oliverschmidt Exp $
+ * $Id: main.c,v 1.5 2005/01/26 23:36:39 oliverschmidt Exp $
  *
  */
 
@@ -66,13 +66,12 @@ clock_time(void)
   return clock();
 }
 /*-----------------------------------------------------------------------------------*/
-void ppp_arch_putchar(void) {}
-void ppp_arch_getchar(void) {}
 void
 main(int argc)
 {
   u16_t addr[2];
 
+#ifdef WITH_SOCKETS
   if(argc != 2) {
     cprintf("\n"
             "usage: Contiki <addr>\n"
@@ -92,6 +91,7 @@ main(int argc)
             "    is to add a static entry into the ARP cache of communication peers.\n");
     exit(EXIT_FAILURE);
   }
+#endif /* WITH_SOCKETS */
 
   ek_init();
   tcpip_init(NULL);
@@ -104,14 +104,21 @@ main(int argc)
   program_handler_init();
 
 #if 1
-  uip_ipaddr(addr, 192,168,0,3);
+  uip_ipaddr(addr, 192,168,0,4);
   uip_sethostaddr(addr);
  
 /* uip_ipaddr(addr, 192,168,0,1); */
 /* resolv_conf(addr);             */
 #endif
 
+#ifdef WITH_SOCKETS
   rawsock_service_init(NULL);
+#endif /* WITH_SOCKETS */
+
+#ifdef WITH_PPP
+//  ppp_arch_init();
+//  ppp_service_init(NULL);
+#endif /* WITH_PPP */
 
   program_handler_add(&netconf_dsc,   "Network setup",  1);
   program_handler_add(&www_dsc,       "Web browser",    1);
@@ -120,6 +127,9 @@ main(int argc)
   program_handler_add(&calc_dsc,      "Calculator",     1);
   program_handler_add(&processes_dsc, "Processes",      1);
   program_handler_add(&about_dsc,     "About Contiki",  0);
+
+//  ppp_init();
+//  ppp_connect();
 
   while(1) {
     ek_run();
