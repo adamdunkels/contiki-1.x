@@ -1,6 +1,8 @@
 
+#include "cc.h"
 #include "uip.h"
 
+#include <string.h>
 #include <stdio.h>
 
  struct ip_hdr {
@@ -124,42 +126,129 @@ tcpflags(unsigned char flags, char *flagsstr)
   *flagsstr = 0;
 }
 /*---------------------------------------------------------------------------*/
+static char * CC_FASTCALL 
+n(u16_t num, char *ptr)
+{
+  u16_t d;
+  u8_t a, f;
+
+  if(num == 0) {
+    *ptr = '0';
+    return ptr + 1;    
+  } else {
+    f = 0;
+    for(d = 10000; d >= 1; d /= 10) {
+      a = (num / d) % 10;
+      if(f == 1 || a > 0) {
+	*ptr = a + '0';
+	++ptr;
+	f = 1;
+      }
+    }
+  }
+  return ptr;
+}
+/*---------------------------------------------------------------------------*/
+static char * CC_FASTCALL 
+d(char *ptr)
+{
+  *ptr = '.';
+  return ptr + 1;
+}
+/*---------------------------------------------------------------------------*/
+static char * CC_FASTCALL
+s(char *str, char *ptr)
+{
+  strcpy(ptr, str);
+  return ptr + strlen(str);
+}
+/*---------------------------------------------------------------------------*/
 int
 tcpdump_print(char *buf, u16_t buflen)
 {
   char flags[8];
   if(IPBUF->proto == UIP_PROTO_ICMP) {
     if(ICMPBUF->type == ICMP_ECHO) {
-      return sprintf(buf, "%d.%d.%d.%d %d.%d.%d.%d ping",
+      return s(" ping",
+	     n(IPBUF->destipaddr[3], d(
+	     n(IPBUF->destipaddr[2], d(	       
+	     n(IPBUF->destipaddr[1], d(	       
+	     n(IPBUF->destipaddr[0],
+             s(" ",
+	     n(IPBUF->srcipaddr[3], d(	       
+	     n(IPBUF->srcipaddr[2], d(	       
+	     n(IPBUF->srcipaddr[1], d(	       
+             n(IPBUF->srcipaddr[0],
+	     buf)))))))))))))))) - buf;
+	     
+      /*      return sprintf(buf, "%d.%d.%d.%d %d.%d.%d.%d ping",
 		     IPBUF->srcipaddr[0], IPBUF->srcipaddr[1],
 		     IPBUF->srcipaddr[2], IPBUF->srcipaddr[3],
 		     IPBUF->destipaddr[0], IPBUF->destipaddr[1],
-		     IPBUF->destipaddr[2], IPBUF->destipaddr[3]);
+		     IPBUF->destipaddr[2], IPBUF->destipaddr[3]);*/
     } else if(ICMPBUF->type == ICMP_ECHO_REPLY) {
-      return sprintf(buf, "%d.%d.%d.%d %d.%d.%d.%d pong",
+      return s(" pong",
+	     n(IPBUF->destipaddr[3], d(
+	     n(IPBUF->destipaddr[2], d(	       
+	     n(IPBUF->destipaddr[1], d(	       
+	     n(IPBUF->destipaddr[0],
+             s(" ",
+	     n(IPBUF->srcipaddr[3], d(	       
+	     n(IPBUF->srcipaddr[2], d(	       
+	     n(IPBUF->srcipaddr[1], d(	       
+             n(IPBUF->srcipaddr[0],
+	     buf)))))))))))))))) - buf;
+      /*      return sprintf(buf, "%d.%d.%d.%d %d.%d.%d.%d pong",
 		     IPBUF->srcipaddr[0], IPBUF->srcipaddr[1],
 		     IPBUF->srcipaddr[2], IPBUF->srcipaddr[3],
 		     IPBUF->destipaddr[0], IPBUF->destipaddr[1],
-		     IPBUF->destipaddr[2], IPBUF->destipaddr[3]);
+		     IPBUF->destipaddr[2], IPBUF->destipaddr[3]);*/
     }
   } else if(IPBUF->proto == UIP_PROTO_UDP) {
-    return sprintf(buf, "%d.%d.%d.%d.%d %d.%d.%d.%d.%d UDP",
+      return s(" UDP",
+	     n(htons(UDPBUF->destport), d(	       
+	     n(IPBUF->destipaddr[3], d(
+	     n(IPBUF->destipaddr[2], d(	       
+	     n(IPBUF->destipaddr[1], d(	       
+	     n(IPBUF->destipaddr[0],
+             s(" ",
+	     n(htons(UDPBUF->srcport), d(
+	     n(IPBUF->srcipaddr[3], d(	       
+	     n(IPBUF->srcipaddr[2], d(	       
+	     n(IPBUF->srcipaddr[1], d(	       
+             n(IPBUF->srcipaddr[0],
+	     buf)))))))))))))))))))) - buf;
+      /*    return sprintf(buf, "%d.%d.%d.%d.%d %d.%d.%d.%d.%d UDP",
 		   IPBUF->srcipaddr[0], IPBUF->srcipaddr[1],
 		   IPBUF->srcipaddr[2], IPBUF->srcipaddr[3],
 		   htons(UDPBUF->srcport),
 		   IPBUF->destipaddr[0], IPBUF->destipaddr[1],
 		   IPBUF->destipaddr[2], IPBUF->destipaddr[3],
-		   htons(UDPBUF->destport));
+		   htons(UDPBUF->destport));*/
   } else if(IPBUF->proto == UIP_PROTO_TCP) {
     tcpflags(TCPBUF->flags, flags);
-    return sprintf(buf, "%d.%d.%d.%d.%d %d.%d.%d.%d.%d %s",
+      return s(flags,
+             s(" ",
+	     n(htons(TCPBUF->destport), d(	       
+	     n(IPBUF->destipaddr[3], d(
+	     n(IPBUF->destipaddr[2], d(	       
+	     n(IPBUF->destipaddr[1], d(	       
+	     n(IPBUF->destipaddr[0],
+             s(" ",
+	     n(htons(TCPBUF->srcport), d(
+	     n(IPBUF->srcipaddr[3], d(	       
+	     n(IPBUF->srcipaddr[2], d(	       
+	     n(IPBUF->srcipaddr[1], d(	       
+             n(IPBUF->srcipaddr[0],
+	     buf))))))))))))))))))))) - buf;
+    /*    return sprintf(buf, "%d.%d.%d.%d.%d %d.%d.%d.%d.%d %s",
 		   IPBUF->srcipaddr[0], IPBUF->srcipaddr[1],
 		   IPBUF->srcipaddr[2], IPBUF->srcipaddr[3],
 		   htons(TCPBUF->srcport),
 		   IPBUF->destipaddr[0], IPBUF->destipaddr[1],
 		   IPBUF->destipaddr[2], IPBUF->destipaddr[3],
 		   htons(TCPBUF->destport),
-		   flags);  
+		   flags);  */
   }
 }
 /*---------------------------------------------------------------------------*/
