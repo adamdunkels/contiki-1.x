@@ -45,6 +45,13 @@ ek_service_state(struct ek_service *s)
   return ek_procstate(s->id);  
 }
 /*---------------------------------------------------------------------------*/
+void
+ek_service_reset(struct ek_service *s)
+{
+  log_message("ek-service: reseting ", s->name);
+  s->id = EK_ID_NONE;
+}
+/*---------------------------------------------------------------------------*/
 #if 0
 unsigned char
 ek_service_ref(struct ek_service *s)

@@ -16,6 +16,8 @@ ek_err_t ek_service_find(struct ek_service *s);
 
 void *ek_service_state(struct ek_service *s);
 
+void ek_service_reset(struct ek_service *s);
+
 
 /*ek_err_t ek_service_call(struct ek_service *s,
   ek_event_t ev, ek_data_t data);*/
