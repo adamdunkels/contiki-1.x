@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-drv.c,v 1.8 2004/07/18 13:20:38 oliverschmidt Exp $
+ * $Id: rrnet-drv.c,v 1.9 2004/08/09 20:57:39 adamdunkels Exp $
  *
  */
 
@@ -48,7 +48,7 @@ static const struct packet_service_state state =
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
-EK_PROCESS(proc, PACKET_SERVICE_NAME, EK_PRIO_NORMAL,
+EK_PROCESS(proc, PACKET_SERVICE_NAME ": RR-net", EK_PRIO_NORMAL,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
