@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.14 2004/06/06 06:14:19 adamdunkels Exp $
+ * $Id: uip.c,v 1.15 2004/09/12 07:17:37 adamdunkels Exp $
  *
  */
 
@@ -841,7 +841,6 @@ uip_process(u8_t flag)
     UIP_STAT(++uip_stat.tcp.drop);
     UIP_STAT(++uip_stat.tcp.chkerr);
     UIP_LOG("tcp: bad checksum.");
-    /*    printf("uip_len %d sum 0x%04x\n", uip_len, uip_tcpchksum());*/
     goto drop;
   }
   
@@ -1084,6 +1083,7 @@ uip_process(u8_t flag)
      retransmission timer. */
   if((BUF->flags & TCP_ACK) && uip_outstanding(uip_connr)) {
     uip_add32(uip_connr->snd_nxt, uip_connr->len);
+
     if(BUF->ackno[0] == uip_acc32[0] &&
        BUF->ackno[1] == uip_acc32[1] &&
        BUF->ackno[2] == uip_acc32[2] &&
@@ -1114,6 +1114,9 @@ uip_process(u8_t flag)
       uip_flags = UIP_ACKDATA;
       /* Reset the retransmission timer. */
       uip_connr->timer = uip_connr->rto;
+
+      /* Reset length of outstanding data. */
+      uip_connr->len = 0;
     }
     
   }
@@ -1349,7 +1352,7 @@ uip_process(u8_t flag)
 	  uip_slen = uip_connr->len;
 	}
       } else {
-	uip_connr->len = 0;
+	/*	uip_connr->len = 0;*/
       }
       uip_connr->nrtx = 0;
     apprexmit:
