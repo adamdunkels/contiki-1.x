@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.8 2003/08/22 19:22:58 adamdunkels Exp $
+ * $Id: webclient.c,v 1.9 2003/08/24 22:36:31 adamdunkels Exp $
  *
  */
 
@@ -73,7 +73,7 @@ struct webclient_state {
   u16_t getrequestptr;
   u16_t getrequestleft;
   
-  char httpheaderline[100];
+  char httpheaderline[200];
   u16_t httpheaderlineptr;
 
   char mimetype[32];
