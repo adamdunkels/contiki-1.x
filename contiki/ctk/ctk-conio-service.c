@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-service.c,v 1.7 2005/03/18 01:08:35 oliverschmidt Exp $
+ * $Id: ctk-conio-service.c,v 1.8 2005/03/29 20:30:32 oliverschmidt Exp $
  *
  */
 
@@ -74,8 +74,8 @@ cputsn(char *str, unsigned char len)
 static void
 s_ctk_draw_init(void)
 {
-  bgcolor(SCREENCOLOR);
-  bordercolor(BORDERCOLOR);
+  (void)bgcolor(SCREENCOLOR);
+  (void)bordercolor(BORDERCOLOR);
   screensize(&sizex, &sizey);
   ctk_draw_clear(0, sizey);
 }
@@ -95,19 +95,19 @@ draw_widget(struct ctk_widget *w,
 
   wfocus = 0;
   if(focus & CTK_FOCUS_WINDOW) {    
-    textcolor(WIDGETCOLOR_FWIN);
+    (void)textcolor(WIDGETCOLOR_FWIN);
     if(focus & CTK_FOCUS_WIDGET) {
-      textcolor(WIDGETCOLOR_FOCUS);
+      (void)textcolor(WIDGETCOLOR_FOCUS);
       wfocus = 1;
     }
   } else if(focus & CTK_FOCUS_DIALOG) {
-    textcolor(WIDGETCOLOR_DIALOG);
+    (void)textcolor(WIDGETCOLOR_DIALOG);
     if(focus & CTK_FOCUS_WIDGET) {
-      textcolor(WIDGETCOLOR_FOCUS);
+      (void)textcolor(WIDGETCOLOR_FOCUS);
       wfocus = 1;
     }
   } else {
-    textcolor(WIDGETCOLOR);
+    (void)textcolor(WIDGETCOLOR);
   }
   
   xpos = x + w->x;
@@ -154,7 +154,7 @@ draw_widget(struct ctk_widget *w,
 	revers(1);
       }
       gotoxy(xpos, ypos);
-      textcolor(WIDGETCOLOR_HLINK);
+      (void)textcolor(WIDGETCOLOR_HLINK);
       cputsn(w->widget.button.text, w->w);
       revers(0);
     }
@@ -283,9 +283,9 @@ s_ctk_draw_clear_window(struct ctk_window *window,
   unsigned char h;
 
   if(focus & CTK_FOCUS_WINDOW) {
-    textcolor(WINDOWCOLOR_FOCUS);
+    (void)textcolor(WINDOWCOLOR_FOCUS);
   } else {
-    textcolor(WINDOWCOLOR);
+    (void)textcolor(WINDOWCOLOR);
   }
     
   h = window->y + 2 + window->h;
@@ -329,7 +329,6 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
 #ifdef CTK_CONIO_CONF_UPDATE
   CTK_CONIO_CONF_UPDATE();
 #endif /* CTK_CONIO_CONF_UPDATE */
-
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -356,9 +355,9 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
 
     /* Draw window frame. */
     if(focus & CTK_FOCUS_WINDOW) {
-      textcolor(WINDOWCOLOR_FOCUS);
+      (void)textcolor(WINDOWCOLOR_FOCUS);
     } else {
-      textcolor(WINDOWCOLOR);
+      (void)textcolor(WINDOWCOLOR);
     }
 
     if(y >= clipy1) {
@@ -409,7 +408,7 @@ s_ctk_draw_dialog(struct ctk_window *dialog)
   unsigned char i;
   unsigned char x1, y1, x2, y2;
   
-  textcolor(DIALOGCOLOR);
+  (void)textcolor(DIALOGCOLOR);
 
   x = dialog->x;
   y = dialog->y + 1;
@@ -449,7 +448,7 @@ s_ctk_draw_clear(unsigned char y1, unsigned char y2)
 {
   unsigned char i;
  
-  textcolor(BACKGROUNDCOLOR);
+  (void)textcolor(BACKGROUNDCOLOR);
   for(i = y1; i < y2; ++i) {
     cclearxy(0, i, sizex);
   }
@@ -468,10 +467,10 @@ draw_menu(struct ctk_menu *m, unsigned char open)
 
     for(y = 0; y < m->nitems; ++y) {
       if(y == m->active) {
-	textcolor(ACTIVEMENUITEMCOLOR);
+	(void)textcolor(ACTIVEMENUITEMCOLOR);
 	revers(0);
       } else {
-	textcolor(MENUCOLOR);	  
+	(void)textcolor(MENUCOLOR);	  
 	revers(1);
       }
       gotoxy(x2, y + 1);
@@ -486,13 +485,13 @@ draw_menu(struct ctk_menu *m, unsigned char open)
     }
 
     gotoxy(x, 0);
-    textcolor(OPENMENUCOLOR);
+    (void)textcolor(OPENMENUCOLOR);
     revers(0);
   }
 
   cputs(m->title);
   cputc(' ');
-  textcolor(MENUCOLOR);
+  (void)textcolor(MENUCOLOR);
   revers(1);
 }
 /*-----------------------------------------------------------------------------------*/
@@ -502,7 +501,7 @@ s_ctk_draw_menus(struct ctk_menus *menus)
   struct ctk_menu *m;
 
   /* Draw menus */
-  textcolor(MENUCOLOR);
+  (void)textcolor(MENUCOLOR);
   gotoxy(0, 0);
   revers(1);
   cputc(' ');
