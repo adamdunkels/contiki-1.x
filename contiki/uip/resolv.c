@@ -58,7 +58,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.9 2003/10/01 11:25:37 adamdunkels Exp $
+ * $Id: resolv.c,v 1.10 2003/11/27 15:53:48 adamdunkels Exp $
  *
  */
 
@@ -135,6 +135,11 @@ static struct uip_udp_conn *resolv_conn = NULL;
 
 ek_signal_t resolv_signal_found;
 
+static DISPATCHER_UIPCALL(udp_appcall, arg);
+static struct dispatcher_proc p =
+  {DISPATCHER_PROC("DNS resolver", NULL, NULL, udp_appcall)};
+static ek_id_t id = EK_ID_NONE;
+
 
 /*-----------------------------------------------------------------------------------*/
 /** \internal
@@ -176,7 +181,7 @@ check_entries(void)
   static u8_t n;
   register struct namemap *namemapptr;
   
-  for(i = 0; i < RESOLV_ENTRIES; ++i) {
+  for(i = 0; i < RESOLV_ENTRIES; ++i) {    
     namemapptr = &names[i];
     if(namemapptr->state == STATE_NEW ||
        namemapptr->state == STATE_ASKING) {
@@ -330,8 +335,8 @@ newdata(void)
  * The main UDP function.
  */
 /*-----------------------------------------------------------------------------------*/
-void
-udp_appcall(void)
+static void
+udp_appcall(void *arg)
 {
   if(uip_udp_conn->rport == HTONS(53)) {
     if(uip_poll()) {
@@ -374,9 +379,7 @@ resolv_query(char *name)
     nameptr = &names[i];
   }
 
-  /*  printf("Using entry %d\n", i);*/
-
-  strcpy(nameptr->name, name);
+  strncpy(nameptr->name, name, sizeof(nameptr->name));
   nameptr->state = STATE_NEW;
   nameptr->seqno = seqno;
   ++seqno;
@@ -448,23 +451,27 @@ resolv_conf(u16_t *dnsserver)
     uip_udp_remove(resolv_conn);
   }
   
-  resolv_conn = uip_udp_new(dnsserver, 53);
+  resolv_conn = dispatcher_udp_new(dnsserver, 53, NULL);
 }
 /*-----------------------------------------------------------------------------------*/
 /**
  * Initalize the resolver.
  */
 /*-----------------------------------------------------------------------------------*/
-void
-resolv_init(void)
+LOADER_INIT_FUNC(resolv_init, arg)
 {
-  static u8_t i;
+ static u8_t i;
+ arg_free(arg);
   
-  for(i = 0; i < RESOLV_ENTRIES; ++i) {
-    names[i].state = STATE_DONE;
+  if(id == EK_ID_NONE) {
+    id = dispatcher_start(&p);
+	
+    for(i = 0; i < RESOLV_ENTRIES; ++i) {
+      names[i].state = STATE_UNUSED;
+    }
+    
+    resolv_signal_found = dispatcher_sigalloc();    
   }
-
-  resolv_signal_found = dispatcher_sigalloc();
 }
 /*-----------------------------------------------------------------------------------*/
 /** \internal
