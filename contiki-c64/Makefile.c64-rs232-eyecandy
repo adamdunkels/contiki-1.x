@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-rs232-eyecandy,v 1.3 2003/04/09 00:31:13 adamdunkels Exp $
+# $Id: Makefile.c64-rs232-eyecandy,v 1.4 2003/04/09 19:25:13 adamdunkels Exp $
 #
 
 all: contiki contiki-labels.o
@@ -40,7 +40,7 @@ include Makefile.common
 CFLAGS:=$(CFLAGS) \
         -DCTK_EYECANDY \
         -DWITH_UIP -DWITH_RS232 -DWITH_LOADER_ARCH \
-	-DWITH_WWW -DWITH_TELNET 
+	-DWITH_WWW -DWITH_TELNET -DWITH_EMAIL
 
 contiki-labels.o: contiki-labels.s
 	ca65 -o contiki-labels.o contiki-labels.s
