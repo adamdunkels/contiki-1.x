@@ -28,11 +28,10 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.6 2003/10/14 11:23:04 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.7 2003/11/27 15:53:00 adamdunkels Exp $
  *
  */
 
-#include "program-handler.h"
 #include "loader.h"
 #include "uip.h"
 #include "uip_main.h"
@@ -67,7 +66,6 @@ static ek_id_t id;
 
 MEMB(linemem, TELNETD_CONF_LINELEN, TELNETD_CONF_NUMLINES);
 
-static u8_t i;
 
 struct telnetd_state {
   char *lines[TELNETD_CONF_NUMLINES];
@@ -181,6 +179,7 @@ LOADER_INIT_FUNC(telnetd_init, arg)
     id = dispatcher_start(&p);
     dispatcher_uiplisten(HTONS(23));
     memb_init(&linemem);
+    shell_init();
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -191,8 +190,8 @@ DISPATCHER_SIGHANDLER(sighandler, s, data)
 
   if(s == dispatcher_signal_quit) {
     telnetd_quit();
-#if TELNETD_CONF_GUI    
   } else {
+#if TELNETD_CONF_GUI    
     telnetd_gui_sighandler(s, data);
 #endif /* TELNETD_CONF_GUI */
   }
@@ -201,6 +200,8 @@ DISPATCHER_SIGHANDLER(sighandler, s, data)
 static void
 acked(void)     
 {
+  static unsigned int i;
+  
   while(s.numsent > 0) {
     dealloc_line(s.lines[0]);
     for(i = 1; i < TELNETD_CONF_NUMLINES; ++i) {
@@ -220,14 +221,14 @@ senddata(void)
   bufptr = uip_appdata;
   buflen = 0;
   for(s.numsent = 0; s.numsent < TELNETD_CONF_NUMLINES &&
-	s.lines[s.numsent] != NULL ; ++s.numsent) {
+	s.lines[s.numsent] != NULL ; ++s.numsent) {    
     lineptr = s.lines[s.numsent];
     linelen = strlen(lineptr);
     if(linelen > TELNETD_CONF_LINELEN) {
       linelen = TELNETD_CONF_LINELEN;
     }
     if(buflen + linelen < uip_mss()) {
-      strncpy(bufptr, lineptr, TELNETD_CONF_LINELEN);
+      memcpy(bufptr, lineptr, linelen);
       bufptr += linelen;
       buflen += linelen;
     } else {
@@ -240,6 +241,8 @@ senddata(void)
 static void
 closed(void)
 {
+  static unsigned int i;
+  
   for(i = 0; i < TELNETD_CONF_NUMLINES; ++i) {
     if(s.lines[i] != NULL) {
       dealloc_line(s.lines[i]);
@@ -357,6 +360,7 @@ newdata(void)
 /*-----------------------------------------------------------------------------------*/
 DISPATCHER_UIPCALL(telnetd_appcall, ts)
 {
+  static unsigned int i;
   if(uip_connected()) {
     dispatcher_markconn(uip_conn, &s);
     for(i = 0; i < TELNETD_CONF_NUMLINES; ++i) {
@@ -365,7 +369,7 @@ DISPATCHER_UIPCALL(telnetd_appcall, ts)
     s.bufptr = 0;
     s.state = STATE_NORMAL;
 
-    shell_init();
+    shell_start();
   }
 
   if(s.state == STATE_CLOSE) {
