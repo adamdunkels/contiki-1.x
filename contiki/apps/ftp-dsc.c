@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ftp-dsc.c,v 1.1 2004/08/09 20:09:27 adamdunkels Exp $
+ * $Id: ftp-dsc.c,v 1.2 2004/09/09 21:12:10 adamdunkels Exp $
  *
  */
 
@@ -68,5 +68,5 @@ static char ftpicon_textmap[9] = {
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon icon =
-  {CTK_ICON("FTP", ftpicon_bitmap, ftpicon_textmap)};
+  {CTK_ICON("FTP client", ftpicon_bitmap, ftpicon_textmap)};
 /*-----------------------------------------------------------------------------------*/
