@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.4 2003/08/05 13:55:13 adamdunkels Exp $
+ * $Id: directory.c,v 1.5 2003/08/13 22:49:23 adamdunkels Exp $
  *
  */
 
@@ -79,15 +79,16 @@ static struct ctk_button reloadbutton =
   {CTK_BUTTON(30, 20, 6, "Reload")};
 
 static DISPATCHER_SIGHANDLER(directory_sighandler, s, data);
+static void directory_idle(void);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Directory browser", NULL, directory_sighandler, NULL)};
+  {DISPATCHER_PROC("Directory browser", directory_idle,
+		   directory_sighandler, NULL)};
 static ek_id_t id;
 
 static unsigned char width, height;
 
-/*-----------------------------------------------------------------------------------*/
+static char loading = 0;
 static struct c64_fs_dir dir;
-static struct c64_fs_dirent dirent;
 /*-----------------------------------------------------------------------------------*/
 static void
 show_statustext(char *text)
@@ -96,7 +97,17 @@ show_statustext(char *text)
   CTK_WIDGET_REDRAW(&description);
 }
 /*-----------------------------------------------------------------------------------*/
-#define LFN 9
+static void
+startloading(void)
+{
+  if(c64_fs_opendir(&dir) != 0) {
+    show_statustext("Cannot open directory");
+  } else {
+    loading = 1;
+  }
+}    
+/*-----------------------------------------------------------------------------------*/
+#if 0
 static void
 loaddirectory(void)
 {
@@ -125,6 +136,7 @@ loaddirectory(void)
     show_statustext("Directory loaded");
   }
 }
+#endif /* 0 */
 /*-----------------------------------------------------------------------------------*/
 static void
 makewindow(unsigned char i)
@@ -182,8 +194,10 @@ LOADER_INIT_FUNC(directory_init)
     
     ctk_window_new(&window, width, height, "Directory");
 
-    loaddirectory();
+    /*    loaddirectory();*/
     makewindow(0);
+    show_statustext("Loading directory...");
+    startloading();
     
     dispatcher_listen(ctk_signal_widget_activate);
     dispatcher_listen(ctk_signal_widget_select);
@@ -217,7 +231,8 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
       for(i = 0; dscs[i] != NULL; ++i) {
 	LOADER_UNLOAD_DSC(dscs[i]);
       }     
-      loaddirectory();
+      /*      loaddirectory();*/
+      startloading();
       makewindow(0);
       ctk_window_open(&window);
     } else if(data == (ek_data_t)&morebutton) {
@@ -269,6 +284,41 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
   } else if(s == dispatcher_signal_quit) {
     ctk_window_close(&window);
     quit();
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+directory_idle(void)
+{
+  static struct c64_fs_dirent dirent;
+  static char message[40];
+    
+  if(loading != 0) {  
+    if(c64_fs_readdir(&dir, &dirent) == 0) {
+      if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
+	dscs[numfiles] = LOADER_LOAD_DSC(dirent.name);
+	if(dscs[numfiles] != NULL) {
+	  ++numfiles;
+	  if(numfiles == MAX_NUMFILES) {
+	    c64_fs_closedir(&dir);
+	    loading = 0;
+	    makewindow(0);
+	    ctk_window_redraw(&window);
+	    return;
+	  }
+	}
+	strcpy(message, "Loading \"");
+	strcpy(message + 9, dirent.name);
+	strcpy(message + 9 + strlen(dirent.name), "\"...");
+	show_statustext(message);
+      }
+    } else {
+      c64_fs_closedir(&dir);
+      loading = 0;
+      makewindow(0);
+      show_statustext("Directory loaded");
+      ctk_window_redraw(&window);
+    }
   }
 }
 /*-----------------------------------------------------------------------------------*/
