@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki operating system
  *
- * $Id: main.c,v 1.13 2004/09/12 07:26:58 adamdunkels Exp $
+ * $Id: main.c,v 1.14 2004/09/12 07:34:49 adamdunkels Exp $
  *
  */
 
@@ -135,11 +135,11 @@ main(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-/*void
+void
 reset(void)
 {
   asm("lda #$36");
   asm("sta $01");
   asm("jmp $fce2");
-}*/
+}
 
