@@ -4,7 +4,7 @@
 ; This must be the *first* file on the linker command line
 ;
 
-	.export		_exit, __Exit
+	.export		_exit
 	.export		__heaporg, __heapptr, __heapend
 	.export		__heapfirst, __heaplast
 	.import	   	initlib, donelib
@@ -64,23 +64,23 @@
 	bit	$C083
 	bit	$C083
 
-; Clear the BSS data
+; Clear the BSS data (in LC bank 2)
 
 	jsr	zerobss
 
 ; Setup the stack in LC bank 2
 
 	lda    	#$00
+	ldx	#$E0
 	sta	sp
-	lda	#$E0
-       	sta	sp+1
+       	stx	sp+1
 
-; Setup the heap end (aligned down to a page boundary)
+; Setup the heap end at HIMEM
 
-	lda	$73+1		; HIMEM
-	sec
-	sbc	#$04		; 1kB ProDOS8 I/O buffer
-	sta	__heapend+1
+	lda	$73
+	ldx	$73+1
+	sta	__heapend
+	stx	__heapend+1
 
 ; Call module constructors
 
@@ -90,7 +90,7 @@
 
 	jsr	callmain
 
-; Restore the original RESET vector. This is also the _exit entry
+; Avoid re-entrance of donelib. This is also the _exit entry
 
 _exit:	ldx	#$02
 :	lda	rvsave,x
@@ -104,9 +104,9 @@ _exit:	ldx	#$02
 
 ; ProDOS TechRefMan, chapter 5.2.1:
 ; "System programs should set the stack pointer to $FF at the warm-start
-;  entry point." This is also the __Exit entry
+;  entry point."
 
-__Exit:	ldx	#$FF
+	ldx	#$FF
 	txs			; Re-init stack pointer
 
 ; Back to DOS
