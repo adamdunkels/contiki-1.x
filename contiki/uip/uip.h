@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.2 2003/03/28 12:11:18 adamdunkels Exp $
+ * $Id: uip.h,v 1.3 2003/04/16 18:28:16 adamdunkels Exp $
  *
  */
 
@@ -76,6 +76,13 @@ void uip_init(void);
  */
 #define uip_sethostaddr(addr) do { uip_hostaddr[0] = addr[0]; \
                               uip_hostaddr[1] = addr[1]; } while(0)
+
+/* uip_gethostaddr(&addr):
+ *
+ * Obtains the IP address.
+ */
+#define uip_gethostaddr(addr) do { addr[0] = uip_hostaddr[0]; \
+                              addr[1] = uip_hostaddr[1]; } while(0)
 
 #if UIP_UDP
 /* uip_udp_periodic(conn):

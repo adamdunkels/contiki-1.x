@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.h,v 1.1 2003/03/19 14:16:07 adamdunkels Exp $
+ * $Id: uip_arp.h,v 1.2 2003/04/16 18:28:16 adamdunkels Exp $
  *
  */
 
@@ -95,6 +95,12 @@ void uip_arp_timer(void);
                                  uip_arp_draddr[1] = addr[1]; } while(0)
 #define uip_setnetmask(addr) do { uip_arp_netmask[0] = addr[0]; \
                                   uip_arp_netmask[1] = addr[1]; } while(0)
+
+
+#define uip_getdraddr(addr) do { addr[0] = uip_arp_draddr[0]; \
+                                 addr[1] = uip_arp_draddr[1]; } while(0)
+#define uip_getnetmask(addr) do { addr[0] = uip_arp_netmask[0]; \
+                                  addr[1] = uip_arp_netmask[1]; } while(0)
 
 
 /* Internal variables that are set using the macros uip_setdraddr and

@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.2 2003/03/28 12:11:17 adamdunkels Exp $
+ * $Id: resolv.c,v 1.3 2003/04/16 18:28:16 adamdunkels Exp $
  *
  */
 
@@ -359,6 +359,15 @@ resolv_lookup(char *name)
   return NULL;
 }  
 /*-----------------------------------------------------------------------------------*/
+u16_t *
+resolv_getserver(void)
+{
+  if(resolv_conn == NULL) {
+    return NULL;
+  }
+  return resolv_conn->ripaddr;
+}
+/*-----------------------------------------------------------------------------------*/
 void
 resolv_conf(u16_t *dnsserver)
 {
@@ -387,3 +396,4 @@ resolv_found(char *name, u16_t *ipaddr)
 {
   dispatcher_emit(resolv_signal_found, name, DISPATCHER_BROADCAST);
 }
+/*-----------------------------------------------------------------------------------*/
