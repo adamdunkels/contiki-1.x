@@ -30,56 +30,21 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/04/08 18:08:24 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2003/09/07 18:11:56 adamdunkels Exp $
 #
 
+all: contiki loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
+     about.prg about.dsc processes.prg processes.dsc \
+     netconf.prg netconf.dsc memstat.prg memstat.dsc 
+
 CONTIKI=../contiki
+CONTIKICC65=../contiki-cc65
 SYS=c128
 
-CC=cc65
-AS=ca65
-CFLAGS=-I ctk -I uip -I conf \
-       -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
-       -I $(CONTIKI)/lib -I $(CONTIKI)/uip \
-       -t $(SYS) --add-source 
-OPT=-Or
+include $(CONTIKICC65)/Makefile.common
+include Makefile.depend
 
-%.o: %.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-%.o: ctk/%.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-%.o: uip/%.c
-	$(CC) $(CFLAGS)  -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-%.o: $(CONTIKI)/apps/%.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-%.o: $(CONTIKI)/ctk/%.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-%.o: $(CONTIKI)/ek/%.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-%.o: $(CONTIKI)/lib/%.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-%.o: $(CONTIKI)/uip/%.c
-	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
-	$(AS) -o $@ $(AFLAGS) $(*).s
-
-
-%.o: ctk/%.S
-	$(AS) -o $@ $(AFLAGS) $<
-
+CFLAGS=$(CFLAGSCOMMON) -DWITH_LOADER_ARCH
 
 UIP=uip.o uip_arch.o uip_main.o resolv.o
 
@@ -89,20 +54,8 @@ WEBSERVER=webserver.o http-strings.o
 TELNET=simpletelnet.o telnet.o
 
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
- ctk-conio.o ctk.o ek.o dispatcher.o \
- program-handler.o about.o processes.o netconf.o
-	cl65 -o contiki -t $(SYS) $^
+ ctk-conio.o ctk.o arg.o dispatcher.o \
+ program-handler.o loader-arch.o \
+ about-dsc.o netconf-dsc.o processes-dsc.o memstat-dsc.o
+	$(CL) $(CLFLAGS) -o contiki -t $(SYS) $^
 
-clean:
-	rm -f *.o *~ *core contiki *.s
-
-depend:
-	gcc -MM -Iapps -Ictk -Iuip -Iconf \
-	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
-	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
-	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
-
-include Makefile.depend
-
-codesize:
-	od65 --dump-segsize *.o | egrep '\.o|CODE'
