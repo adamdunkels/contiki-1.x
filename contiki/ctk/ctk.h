@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.1 2003/03/19 14:13:34 adamdunkels Exp $
+ * $Id: ctk.h,v 1.2 2003/03/28 12:10:39 adamdunkels Exp $
  *
  */
 
@@ -48,7 +48,8 @@
 #define CTK_WIDGET_BUTTON    3
 #define CTK_WIDGET_HYPERLINK 4
 #define CTK_WIDGET_TEXTENTRY 5
-#define CTK_WIDGET_ICON      6
+#define CTK_WIDGET_BITMAP    6
+#define CTK_WIDGET_ICON      7
 
 struct ctk_widget;
 
@@ -148,7 +149,6 @@ struct ctk_bitmap {
 
 
 
-/* The following ctk_widget_* structures are internal to CTK. */
 struct ctk_widget_button {
   char *text;
 };
@@ -196,6 +196,7 @@ struct ctk_widget {
     struct ctk_widget_hyperlink hyperlink;
     struct ctk_widget_textentry textentry;
     struct ctk_widget_icon icon;
+    struct ctk_widget_bitmap bitmap;
   } widget;
 };
 
@@ -203,7 +204,10 @@ struct ctk_widget {
 struct ctk_window {
   struct ctk_window *next, *prev;
   ek_id_t owner;
-  
+
+  char *title;
+  unsigned char titlelen;
+
 #if CTK_CONF_WINDOWCLOSE
   struct ctk_button closebutton;
 #else /* CTK_CONF_WINDOWCLOSE */
@@ -216,13 +220,13 @@ struct ctk_window {
   struct ctk_label titlebutton;
 #endif /* CTK_CONF_WINDOWMOVE */
 
+  unsigned char x, y;
+  unsigned char w, h;
+
+
   struct ctk_widget *inactive;
   struct ctk_widget *active;
   struct ctk_widget *focused;
-  unsigned char x, y;
-  unsigned char w, h;
-  char *title;
-  unsigned char titlelen;
 };
 
 struct ctk_menuitem {
@@ -234,9 +238,8 @@ struct ctk_menu {
   struct ctk_menu *next;
   char *title;
   unsigned char titlelen;
-  ek_id_t owner;
-  unsigned char active;
   unsigned char nitems;
+  unsigned char active;
   struct ctk_menuitem items[CTK_CONF_MAXMENUITEMS];
 };
 
@@ -305,6 +308,8 @@ void ctk_widget_redraw(struct ctk_widget *w);
 #define ctk_label_set_height(w, height) \
                            (w)->widget.label.h = (height)
 #define ctk_label_set_text(l, t) (l)->text = (t)
+
+#define ctk_button_set_text(b, t) (b)->text = (t)
 
 #define CTK_BUTTON_NEW(widg, xpos, ypos, width, buttontext) \
  (widg)->window = NULL; \
