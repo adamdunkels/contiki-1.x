@@ -30,25 +30,37 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/04/05 12:35:32 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2003/04/08 20:10:07 adamdunkels Exp $
 #
+
+all: contiki loader-arch-module.o contiki-labels.o \
+     about.prg processes.prg \
+     netconf.prg memstat.prg
 
 CONTIKI=../contiki
 SYS=vic20
 
 CC=cc65
 AS=ca65
-CFLAGS=-I ctk -I uip -I conf \
+CFLAGS=-I ctk -I loader -I uip -I conf \
        -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
        -I $(CONTIKI)/lib -I $(CONTIKI)/uip \
-       -t $(SYS) --add-source 
+       -t $(SYS) --add-source -DWITH_LOADER_ARCH
 OPT=-Or
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
+%.o: apps/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
 %.o: ctk/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: loader/%.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
@@ -80,6 +92,12 @@ OPT=-Or
 %.o: ctk/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
+%.o: loader/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
+%.prg:  %.o contiki-labels.o
+	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
 
 UIP=uip.o uip_arch.o uip_main.o resolv.o
 
@@ -88,13 +106,19 @@ EMAIL=email.o smtp.o smtp-strings.o
 WEBSERVER=webserver.o http-strings.o 
 TELNET=simpletelnet.o telnet.o
 
+contiki-labels.o: contiki-labels.s
+	ca65 -o contiki-labels.o contiki-labels.s
+contiki-labels.s: contiki
+	./make-labels
+
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
  ctk-conio.o ctk.o ek.o dispatcher.o \
- programs.o contiki.o
-	cl65 -C vic20.cfg -o contiki -t $(SYS) $^
+ program-handler.o loader-arch.o
+	cl65 -Ln contiki-labels -C vic20.cfg -o contiki -t $(SYS) $^
+
 
 clean:
-	rm -f *.o *~ *core contiki *.s
+	rm -f *.o *~ *core contiki *.s *.prg
 
 depend:
 	gcc -MM -Iapps -Ictk -Iuip -Iconf \
@@ -103,3 +127,6 @@ depend:
 	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
 
 include Makefile.depend
+
+codesize:
+	od65 --dump-segsize *.o | egrep '\.o|CODE'

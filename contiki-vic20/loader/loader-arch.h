@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -30,57 +30,20 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki desktop OS
  *
- * $Id: contiki-main.c,v 1.2 2003/04/08 20:10:09 adamdunkels Exp $
+ * $Id: loader-arch.h,v 1.1 2003/04/08 20:10:18 adamdunkels Exp $
  *
  */
+#ifndef __LOADER_ARCH_H__
+#define __LOADER_ARCH_H__
 
-#include "ctk.h"
-#include "ctk-draw.h"
-#include "dispatcher.h"
+unsigned char loader_arch_load(const char *name);
+void loader_arch_free(void *addr);
 
+extern void *loader_arch_loadaddr;
 
-#include "uip_main.h"
-#include "uip.h"
-#include "uip_arp.h"
-#if WITH_TFE
-#include "cs8900a.h"
-#endif /* WITH_TFE */
-#include "resolv.h"
+#define LOADER_LOAD(name) loader_arch_load(name)
+#define LOADER_UNLOAD() loader_arch_free(&loader_arch_loadaddr)
 
-#include "program-handler.h"
-
-/*-----------------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
-{
-
-#ifdef WITH_UIP
-  uip_init();
-  uip_main_init();
-  resolv_init();
-
-#ifdef WITH_RS232
-  rs232dev_init();
-#endif /* WITH_RS232 */
-  
-#endif /* WITH_UIP */
-  
-  ek_init();
-  dispatcher_init();
-  ctk_init();
-  
-  program_handler_init();
-  
-  ctk_redraw();
-  ek_run();
-
-  clrscr();
-  
-  return 0;
-
-  argv = argv;
-  argc = argc;
-}
-/*-----------------------------------------------------------------------------------*/
+#endif /* __LOADER_ARCH_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -30,57 +30,69 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki desktop OS
  *
- * $Id: contiki-main.c,v 1.2 2003/04/08 20:10:09 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.1 2003/04/08 20:10:17 adamdunkels Exp $
  *
  */
 
-#include "ctk.h"
-#include "ctk-draw.h"
-#include "dispatcher.h"
-
-
-#include "uip_main.h"
-#include "uip.h"
-#include "uip_arp.h"
-#if WITH_TFE
-#include "cs8900a.h"
-#endif /* WITH_TFE */
-#include "resolv.h"
-
-#include "program-handler.h"
+#include <modload.h>
+#include <fcntl.h>
+#include "loader-arch.h"
 
 /*-----------------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
+/* loader_arch_load(name)
+ *
+ * Loads a program from disk and executes it. Code originally written by
+ * Ullrich von Bassewitz.
+ */
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+loader_arch_load(const char *name)
 {
+  static struct mod_ctrl ctrl = {
+    read            /* Read from disk */
+  };
+  unsigned char res;
+  
+  /* Now open the file */
+  ctrl.callerdata = open(name, O_RDONLY);
+  if(ctrl.callerdata >= 0) {    
+    /* Load the module */
+    res = mod_load(&ctrl);
+                                                                    
+    /* Close the input file */
+    close(ctrl.callerdata);
+    
+    /* Check the return code */
+    if(res != MLOAD_OK) {
+      /* Wrong module, out of memory or whatever. Print an error
+       * message and return.
+       */
+      /* ### */
+      return res;
+    }
+    
+    /* We've successfully loaded the module. Call its main function. We
+     * could also evaluate the function result code if necessary.
+     */
+    ((void (*)(void))ctrl.module)();
+    
+  } else {
+    
+    /* Could not open the file, display an error and return */
+    /* ### */
+    return 6;
+  }
 
-#ifdef WITH_UIP
-  uip_init();
-  uip_main_init();
-  resolv_init();
+  return MLOAD_OK;
 
-#ifdef WITH_RS232
-  rs232dev_init();
-#endif /* WITH_RS232 */
-  
-#endif /* WITH_UIP */
-  
-  ek_init();
-  dispatcher_init();
-  ctk_init();
-  
-  program_handler_init();
-  
-  ctk_redraw();
-  ek_run();
-
-  clrscr();
-  
-  return 0;
-
-  argv = argv;
-  argc = argc;
 }
 /*-----------------------------------------------------------------------------------*/
+void
+loader_arch_free(void *addr)
+{
+  mod_free(addr);
+}
+/*-----------------------------------------------------------------------------------*/
+
