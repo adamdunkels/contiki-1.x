@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.13 2004/09/12 13:36:03 adamdunkels Exp $
+ * $Id: configedit.c,v 1.14 2004/09/14 07:35:23 adamdunkels Exp $
  *
  */
 
@@ -316,9 +316,14 @@ savescript(void)
   char line[40];
   /*  struct c64_fs_file f;*/
   int f;
-
-  if((f = cfs_open("config.cfg", CFS_WRITE)) == -1) {
+  
+  f = cfs_open("@:config.cfg", CFS_WRITE);
+  if(f == -1) {
+    log_message("Could not open config.cfg", "");
     return;
+  }
+  if(cfs[0] != 0) {
+    cfs_write(f, line, makeline(line, 'c', cfs));
   }
   if(theme[0] != 0) {
     cfs_write(f, line, makeline(line, 't', theme));
@@ -408,7 +413,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     CTK_WIDGET_ADD(&window, &savebutton);
     CTK_WIDGET_ADD(&window, &cancelbutton);    
     
-    CTK_WIDGET_FOCUS(&window, &themetextentry);  
+    CTK_WIDGET_FOCUS(&window, &cfstextentry);  
 
     /* Fill the configuration strings with values from the current
        configuration */
@@ -418,8 +423,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 
   } else if(ev == ctk_signal_button_activate) {   
     if(data == (ek_data_t)&savebutton) {
-      quit_services();
       savescript();
+      quit_services();
       ctk_window_close(&window);
       configedit_quit();
       program_handler_load("config.prg", NULL);
