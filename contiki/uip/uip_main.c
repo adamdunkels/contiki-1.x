@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_main.c,v 1.1 2003/03/19 14:16:07 adamdunkels Exp $
+ * $Id: uip_main.c,v 1.2 2003/04/05 11:47:20 adamdunkels Exp $
  *
  */
 
@@ -49,7 +49,7 @@
 #include "cs8900a.h"
 #endif /* WITH_TFE */
 
-#include <time.h>
+#include "ek.h"
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
@@ -104,7 +104,7 @@ uip_main_init(void)
   id = dispatcher_start(&p);
   
   arptimer = 0;
-  start = clock();
+  start = ek_clock();
   
 }
 /*-----------------------------------------------------------------------------------*/
@@ -152,7 +152,7 @@ idle(void)
 
   /* Check the clock so see if we should call the periodic uIP
      processing. */
-  current = clock();
+  current = ek_clock();
 
   if((current - start) >= CLK_TCK/2) {
     timer();
