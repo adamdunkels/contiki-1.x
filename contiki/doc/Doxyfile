@@ -372,11 +372,12 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ../ek/dispatcher.c \
+INPUT                  = ../ek/ek.c \
                          ../ek/arg.c \
-                         ../ek/dispatcher.h \
+                         ../ek/ek.h \
                          ../ek/dsc.h \
                          ../ek/loader.h \
+                         ../ek/pt.h \
                          ../apps/program-handler.c \
                          ../ctk/ctk.h \
                          ../ctk/ctk.c \
@@ -392,16 +393,14 @@ INPUT                  = ../ek/dispatcher.c \
                          ../uip/uiplib.c \
                          ../uip/resolv.h \
                          ../uip/resolv.c \
-                         ../uip/uip-signal.h \
                          ../lib/cc.h \
                          ../lib/petsciiconv.h \
                          ../lib/ctk-textedit.h \
                          ../lib/ctk-textedit.c \
                          ../lib/memb.h \
                          ../lib/memb.c \
-                         ../lib/mt.h \
-                         ../lib/mt.c \
-                         ../lib/mtp.h \
+                         ../ek/mt.h \
+                         ../ek/mt.c \
                          ../conf/uip-conf.h.example \
                          ../conf/www-conf.h.example \
                          contiki-mainpage.txt
