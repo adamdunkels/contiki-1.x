@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.2 2003/08/04 00:52:42 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.3 2003/08/05 14:04:24 adamdunkels Exp $
  *
  */
 
@@ -61,23 +61,10 @@ static unsigned char filebuftrack = 0, filebufsect = 0;
 static struct c64_fs_dirent lastdirent;
 
 /*-----------------------------------------------------------------------------------*/
-static void
-readfilebuf(unsigned char track, unsigned char sect)
-{
-  if(filebuftrack == track &&
-     filebufsect == sect) {
-    /* Buffer already contains requested block, return. */
-    return;
-  }
-  c64_dio_read_block(track, sect, filebuf);
-  filebuftrack = track;
-  filebufsect = sect;
-}
-/*-----------------------------------------------------------------------------------*/
 static struct c64_fs_dir opendir;
 static struct c64_fs_dirent opendirent;
 int
-c64_fs_open(const char *name, struct c64_fs_file *f)
+c64_fs_open(const char *name, register struct c64_fs_file *f)
 {
   /* First check if we already have the file cached. If so, we don't
      need to do an expensive directory lookup. */
@@ -103,33 +90,40 @@ c64_fs_open(const char *name, struct c64_fs_file *f)
   return -1;
 }
 /*-----------------------------------------------------------------------------------*/
-static unsigned char
-readbyte(struct c64_fs_file *f, char *buf)
-{
-  readfilebuf(f->track, f->sect);
-  *buf = filebuf[f->ptr];
-
-  ++f->ptr;
-  if(filebuf[0] == 0) {
-    if(f->ptr == filebuf[1]) {
-      return 0;
-    }
-  } else if(f->ptr == 0) {
-    f->track = filebuf[0];
-    f->sect = filebuf[1];
-    f->ptr = 2;
-  }
-  return 1;
-}
-/*-----------------------------------------------------------------------------------*/
 int __fastcall__
-c64_fs_read(struct c64_fs_file *f, char *buf, int len)
+c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
 {
   int i;
-  for(i = 0;i < len; ++i) {
-    if(readbyte(f, buf) == 0) {
-      break;
+
+  /* Check if current block is already in buffer, and if not read it
+     from disk. */
+  if(filebuftrack != f->track ||
+     filebufsect != f->sect) {
+    filebuftrack = f->track;
+    filebufsect = f->sect;
+    c64_dio_read_block(filebuftrack, filebufsect, filebuf);
+  }
+
+  for(i = 0; i < len; ++i) {
+    *buf = filebuf[f->ptr];
+    
+    ++f->ptr;
+    if(filebuf[0] == 0) {
+      if(f->ptr == filebuf[1]) {
+	/* End of file reached, we return the amount of bytes read so
+	   far. */
+	return i;
+      }
+    } else if(f->ptr == 0) {
+
+      /* Read new block into buffer and set buffer state
+	 accordingly. */
+      filebuftrack = f->track = filebuf[0];
+      filebufsect = f->sect = filebuf[1];
+      f->ptr = 2;
+      c64_dio_read_block(filebuftrack, filebufsect, filebuf);
     }
+    
     ++buf;
   }
   return i;
@@ -155,7 +149,7 @@ readdirbuf(unsigned char track, unsigned char sect)
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-c64_fs_opendir(struct c64_fs_dir *d)
+c64_fs_opendir(register struct c64_fs_dir *d)
 {
   d->track = 18;
   d->sect = 1;
@@ -165,8 +159,8 @@ c64_fs_opendir(struct c64_fs_dir *d)
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-c64_fs_readdir(struct c64_fs_dir *d,
-	       struct c64_fs_dirent *f)
+c64_fs_readdir(register struct c64_fs_dir *d,
+	       register struct c64_fs_dirent *f)
 {
   struct directory_entry *de;
   int i;
