@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.12 2003/04/11 20:22:03 adamdunkels Exp $
+ * $Id: ctk.c,v 1.13 2003/04/15 21:23:33 adamdunkels Exp $
  *
  */
 
@@ -1262,7 +1262,8 @@ ctk_idle(void)
 	  }
 	  break;
 	default:
-	  if(widget->type == CTK_WIDGET_TEXTENTRY) {
+	  if(widget != NULL &&
+	     widget->type == CTK_WIDGET_TEXTENTRY) {
 	    widget->widget.textentry.state = CTK_TEXTENTRY_EDIT;
 	    textentry_input(c, (struct ctk_textentry *)widget);
 	    add_redrawwidget(widget);
