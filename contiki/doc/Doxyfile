@@ -386,6 +386,10 @@ INPUT                  = ../ek/dispatcher.c \
                          ../uip/uip.c \
                          ../uip/uip_arp.h \
                          ../uip/uip_arp.c \
+                         ../uip/uip-split.h \
+                         ../uip/uip-split.c \
+                         ../uip/uiplib.h \
+                         ../uip/uiplib.c \
                          ../uip/resolv.h \
                          ../uip/resolv.c \
                          ../uip/uip-signal.h \
