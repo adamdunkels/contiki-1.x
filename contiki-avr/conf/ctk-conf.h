@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.3 2004/06/27 12:40:40 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.4 2004/08/09 22:29:44 adamdunkels Exp $
  *
  */
 
@@ -45,7 +45,7 @@
 */
 
 /* Defines which key that is to be used for activating the menus */
-#define CTK_CONF_MENU_KEY             CH_HOME
+#define CTK_CONF_MENU_KEY             CH_F1
 
 /* Defines which key that is to be used for switching the frontmost
    window.  */
