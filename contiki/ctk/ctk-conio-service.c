@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-service.c,v 1.6 2005/03/15 15:51:17 oliverschmidt Exp $
+ * $Id: ctk-conio-service.c,v 1.7 2005/03/18 01:08:35 oliverschmidt Exp $
  *
  */
 
@@ -363,7 +363,7 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
 
     if(y >= clipy1) {
       cputcxy(x, y, CH_ULCORNER);
-      gotoxy(wherex() + window->titlelen + 2, wherey());
+      gotoxy(wherex() + window->titlelen + CTK_CONF_WINDOWMOVE * 2, wherey());
       chline(window->w - (wherex() - x) - 2);
       cputcxy(x2, y, CH_URCORNER);
     }

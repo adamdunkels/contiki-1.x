@@ -722,7 +722,7 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
 
     if(y >= clipy1) {
       cputcxy(x, y, CH_ULCORNER);
-      for(i = wherex() + window->titlelen + 2; i < x2; ++i) {
+      for(i = wherex() + window->titlelen + CTK_CONF_WINDOWMOVE * 2; i < x2; ++i) {
 	cputcxy(i, y, CH_TITLEBAR);
       }
       cputcxy(x2, y, CH_URCORNER);

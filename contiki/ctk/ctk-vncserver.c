@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.13 2005/03/15 16:07:35 oliverschmidt Exp $
+ * $Id: ctk-vncserver.c,v 1.14 2005/03/18 01:08:35 oliverschmidt Exp $
  *
  */
 
@@ -699,7 +699,7 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
 
     if(y >= clipy1) {
       cputcxy(x, y, CH_ULCORNER);
-      for(i = wherex() + window->titlelen + 2; i < x2; ++i) {
+      for(i = wherex() + window->titlelen + CTK_CONF_WINDOWMOVE * 2; i < x2; ++i) {
 	cputcxy(i, y, CH_TITLEBAR);
       }
       cputcxy(x2, y, CH_URCORNER);
