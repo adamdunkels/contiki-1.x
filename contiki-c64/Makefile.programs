@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.9 2003/04/25 08:46:00 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.10 2003/07/31 23:11:13 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -42,6 +42,8 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      email.prg \
      memstat.prg memstat.dsc \
      vnc.prg \
+     webserver.prg webserver.dsc \
+     wget.prg wget.dsc \
      calc.prg calc.dsc \
      directory.prg directory.dsc \
      blueround.prg blueround.dsc \
@@ -49,8 +51,10 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      springlight.prg springlight.dsc \
      default.prg default.dsc \
      ssfire.sav \
+     rrnet.drv rrnet.dsc \
      slip.drv slip.dsc \
-     tfe.drv tfe.dsc
+     tfe.drv tfe.dsc \
+     ssconfig.prg ssconfig.dsc
 
 SYS=c64
 
@@ -59,17 +63,23 @@ include $(CONTIKICC65)/Makefile.common
 CFLAGS:=$(CFLAGSCOMMON) \
         -DCTK_HIRES \
 	-DWITH_LOADER_ARCH \
-        -DWITH_UIP -DWITH_RS232 
+        -DWITH_UIP -DWITH_ETHERNET
 
 email.prg: $(EMAIL) 
 
 www.prg: $(WWW)
 
+webserver.prg: $(WEBSERVER)
+
 simpletelnet.prg: $(TELNET)
 
-tfe.drv: tfe-drv.o uip_arp.o cs8900a.o
+tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o
+
+rrnet.drv: rrnet-drv.o cs8900a.o rrnet-drv-asm.o
 
 slip.drv: slip-drv.o rs232dev.o
+
+wget.prg: wget.o webclient.o http-strings.o http-user-agent-string.o
 
 VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
 vnc.prg: $(VNC)
