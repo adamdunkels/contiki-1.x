@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.6 2003/08/15 18:44:46 adamdunkels Exp $
+ * $Id: directory.c,v 1.7 2003/08/20 19:52:22 adamdunkels Exp $
  *
  */
 
@@ -63,11 +63,11 @@ static struct ctk_label description =
 
 static char autoexit = 1;
 static struct ctk_button autoexitbutton =
-  {CTK_BUTTON(0, 20, 9, "Auto-exit")};
+  {CTK_BUTTON(WIDTH/2 - 9, 20, 9, "Auto-exit")};
 static char autoexiton[] = "is On ";
 static char autoexitoff[] = "is Off";
 static struct ctk_label autoexitlabel =
-  {CTK_LABEL(12, 20, 6, 1, autoexiton)};
+  {CTK_LABEL(WIDTH/2 - 9 + 12, 20, 6, 1, autoexiton)};
 
 static struct ctk_button morebutton =
   {CTK_BUTTON(0, 20, 4, "More")};
@@ -119,7 +119,8 @@ loaddirectory(void)
     show_statustext("Cannot open directory");
   } else {
     i = 0;
-    while(c64_fs_readdir(&dir, &dirent) == 0) {
+    do {
+      c64_fs_readdir_dirent(&dir, &dirent);
       if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
 	dscs[i] = LOADER_LOAD_DSC(dirent.name);
 	if(dscs[i] != NULL) {
@@ -130,7 +131,7 @@ loaddirectory(void)
 	}
 
       }
-    }
+    } while(c64_fs_readdir_next(&dir) == 0);
     c64_fs_closedir(&dir);
 
     numfiles = i;
@@ -296,26 +297,26 @@ directory_idle(void)
   static struct c64_fs_dirent dirent;
   static char message[40];
     
-  if(loading != 0) {  
-    if(c64_fs_readdir(&dir, &dirent) == 0) {
-      if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
-	dscs[numfiles] = LOADER_LOAD_DSC(dirent.name);
-	if(dscs[numfiles] != NULL) {
-	  ++numfiles;
-	  if(numfiles == MAX_NUMFILES) {
-	    c64_fs_closedir(&dir);
-	    loading = 0;
-	    makewindow(0);
-	    ctk_window_redraw(&window);
-	    return;
-	  }
+  if(loading != 0) {
+    c64_fs_readdir_dirent(&dir, &dirent);
+    if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
+      dscs[numfiles] = LOADER_LOAD_DSC(dirent.name);
+      if(dscs[numfiles] != NULL) {
+	++numfiles;
+	if(numfiles == MAX_NUMFILES) {
+	  c64_fs_closedir(&dir);
+	  loading = 0;
+	  makewindow(0);
+	  ctk_window_redraw(&window);
+	  return;
 	}
-	strcpy(message, "Loading \"");
-	strcpy(message + 9, dirent.name);
-	strcpy(message + 9 + strlen(dirent.name), "\"...");
-	show_statustext(message);
       }
-    } else {
+      strcpy(message, "Loading \"");
+      strcpy(message + 9, dirent.name);
+      strcpy(message + 9 + strlen(dirent.name), "\"...");
+      show_statustext(message);
+    }
+    if(c64_fs_readdir_next(&dir) != 0) {
       c64_fs_closedir(&dir);
       loading = 0;
       makewindow(0);
