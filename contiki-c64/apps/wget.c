@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.6 2003/08/29 20:33:32 adamdunkels Exp $
+ * $Id: wget.c,v 1.7 2003/09/04 23:05:43 adamdunkels Exp $
  *
  */
 
@@ -146,7 +146,7 @@ LOADER_INIT_FUNC(wget_init, arg)
     CTK_WIDGET_ADD(&window, &savefilenamelabel);
     CTK_WIDGET_ADD(&window, &savefilenametextentry);
 
-    CTK_WIDGET_ADD(&window, &filebutton);
+    /*    CTK_WIDGET_ADD(&window, &filebutton);*/
 
     CTK_WIDGET_ADD(&window, &d64button);
 
