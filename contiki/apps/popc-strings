@@ -1,0 +1,5 @@
+popc_strings_user "USER "
+popc_strings_pass "PASS "
+popc_strings_retr "RETR "
+popc_strings_stat "STAT\r\n"
+popc_strings_crnl "\r\n"
