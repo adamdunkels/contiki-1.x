@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: pt-sem.h,v 1.3 2004/09/13 21:47:46 adamdunkels Exp $
+ * $Id: pt-sem.h,v 1.4 2005/02/28 09:02:41 adamdunkels Exp $
  */
 
 /**
@@ -151,7 +151,7 @@ PT_THREAD(driver_thread(struct pt *pt))
    
 /**
  * \file
- * Couting semaphores implemented on protothreads
+ * Counting semaphores implemented on protothreads
  * \author
  * Adam Dunkels <adam@sics.se>
  *
