@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.26 2005/01/21 14:25:27 oliverschmidt Exp $
+ * $Id: www.c,v 1.27 2005/01/30 20:22:17 oliverschmidt Exp $
  *
  */
 
@@ -766,26 +766,24 @@ add_pagewidget(char *text, unsigned char len, unsigned char type,
 static void
 centerline(char *wptr)
 {
-  static char tmpcenterline[WWW_CONF_WEBPAGE_WIDTH];
   unsigned char spaces, i;
   char *cptr;
   register struct ctk_widget *linksptr;
   
-  cptr = wptr + WWW_CONF_WEBPAGE_WIDTH - 1;
+  cptr = wptr + WWW_CONF_WEBPAGE_WIDTH;
   for(spaces = 0; spaces < WWW_CONF_WEBPAGE_WIDTH; ++spaces) {
-    if(*cptr-- != 0) {
+    if(*--cptr != 0) {
       break;
     }
   }
   
-  spaces = spaces / 2;
+  spaces /= 2;
 
-  memcpy(tmpcenterline,
-	 wptr,
-	 WWW_CONF_WEBPAGE_WIDTH);
-  memcpy(wptr + spaces,
-	 tmpcenterline,
-	 WWW_CONF_WEBPAGE_WIDTH - spaces);
+  while(cptr >= wptr) {
+    *(cptr + spaces) = *cptr;
+    --cptr;
+  }
+
   memset(wptr, ' ', spaces);
   
   linksptr = pagewidgets;
