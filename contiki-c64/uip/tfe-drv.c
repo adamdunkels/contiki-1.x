@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.6 2003/08/24 22:35:23 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.7 2003/08/29 20:35:13 adamdunkels Exp $
  *
  */
 
@@ -57,19 +57,22 @@ static struct dispatcher_proc p =
 		   tfe_drv_sighandler, NULL)};
 static ek_id_t id;
 
-
-
-
+/*-----------------------------------------------------------------------------------*/
+static void
+send(void)
+{
+  if(uip_len > 0) {
+    uip_arp_out();
+    cs8900a_send();
+  }
+}
 /*-----------------------------------------------------------------------------------*/
 static void
 timer(void)
 {
   for(i = 0; i < UIP_CONNS; ++i) {
     uip_periodic(i);
-    if(uip_len > 0) {
-      uip_arp_out();
-      cs8900a_send();
-    }
+    send();
   }
 
   for(i = 0; i < UIP_UDP_CONNS; i++) {
@@ -77,10 +80,7 @@ timer(void)
     /* If the above function invocation resulted in data that
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
-    if(uip_len > 0) {
-      uip_arp_out();
-      cs8900a_send();
-    }
+    send();
   }   
 }
 /*-----------------------------------------------------------------------------------*/
@@ -99,10 +99,7 @@ tfe_drv_idle(void)
       /* If the above function invocation resulted in data that
 	 should be sent out on the network, the global variable
 	 uip_len is set to a value > 0. */
-      if(uip_len > 0) {
-	uip_arp_out();
-	cs8900a_send();
-      }
+      send();
     } else if(BUF->type == HTONS(UIP_ETHTYPE_ARP)) {
       uip_arp_arpin();
       /* If the above function invocation resulted in data that
@@ -148,16 +145,10 @@ DISPATCHER_SIGHANDLER(tfe_drv_sighandler, s, data)
 
   if(s == uip_signal_poll) {
     uip_periodic_conn(data);
-    if(uip_len > 0) {
-      uip_arp_out();
-      cs8900a_send();
-    }
+    send();
   } else if(s == uip_signal_poll_udp) {
     uip_udp_periodic_conn(data);
-    if(uip_len > 0) {
-      uip_arp_out();
-      cs8900a_send();
-    }    
+    send();
   } else if(s == dispatcher_signal_quit ||
 	    s == uip_signal_uninstall) {
     dispatcher_exit(&p);
