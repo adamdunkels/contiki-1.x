@@ -31,6 +31,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
   case EK_EVENT_INIT:
+  case EK_EVENT_REPLACE:
     rawsock_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:
