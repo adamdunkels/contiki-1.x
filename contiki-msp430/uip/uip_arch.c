@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.1 2003/09/04 19:46:33 adamdunkels Exp $
+ * $Id: uip_arch.c,v 1.2 2003/10/01 08:06:41 adamdunkels Exp $
  *
  */
 
@@ -136,8 +136,8 @@ uip_add32(u8_t *op32, u8_t op8)
 /*-----------------------------------------------------------------------------------*/
 #endif /* UIP_BUFSIZE > 255 */
 
-static u16_t
-chksum(u16_t *sdata, u16_t len)
+u16_t
+uip_chksum(u16_t *sdata, u16_t len)
 {
   u8_t *dataptr;
   u16_t acc;
@@ -168,7 +168,7 @@ chksum(u16_t *sdata, u16_t len)
 u16_t
 uip_ipchksum(void)
 {
-  return chksum((u16_t *)&uip_buf[UIP_LLH_LEN], 20);
+  return uip_chksum((u16_t *)&uip_buf[UIP_LLH_LEN], 20);
 }
 /*-----------------------------------------------------------------------------------*/
 u16_t
@@ -178,12 +178,12 @@ uip_tcpchksum(void)
 
   
   /* Compute the checksum of the TCP header. */
-  hsum = chksum((u16_t *)&uip_buf[20 + UIP_LLH_LEN], 20);
+  hsum = uip_chksum((u16_t *)&uip_buf[20 + UIP_LLH_LEN], 20);
 
   /* Compute the checksum of the data in the TCP packet and add it to
      the TCP header checksum. */
-  sum = chksum((u16_t *)uip_appdata,
-	       (u16_t)(((((u16_t)(BUF->len[0]) << 8) + BUF->len[1]) - 40)));
+  sum = uip_chksum((u16_t *)uip_appdata,
+		   (u16_t)(((((u16_t)(BUF->len[0]) << 8) + BUF->len[1]) - 40)));
 
 
   if((sum += hsum) < hsum) {
