@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.13 2004/08/09 20:10:09 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.14 2004/09/18 20:18:59 adamdunkels Exp $
  *
  */
 
@@ -228,7 +228,11 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
+#ifdef UIP_CONF_UDP_CHECKSUMS
+#define UIP_UDP_CHECKSUMS UIP_CONF_UDP_CHECKSUMS
+#else
 #define UIP_UDP_CHECKSUMS 0
+#endif
 
 /**
  * The maximum amount of concurrent UDP connections.
