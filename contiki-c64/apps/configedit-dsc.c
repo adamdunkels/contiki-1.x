@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit-dsc.c,v 1.2 2003/08/06 23:14:02 adamdunkels Exp $
+ * $Id: configedit-dsc.c,v 1.3 2003/08/09 13:15:01 adamdunkels Exp $
  *
  */
 
@@ -65,5 +65,5 @@ static char tcpipconficon_textmap[9] = {
 
 
 static struct ctk_icon configedit_icon =
-  {CTK_ICON("Config editor", tcpipconficon_bitmap, tcpipconficon_textmap)};
+  {CTK_ICON("Configuration", tcpipconficon_bitmap, tcpipconficon_textmap)};
 /*-----------------------------------------------------------------------------------*/
