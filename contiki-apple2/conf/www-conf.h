@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h,v 1.3 2004/06/09 22:06:32 oliverschmidt Exp $
+ * $Id: www-conf.h,v 1.4 2004/07/12 21:35:40 oliverschmidt Exp $
  *
  */
 #ifndef __WWW_CONF_H__
@@ -41,7 +41,11 @@
 #define WWW_CONF_HOMEPAGE "http://www.apple2.org/"
 
 /* The size of the HTML viewing area. */
+#ifdef __APPLE2__
 #define WWW_CONF_WEBPAGE_WIDTH 36
+#else /* __APPLE2__ */
+#define WWW_CONF_WEBPAGE_WIDTH 76
+#endif /* __APPLE2__ */
 #define WWW_CONF_WEBPAGE_HEIGHT 16
 
 /* The size of the "Back" history. */

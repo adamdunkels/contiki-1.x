@@ -21,6 +21,12 @@ a2tools in -r b contiki.dsk CONTIKI.CONF contiki.con
 a2tools in -r b contiki.dsk CONTIKI.CODE contiki.cod
 a2tools in -r b contiki.dsk CONTIKI.DATA contiki.dat
 
+If you built the 'apple2enh' target replace the last two commands with the
+following ones to allow the Contiki wrapper program to work as expected:
+
+a2tools in -r b contiki.dsk CONTIKI.CODE.ENH contiki.cod
+a2tools in -r b contiki.dsk CONTIKI.DATA.ENH contiki.dat
+
 On the Apple ][ enter the following commands on the Applesoft prompt (']') to
 create the Contiki wrapper program.
 
@@ -38,6 +44,6 @@ next window: CONTROL-W
 As there is no DOS available while Contiki is running the configuration data
 is saved by running the Contiki wrapper program again immediately after exiting
 Contiki via Ctrl-Reset and rebooting. The wrapper program checks if the data is
-still available and prints "Saving Contiki Conf..." if it is.
+still available and prints "SAVING CONTIKI CONF..." if it is.
 
 eof

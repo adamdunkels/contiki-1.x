@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.6 2004/07/11 12:24:53 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.7 2004/07/12 21:36:00 oliverschmidt Exp $
  *
  */
 
@@ -46,8 +46,6 @@
 #ifndef NULL
 #define NULL (void *)0
 #endif /* NULL */
-
-static unsigned char sizex, sizey;
 
 unsigned char ctk_draw_windowborder_height = 1;
 unsigned char ctk_draw_windowborder_width = 1;
@@ -74,15 +72,7 @@ cputsn(char *str, unsigned char len)
 void
 ctk_draw_init(void)
 {
-  unsigned char i = 0;
-
-  while(i < 40) {
-    ((char *)0x0200)[i++] = 'V';
-    ((char *)0x0200)[i++] = 'W';
-  }
-
-  screensize(&sizex, &sizey);
-  ctk_draw_clear(0, sizey);
+  ctk_draw_clear(0, 24);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -228,8 +218,8 @@ draw_widget(struct ctk_widget *w,
 #endif /* CTK_CONF_ICON_TEXTMAPS */
   
       len = strlen(w->widget.icon.title);
-      if(xpos + len >= sizex) {
-	xpos = sizex - len;
+      if(xpos + len >= 80) {
+	xpos = 80 - len;
       }
 
       gotoxy(xpos, ypos);
@@ -365,7 +355,7 @@ ctk_draw_dialog(struct ctk_window *dialog)
     cclearxy(x1, i, dialog->w);
   }
 
-  draw_window_contents(dialog, CTK_FOCUS_DIALOG, 0, sizey,
+  draw_window_contents(dialog, CTK_FOCUS_DIALOG, 0, 24,
 		       x1, x2, y1, y2);
 }
 /*-----------------------------------------------------------------------------------*/
@@ -385,18 +375,10 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
 
   for(i = y1; i < y2; ++i) {
     gotoxy(0, i);
-    if(sizex == 80) {
-      *(char *)0xC055 = 0;
-      memset(*(char **)0x28, c1, 40);
-      *(char *)0xC054 = 0;
-      memset(*(char **)0x28, c2, 40);
-    } else {
-      if(c1 == 'V') {
-	memcpy(*(char **)0x28, (char *)0x0200, 40);
-      } else {
-	memset(*(char **)0x28, ' ' | 0x80, 40);
-      }
-    }
+    *(char *)0xC055 = 0;
+    memset(*(char **)0x28, c1, 40);
+    *(char *)0xC054 = 0;
+    memset(*(char **)0x28, c2, 40);
   }
 
 }
@@ -410,8 +392,8 @@ draw_menu(struct ctk_menu *m)
   cputs(m->title);
   cputc(' ');
   x2 = wherex();
-  if(x + CTK_CONF_MENUWIDTH > sizex) {
-    x = sizex - CTK_CONF_MENUWIDTH;
+  if(x + CTK_CONF_MENUWIDTH > 80) {
+    x = 80 - CTK_CONF_MENUWIDTH;
   }
     
   for(y = 0; y < m->nitems; ++y) {
@@ -450,10 +432,10 @@ ctk_draw_menus(struct ctk_menus *menus)
     }
   }
 
-  if(wherex() + strlen(menus->desktopmenu->title) + 1>= sizex) {
-    gotoxy(sizex - strlen(menus->desktopmenu->title) - 1, 0);
+  if(wherex() + strlen(menus->desktopmenu->title) + 1>= 80) {
+    gotoxy(80 - strlen(menus->desktopmenu->title) - 1, 0);
   } else {
-    cclear(sizex - wherex() -
+    cclear(80 - wherex() -
 	   strlen(menus->desktopmenu->title) - 1);
   }
   
@@ -471,13 +453,13 @@ ctk_draw_menus(struct ctk_menus *menus)
 unsigned char
 ctk_draw_height(void)
 {
-  return sizey;
+  return 24;
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
 ctk_draw_width(void)
 {
-  return sizex;
+  return 80;
 }
 /*-----------------------------------------------------------------------------------*/
 int
