@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.20 2003/08/29 20:36:23 adamdunkels Exp $
+ * $Id: www.c,v 1.21 2003/09/04 19:35:32 adamdunkels Exp $
  *
  */
 
@@ -306,6 +306,7 @@ open_url(void)
   char *file;
   register char *urlptr;
   unsigned short port;
+  static u16_t addr[2];
 
   /* Trim off any spaces in the end of the url. */
   urlptr = url + strlen(url) - 1;
@@ -358,10 +359,12 @@ open_url(void)
   
   /* Try to lookup the hostname. If it fails, we initiate a hostname
      lookup and print out an informative message on the statusbar. */
-  if(resolv_lookup(host) == NULL) {
-    resolv_query(host);
-    show_statustext("Resolving host...");
-    return;
+  if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {    
+    if(resolv_lookup(host) == NULL) {
+      resolv_query(host);
+      show_statustext("Resolving host...");
+      return;
+    }
   }
 
   /* The hostname we present in the hostname table, so we send out the
