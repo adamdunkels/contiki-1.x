@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.c,v 1.2 2004/07/31 14:55:17 oliverschmidt Exp $
+ * $Id: ctk-console.c,v 1.3 2004/08/12 22:09:34 oliverschmidt Exp $
  *
  */
 
@@ -42,15 +42,13 @@
 
 static HANDLE stdouthandle;
 
-static unsigned char       saved_foreground;
-static unsigned char       saved_background;
+static unsigned char       saved_color;
 static char                saved_title[1024];
 static DWORD               saved_consolemode;
 static CONSOLE_CURSOR_INFO saved_cursorinfo;
 
+static unsigned char color;
 static unsigned char reversed;
-static unsigned char foreground;
-static unsigned char background;
 
 /*-----------------------------------------------------------------------------------*/
 static BOOL WINAPI
@@ -73,8 +71,7 @@ console_init(void)
   stdouthandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
   GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
-  saved_foreground = consoleinfo.wAttributes % 0x10;
-  saved_background = consoleinfo.wAttributes / 0x10;
+  saved_color = consoleinfo.wAttributes;
 
   GetConsoleTitle(saved_title, sizeof(saved_title));
   SetConsoleTitle("Contiki");
@@ -91,9 +88,8 @@ console_init(void)
 void
 console_exit(void)
 {
+  textcolor(saved_color);
   revers(0);
-  textcolor(saved_foreground);
-  bgcolor(saved_background);
   clrscr();
   gotoxy(0, 0);
 
@@ -105,8 +101,9 @@ console_exit(void)
 static void
 setcolor(void)
 {
-  SetConsoleTextAttribute(stdouthandle, reversed? background + foreground * 0x10 
-					        : foreground + background * 0x10);
+  SetConsoleTextAttribute(stdouthandle, reversed? (color & 0x0F) << 4 |
+						  (color & 0xF0) >> 4
+					        : color);
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
@@ -219,15 +216,13 @@ cputcxy(unsigned char x, unsigned char y, char c)
 void
 textcolor(unsigned char c)
 {
-  foreground = c;
+  color = c;
   setcolor();
 }
 /*-----------------------------------------------------------------------------------*/
 void
 bgcolor(unsigned char c)
 {
-  background = c;
-  setcolor();
 }
 /*-----------------------------------------------------------------------------------*/
 void
