@@ -3,84 +3,64 @@
 open(OUTPUT, "> httpd-fsdata.c");
 
 chdir("httpd-fs");
-open(FILES, "find . -type f |");
 
+opendir(DIR, ".");
+@files =  grep { !/^\./ && !/(CVS|~)/ } readdir(DIR);
+closedir(DIR);
 
-while($file = <FILES>) {
+foreach $file (@files) {  
+   
+    if(-d $file && $file !~ /^\./) {
+	print "Processing directory $file\n";
+	opendir(DIR, $file);
+	@newfiles =  grep { !/^\./ && !/(CVS|~)/ } readdir(DIR);
+	closedir(DIR);
+	printf "Adding files @newfiles\n";
+	@files = (@files, map { $_ = "$file/$_" } @newfiles);
+	next;
+    }
+}
 
-    # Do not include files in CVS directories nor backup files.
-    if($file =~ /(CVS|~)/) {
-    	next;
-    }
-    
-    chop($file);
-    
-    open(HEADER, "> /tmp/header") || die $!;
-    if($file =~ /404.html/) {
-      print(HEADER "HTTP/1.0 404 File not found\r\n");
-    } else {
-      print(HEADER "HTTP/1.0 200 OK\r\n");
-    }
-    print(HEADER "Server: Contiki/1.1 (http://dunkels.com/adam/contiki/)\r\n");
-    if($file =~ /\.html$/ ||
-       $file =~ /\.shtml$/) {
-	print(HEADER "Content-type: text/html\r\n");
-    } elsif($file =~ /\.gif$/) {
-	print(HEADER "Content-type: image/gif\r\n");
-    } elsif($file =~ /\.png$/) {
-	print(HEADER "Content-type: image/png\r\n");
-    } elsif($file =~ /\.jpg$/) {
-	print(HEADER "Content-type: image/jpeg\r\n");
-    } elsif($file =~ /\.css$/) {
-	print(HEADER "Content-type: text/css\r\n");
-    } else {
-	print(HEADER "Content-type: text/plain\r\n");
-    }
-    print(HEADER "\r\n");
-    close(HEADER);
+foreach $file (@files) {  
+    if(-f $file) {
+	
+	print "Adding file $file\n";
+	
+	open(FILE, $file) || die "Could not open file $file\n";
 
-#    unless($file =~ /\.plain$/ || $file =~ /cgi/) {
-#	system("cat /tmp/header $file > /tmp/file");
-#    } else {
-	system("cp $file /tmp/file");
-#    }
-    
-    open(FILE, "/tmp/file");
-    unlink("/tmp/file");
-    unlink("/tmp/header");
-
-    $file =~ s/\.//;
-    $fvar = $file;
-    $fvar =~ s-/-_-g;
-    $fvar =~ s-\.-_-g;
-    print(OUTPUT "static const unsigned char data".$fvar."[] = {\n");
-    print(OUTPUT "\t/* $file */\n\t");
-    for($j = 0; $j < length($file); $j++) {
-	printf(OUTPUT "%#02x, ", unpack("C", substr($file, $j, 1)));
+	$file =~ s-^-/-;
+	$fvar = $file;
+	$fvar =~ s-/-_-g;
+	$fvar =~ s-\.-_-g;
+	print(OUTPUT "static const unsigned char data".$fvar."[] = {\n");
+	print(OUTPUT "\t/* $file */\n\t");
+	for($j = 0; $j < length($file); $j++) {
+	    printf(OUTPUT "%#02x, ", unpack("C", substr($file, $j, 1)));
+	}
+	printf(OUTPUT "0,\n");
+	
+	
+	$i = 0;        
+	while(read(FILE, $data, 1)) {
+	    if($i == 0) {
+		print(OUTPUT "\t");
+	    }
+	    printf(OUTPUT "%#02x, ", unpack("C", $data));
+	    $i++;
+	    if($i == 10) {
+		print(OUTPUT "\n");
+		$i = 0;
+	    }
+	}
+	print(OUTPUT "0};\n\n");
+	close(FILE);
+	push(@fvars, $fvar);
+	push(@pfiles, $file);
     }
-    printf(OUTPUT "0,\n");
-    
-    
-    $i = 0;        
-    while(read(FILE, $data, 1)) {
-        if($i == 0) {
-            print(OUTPUT "\t");
-        }
-        printf(OUTPUT "%#02x, ", unpack("C", $data));
-        $i++;
-        if($i == 10) {
-            print(OUTPUT "\n");
-            $i = 0;
-        }
-    }
-    print(OUTPUT "0};\n\n");
-    close(FILE);
-    push(@fvars, $fvar);
-    push(@files, $file);
 }
 
 for($i = 0; $i < @fvars; $i++) {
-    $file = $files[$i];
+    $file = $pfiles[$i];
     $fvar = $fvars[$i];
 
     if($i == 0) {
