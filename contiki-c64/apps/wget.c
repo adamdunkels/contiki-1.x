@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.11 2004/09/12 13:50:55 adamdunkels Exp $
+ * $Id: wget.c,v 1.12 2004/09/19 15:32:38 adamdunkels Exp $
  *
  */
 
@@ -53,6 +53,8 @@
 #include <fcntl.h>
 
 #include "c64-dio.h"
+
+#define USE_KERNAL 0
 
 static struct ctk_window window;
 
@@ -134,6 +136,11 @@ LOADER_INIT_FUNC(wget_init, arg)
     strncpy(url, arg, sizeof(url));
     strncpy(urledit, arg, sizeof(urledit));
     petsciiconv_topetscii(urledit, sizeof(urledit));
+  } else {
+#ifdef WGET_CONF_URL
+    strncpy(url, WGET_CONF_URL, sizeof(url));
+    strncpy(urledit, WGET_CONF_URL, sizeof(urledit));
+#endif /* WGET_CONF_URL  */
   }
   arg_free(arg);
   
@@ -308,6 +315,7 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
       ds.track = 1;
       ds.sect = 0;
       bufferptr = 0;
+      /*      c64_dio_init(_curunit);*/
       /*      c64_dio_init(8);*/
     }
   } else if(ev == ctk_signal_hyperlink_activate) {
@@ -381,7 +389,6 @@ void
 webclient_connected(void)
 {    
   show_statustext("Request sent...");
-  c64_dio_init(_curunit);
 }
 /*-----------------------------------------------------------------------------------*/
 static u8_t
@@ -417,10 +424,57 @@ next_sector(void)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
+x_open(u8_t f, u8_t d, u8_t cmd, u8_t *fname)
+{
+  u8_t ret;
+  
+  ret = cbm_open(f, d, cmd, fname);
+  if(ret != 0) {
+    /*    printf("open: error %d\n", ret);*/
+    /*    ctk_label_set_text(&statuslabel, "Open err");
+	  CTK_WIDGET_REDRAW(&statuslabel);*/
+    show_statustext("Open error");
+  }
+  
+}
+static void
+write_sector(u8_t device, u8_t track, u8_t sect, void *mem)
+{
+  u16_t ret;
+  static u8_t cmd[32];
+  
+  x_open(15, device, 15, NULL);
+  x_open(2, device, 2, "#");
+
+  ret = cbm_write(2, mem, 256);
+  
+  sprintf(cmd, "u2: 2 0 %d %d", track, sect);  
+  cbm_write(15, cmd, strlen(cmd));
+  /*  printf("%s\n", cmd);*/
+    
+
+  /*  ret = 0;*/
+  if(ret == -1) {
+    sprintf(statusmsg, "Write error at %d:%d", track, sect);
+    show_statustext(statusmsg);
+  } else {
+    sprintf(statusmsg, "Wrote %d bytes to %d:%d", ret, track, sect);
+    show_statustext(statusmsg);
+  }
+  /*  printf("write: wrote %d bytes\n", ret);*/
+
+  cbm_close(2);
+  cbm_close(15);
+}
+
+static void
 write_buffer(void)
 {
-  /*  write_sector(8, ds.track, ds.sect, buffer);*/
+#if USE_KERNAL
+  write_sector(8, ds.track, ds.sect, buffer);
+#else
   c64_dio_write_block(ds.track, ds.sect, buffer);
+#endif
   if(next_sector() != 0) {
     dload_state = DLOAD_NONE;
   }
