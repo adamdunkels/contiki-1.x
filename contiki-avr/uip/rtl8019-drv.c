@@ -29,7 +29,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rtl8019-drv.c,v 1.3 2004/07/04 20:17:38 adamdunkels Exp $
+ * $Id: rtl8019-drv.c,v 1.4 2004/08/09 22:23:29 adamdunkels Exp $
  *
  */
 
@@ -49,7 +49,7 @@ static const struct packet_service_state state =
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
-EK_PROCESS(proc, PACKET_SERVICE_NAME, EK_PRIO_NORMAL,
+EK_PROCESS(proc, PACKET_SERVICE_NAME ": RTL8019as", EK_PRIO_HIGH,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
@@ -62,6 +62,7 @@ LOADER_INIT_FUNC(rtl8019_drv_init, arg)
 static void
 output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
 {
+  uip_arp_out();
   RTL8019dev_send();
 }
 /*---------------------------------------------------------------------------*/
@@ -69,6 +70,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   switch(ev) {
   case EK_EVENT_INIT:
+  case EK_EVENT_REPLACE:
     RTL8019dev_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:
@@ -76,8 +78,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     LOADER_UNLOAD();
     break;
   case EK_EVENT_REQUEST_EXIT:
-    ek_exit();
-    LOADER_UNLOAD();
+    /*    ek_exit();
+	  LOADER_UNLOAD();*/
     break;
   default:
     break;
