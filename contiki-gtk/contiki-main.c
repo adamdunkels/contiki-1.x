@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.13 2004/08/11 21:26:22 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.14 2004/09/01 20:34:18 adamdunkels Exp $
  *
  */
 
@@ -54,6 +54,7 @@
 #include "editor-dsc.h"
 #include "email-dsc.h"
 #include "ftp-dsc.h"
+#include "irc-dsc.h"
 #include "netconf-dsc.h"
 #include "processes-dsc.h"
 #include "shell-dsc.h"
@@ -90,7 +91,7 @@ main(int argc, char **argv)
   ctk_gtksim_service_init(NULL);
   ctk_init();
 
-  /*  ctk_vncserver_init(NULL);*/
+  /* ctk_vncserver_init(NULL); */
   /*  ctk_termtelnet_init(NULL);*/
   
   uip_init();
@@ -124,6 +125,8 @@ main(int argc, char **argv)
   program_handler_add(&shell_dsc, "Command shell", 1);
   program_handler_add(&calc_dsc, "Calculator", 1);
   program_handler_add(&email_dsc, "E-mail", 1);
+
+  program_handler_add(&irc_dsc, "IRC", 1);
   
   gtk_timeout_add(20, idle_callback, NULL);
 

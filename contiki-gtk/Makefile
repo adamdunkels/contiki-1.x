@@ -27,13 +27,13 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.12 2004/08/11 21:23:29 adamdunkels Exp $
+# $Id: Makefile,v 1.13 2004/09/01 20:34:06 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
 CC=gcc
 CFLAGS=-Wall -Wstrict-prototypes -Wmissing-prototypes \
-	-g -O3 \
+	-g \
        -Iapps -Ictk -Iuip -Iconf -Ilib \
        -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
@@ -66,7 +66,7 @@ LDFLAGS= `pkg-config --libs gtk+-2.0`
 
 
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o http-user-agent-string.o
-EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
+EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o
 WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o http-strings.o
 TELNET=simpletelnet.o telnet.o
 
@@ -88,8 +88,9 @@ contiki: contiki-main.o ek.o arg.o ek-service.o \
  processes-dsc.o processes.o \
  shell-dsc.o shell.o shell-gui.o \
  calc-dsc.o calc.o \
- email.o email-dsc.o smtp.o smtp-strings.o ctk-textedit.o #ctk-conio-service.o
-# sock-httpd.o socket.o list.o filecache.o \
+ email.o email-dsc.o smtp-socket.o smtp-strings.o ctk-textedit.o \
+ sock-httpd.o socket.o list.o filecache.o \
+ ircc.o irc.o irc-dsc.o
 # program-handler.o about.o netconf.o processes.o \
 # about-dsc.o netconf-dsc.o processes-dsc.o  \
 # $(CTKGTK) \
