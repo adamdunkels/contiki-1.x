@@ -13,7 +13,7 @@
 	.constructor	initprefix
         .destructor     closeallfiles, 17
 	.export		_open, _read, _write, _close
-	.import		__BUFFER_START__, popax
+	.import		_uip_buf, popax
 	.importzp 	ptr1
 
 PATHNAME	:= $0280
@@ -37,7 +37,7 @@ PREFIX:		.res	1
 OPEN_PARAM:
 		.byte	$03		;PARAM_COUNT
 		.addr	PATHNAME	;PATHNAME
-		.addr	__BUFFER_START__;IO_BUFFER
+		.addr	_uip_buf	;IO_BUFFER
 OPEN_FD:	.byte	$00		;REF_NUM
 
 RW_PARAM:

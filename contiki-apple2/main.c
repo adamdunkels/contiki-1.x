@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.7 2005/01/26 21:33:29 oliverschmidt Exp $
+ * $Id: main.c,v 1.8 2005/02/17 22:45:03 oliverschmidt Exp $
  *
  */
 
@@ -62,6 +62,10 @@
 
 
 unsigned char lanslot;
+
+#pragma bssseg(push, "UIPBUF");
+u8_t uip_buf[UIP_BUFSIZE + 2];
+#pragma bssseg(pop);
 
 /*-----------------------------------------------------------------------------------*/
 unsigned char

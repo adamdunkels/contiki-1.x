@@ -32,14 +32,15 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h,v 1.1 2003/08/05 14:37:59 adamdunkels Exp $
+ * $Id: uip-conf.h,v 1.2 2005/02/17 22:45:03 oliverschmidt Exp $
  *
  */
 #ifndef __UIP_CONF_H__
 
 #define UIP_CONF_MAX_CONNECTIONS 10
 #define UIP_CONF_MAX_LISTENPORTS 10
-#define UIP_CONF_BUFFER_SIZE     400
+#define UIP_CONF_BUFFER_SIZE     1024 - 2
+#define UIP_CONF_EXTERNAL_BUFFER
 
 #define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
 
