@@ -2,94 +2,49 @@
 <html>
   <head>
     <title>Welcome to the Contiki web server!</title>
-    <link rel="stylesheet" type="text/css" href="/contiki.css">  
+    <link rel="stylesheet" type="text/css" href="/style.css">  
   </head>
-  <body bgcolor="#4040e0" text="white">
-    <table width="100%" cellspacing=0 cellpadding=0 border=0>
-      <tr valign="top">
-	<td width="25%" valign="top">
-	  <br>
-	  <table width="100%" cellspacing=0 cellpadding=0 border=0>
-	    <tr>
-	      <td class="btl" width=16 height=16>&nbsp;</td>
-	      <td class="bt" height=16>&nbsp;</td>
-	      <td class="btr" width=16 height=16>&nbsp;</td>
-	    </tr>
-	    <tr>
-	      <td class="bl" width=16>&nbsp;</td>
-	      <td class="menu">
-		<br>
-		<a href="/">Front page</a><br>
-		<br>		      
-		<a href="/cgi/files">File statistics</a><br>
-		<br>		      			  
-		<a href="/cgi/tcp">Current connections</a><br>
-		<br>			
-		<a href="/cgi/processes">System processes</a><br>
-		<br>			
-	      </td>
-	      <td class="br" width=16>&nbsp;</td>
-	    </tr>
-	    <tr>
-	      <td class="bbl" width=16 height=16>&nbsp;</td>
-	      <td class="bb" height=16>&nbsp;</td>
-	      <td class="bbr" width=16 height=16>&nbsp;</td>
-	    </tr>
-	  </table>
-	</td>
-	<td class="content">
-	  <h1>Welcome to the <a
-	      href="http://dunkels.com/adam/contiki/">Contiki</a>
-	      web server!</h1>
+  <body bgcolor="#fffeec" text="black">
+
+  <div class="menublock">
+
+  <div class="menu">
+  <p class="border-title">Menu</p>
+  <p class="menu">
+  
+  <a href="/">Front page</a><br>
+  <a href="/cgi/files.html">File statistics</a><br>
+  <a href="/cgi/tcp.html">Network connections</a><br>
+  <a href="/cgi/processes.html">System processes</a><br>
+
+  </p>
+  </div>
+  </div>
+
+  <div class="contentblock">
+  <p class="border-title">
+  Welcome to the <a href="http://www.sics.se/~adam/contiki/">Contiki</a> 
+  web server!
+  </p>
+	      
 	  <p class="intro">
 	    The web pages you are watching are served by a <a
-	    href="http://dunkels.com/adam/contiki/apps/webserver.html">web
+	    href="http://www.sics.se/~adam/contiki/apps/webserver.html">web
 	    server</a> running under the <a
-	    href="http://dunkels.com/adam/contiki/">Contiki operating
-	    system</a> on an unexpanded Commodore 64 equipped with a
-	    custom built <a
-	    href="http://dunkels.com/adam/tfe/">Ethernet card</a>.
+	    href="http://www.sics.se/~adam/contiki/">Contiki operating
+	    system</a>.
 	  </p>
+
 	  
+	 
+	  <h2>Screenshot</h2>
+	  <p>
+	    This is what the desktop of this server might look
+	    like:
+	  </p>
 	  <center>
-	    <img src="img/screenshot.png" border="2">
+	    <img src="/img/screenshot.png" alt="Screenshot">
 	  </center>
-	      
-	  <p>
-	    The screenshot above shows what the desktop looks like on
-	    the C64 on which the web server is running. Please note
-	    that this web page, the screenshot, the graphical border
-	    around the menu to the left, and the scripts that generate
-	    the dynamic pages for <a href="/cgi/files">file
-	    statistics</a>, the <a href="/cgi/tcp">currently open
-	    connections</a> and the <a href="/cgi/processes">system
-	    processes</a> all are served by this Contiki web server.
-	  </p>
-
-	  <p>
-	    For more information about the Contiki operating system,
-	    see the Contiki web site:
-	  </p>
-	  <p align="center">
-	    <tt><a href="http://dunkels.com/adam/contiki/">http://dunkels.com/adam/contiki/</a></tt>
-	  </p>
-
-	  <p>
-	    For pictures of the Commodore 64 on which this server is
-	    running, see the <a
-	    href="http://dunkels.com/adam/tfe/pictures.html">"Pictures"</a>
-	    section of the TFE (The Final Ethernet cartridge)
-	    homepage:
-	  </p>
-	  <p align="center">
-	    <tt><a href="http://dunkels.com/adam/tfe/">http://dunkels.com/adam/tfe/</a></tt>
-	  </p>
-	  <p align="right">
-	    /<a href="http://dunkels.com/adam/">Adam Dunkels</a>
-	  </p>
-	</td>
-      </tr>
-    </table>
     
   </body>
 </html>
