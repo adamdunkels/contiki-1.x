@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.18 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: ctk.h,v 1.19 2004/06/27 12:32:16 oliverschmidt Exp $
  *
  */
 
@@ -250,6 +250,18 @@ struct ctk_textentry {
 };
 
 
+#if CTK_CONF_ICON_BITMAPS
+#define CTK_ICON_BITMAP(bitmap)	  bitmap
+#else
+#define CTK_ICON_BITMAP(bitmap)	  NULL
+#endif
+
+#if CTK_CONF_ICON_TEXTMAPS
+#define CTK_ICON_TEXTMAP(textmap) textmap
+#else
+#define CTK_ICON_TEXTMAP(textmap) NULL
+#endif
+
 /**
  * Instantiating macro for the ctk_icon widget.
  *
@@ -264,7 +276,8 @@ struct ctk_textentry {
  * \param textmap A pointer to the icon's text version of the bitmap.
  */
 #define CTK_ICON(title, bitmap, textmap) \
- NULL, NULL, 0, 0, CTK_WIDGET_ICON, 2, 4, title, 0, bitmap, textmap
+ NULL, NULL, 0, 0, CTK_WIDGET_ICON, 2, 4, title, 0, \
+ CTK_ICON_BITMAP(bitmap), CTK_ICON_TEXTMAP(textmap)
 struct ctk_icon {
   struct ctk_widget *next;
   struct ctk_window *window;
