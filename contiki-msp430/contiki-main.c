@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.1 2003/09/04 19:46:32 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.2 2003/09/05 21:22:48 adamdunkels Exp $
  *
  */
 
@@ -162,6 +162,8 @@ main(int argc, char **argv)
 
   init_hardware();
 
+  rs232_init(0);
+  
   sensors_init();
   
   rs232_print("uip_init()...\n"); 
