@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.11 2003/08/05 13:54:31 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.12 2003/08/06 23:13:06 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -44,7 +44,7 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      vnc.prg  \
      webserver.prg webserver.dsc \
      wget.prg wget.dsc \
-     calc.prg calc.dsc \
+     calc.prg \
      directory.prg directory.dsc \
      blueround.prg blueround.dsc \
      enabler.prg enabler.dsc \
@@ -54,7 +54,8 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      rrnet.drv rrnet.dsc \
      slip.drv slip.dsc \
      tfe.drv tfe.dsc \
-     ssconfig.prg 
+     ssconfig.prg \
+     config.prg configedit.prg configedit.dsc
 
 SYS=c64
 
@@ -64,6 +65,8 @@ CFLAGS:=$(CFLAGSCOMMON) \
         -DCTK_HIRES \
 	-DWITH_LOADER_ARCH \
         -DWITH_UIP -DWITH_ETHERNET
+
+configedit.prg: configedit.o c64-fs-write.o
 
 email.prg: $(EMAIL) 
 

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.3 2003/08/05 13:54:50 adamdunkels Exp $
+ * $Id: main.c,v 1.4 2003/08/06 23:13:16 adamdunkels Exp $
  *
  */
 
@@ -47,7 +47,7 @@
 #include "uip.h"
 #include "uip_arp.h"
 
-#include "netconf-dsc.h"
+#include "configedit-dsc.h"
 #include "directory-dsc.h"
 #include "processes-dsc.h"
 
@@ -65,13 +65,17 @@ main(int argc, char **argv)
   ek_init();
   dispatcher_init();
   ctk_init();
-	    
+
+  uip_signal_init();
+  
   program_handler_init();
    
   program_handler_add(&directory_dsc, "Directory", 1);
-  program_handler_add(&netconf_dsc, "Network setup", 1);
+  program_handler_add(&configedit_dsc, "Configuration", 1);
   program_handler_add(&processes_dsc, "Processes", 1);  
 
+  program_handler_load("config.prg");
+  
   ek_run();
 
   return 0;
