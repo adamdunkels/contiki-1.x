@@ -44,7 +44,7 @@ rawsock_init(void)
   addr.sin_family      = AF_INET;
   addr.sin_addr.s_addr = inet_addr(__argv[1]);
   addr.sin_port        = 0;
-  if (bind(rawsock, (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
+  if(bind(rawsock, (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
     error_exit("bind() error: %d\n", WSAGetLastError());
   }
 
@@ -53,7 +53,7 @@ rawsock_init(void)
     error_exit("setsockopt(IP_HDRINCL) error: %d\n", WSAGetLastError());
   }
 
-  if (ioctlsocket(rawsock, SIO_RCVALL, &on) == SOCKET_ERROR) {
+  if(ioctlsocket(rawsock, SIO_RCVALL, &on) == SOCKET_ERROR) {
     error_exit("ioctlsocket(SIO_RCVALL) error: %d\n", WSAGetLastError());
   }
 
@@ -82,7 +82,10 @@ rawsock_send(void)
   addr.sin_port        = 0;
   if(sendto(rawsock, sendbuf, uip_len, 0,
 	    (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
-    error_exit("sendto() error: %d\n", WSAGetLastError());
+
+    if (WSAGetLastError() != WSAEHOSTUNREACH) {
+      error_exit("sendto() error: %d\n", WSAGetLastError());
+    }
   }
 
   if(ioctlsocket(rawsock, FIONBIO, &on) == SOCKET_ERROR) {
@@ -102,11 +105,12 @@ rawsock_poll(void)
   received = recv(rawsock, uip_buf, UIP_BUFSIZE, 0);
   if(received == SOCKET_ERROR) {
 
-    if(WSAGetLastError() != WSAEWOULDBLOCK) {
+    if(WSAGetLastError() != WSAEWOULDBLOCK &&
+       WSAGetLastError() != WSAEMSGSIZE) {
       error_exit("recv() error: %d\n", WSAGetLastError());
     }
-    return 0;
 
+    return 0;
   }
   return received;
 }
