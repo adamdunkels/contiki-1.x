@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-blueround.c,v 1.2 2003/03/28 12:16:22 adamdunkels Exp $
+ * $Id: ctk-blueround.c,v 1.3 2003/04/08 19:12:02 adamdunkels Exp $
  *
  */
 #include "ctk.h"
@@ -570,13 +570,13 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_BUTTON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      hires_color(colors[7 * 6 + focus]);
+      hires_color(colors[8 * 6 + focus]);
       hires_gotoxy(xpos, ypos);
       ctk_blueround_draw_buttonleft();
       hires_color(colors[w->type * 6 + focus]);
       hires_gotoxy(xpos + 1, ypos);
       ctk_blueround_cputsn(w->widget.button.text, w->w);
-      hires_color(colors[8 * 6 + focus]);      
+      hires_color(colors[9 * 6 + focus]);      
       ctk_blueround_draw_buttonright();
     }
     break;
@@ -681,16 +681,30 @@ ctk_draw_widget(struct ctk_widget *w,
 }
 /*-----------------------------------------------------------------------------------*/
 void
+ctk_draw_clear_window(struct ctk_window *window,
+		      unsigned char focus,
+		      unsigned char clipy1,
+		      unsigned char clipy2)
+{
+  unsigned char h;
+
+  hires_color(colors[focus]);
+  
+  h = window->y + 2 + window->h;
+  /* Clear window contents. */
+  for(i = window->y + 2; i < h; ++i) {
+    if(i >= clipy1 && i < clipy2) {
+      hires_cclearxy(window->x + 1, i, window->w);
+    }
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+void
 ctk_draw_window(register struct ctk_window *window,
 		unsigned char focus,
 		unsigned char clipy1, unsigned char clipy2)
 {
   register struct ctk_widget *w;
-  
-  /*  if(clipy1 >= clipy2) {
-    return;
-    }*/
-  
   
   x = window->x;
   y = window->y + 1;
@@ -707,15 +721,6 @@ ctk_draw_window(register struct ctk_window *window,
   y2 = y1 + window->h;
 
 
-  hires_color(colors[focus]);
-  
-  h = y1 + window->h;
-  /* Clear window contents. */
-  for(i = y1; i < h; ++i) {
-    if(i >= clipy1 && i < clipy2) {
-      hires_cclearxy(x1, i, window->w);
-    }
-  }
 
   hires_color(colors[focus+1]);
   hires_gotoxy(x, y);
