@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.12 2004/07/04 11:35:08 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.13 2004/09/12 20:02:16 oliverschmidt Exp $
  *
  */
 
@@ -276,7 +276,7 @@ EK_EVENTHANDLER(simpletelnet_eventhandler, ev, data)
 	    ev == EK_EVENT_REQUEST_EXIT) {
     ek_exit();
     ctk_window_close(&telnetwindow);
-    id = 0;
+    id = EK_ID_NONE;
     LOADER_UNLOAD();
   } else if(ev == tcpip_event) {
     telnet_app(data);
