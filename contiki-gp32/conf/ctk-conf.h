@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.1 2003/05/19 09:30:07 gpz Exp $
+ * $Id: ctk-conf.h,v 1.2 2004/06/27 12:48:37 oliverschmidt Exp $
  *
  */
 
@@ -51,17 +51,20 @@
    window.  */
 #define CTK_CONF_WINDOWSWITCH_KEY     CH_F3
 
-/* Toggles support for desktop icons. */
+/* Toggles support for icons. */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
+
+/* Toggles support for icon bitmaps. */
+#define CTK_CONF_ICON_BITMAPS         1
+
+/* Toggles support for icon textmaps. */
+#define CTK_CONF_ICON_TEXTMAPS        1
 
 /* Toggles support for movable windows. */
 #define CTK_CONF_WINDOWMOVE           1 /* 333 bytes */
 
 /* Toggles support for closable windows. */
 #define CTK_CONF_WINDOWCLOSE          1 /* 14 bytes */
-
-/* Toggles support for multiline text entry editing. */
-#define CTK_CONF_TEXTENTRY_MULTILINE  0 /* 118 bytes */
 
 /* Toggles support for menus. */
 #define CTK_CONF_MENUS                1 /* 1384 bytes */
