@@ -32,7 +32,7 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: hello.c,v 1.2 2003/04/09 19:15:25 adamdunkels Exp $
+ * $Id: hello.c,v 1.3 2003/04/10 07:02:05 adamdunkels Exp $
  *
  */
 
@@ -69,7 +69,6 @@ LOADER_INIT_FUNC(hello_init)
     id = dispatcher_start(&p);
     
     ctk_window_new(&window, 15, 4, "Hello");
-    ctk_window_move(&window, 5, 6);
 
     CTK_WIDGET_ADD(&window, &hellolabel);
     CTK_WIDGET_ADD(&window, &worldlabel);
