@@ -111,7 +111,7 @@ s_ctk_draw_clear_window(struct ctk_window *window,
   y = window->y + MENU_HEIGHT;  
 
   /* Clear window */
-  if(focus == CTK_FOCUS_WINDOW) {
+  if(focus & CTK_FOCUS_WINDOW) {
     gdk_draw_rectangle(ctk_gtksim_pixmap,
 		       white,
 		       TRUE,
@@ -161,7 +161,7 @@ s_ctk_draw_window(struct ctk_window *window,
 		                  WINDOWBORDER_HEIGHT) * RASTER_Y);
 
   if(ctk_mode_get() == CTK_MODE_WINDOWMOVE) {
-    if(focus == CTK_FOCUS_WINDOW) {
+    if(focus & CTK_FOCUS_WINDOW) {
       gdk_draw_rectangle(ctk_gtksim_pixmap,
 			 white,
 			 TRUE,
