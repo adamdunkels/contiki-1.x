@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.5 2004/09/12 07:15:00 adamdunkels Exp $
+ * $Id: httpd-cgi.c,v 1.6 2004/09/12 20:52:37 adamdunkels Exp $
  *
  */
 
@@ -160,20 +160,26 @@ make_processes(struct ek_proc *p)
 
   strncpy(name, p->name, 40);
   petsciiconv_toascii(name, 40);
+
   return sprintf((char *)uip_appdata,
-		 "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%04x</td><td>0x%04x</td><td>0x%04x</td></tr>\r\n",
-		 p->id, name,
+		 "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%02x</td><td>0x%04x</td><td>0x%04x</td><td>0x%04x</td></tr>\r\n",
+		 p->id, name, p->prio,
 		 p->pollhandler, p->eventhandler, p->procstate);
 }
 /*-----------------------------------------------------------------------------------*/
 static
 PT_THREAD(processes(struct httpd_state *s, char *ptr))
 {
+  struct ek_proc *p;
+  
   SOCKET_BEGIN(&s->sout);
 
-  /*  for(s->count = 0; s->count < EK_CONF_MAXPROCS; ++s->count) {
-    
-  }*/
+  for(s->count = 0; s->count < EK_CONF_MAXPROCS; ++s->count) {
+    p = ek_process(s->count);
+    if(p != NULL) {
+      SOCKET_GENERATOR_SEND(&s->sout, make_processes, p);
+    }    
+  }
   
   SOCKET_END(&s->sout);
 }
