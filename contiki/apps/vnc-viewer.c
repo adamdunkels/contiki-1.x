@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-viewer.c,v 1.3 2003/04/17 18:55:38 adamdunkels Exp $
+ * $Id: vnc-viewer.c,v 1.4 2003/07/31 23:48:42 adamdunkels Exp $
  *
  */
 
@@ -53,7 +53,7 @@
 /* "RFB 003.003" */
 static u8_t rfb_server_version_string[12] = {82,70,66,32,48,48,51,46,48,48,51,10};
 
-#if 0
+#if 1
 #define PRINTF(x)
 #else
 #define PRINTF(x) printf x

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.4 2003/04/17 18:55:38 adamdunkels Exp $
+ * $Id: vnc.c,v 1.5 2003/07/31 23:48:42 adamdunkels Exp $
  *
  */
 
@@ -50,7 +50,7 @@
 
 #include "loader.h"
 
-#if 0
+#if 1
 #define PRINTF(x)
 #else
 #include <stdio.h>
