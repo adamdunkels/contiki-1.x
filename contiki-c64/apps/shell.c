@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.6 2004/02/16 20:56:58 adamdunkels Exp $
+ * $Id: shell.c,v 1.7 2004/02/24 09:51:26 adamdunkels Exp $
  *
  */
 
@@ -36,7 +36,6 @@
 #include "loader.h"
 #include "c64-fs.h"
 #include "uip.h"
-#include "uip_main.h"
 #include "uip_arp.h"
 #include "resolv.h"
 
@@ -237,6 +236,11 @@ static struct ptentry configparsetab[] =
 /*-----------------------------------------------------------------------------------*/
 void
 shell_init(void)
+{
+}
+/*-----------------------------------------------------------------------------------*/
+void
+shell_start(void)
 {
   showingdir = 0;
   shell_output("Contiki command shell", "");
