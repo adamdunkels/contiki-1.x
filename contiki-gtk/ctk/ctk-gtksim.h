@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-gtksim.h,v 1.2 2003/04/15 21:20:43 adamdunkels Exp $
+ * $Id: ctk-gtksim.h,v 1.3 2003/08/11 22:20:23 adamdunkels Exp $
  *
  */
 
@@ -52,8 +52,10 @@ guint ctk_arch_getkey(void);
 #define CH_CURS_LEFT   GDK_Left
 #define CH_CURS_UP     GDK_Up
 #define CH_ENTER       GDK_Return
+#define CH_TAB         GDK_Tab
 #define CH_F1          GDK_F1
 #define CH_F3          GDK_F3
+#define CH_F5          GDK_F5
 #define CH_DEL         GDK_BackSpace
 #define CH_ESC         GDK_Escape
 
