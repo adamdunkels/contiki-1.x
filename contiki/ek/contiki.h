@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: contiki.h,v 1.4 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: contiki.h,v 1.5 2005/02/22 22:43:36 adamdunkels Exp $
  */
 #ifndef __CONTIKI_H__
 #define __CONTIKI_H__
@@ -38,6 +38,7 @@
 #include "contiki-version.h"
 
 #include "ek.h"
+#include "ek-service.h"
 #include "uip.h"
 #include "uiplib.h"
 #include "resolv.h"
