@@ -28,7 +28,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.4 2005/03/31 22:03:41 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.5 2005/04/05 08:18:01 oliverschmidt Exp $
  *
  */
 
@@ -238,6 +238,7 @@ void lan91c96_send(void)
   /* than data from uip_appdata */
 
   asm("ldx %v", slot_index);
+  asm("beq %g", L0);
 
   asm("lda %v+1", uip_len);
   asm("ora #%%00100000");        /* Allocate memory for TX */
@@ -250,6 +251,7 @@ L1:                              /* Wait for allocation ready */
   asm("bne %g", L2);
   asm("dey");
   asm("bne %g", L1);
+L0:
   return;
 
 L2:
