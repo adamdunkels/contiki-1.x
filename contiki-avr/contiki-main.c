@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.2 2003/08/20 21:54:19 adamdunkels Exp $
  *
  */
 
@@ -179,32 +179,15 @@ main(int argc, char **argv)
 
   
     
-  debug_print8(2);
-  resolv_query("www.sics.se");
-
-  
-    
-  debug_print8(3);
-  ek_init();
-
-  
-  
-  debug_print8(4);
   dispatcher_init();
 
   
-  
-  
-  debug_print8(5);
   ctk_init();
 
-  debug_print8(6);
   rtl8019_drv_init();
 
-  debug_print8(8);
   ctk_vncserver_init();  
 
-  debug_print8(7);
   program_handler_init();
 
   webserver_init();
@@ -220,7 +203,7 @@ main(int argc, char **argv)
 
 
   debug_print8(64);
-  ek_run();
+  dispatcher_run();
 
   
   return 0;
