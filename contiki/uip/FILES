@@ -1,6 +1,10 @@
 The contiki/uip/ directory contains the source code for the uIP TCP/IP
 stack and associated utility libraries.
 
+dhcpc.[ch]
+
+  A rudimentary DHCP client.
+
 packet-service.h
 
   The Contiki/uIP packet driver interface, used by network device
