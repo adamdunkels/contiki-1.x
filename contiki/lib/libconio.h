@@ -32,13 +32,14 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: libconio.h,v 1.2 2003/04/05 12:21:13 adamdunkels Exp $
+ * $Id: libconio.h,v 1.3 2003/04/15 21:23:08 adamdunkels Exp $
  *
  */
 
 #ifndef __LIBCONIO_H__
 #define __LIBCONIO_H__
 
+#include "libconio-conf.h"
 
 /* This function must be implemented specifically for the architecure: */
 void ctk_arch_draw_char(char c,
@@ -47,13 +48,17 @@ void ctk_arch_draw_char(char c,
 			unsigned char reversedflag);
 
 /* Default definitions that should be overridden by calling module. */
-#ifndef LIBCONIO_SCREEN_WIDTH
+#ifndef LIBCONIO_CONF_SCREEN_WIDTH
 #define LIBCONIO_SCREEN_WIDTH 40
+#else
+#define LIBCONIO_SCREEN_WIDTH LIBCONIO_CONF_SCREEN_WIDTH
 #endif /* LIBCONIO_SCREEN_WIDTH */
 
-#ifndef LIBCONIO_SCREEN_HEIGHT
+#ifndef LIBCONIO_CONF_SCREEN_HEIGHT
 #define LIBCONIO_SCREEN_HEIGHT 25
-#endif /* LIBCONIO_SCREEN_HEIGHT */
+#else
+#define LIBCONIO_SCREEN_HEIGHT LIBCONIO_CONF_SCREEN_HEIGHT
+#endif /* LIBCONIO_CONF_SCREEN_HEIGHT */
 
 
 
