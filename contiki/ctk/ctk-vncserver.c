@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.12 2005/03/15 15:51:17 oliverschmidt Exp $
+ * $Id: ctk-vncserver.c,v 1.13 2005/03/15 16:07:35 oliverschmidt Exp $
  *
  */
 
@@ -662,6 +662,7 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
  * \param focus The focus of the window.
  * \param clipy1 The lower y coordinate bound.
  * \param clipy2 The upper y coordinate bound.
+ * \param draw_borders The flag for border drawing.
  */
 /*-----------------------------------------------------------------------------------*/
 void

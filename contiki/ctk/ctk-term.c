@@ -690,6 +690,7 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
  * \param focus The focus of the window.
  * \param clipy1 The lower y coordinate bound.
  * \param clipy2 The upper y coordinate bound.
+ * \param draw_borders The flag for border drawing.
  */
 /*-----------------------------------------------------------------------------------*/
 void
