@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: webserver.c,v 1.2 2003/03/28 12:08:35 adamdunkels Exp $
  *
  */
 
@@ -43,8 +43,10 @@
 #include "uip_main.h"
 #include "petsciiconv.h"
 
+#ifdef __C64__
 #include <c64.h>
 #include <cbm.h>
+#endif /* __C64__ */
 
 
 /* The main window. */
