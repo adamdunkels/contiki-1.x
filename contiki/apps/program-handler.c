@@ -30,9 +30,9 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki VNC client
+ * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.1 2003/04/08 17:56:44 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.2 2003/04/08 19:25:38 adamdunkels Exp $
  *
  */
 
@@ -45,10 +45,6 @@
 #include "dispatcher.h"
 #include "resolv.h"
 #include "telnet.h"
-#include "vnc.h"
-#include "vnc-draw.h"
-#include "vnc-viewer.h"
-#include "vnc-conf.h"
 
 #include "loader.h"
 
@@ -63,31 +59,6 @@ static unsigned char menuitem_www,
   menuitem_run;
 
 /* Icons */
-
-/* The icon for the WWW browser */
-static unsigned char wwwicon_bitmap[3*3*8] = {
-  0x00, 0x7e, 0x40, 0x73, 0x46, 0x4c, 0x18, 0x13,
-  0x00, 0x00, 0xff, 0x81, 0x34, 0xc9, 0x00, 0xb6,
-  0x00, 0x7e, 0x02, 0xce, 0x72, 0x32, 0x18, 0x48,
-
-  0x30, 0x27, 0x24, 0x20, 0x37, 0x24, 0x20, 0x33,
-  0x00, 0x7b, 0x42, 0x00, 0x7b, 0x42, 0x00, 0x3b,
-  0x0c, 0x24, 0x24, 0x04, 0xa4, 0x24, 0x04, 0x4c,
-
-  0x12, 0x19, 0x4c, 0x46, 0x63, 0x40, 0x7c, 0x00,
-  0x22, 0x91, 0x00, 0xc4, 0x81, 0xff, 0x00, 0x00,
-  0x08, 0x18, 0x32, 0x62, 0xc6, 0x02, 0x3e, 0x00
-};
-
-static char wwwicon_textmap[9] = {
-  'w', 'w', 'w',
-  '(', ')', ' ',
-  ' ', '(', ')'
-};
-
-static struct ctk_icon wwwicon =
-  {CTK_ICON("Web browser", wwwicon_bitmap, wwwicon_textmap)};
-
 static unsigned char abouticon_bitmap[3*3*8] = {
   0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
   0x00, 0xff, 0x00, 0x7e, 0x00, 0xff, 0x00, 0xff,
@@ -135,6 +106,34 @@ static char tcpipconficon_textmap[9] = {
 static struct ctk_icon tcpipconficon =
   {CTK_ICON("TCP/IP conf", tcpipconficon_bitmap, tcpipconficon_textmap)};
 
+
+#ifdef WITH_WWW
+/* The icon for the WWW browser */
+static unsigned char wwwicon_bitmap[3*3*8] = {
+  0x00, 0x7e, 0x40, 0x73, 0x46, 0x4c, 0x18, 0x13,
+  0x00, 0x00, 0xff, 0x81, 0x34, 0xc9, 0x00, 0xb6,
+  0x00, 0x7e, 0x02, 0xce, 0x72, 0x32, 0x18, 0x48,
+
+  0x30, 0x27, 0x24, 0x20, 0x37, 0x24, 0x20, 0x33,
+  0x00, 0x7b, 0x42, 0x00, 0x7b, 0x42, 0x00, 0x3b,
+  0x0c, 0x24, 0x24, 0x04, 0xa4, 0x24, 0x04, 0x4c,
+
+  0x12, 0x19, 0x4c, 0x46, 0x63, 0x40, 0x7c, 0x00,
+  0x22, 0x91, 0x00, 0xc4, 0x81, 0xff, 0x00, 0x00,
+  0x08, 0x18, 0x32, 0x62, 0xc6, 0x02, 0x3e, 0x00
+};
+
+static char wwwicon_textmap[9] = {
+  'w', 'w', 'w',
+  '(', ')', ' ',
+  ' ', '(', ')'
+};
+
+static struct ctk_icon wwwicon =
+  {CTK_ICON("Web browser", wwwicon_bitmap, wwwicon_textmap)};
+#endif /* WITH_WWW */
+
+#ifdef WITH_WEBSERVER
 /* The icon for the web server */
 static unsigned char webservericon_bitmap[3*3*8] = {
   0x00, 0x7f, 0x40, 0x41, 0x44, 0x48, 0x40, 0x50,
@@ -158,8 +157,9 @@ static char webservericon_textmap[9] = {
 
 static struct ctk_icon webservericon =
   {CTK_ICON("Web server", webservericon_bitmap, webservericon_textmap)};
+#endif /* WITH_WEBSERVER */
 
-
+#ifdef WITH_TELNET 
 /* The icon for the telnet client */
 static unsigned char telneticon_bitmap[3*3*8] = {
   0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
@@ -183,7 +183,7 @@ static char telneticon_textmap[9] = {
 
 static struct ctk_icon telneticon =
   {CTK_ICON("Telnet client", telneticon_bitmap, telneticon_textmap)};
-
+#endif /* WITH_TELNET */
 
 
 /* Main window */
@@ -232,6 +232,16 @@ static struct ctk_button errorokbutton =
   {CTK_BUTTON(9, 5, 2, "Ok")};
 
 
+/* Function declarations for init() functions for external
+   programs: */
+
+void about_init(void);
+void netconf_init(void);
+void processes_init(void);
+void www_init(void);
+void webserver_init(void);
+void simpletelnet_init(void);
+void email_init(void);
 /*-----------------------------------------------------------------------------------*/
 void
 program_handler_init(void)     
@@ -330,7 +340,9 @@ program_handler_sighandler(ek_signal_t s, ek_data_t data)
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&loadbutton) {
       ctk_window_close(&runwindow);
+#ifdef WITH_LOADER_ARCH
       load(name);
+#endif /* WITH_LOADER_ARCH */
     } else if(data == (ek_data_t)&errorokbutton) {
       ctk_dialog_close();
       ctk_redraw();
