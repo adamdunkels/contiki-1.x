@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.h,v 1.1 2003/05/19 09:30:06 gpz Exp $
+ * $Id: uip_arch.h,v 1.2 2005/01/26 23:36:36 oliverschmidt Exp $
  *
  */
 
@@ -40,14 +40,8 @@
 
 #include "uip.h"
 
-#if UIP_BUFSIZE > 255
 void uip_add_rcv_nxt(u16_t n);
 void uip_add32(u8_t *op32, u16_t op16);
-#else
-void uip_add_rcv_nxt(u8_t n);
-void uip_add32(u8_t *op32, u8_t op8);
-#endif /* UIP_BUFSIZE > 255 */
-
 u16_t uip_chksum(u16_t *data, u16_t len);
 u16_t uip_ipchksum(void);
 u16_t uip_tcpchksum(void);
