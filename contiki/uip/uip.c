@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.2 2003/03/28 12:11:18 adamdunkels Exp $
+ * $Id: uip.c,v 1.3 2003/06/30 20:35:41 adamdunkels Exp $
  *
  */
 
@@ -1418,12 +1418,19 @@ uip_process(u8_t flag)
     apprexmit:
       /* If the application has data to be sent, or if the incoming
          packet had new data in it, we must send out a packet. */
-      if(uip_slen > 0 || (uip_flags & UIP_NEWDATA)) {
+      if(uip_slen > 0 && uip_connr->len > 0) {
 	/* Add the length of the IP and TCP headers. */
 	uip_len = uip_connr->len + UIP_TCPIP_HLEN;
 	/* We always set the ACK flag in response packets. */
-	BUF->flags = TCP_ACK;
+	BUF->flags = TCP_ACK | TCP_PSH;
 	/* Send the packet. */
+	goto tcp_send_noopts;
+      }
+      /* If there is no data to send, just send out a pure ACK if
+	 there is newdata. */
+      if(uip_flags & UIP_NEWDATA) {
+	uip_len = UIP_TCPIP_HLEN;
+	BUF->flags = TCP_ACK;
 	goto tcp_send_noopts;
       }
     }
