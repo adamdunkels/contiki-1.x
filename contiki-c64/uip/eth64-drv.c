@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: eth64-drv.c,v 1.1 2004/09/19 18:54:13 adamdunkels Exp $
+ * $Id: eth64-drv.c,v 1.2 2005/03/17 21:51:23 oliverschmidt Exp $
  *
  */
 
@@ -40,8 +40,9 @@
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
+/* 00:80:0F is the OUI of Standard Microsystems, 64:64:64 just means C64 */
 static const struct uip_eth_addr addr =
-  {{0x00,0x0d,0x60,0x80,0x3d,0xb9}};
+  {{0x00,0x80,0x0f,0x64,0x64,0x64}};
 
 static const struct packet_service_state state =
   {
