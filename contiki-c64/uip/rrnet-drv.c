@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-drv.c,v 1.11 2004/09/17 20:54:05 adamdunkels Exp $
+ * $Id: rrnet-drv.c,v 1.12 2004/09/18 20:51:28 adamdunkels Exp $
  *
  */
 
@@ -55,7 +55,7 @@ EK_PROCESS(proc, PACKET_SERVICE_NAME ": RR-net", EK_PRIO_NORMAL,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tapdev_service_init, arg)
+LOADER_INIT_FUNC(rrnet_drv_init, arg)
 {
   arg_free(arg);
   ek_service_start(PACKET_SERVICE_NAME, &proc);

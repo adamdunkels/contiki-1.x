@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.13 2004/09/17 20:54:05 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.14 2004/09/18 20:48:23 adamdunkels Exp $
  *
  */
 
@@ -41,7 +41,7 @@
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
 static const struct uip_eth_addr addr =
-  {{0x00,0x00,0x00,0x64,0x64,0x64}};
+  {{0x00,0x0d,0x60,0x64,0x64,0x64}};
 
 static const struct packet_service_state state =
   {
@@ -55,7 +55,7 @@ EK_PROCESS(proc, PACKET_SERVICE_NAME ": TFE", EK_PRIO_NORMAL,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tapdev_service_init, arg)
+LOADER_INIT_FUNC(tfe_drv_init, arg)
 {
   arg_free(arg);
   ek_service_start(PACKET_SERVICE_NAME, &proc);
