@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: contiki.c,v 1.2 2003/03/28 12:07:33 adamdunkels Exp $
+ * $Id: contiki.c,v 1.3 2003/04/08 07:25:18 adamdunkels Exp $
  *
  */
 
@@ -178,25 +178,30 @@ static ek_id_t id;
 static void
 update_processwindow(void)
 {
-  unsigned char i, *idsptr;
+  unsigned char i, j, *idsptr;
   struct dispatcher_proc *p;
-  
-  for(i = 0; i < MAX_PROCESSLABELS; ++i) {
+
+  i = 0;
+  j = 0;  
+  do {
     p = dispatcher_process(i);
     if(p != NULL) {
-      idsptr = ids[i];
+      idsptr = ids[j];
       idsptr[0] = '0' + i / 10;
       idsptr[1] = '0' + i % 10;
       idsptr[2] = 0;
-      CTK_LABEL_NEW(&processidlabels[i],
-		    0, i + 1, 2, 1, idsptr);
-      CTK_WIDGET_ADD(&processwindow, &processidlabels[i]);
+      CTK_LABEL_NEW(&processidlabels[j],
+		    0, j + 1, 2, 1, idsptr);
+      CTK_WIDGET_ADD(&processwindow, &processidlabels[j]);
       
-      CTK_LABEL_NEW(&processnamelabels[i],
-		    3, i + 1, 17, 1, p->name);
-      CTK_WIDGET_ADD(&processwindow, &processnamelabels[i]);
+      CTK_LABEL_NEW(&processnamelabels[j],
+		    3, j + 1, 17, 1, p->name);
+      CTK_WIDGET_ADD(&processwindow, &processnamelabels[j]);
+      ++j;
     }
-  }
+    ++i;
+  } while(i != 0);
+  
 
   CTK_WIDGET_ADD(&processwindow, &processupdatebutton);
   CTK_WIDGET_ADD(&processwindow, &processclosebutton);
@@ -340,7 +345,7 @@ sighandler(ek_signal_t s, ek_data_t data)
     } else if(w == (struct ctk_widget *)&processupdatebutton) {
       ctk_window_clear(&processwindow);
       update_processwindow();
-      ctk_window_redraw(&processwindow);
+      ctk_redraw();
     } else if(w == (struct ctk_widget *)&processclosebutton) {
       ctk_window_close(&processwindow);
       ctk_redraw();
