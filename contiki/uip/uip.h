@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.11 2004/06/06 06:16:03 adamdunkels Exp $
+ * $Id: uip.h,v 1.12 2004/07/04 17:00:50 adamdunkels Exp $
  *
  */
 
@@ -696,6 +696,18 @@ struct uip_udp_conn *uip_udp_new(u16_t *ripaddr, u16_t rport);
  * \hideinitializer
  */
 #define uip_udp_remove(conn) (conn)->lport = 0
+
+/**
+ * Bind a UDP connection to a local port.
+ *
+ * \param conn A pointer to the uip_udp_conn structure for the
+ * connection.
+ *
+ * \param port The local port number, in network byte order.
+ *
+ * \hideinitializer
+ */
+#define uip_udp_bind(conn, port) (conn)->lport = port
 
 /**
  * Send a UDP datagram of length len on the current connection.
