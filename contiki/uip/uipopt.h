@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.8 2003/11/27 15:50:54 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.9 2004/03/18 21:07:35 adamdunkels Exp $
  *
  */
 
@@ -415,7 +415,11 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
-#define UIP_STATISTICS  1
+#ifndef UIP_CONF_STATISTICS
+#define UIP_STATISTICS  0
+#else /* UIP_CONF_STATISTICS */
+#define UIP_STATISTICS UIP_CONF_STATISTICS
+#endif /* UIP_CONF_STATISTICS */
 
 /**
  * Determines if logging of certain events should be compiled in.
@@ -426,7 +430,11 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
+#ifndef UIP_CONF_LOGGING
 #define UIP_LOGGING     0
+#else /* UIP_CONF_LOGGING */
+#define UIP_LOGGING     UIP_CONF_LOGGING
+#endif /* UIP_CONF_LOGGING */
 
 /**
  * Print out a uIP log message.
