@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h,v 1.7 2003/08/29 20:34:54 adamdunkels Exp $
+ * $Id: www-conf.h,v 1.8 2003/09/04 23:06:10 adamdunkels Exp $
  *
  */
 #ifndef __WWW_CONF_H__
@@ -48,7 +48,7 @@
 #define WWW_CONF_HISTORY_SIZE 4
 
 /* Defines the maximum length of an URL */
-#define WWW_CONF_MAX_URLLEN 70
+#define WWW_CONF_MAX_URLLEN 65
 
 /* The maxiumum number of widgets (i.e., hyperlinks, form elements) on
    a page. */
