@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.11 2003/07/31 23:12:05 adamdunkels Exp $
+ * $Id: www.c,v 1.12 2003/08/05 13:50:02 adamdunkels Exp $
  *
  */
 
@@ -635,9 +635,11 @@ scroll(void)
   /* See if there are any links that scroll off the top. */
   if(lptr != 0) {
     memcpy(pagewidgets, &pagewidgets[lptr],
-	   sizeof(struct ctk_widget) * (WWW_CONF_MAX_NUMPAGEWIDGETS - lptr));
+	   sizeof(struct ctk_widget) *
+	   (WWW_CONF_MAX_NUMPAGEWIDGETS - lptr));
     memcpy(pagewidgetattribs, &pagewidgetattribs[lptr],
-	   sizeof(union pagewidgetattrib) * (WWW_CONF_MAX_NUMPAGEWIDGETS - lptr));    
+	   sizeof(union pagewidgetattrib) *
+	   (WWW_CONF_MAX_NUMPAGEWIDGETS - lptr));    
 
     /* Compute new value of linkptr and tuck it away in
        linkptrtmp. make_window() destroys linkptr, so we need to
@@ -678,7 +680,7 @@ inc_y(void)
 {
   unsigned char spaces, i;
   char *cptr;
-  struct ctk_widget *linksptr;
+  register struct ctk_widget *linksptr;
   
   if(starty > 0) {
     --starty;
@@ -808,7 +810,7 @@ add_pagewidget(char *text, unsigned char type,
 	       unsigned char border)
 {  
   static unsigned char len, maxwidth;
-  static unsigned char *webpageptr;
+  register unsigned char *webpageptr;
   static void *dataptr;
   register struct ctk_widget *lptr;
 
@@ -976,8 +978,8 @@ static void
 formsubmit(struct formattribs *attribs)
 {
   unsigned char i, j;
-  char *urlptr, *valueptr;
-  struct formattribs *faptr;
+  register char *urlptr, *valueptr;
+  register struct formattribs *faptr;
 
   urlptr = &tmpurl[0];
 
