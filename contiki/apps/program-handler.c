@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.20 2003/08/31 22:16:49 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.21 2003/09/04 19:34:22 adamdunkels Exp $
  *
  */
 
@@ -64,7 +64,9 @@
 /* Menus */
 static struct ctk_menu contikimenu;
 
-static struct dsc *contikidsc[10];
+#define MAX_NUMDSCS 10
+
+static struct dsc *contikidsc[MAX_NUMDSCS];
 static unsigned char contikidsclast = 0;
 
 #if WITH_LOADER_ARCH
@@ -105,14 +107,15 @@ static struct dispatcher_proc p =
 static ek_id_t id;
 
 
-static char *errormsgs[] = {
+static const char * const errormsgs[] = {
   "Ok",
   "Read error",
   "Header error",
   "OS error",
   "Data format error",
   "Out of memory",
-  "File not found"
+  "File not found",
+  "No loader"
 };
 
 static ek_signal_t loader_signal_load;
@@ -142,7 +145,7 @@ program_handler_add(struct dsc *dsc, char *menuname,
   contikidsc[contikidsclast++] = dsc;
   ctk_menuitem_add(&contikimenu, menuname);
   if(desktop) {
-    CTK_ICON_ADD(dsc->icon);
+    CTK_ICON_ADD(dsc->icon, id);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -366,7 +369,7 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 	strncpy(errorfilename + 1, ((struct pnarg *)data)->name,
 		sizeof(errorfilename) - 2);
 	errorfilename[1 + strlen(((struct pnarg *)data)->name)] = '"';
-	ctk_label_set_text(&errortype, errormsgs[err]);
+	ctk_label_set_text(&errortype, (char *)errormsgs[err]);
 	ctk_dialog_open(&errordialog);
       }
       pnarg_free(data);
