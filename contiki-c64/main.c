@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki operating system
  *
- * $Id: main.c,v 1.16 2004/09/12 13:19:04 adamdunkels Exp $
+ * $Id: main.c,v 1.17 2004/09/18 20:35:37 adamdunkels Exp $
  *
  */
 
@@ -101,20 +101,9 @@ clock_time(void)
   return clock();
 }
 /*-----------------------------------------------------------------------------------*/
-#pragma optimize(push, off)
-static void
-setup_curunit(void)
-{
-  asm("lda $ba");
-  asm("sta %v", _curunit);
-}
-#pragma optimize(pop)
-/*-----------------------------------------------------------------------------------*/
 void
 main(void)
 {
-
-  setup_curunit();
   
   log_message("Starting ", CONTIKI_VERSION_STRING);
   
