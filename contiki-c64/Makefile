@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.4 2003/04/17 15:09:31 adamdunkels Exp $
+# $Id: Makefile,v 1.5 2003/04/18 00:14:13 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -70,5 +70,5 @@ clean:
 d64:
 	c1541 -format contiki,64 d64 contiki.d64
 	c1541 -attach contiki.d64 -write contiki
-	c1541 -attach contiki.d64 -write about.prg -write email.prg -write memstat.prg -write netconf.prg -write processes.prg -write simpletelnet.prg -write www.prg -write calc.prg -write default.prg -write blueround.prg
+	c1541 -attach contiki.d64 -write about.prg -write email.prg -write memstat.prg -write netconf.prg -write processes.prg -write simpletelnet.prg -write www.prg -write calc.prg -write default.prg -write blueround.prg -write about.dsc -write netconf.dsc -write www.dsc -write dirload.prg
 	c1541 -attach contiki.d64 -list

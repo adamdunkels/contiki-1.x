@@ -30,15 +30,22 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.6 2003/04/17 19:55:33 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.7 2003/04/18 00:14:13 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      about.prg about.dsc \
      netconf.prg netconf.dsc \
-     www.prg email.prg simpletelnet.prg processes.prg \
-     netconf.prg memstat.prg vnc.prg calc.prg blueround.prg default.prg \
-     dirload.prg
+     processes.prg processes.dsc \
+     www.prg www.dsc \
+     simpletelnet.prg telnet.dsc \
+     email.prg \
+     memstat.prg memstat.dsc \
+     vnc.prg \
+     calc.prg calc.dsc \
+     directory.prg directory.dsc \
+     blueround.prg blueround.dsc \
+     default.prg default.dsc
 
 include Makefile.common 
 
