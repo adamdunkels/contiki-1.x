@@ -7,7 +7,11 @@ about*.[ch]
 
 calc*.[ch]
 
-  A simple desktop calculator
+  A simple desktop calculator.
+
+dhcp.[ch]
+
+  A simple frontend for the DHCP client.
 
 email*.[ch], smtp*.[ch], pop*.[ch]
 
