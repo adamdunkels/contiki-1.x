@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.7 2004/09/13 10:34:30 adamdunkels Exp $
+# $Id: Makefile,v 1.8 2004/09/13 23:17:13 adamdunkels Exp $
 #
 
 all: contiki.srec
@@ -102,7 +102,7 @@ depend:
 
 contiki: $(CONIKIFILES) contiki-main.o strncasecmp.o \
  ctk.o ek.o arg.o timer.o ek-service.o \
- uip.o uip_arch.o uip_arp.o resolv.o uip-event.o uiplib.o tcpip.o uip-split.o \
+ uip.o uip_arch.o uip_arp.o resolv.o uiplib.o tcpip.o uip-split.o \
  rtl8019.o rtl8019dev.o delay.o debug.o rtl8019-drv.o \
  $(CTKVNC) program-handler.o  \
  webserver.o httpd.o httpd-cgi.o httpd-fs.o webserver-dsc.o \
@@ -122,7 +122,7 @@ upload: erase
 	uisp -dprog=stk200 --upload -v if=contiki.srec
 
 upload-remote: contiki.srec
-	scp contiki.srec sidewalker.sics.se:/tmp
+	scp contiki.srec sidewalker:/tmp
 	ssh sidewalker.sics.se "uisp -dprog=stk200 --erase -v"
 	ssh sidewalker.sics.se "uisp -dprog=stk200 --upload -v if=/tmp/contiki.srec"
 
