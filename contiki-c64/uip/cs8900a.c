@@ -28,7 +28,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.9 2005/02/23 22:43:00 oliverschmidt Exp $
+ * $Id: cs8900a.c,v 1.10 2005/03/09 23:31:54 oliverschmidt Exp $
  *
  */
 
@@ -129,7 +129,7 @@ cs8900a_send(void)
   asm("sta %v+1", cs8900a_txlen);
 
   asm("ldy #8");
-  asm("tryagain:");
+tryagain:
   /* Check for avaliable buffer space. */
   asm("lda #$38");
   asm("sta %v", cs8900a_packetpp);
@@ -137,7 +137,7 @@ cs8900a_send(void)
   asm("sta %v+1", cs8900a_packetpp);
   asm("lda %v+1", cs8900a_ppdata);
   asm("and #1");
-  asm("bne send");
+  asm("bne %g", send);
 
   /* No space avaliable, skip a received frame and try again. */
   asm("lda #$02");
@@ -149,15 +149,15 @@ cs8900a_send(void)
   asm("sta %v", cs8900a_ppdata);
 
   asm("dey");
-  asm("bne tryagain");
+  asm("bne %g", tryagain);
   return;
 
   /* Send the frame. */
-  asm("send:");
+send:
 
   /* First, send 14+40=54 bytes of header. */
   asm("ldy #0");
-  asm("sendloop1:");
+sendloop1:
   asm("lda %v,y", uip_buf);
   asm("sta %v", cs8900a_rxtxreg);
   asm("iny");
@@ -165,7 +165,7 @@ cs8900a_send(void)
   asm("sta %v+1", cs8900a_rxtxreg);
   asm("iny");
   asm("cpy #%b", UIP_LLH_LEN + UIP_TCPIP_HLEN);
-  asm("bne sendloop1");
+  asm("bne %g", sendloop1);
 
   if(uip_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
     return;
@@ -176,11 +176,11 @@ cs8900a_send(void)
 
   asm("lda %v", uip_len);
   asm("lsr");
-  asm("bcc noinc");
+  asm("bcc %g", noinc);
   asm("inc %v", uip_len);
-  asm("bne noinc");
+  asm("bne %g", noinc);
   asm("inc %v+1", uip_len);
-  asm("noinc:");
+noinc:
 
   asm("lda ptr1");
   asm("pha");
@@ -193,20 +193,20 @@ cs8900a_send(void)
   asm("sta ptr1+1");  
 
   asm("ldy #0");
-  asm("sendloop2:");
+sendloop2:
   asm("lda (ptr1),y");
   asm("sta %v", cs8900a_rxtxreg);
   asm("iny");
   asm("lda (ptr1),y");
   asm("sta %v+1", cs8900a_rxtxreg);
   asm("iny");
-  asm("bne check");
+  asm("bne %g", check);
   asm("inc ptr1+1");
-  asm("check:");
+check:
   asm("cpy %v", uip_len);
-  asm("bne sendloop2");
+  asm("bne %g", sendloop2);
   asm("dec %v+1", uip_len);
-  asm("bpl sendloop2");
+  asm("bpl %g", sendloop2);
 
   asm("pla");
   asm("sta ptr1+1");
@@ -249,11 +249,11 @@ cs8900a_poll(void)
   asm("lda %v+1", cs8900a_ppdata);
   asm("and #$0d");
   asm("cmp #$00");
-  asm("bne noreturn");
+  asm("bne %g", noreturn);
   /* No frame ready. */
   return 0;
   
-  asm("noreturn:");
+noreturn:
   /* Process the incoming frame. */
   
   /* Read receiver event and discard it. */
@@ -271,11 +271,11 @@ cs8900a_poll(void)
   asm("sta %v", cnt);
 
   asm("lsr");
-  asm("bcc noinc");
+  asm("bcc %g", noinc);
   asm("inc %v", cnt);
-  asm("bne noinc");
+  asm("bne %g", noinc);
   asm("inc %v+1", cnt);
-  asm("noinc:");
+noinc:
 
   if(cnt > UIP_BUFSIZE) {
     skip_frame();
@@ -294,20 +294,20 @@ cs8900a_poll(void)
   asm("sta ptr1+1");  
   
   asm("ldy #0");
-  asm("readloop:");
+readloop:
   asm("lda %v", cs8900a_rxtxreg);
   asm("sta (ptr1),y");
   asm("iny");
   asm("lda %v+1", cs8900a_rxtxreg);
   asm("sta (ptr1),y");
   asm("iny");
-  asm("bne check");
+  asm("bne %g", check);
   asm("inc ptr1+1");
-  asm("check:");
+check:
   asm("cpy %v", cnt);
-  asm("bne readloop");
+  asm("bne %g", readloop);
   asm("dec %v+1", cnt);
-  asm("bpl readloop");
+  asm("bpl %g", readloop);
 
   asm("pla");
   asm("sta ptr1+1");
