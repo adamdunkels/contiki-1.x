@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.17 2004/09/17 20:59:23 adamdunkels Exp $
+ * $Id: uip.c,v 1.18 2004/09/18 20:17:01 adamdunkels Exp $
  *
  */
 
@@ -823,13 +823,6 @@ uip_process(u8_t flag)
 
   UDPBUF->udplen = HTONS(uip_slen + 8);
   UDPBUF->udpchksum = 0;
-#if UIP_UDP_CHECKSUMS 
-  /* Calculate UDP checksum. */
-  UDPBUF->udpchksum = ~(uip_udpchksum());
-  if(UDPBUF->udpchksum == 0) {
-    UDPBUF->udpchksum = 0xffff;
-  }
-#endif /* UIP_UDP_CHECKSUMS */
 
   BUF->srcport  = uip_udp_conn->lport;
   BUF->destport = uip_udp_conn->rport;
@@ -840,6 +833,15 @@ uip_process(u8_t flag)
   BUF->destipaddr[1] = uip_udp_conn->ripaddr[1];
  
   uip_appdata = &uip_buf[UIP_LLH_LEN + 40];
+
+#if UIP_UDP_CHECKSUMS 
+  /* Calculate UDP checksum. */
+  UDPBUF->udpchksum = ~(uip_udpchksum());
+  if(UDPBUF->udpchksum == 0) {
+    UDPBUF->udpchksum = 0xffff;
+  }
+#endif /* UIP_UDP_CHECKSUMS */
+  
   goto ip_send_nolen;
 #endif /* UIP_UDP */
   
