@@ -10,7 +10,7 @@
 
 /*---------------------------------------------------------------------------*/
 static char
-send_data(struct socket *s)
+send_data(register struct socket *s)
 {
   if(s->state != SOCKET_STATE_DATA_SENT || uip_rexmit()) {
     if(s->sendlen > uip_mss()) {
@@ -25,7 +25,7 @@ send_data(struct socket *s)
 }
 /*---------------------------------------------------------------------------*/
 static char
-data_sent(struct socket *s)
+data_sent(register struct socket *s)
 {
   if(s->state == SOCKET_STATE_DATA_SENT && uip_acked()) {
     if(s->sendlen > uip_mss()) {
@@ -41,7 +41,7 @@ data_sent(struct socket *s)
   return 0;
 }
 /*---------------------------------------------------------------------------*/
-PT_THREAD(socket_send(struct socket *s, char *buf, unsigned int len))
+PT_THREAD(socket_send(register struct socket *s, const char *buf, unsigned int len))
 {
   PT_BEGIN(&s->socketpt);
 
@@ -82,7 +82,7 @@ socket_newdata(struct socket *s)
   }
 }
 /*---------------------------------------------------------------------------*/
-PT_THREAD(socket_readto(struct socket *socket, unsigned char c))
+PT_THREAD(socket_readto(register struct socket *socket, unsigned char c))
 {
   PT_BEGIN(&socket->socketpt);
 
@@ -113,7 +113,7 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c))
 }
 /*---------------------------------------------------------------------------*/
 void
-socket_init(struct socket *socket, char *buffer, unsigned int buffersize)
+socket_init(register struct socket *socket, char *buffer, unsigned int buffersize)
 {
   socket->state = SOCKET_STATE_NONE;
   socket->readlen = 0;
