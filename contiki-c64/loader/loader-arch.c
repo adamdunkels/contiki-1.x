@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.2 2003/04/17 18:59:07 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.3 2003/04/17 19:55:35 adamdunkels Exp $
  *
  */
 
@@ -106,8 +106,7 @@ loader_arch_load_dsc(const char *name)
   unsigned char r;
 
   r = load(name);
-  if(r == MLOAD_OK) {
-    
+  if(r == MLOAD_OK) {    
     return (struct dsc *)ctrl.module;    
   }
   return NULL;

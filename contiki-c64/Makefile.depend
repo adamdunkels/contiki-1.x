@@ -7,6 +7,10 @@ contiki-main.o: contiki-main.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ../contiki/uip/uip_arp.h ../contiki/uip/resolv.h uip/rs232dev.h \
  ../contiki/apps/about-dsc.h ../contiki/apps/netconf-dsc.h \
  ../contiki/apps/processes-dsc.h ../contiki/apps/www-dsc.h
+dirload.o: apps/dirload.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/dispatcher.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h ../contiki/ek/loader.h
 memstat.o: apps/memstat.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/dispatcher.h ../contiki/uip/uip.h \

@@ -30,12 +30,15 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.5 2003/04/17 18:59:06 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.6 2003/04/17 19:55:33 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
-     www.prg email.prg simpletelnet.prg about.prg about.dsc processes.prg \
-     netconf.prg memstat.prg vnc.prg calc.prg blueround.prg default.prg
+     about.prg about.dsc \
+     netconf.prg netconf.dsc \
+     www.prg email.prg simpletelnet.prg processes.prg \
+     netconf.prg memstat.prg vnc.prg calc.prg blueround.prg default.prg \
+     dirload.prg
 
 include Makefile.common 
 
@@ -49,11 +52,11 @@ CFLAGS:=$(CFLAGS) \
 %.prg:  %.o contiki-labels.o
 	cl65 --module -t c64 -o $@ loader-arch-module.o $^
 
-%.dsc:  %.o contiki-labels.o
-	cl65 --module -t c64 -o $@ loader-arch-dsc.o $^
+%.dsc:  %-dsc.o 
+	cl65 --module -t c64 -o $@ loader-arch-dsc.o $^ 
 
-about.dsc: about-dsc.o 
-	cl65 --module -t c64 -o $@ loader-arch-dsc.o $^
+#about.dsc: about-dsc.o
+#	cl65 --module -t c64 -o $@ $^
 
 email.prg: $(EMAIL) 
 
@@ -67,4 +70,4 @@ blueround.prg: themeloader.o ctk-hires-theme-blueround.o contiki-labels.o
 	cl65 --module -t c64 -o $@ loader-arch-module.o $^
 
 default.prg: themeloader.o ctk-hires-theme-default.o contiki-labels.o
-	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
