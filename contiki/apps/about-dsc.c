@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about-dsc.c,v 1.1 2003/04/17 19:00:00 adamdunkels Exp $
+ * $Id: about-dsc.c,v 1.2 2003/04/18 00:15:13 adamdunkels Exp $
  *
  */
 
@@ -38,7 +38,7 @@
 extern struct ctk_icon about_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(about_dsc,
-    "About dialog box",
+    "About Contiki",
     "about.prg",
     about_init,
     &about_icon);
