@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.27 2003/08/15 18:49:22 adamdunkels Exp $
+ * $Id: ctk.c,v 1.28 2003/08/20 20:55:22 adamdunkels Exp $
  *
  */
 
@@ -840,6 +840,8 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
       }
     } else if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT) {
       w->widget.textentry.state = CTK_TEXTENTRY_NORMAL;
+      dispatcher_emit(ctk_signal_widget_activate, w,
+		      w->window->owner);      
     }
     add_redrawwidget(w);
     return REDRAW_WIDGETS;
@@ -886,7 +888,8 @@ textentry_input(ctk_arch_key_t c,
     break;
     
   case CH_ENTER:
-    t->state = CTK_TEXTENTRY_NORMAL;
+    /*    t->state = CTK_TEXTENTRY_NORMAL;*/
+    activate((struct ctk_widget *)t);
     break;
     
   case CTK_CONF_WIDGETDOWN_KEY:
@@ -902,8 +905,7 @@ textentry_input(ctk_arch_key_t c,
     len = tlen - txpos - 1;
     if(c == CH_DEL) {
       if(txpos > 0 && len > 0) {
-	strncpy(cptr - 1, cptr,
-		len);
+	strncpy(cptr - 1, cptr, len);
 	*(cptr + len - 1) = 0;
 	--txpos;
       }
