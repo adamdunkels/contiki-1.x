@@ -43,7 +43,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.36 2004/06/06 06:19:25 adamdunkels Exp $
+ * $Id: ctk.c,v 1.37 2004/06/14 22:11:01 oliverschmidt Exp $
  *
  */
 
@@ -1181,8 +1181,7 @@ textentry_input(ctk_arch_key_t c,
     break;
     
   case CH_CURS_RIGHT:    
-    if(txpos < tlen &&
-       *cptr != 0) {
+    if(txpos < tlen - 1 && *cptr != 0) {
       ++txpos;
     }
     break;
@@ -1193,6 +1192,9 @@ textentry_input(ctk_arch_key_t c,
     
   case CH_CURS_DOWN:
     txpos = strlen(t->text);
+    if(txpos == tlen) {
+      --txpos;
+    }
     break;
     
   case CH_ENTER:
@@ -1211,25 +1213,27 @@ textentry_input(ctk_arch_key_t c,
     break;
     
   default:
-    if(ctk_arch_isprint(c)) {
-      len = tlen - txpos - 1;
-      if(c == CH_DEL) {
-	if(txpos > 0 && len > 0) {
-	  strncpy(cptr - 1, cptr, len);
-	  *(cptr + len - 1) = 0;
-	  --txpos;
-	}
+    len = tlen - txpos;
+    if(c == CH_DEL) {
+      if(len == 1 && *cptr != 0) {
+	*cptr = 0;
       } else {
-	if(len > 0) {
+        if(txpos > 0) {
+	  --txpos;
+	  strcpy(cptr - 1, cptr);
+	}
+      }
+    } else {
+      if(ctk_arch_isprint(c)) {
+	if(len > 1) {
 	  cptr2 = cptr + len - 1;
-	  while(cptr2 + 1 > cptr) {
-	    *(cptr2 + 1) = *cptr2;
+	  while(cptr2 > cptr) {
+	    *cptr2 = *(cptr2 - 1);
 	    --cptr2;
 	  }
-	
-	  *cptr = c;
 	  ++txpos;
 	}
+	*cptr = c;
       }
     }
     break;
