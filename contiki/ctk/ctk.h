@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.19 2004/06/27 12:32:16 oliverschmidt Exp $
+ * $Id: ctk.h,v 1.20 2004/07/04 11:42:47 adamdunkels Exp $
  *
  */
 
@@ -83,6 +83,12 @@
 
 struct ctk_widget;
 
+#if CTK_CONF_WIDGET_FLAGS
+#define CTK_WIDGET_FLAG_INITIALIZER(x) x,
+#else
+#define CTK_WIDGET_FLAG_INITIALIZER(x)
+#endif
+
 /**
  * \defgroup ctkappfunc CTK application functions
  * @{
@@ -106,13 +112,16 @@ struct ctk_widget;
  * \param w The widget's width.
  */
 #define CTK_SEPARATOR(x, y, w) \
- NULL, NULL, x, y, CTK_WIDGET_SEPARATOR, w, 1
+ NULL, NULL, x, y, CTK_WIDGET_SEPARATOR, w, 1, CTK_WIDGET_FLAG_INITIALIZER(0) 
 struct ctk_separator {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
 };
 
 /**
@@ -132,13 +141,16 @@ struct ctk_separator {
  * \param text The button text.
  */
 #define CTK_BUTTON(x, y, w, text) \
- NULL, NULL, x, y, CTK_WIDGET_BUTTON, w, 1, text
+ NULL, NULL, x, y, CTK_WIDGET_BUTTON, w, 1, CTK_WIDGET_FLAG_INITIALIZER(0) text
 struct ctk_button {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
   char *text;
 };
 
@@ -160,13 +172,16 @@ struct ctk_button {
  * \param text The label text.
  */
 #define CTK_LABEL(x, y, w, h, text) \
- NULL, NULL, x, y, CTK_WIDGET_LABEL, w, h, text,
+ NULL, NULL, x, y, CTK_WIDGET_LABEL, w, h, CTK_WIDGET_FLAG_INITIALIZER(0) text,
 struct ctk_label {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
   char *text;
 };
 
@@ -188,13 +203,16 @@ struct ctk_label {
  * \param url The hyperlink URL.
  */
 #define CTK_HYPERLINK(x, y, w, text, url) \
- NULL, NULL, x, y, CTK_WIDGET_HYPERLINK, w, 1, text, url
+ NULL, NULL, x, y, CTK_WIDGET_HYPERLINK, w, 1, CTK_WIDGET_FLAG_INITIALIZER(0) text, url
 struct ctk_hyperlink {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
   char *text;
   char *url;
 };
@@ -235,7 +253,7 @@ struct ctk_hyperlink {
  * \param len The length of the text buffer
  */
 #define CTK_TEXTENTRY(x, y, w, h, text, len) \
-  NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, 1, text, len, \
+  NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, 1, CTK_WIDGET_FLAG_INITIALIZER(0) text, len, \
   CTK_TEXTENTRY_NORMAL, 0, 0
 struct ctk_textentry {
   struct ctk_widget *next;
@@ -243,6 +261,9 @@ struct ctk_textentry {
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
   char *text;
   unsigned char len;
   unsigned char state;
@@ -276,7 +297,8 @@ struct ctk_textentry {
  * \param textmap A pointer to the icon's text version of the bitmap.
  */
 #define CTK_ICON(title, bitmap, textmap) \
- NULL, NULL, 0, 0, CTK_WIDGET_ICON, 2, 4, title, 0, \
+ NULL, NULL, 0, 0, CTK_WIDGET_ICON, 2, 4, CTK_WIDGET_FLAG_INITIALIZER(0) \
+ title, EK_ID_NONE, \
  CTK_ICON_BITMAP(bitmap), CTK_ICON_TEXTMAP(textmap)
 struct ctk_icon {
   struct ctk_widget *next;
@@ -284,6 +306,9 @@ struct ctk_icon {
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
   char *title;
   ek_id_t owner;
   unsigned char *bitmap;
@@ -291,7 +316,7 @@ struct ctk_icon {
 };
 
 #define CTK_BITMAP(x, y, w, h, bitmap) \
-  NULL, NULL, x, y, CTK_WIDGET_BITMAP, w, h, bitmap,
+  NULL, NULL, x, y, CTK_WIDGET_BITMAP, w, h, CTK_WIDGET_FLAG_INITIALIZER(0) bitmap,
 struct ctk_bitmap {
   struct ctk_widget *next;
   struct ctk_window *window;
@@ -304,20 +329,22 @@ struct ctk_bitmap {
 #define CTK_TEXTMAP_NORMAL 0
 #define CTK_TEXTMAP_ACTIVE 1
 
-#define CTK_TEXTMAP(x, y, w, h, textmap, flags) \
- NULL, NULL, x, y, CTK_WIDGET_LABEL, w, h, text, flags, CTK_TEXTMAP_NORMAL
+#define CTK_TEXTMAP(x, y, w, h, textmap) \
+ NULL, NULL, x, y, CTK_WIDGET_LABEL, w, h, CTK_WIDGET_FLAG_INITIALIZER(0) text, CTK_TEXTMAP_NORMAL
 struct ctk_textmap {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
   unsigned char w, h;
-  char *textmap;
+#if CTK_CONF_WIDGET_FLAGS
   unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
+  char *textmap;
   unsigned char state;
 };
 
-  
+
 /**
  * \internal The CTK button widget structure.
  */
@@ -399,6 +426,10 @@ struct ctk_widget {
 				coordinates. */
     h;                       /**< The height of the widget in
 				character coordinates. */
+#if CTK_CONF_WIDGET_FLAGS
+  unsigned char flags;
+#endif /* CTK_CONF_WIDGET_FLAGS */
+  
   union {
     struct ctk_widget_label label;
     struct ctk_widget_button button;
@@ -413,6 +444,16 @@ struct ctk_widget {
 
 
 struct ctk_desktop;
+
+#define CTK_WIDGET_FLAG_NONE      0
+#define CTK_WIDGET_FLAG_MONOSPACE 1
+#define CTK_WIDGET_FLAG_CENTER    2
+
+#if CTK_CONF_WIDGET_FLAGS
+#define CTK_WIDGET_SET_FLAG(w, f) ((struct ctk_widget *)(w))->flags = (f)
+#else /* CTK_CONF_WIDGET_FLAGS */
+#define CTK_WIDGET_SET_FLAG(w, f)
+#endif /* CTK_CONF_WIDGET_FLAGS */
 
 /**
  * Representation of a CTK window.
@@ -828,7 +869,7 @@ unsigned char ctk_desktop_width(struct ctk_desktop *d);
 unsigned char ctk_desktop_height(struct ctk_desktop *d);
 
 /* Signals. */
-extern ek_signal_t ctk_signal_keypress,
+extern ek_event_t ctk_signal_keypress,
   ctk_signal_widget_activate,
   ctk_signal_widget_select,
   ctk_signal_timer,
@@ -838,7 +879,7 @@ extern ek_signal_t ctk_signal_keypress,
   ctk_signal_pointer_button;
 
 #if CTK_CONF_SCREENSAVER
-extern ek_signal_t ctk_signal_screensaver_stop,
+extern ek_event_t ctk_signal_screensaver_stop,
   ctk_signal_screensaver_start;
 
 extern unsigned short ctk_screensaver_timeout;
@@ -857,7 +898,7 @@ extern unsigned short ctk_screensaver_timeout;
 #endif /* CTK_CONF_SCREENSAVER */
 
 /* These should no longer be used: */
-extern ek_signal_t ctk_signal_button_activate,
+extern ek_event_t ctk_signal_button_activate,
   ctk_signal_button_hover,
   ctk_signal_hyperlink_activate,
   ctk_signal_hyperlink_hover;
