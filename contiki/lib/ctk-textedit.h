@@ -36,14 +36,13 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-textedit.h,v 1.2 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: ctk-textedit.h,v 1.3 2004/07/04 15:12:57 adamdunkels Exp $
  *
  */
 #ifndef __CTK_TEXTEDIT_H__
 #define __CTK_TEXTEDIT_H__
 
 #include "ctk.h"
-#include "dispatcher.h"
 
 /**
  * Instantiating macro for the CTK textedit widget.
@@ -65,8 +64,8 @@ struct ctk_textedit {
 void ctk_textedit_add(struct ctk_window *w,
 		      struct ctk_textedit *t);
 
-void ctk_textedit_sighandler(struct ctk_textedit *t,
-			     ek_signal_t s,
-			     ek_data_t data);          
+void ctk_textedit_eventhandler(struct ctk_textedit *t,
+			       ek_event_t s,
+			       ek_data_t data);          
 
 #endif /* __CTK_TEXTEDIT_H__ */

@@ -43,12 +43,14 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-textedit.c,v 1.2 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: ctk-textedit.c,v 1.3 2004/07/04 15:12:56 adamdunkels Exp $
  *
  */
 
 
 #include "ctk-textedit.h"
+
+#include <string.h>
 
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -77,9 +79,9 @@ ctk_textedit_add(struct ctk_window *w,
  */
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_textedit_sighandler(struct ctk_textedit *t,
-			ek_signal_t s,
-			ek_data_t data)
+ctk_textedit_eventhandler(struct ctk_textedit *t,
+			  ek_event_t s,
+			  ek_data_t data)
 {
   char *textptr, *textptr2;
   unsigned char len;
