@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-conf.h,v 1.2 2004/07/04 19:51:19 adamdunkels Exp $
+ * $Id: ctk-conio-conf.h,v 1.3 2004/08/12 21:54:12 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@
 /* Light gray inverted color scheme: */
 #define BORDERCOLOR         COLOR_WHITE
 #define SCREENCOLOR         COLOR_WHITE
+#define BACKGROUNDCOLOR     COLOR_WHITE
 
 #define WINDOWCOLOR_FOCUS   COLOR_BLACK
 #define WINDOWCOLOR         COLOR_GRAY2
@@ -64,6 +65,7 @@
 /* Blue color scheme: */
 #define BORDERCOLOR         COLOR_LIGHTBLUE
 #define SCREENCOLOR         COLOR_BLUE
+#define BACKGROUNDCOLOR     COLOR_BLUE
 
 #define WINDOWCOLOR_FOCUS   COLOR_LIGHTBLUE
 #define WINDOWCOLOR         COLOR_GRAY1
@@ -85,6 +87,7 @@
 /* Black and white monocrome color scheme: */
 #define BORDERCOLOR         COLOR_BLACK
 #define SCREENCOLOR         COLOR_BLACK
+#define BACKGROUNDCOLOR     COLOR_BLACK
 
 #define WINDOWCOLOR_FOCUS   COLOR_WHITE
 #define WINDOWCOLOR         COLOR_WHITE
@@ -106,6 +109,7 @@
 /* Blue monocrome color scheme: */
 #define BORDERCOLOR         COLOR_BLUE
 #define SCREENCOLOR         COLOR_BLUE
+#define BACKGROUNDCOLOR     COLOR_BLUE
 
 #define WINDOWCOLOR_FOCUS   COLOR_LIGHTBLUE
 #define WINDOWCOLOR         COLOR_LIGHTBLUE
@@ -127,6 +131,7 @@
 /* Gray color scheme: */
 #define BORDERCOLOR         COLOR_GRAY1
 #define SCREENCOLOR         COLOR_GRAY1
+#define BACKGROUNDCOLOR     COLOR_GRAY1
 
 #define WINDOWCOLOR_FOCUS   COLOR_GRAY3
 #define WINDOWCOLOR         COLOR_GRAY2
@@ -148,6 +153,7 @@
 /* Red color scheme: */
 #define BORDERCOLOR         COLOR_BLACK
 #define SCREENCOLOR         COLOR_BLACK
+#define BACKGROUNDCOLOR     COLOR_BLACK
 
 #define WINDOWCOLOR_FOCUS   COLOR_LIGHTRED
 #define WINDOWCOLOR         COLOR_RED
