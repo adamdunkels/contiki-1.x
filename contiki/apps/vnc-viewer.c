@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-viewer.c,v 1.8 2004/07/04 11:35:08 adamdunkels Exp $
+ * $Id: vnc-viewer.c,v 1.9 2004/09/12 07:32:05 adamdunkels Exp $
  *
  */
 
@@ -48,9 +48,10 @@
 #define RFB_SERVER_VERSION_STRING rfb_server_version_string
 
 /* "RFB 003.003" */
-static u8_t rfb_server_version_string[12] = {82,70,66,32,48,48,51,46,48,48,51,10};
+static u8_t rfb_server_version_string[12] =
+  {82,70,66,32,48,48,51,46,48,48,51,10};
 
-#if 1
+#if 0
 #define PRINTF(x)
 #else
 #define PRINTF(x) printf x
@@ -621,7 +622,6 @@ newdata(void)
 /*-----------------------------------------------------------------------------------*/
 /* Called when there is nothing else to do - checks for any pending
    events (mouse movements or keypresses). If no events are found, it
-   makes sure that we send out an incremental update rd, it
    makes sure that we send out an incremental update request. */
 static void
 check_events(void)
@@ -669,7 +669,7 @@ acked(void)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-vnc_viewer_app(void * nullptr)
+vnc_viewer_appcall(void * nullptr)
 {
   if(vs->close == 1) {
     uip_close();

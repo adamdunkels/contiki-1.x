@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki VNC client.
  *
- * $Id: vnc-viewer.h,v 1.7 2004/08/22 12:35:12 oliverschmidt Exp $
+ * $Id: vnc-viewer.h,v 1.8 2004/09/12 07:33:26 adamdunkels Exp $
  *
  */
 
@@ -43,7 +43,7 @@ struct vnc_viewer_state;
 typedef unsigned long u32_t;
 
 void vnc_viewer_init(void);
-void vnc_viewer_app(void *nullptr);
+void vnc_viewer_appcall(void *nullptr);
 
 void vnc_viewer_connect(u16_t *server, u8_t display);
 void vnc_viewer_close(void);

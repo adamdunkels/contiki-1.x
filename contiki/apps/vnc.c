@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.9 2004/07/04 11:35:08 adamdunkels Exp $
+ * $Id: vnc.c,v 1.10 2004/09/12 07:32:05 adamdunkels Exp $
  *
  */
 
@@ -83,7 +83,9 @@ static struct ctk_bitmap vncbitmap =
   {CTK_BITMAP(2, 2,
 	      VNC_CONF_VIEWPORT_WIDTH / 8,
 	      VNC_CONF_VIEWPORT_HEIGHT / 8,
-	      vnc_draw_bitmap)};
+	      vnc_draw_bitmap,
+	      VNC_CONF_VIEWPORT_WIDTH,
+	      VNC_CONF_VIEWPORT_HEIGHT)};
 
 static struct ctk_button leftbutton =
   {CTK_BUTTON(6, HEIGHT - 1, 4, "Left")};
@@ -220,6 +222,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
       VNC_VIEWER_POST_POINTER_EVENT(x, y, 0);
     }
        
+  } else if(ev == tcpip_event) {
+    vnc_viewer_appcall(data);
   }
 }
 /*-----------------------------------------------------------------------------------*/

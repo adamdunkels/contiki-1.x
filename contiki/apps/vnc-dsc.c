@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: vnc-dsc.c,v 1.3 2004/06/27 12:34:24 oliverschmidt Exp $
+ * $Id: vnc-dsc.c,v 1.4 2004/09/12 07:33:26 adamdunkels Exp $
  *
  */
 
@@ -61,9 +61,9 @@ static unsigned char vncicon_bitmap[3*3*8] = {
 
 #if CTK_CONF_ICON_TEXTMAPS
 static char vncicon_textmap[9] = {
-  'w', 'e', 'b',
-  'p', 'r', 'g',
-  'd', '6', '4'
+  'V', 'N', 'C',
+  'c', 'l', 'i',
+  'e', 'n', 't'
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
