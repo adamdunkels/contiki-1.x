@@ -29,13 +29,13 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.11 2004/06/06 06:03:03 adamdunkels Exp $
+ * $Id: webserver.c,v 1.12 2004/07/04 17:50:39 adamdunkels Exp $
  *
  */
 
 
 #include "ctk.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "http-strings.h"
 #include "petsciiconv.h"
 
@@ -52,12 +52,17 @@ static struct ctk_window mainwindow;
 static struct ctk_label message =
   {CTK_LABEL(0, 0, 15, 1, "Latest requests")};
 
-static DISPATCHER_SIGHANDLER(webserver_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(webserver_sighandler, s, data);
 
 static struct dispatcher_proc p =
 {DISPATCHER_PROC("Web server", NULL, webserver_sighandler,
 		 httpd_appcall)};
-static ek_id_t id;
+static ek_id_t id;*/
+
+EK_EVENTHANDLER(webserver_eventhandler, ev, data);
+EK_PROCESS(p, "Web server", EK_PRIO_NORMAL,
+	   webserver_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 
 #define LOG_WIDTH  30
@@ -72,32 +77,27 @@ LOADER_INIT_FUNC(webserver_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    id = ek_start(&p);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(webserver_eventhandler, ev, data)
+{
+  EK_EVENTHANDLER_ARGS(ev, data);
 
+  if(ev == EK_EVENT_INIT) {
     ctk_window_new(&mainwindow, LOG_WIDTH, LOG_HEIGHT+1, "Web server");
-
     
     CTK_WIDGET_ADD(&mainwindow, &message);
     CTK_WIDGET_ADD(&mainwindow, &loglabel);
  
-    /* Attach listeners to signals. */
-    dispatcher_listen(ctk_signal_window_close);
-
     httpd_init();
-  }
 
-  ctk_window_open(&mainwindow);
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(webserver_sighandler, s, data)
-{
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_window_close ||
-     s == dispatcher_signal_quit) {
+    ctk_window_open(&mainwindow);
+  } else if(ev == ctk_signal_window_close ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     ctk_window_close(&mainwindow);
-    dispatcher_exit(&p);
+    ek_exit();
     id = EK_ID_NONE;
     LOADER_UNLOAD();    
   }

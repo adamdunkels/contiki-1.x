@@ -29,10 +29,12 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.17 2004/06/06 06:03:03 adamdunkels Exp $
+ * $Id: webclient.c,v 1.18 2004/07/04 17:50:39 adamdunkels Exp $
  *
  */
 
+#include "ek.h"
+#include "tcpip.h"
 #include "uip.h"
 #include "webclient.h"
 #include "resolv.h"
@@ -149,7 +151,7 @@ webclient_get(char *host, u16_t port, char *file)
     }
   }
   
-  conn = dispatcher_connect(ipaddr, htons(port), NULL);
+  conn = tcp_connect(ipaddr, htons(port), NULL);
   
   if(conn == NULL) {
     return 0;
@@ -369,16 +371,15 @@ newdata(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(webclient_appcall, state)
+void
+webclient_appcall(void *state)
 {
-  DISPATCHER_UIPCALL_ARG(state);
-
   if(uip_connected()) {
     s.timer = 0;
     s.state = WEBCLIENT_STATE_STATUSLINE;
     senddata();
     webclient_connected();
-    dispatcher_markconn(uip_conn, &s);
+    tcp_markconn(uip_conn, &s);
     return;
   }
 
@@ -425,7 +426,7 @@ DISPATCHER_UIPCALL(webclient_appcall, state)
   }
 
   if(uip_closed()) {
-    dispatcher_markconn(uip_conn, NULL);
+    tcp_markconn(uip_conn, NULL);
     if(s.httpflag != HTTPFLAG_MOVED) {
       /* Send NULL data to signal EOF. */
       webclient_datahandler(NULL, 0);

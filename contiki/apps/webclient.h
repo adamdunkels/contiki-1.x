@@ -29,7 +29,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.h,v 1.5 2004/06/06 06:03:03 adamdunkels Exp $
+ * $Id: webclient.h,v 1.6 2004/07/04 17:50:39 adamdunkels Exp $
  *
  */
 #ifndef __WEBCLIENT_H__
@@ -39,7 +39,7 @@
 #include "http-strings.h"
 #include "http-user-agent-string.h"
 #include "resolv.h"
-#include "dispatcher.h"
+
 
 /* Callback functions that have to be implemented by the application
    program. */
@@ -55,7 +55,9 @@ void webclient_closed(void);
 void webclient_init(void);
 unsigned char webclient_get(char *host, u16_t port, char *file);
 void webclient_close(void);
-DISPATCHER_UIPCALL(webclient_appcall, state);
+
+void webclient_appcall(void *state);
+/*DISPATCHER_UIPCALL(webclient_appcall, state);*/
 
 char *webclient_mimetype(void);
 char *webclient_filename(void);
