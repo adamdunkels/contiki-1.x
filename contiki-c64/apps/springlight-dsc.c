@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: springlight-dsc.c,v 1.1 2003/04/24 17:07:41 adamdunkels Exp $
+ * $Id: springlight-dsc.c,v 1.2 2004/06/27 12:43:33 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(springlight_dsc,
     springlight_init,
     &springlight_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char springlighticon_bitmap[3*3*8] = {
   0x00,0x3f,0x6a,0x40,0x60,0x40,0x60,0x40,
   0x00,0xff,0xaa,0x00,0x00,0x00,0x00,0x00,
@@ -56,13 +57,15 @@ static unsigned char springlighticon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0xff,0x00,
   0x02,0x02,0x02,0x02,0x02,0x06,0xfc,0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
-
+#if CTK_CONF_ICON_TEXTMAPS
 static char springlighticon_textmap[9] = {
   '(', '=', ')',
   '|', 'o', '|',
   '(', '-', ')'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon springlight_icon =
   {CTK_ICON("Springlight", springlighticon_bitmap, springlighticon_textmap)};

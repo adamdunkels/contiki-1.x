@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: default-dsc.c,v 1.2 2003/04/24 17:02:52 adamdunkels Exp $
+ * $Id: default-dsc.c,v 1.3 2004/06/27 12:43:33 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(default_dsc,
     default_init,
     &default_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char defaulticon_bitmap[3*3*8] = {
   0xff,0xff,0xc0,0xcf,0xc0,0xc3,0xc0,0xc0,
   0xff,0xff,0x00,0xff,0x00,0xff,0x00,0x00,
@@ -54,12 +55,15 @@ static unsigned char defaulticon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0xff,0x00,0xff,0xff,
   0x0b,0x0b,0x0b,0x0b,0xfb,0x03,0xff,0xff  
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char defaulticon_textmap[9] = {
   '+', '=', '+',
   '|', 'D', '|',
   '+', '-', '+'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon default_icon =
   {CTK_ICON("Default", defaulticon_bitmap, defaulticon_textmap)};

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: plasma-dsc.c,v 1.1 2003/08/20 19:49:44 adamdunkels Exp $
+ * $Id: plasma-dsc.c,v 1.2 2004/06/27 12:43:33 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(plasma_dsc,
     plasma_init,
     &plasma_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char plasmaicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -56,12 +57,15 @@ static unsigned char plasmaicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char plasmaicon_textmap[9] = {
   '.', ' ', '.',
   'o', ' ', 'o',
   'O', ' ', 'O'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon plasma_icon =
   {CTK_ICON("Plasma", plasmaicon_bitmap, plasmaicon_textmap)};

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssconfig-dsc.c,v 1.1 2003/07/31 23:36:29 adamdunkels Exp $
+ * $Id: ssconfig-dsc.c,v 1.2 2004/06/27 12:43:33 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(ssconfig_dsc,
     ssconfig_init,
     &ssconfig_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char ssconfigicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -56,12 +57,15 @@ static unsigned char ssconfigicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char ssconfigicon_textmap[9] = {
   ' ', 'Z', 'z',
   ' ', 'z', ' ',
   '|', '-', 'o'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon ssconfig_icon =
   {CTK_ICON("Screensavers", ssconfigicon_bitmap, ssconfigicon_textmap)};

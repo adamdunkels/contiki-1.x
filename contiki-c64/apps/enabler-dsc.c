@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: enabler-dsc.c,v 1.1 2003/04/24 17:07:41 adamdunkels Exp $
+ * $Id: enabler-dsc.c,v 1.2 2004/06/27 12:43:33 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(enabler_dsc,
     enabler_init,
     &enabler_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char enablericon_bitmap[3*3*8] = {
   0xff,0xff,0xff,0xfc,0xf0,0xf0,0xe0,0xe0,
   0xff,0xff,0xff,0x00,0x00,0x00,0x00,0x00,
@@ -56,13 +57,15 @@ static unsigned char enablericon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,
   0x07,0x07,0x0f,0x0f,0x3f,0xff,0xff,0xff
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
-
+#if CTK_CONF_ICON_TEXTMAPS
 static char enablericon_textmap[9] = {
   '(', '=', ')',
   '|', 'o', '|',
   '(', '-', ')'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon enabler_icon =
   {CTK_ICON("Enabler", enablericon_bitmap, enablericon_textmap)};

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire-dsc.c,v 1.2 2003/08/20 19:53:29 adamdunkels Exp $
+ * $Id: ssfire-dsc.c,v 1.3 2004/06/27 12:43:33 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(ssfire_dsc,
     ssfire_init,
     &ssfire_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char ssfireicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -56,12 +57,15 @@ static unsigned char ssfireicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char ssfireicon_textmap[9] = {
   '.', ' ', '.',
   'o', ' ', 'o',
   'O', ' ', 'O'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon ssfire_icon =
   {CTK_ICON("Fire", ssfireicon_bitmap, ssfireicon_textmap)};

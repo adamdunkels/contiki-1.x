@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat-dsc.c,v 1.2 2003/08/20 19:53:07 adamdunkels Exp $
+ * $Id: memstat-dsc.c,v 1.3 2004/06/27 12:43:33 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(memstat_dsc,
     memstat_init,
     &memstat_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char memstaticon_bitmap[3*3*8] = {
   0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
   0x00, 0xff, 0x00, 0x7e, 0x00, 0xff, 0x00, 0xff,
@@ -56,12 +57,15 @@ static unsigned char memstaticon_bitmap[3*3*8] = {
   0x07, 0xe7, 0x0f, 0xef, 0x0f, 0x0f, 0xff, 0x00,
   0x8e, 0x06, 0x06, 0x06, 0x8e, 0xfe, 0xfe, 0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char memstaticon_textmap[9] = {
   '0', '0', '1',
   '0', '1', '0',
   '1', '0', '1'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon memstat_icon =
   {CTK_ICON("Memory stats", memstaticon_bitmap, memstaticon_textmap)};
