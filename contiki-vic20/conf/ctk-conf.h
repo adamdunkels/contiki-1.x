@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.1 2003/04/05 12:35:32 adamdunkels Exp $
+ * $Id: ctk-conf.h,v 1.2 2004/06/06 06:47:14 adamdunkels Exp $
  *
  */
 
@@ -50,6 +50,8 @@
 /* Defines which key that is to be used for switching the frontmost
    window.  */
 #define CTK_CONF_WINDOWSWITCH_KEY     CH_F3
+#define CTK_CONF_WIDGETUP_KEY         CH_F5
+#define CTK_CONF_WIDGETDOWN_KEY       CH_F7
 
 /* Toggles support for desktop icons. */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
