@@ -4,18 +4,16 @@
 
 \author Adam Dunkels <adam@dunkels.com>
 
-The Contiki desktop environment is a highly portable, modern, open
-source, Internet-enabled operating system and desktop environment for
-very constrained systems, such as 8-bit microcontrollers or 8-bit
-homecomputers like the Commodore 64
-
-Contiki has the following features:
-
- - Windowing system and GUI toolkit
- - Cooperative multitasking event kernel
- - Message passing using signals
- - TCP/IP support using the uIP TCP/IP stack
- - VNC server
+The Contiki operating system is a highly portable, minimalistic
+operating system for a variety of constrained systems ranging from
+modern 8-bit microcontrollers for embedded systems to old 8-bit
+homecomputers such as the Commodore 64. Contiki provides a simple
+event driven kernel with cooperative multitasking and interprocess
+communication using message passing signals, a dynamic process
+structure and support for loading and unloading programs, native
+TCP/IP support using the uIP TCP/IP stack, and a graphical subsystem
+with either direct graphic support for directly connected terminals or
+networked virtual display with VNC or Telnet.
 
 Contiki is written in the C programming language and is freely
 available as open source under a BSD-style license. More information

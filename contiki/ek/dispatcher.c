@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.21 2003/11/27 15:53:33 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.22 2004/02/24 09:55:33 adamdunkels Exp $
  *
  */
 
@@ -167,7 +167,7 @@ static struct signal_data signals[EK_CONF_NUMSIGNALS];
  */
 
 /**
- * \page disptacher The dispatcher
+ * \page dispatcher The dispatcher
  *
  * The dispatcher is the initiator of all program execution in
  * Contiki. After the system has been initialized by the boot up code,
@@ -277,8 +277,32 @@ dispatcher_sigalloc(void)
  * Starts a new process.
  *
  * Is called by a program in order to start a new process for the
- * program. It must be called before any other dispatcher or CTK
- * functions.
+ * program. This function should be called quite early in the
+ * initialization procedure of a new process. In partcular, it must be
+ * called before any other dispatcher functions, or functions of other
+ * modules that make use of dispatcher functions. Most CTK functions
+ * call dispatcher functions, and should therefore not be called
+ * before dispatcher_start() is called.
+ *
+ * Example:
+ \code
+static void app_idle(void);
+static DISPATCHER_SIGHANDLER(app_sighandler, s, data);
+static struct dispatcher_proc p =
+  {DISPATCHER_PROC("Generic applications", app_idle, app_sighandler, NULL)};
+static ek_id_t id = EK_ID_NONE;
+ 
+LOADER_INIT_FUNC(app_init, arg)
+{
+  arg_free(arg);
+  
+  if(id == EK_ID_NONE) {
+    id = dispatcher_start(&p);
+
+    rest_of_initialization();
+  }
+}
+ \endcode
  *
  * \param p A pointer to a dispatcher_proc struct that must be found
  * in the process own memory space.
@@ -610,7 +634,7 @@ dispatcher_markconn(struct uip_conn *conn,
  * \param ripaddr A pointer to a 4-byte structure representing the IP
  * address of the remote host.
  *
- * \param rport The remote port number in network byte order.
+ * \param port The remote port number in network byte order.
  *
  * \param appstate A pointer to an application specific state object.
  *
