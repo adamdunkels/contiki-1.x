@@ -1,3 +1,6 @@
+#ifndef __PPP_ARCH_H__
+#define __PPP_ARCH_H__
+
 /**
  * Put a character on the serial device.
  *
@@ -28,3 +31,5 @@ void ppp_arch_putchar(u8_t c);
  * \retval Non-zero If a character is available.
  */
 u8_t ppp_arch_getchar(u8_t *c);
+
+#endif /* __PPP_ARCH_H__ */
