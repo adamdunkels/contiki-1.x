@@ -32,7 +32,7 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: calc.c,v 1.3 2003/04/24 17:19:23 adamdunkels Exp $
+ * $Id: calc.c,v 1.4 2003/08/20 20:51:31 adamdunkels Exp $
  *
  */
 
@@ -92,7 +92,7 @@ static struct dispatcher_proc p =
   {DISPATCHER_PROC("Calculator", NULL, calc_sighandler, NULL)};
 static ek_id_t id;
 
-static unsigned int operand1, operand2;
+static unsigned long operand1, operand2;
 static unsigned char op;
 #define OP_ADD 1
 #define OP_SUB 2
