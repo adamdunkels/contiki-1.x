@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.h,v 1.2 2003/04/18 00:17:09 adamdunkels Exp $
+ * $Id: ek.h,v 1.3 2003/08/13 22:52:15 adamdunkels Exp $
  *
  */
 /*-----------------------------------------------------------------------------------*/
@@ -56,96 +56,7 @@
 
 typedef unsigned char ek_err_t;
 
-/* Callback functions (must be implemented by the system/application
-   program using ek): */
-
-/* ek_idle:
- *
- * Is called repeatedly by ek when there is nothing else to do. This
- * function can be used to implement polling operations by the
- * system/application program using ek.
- */
-void ek_idle(void);
-
-/* ek_dispatcher:
- *
- * Is called by ek when a signal has been omitted. The "id" parameter
- * can be used to distinguish listeners.
- *
- * Return values: TBA
- */
-ek_err_t ek_dispatcher(ek_signal_t s, ek_data_t data, ek_id_t id);
-
-/* ek_clock:
- *
- * Should return the current value of the system clock.
- */
 ek_clock_t ek_clock(void);
-
-
-/* API functions (are used by programs using ek): */
-
-/* ek_listen:
- *
- * Registers the listener identified by "id" with the signal "s". When
- * the signal "s" is emitted, the ek dispatcher callback will be
- * invoked for the listener "id".
- *
- * The meaning of the identifier "id" is defined by the caller (i.e.,
- * the application program using the ek kernel).
- *
- * Return values: TBA
- */
-ek_err_t ek_listen(ek_signal_t s, ek_id_t id);
-
-/* ek_unlisten:
- *
- * Unregisters all previously registered listeners with ID id.
- *
- * Return values: TBA
- */
-ek_err_t ek_unlisten(ek_id_t id);
-
-/* ek_emit:
- *
- * Emits the signal "s". When control returns to ek, the ek signal
- * dispatcher will be called for each of the registered listeners for
- * the signal. If no listeners are registered, the signal is
- * dropped.
- *
- * Return values: TBA
- */
-ek_err_t ek_emit(ek_signal_t s, ek_data_t data, ek_id_t id);
-
-/* ek_timer:
- *
- * Sets a timer that will make the signal "s" to be emitted after "t"
- * number of clock ticks. The granularity of the clock ticks is
- * determined by the underlying system on which ek is run.
- *
- * Return values: TBA
- */ 
-ek_err_t ek_timer(ek_signal_t s, ek_data_t data, ek_id_t id,
-		  ek_ticks_t t);
-
-/* ek_init:
- *
- * Initializes ek.
- */
-void ek_init(void);
-
-/* ek_signals:
- *
- * Called internally by ek_run(). Processes signals. 
- */
-void ek_signals(void);
-
-/* ek_run:
- *
- * The main function in ek that is called to start ek. This function
- * never returns.
- */
-void ek_run(void);
 
 #endif /* __EK_H__ */
 /*-----------------------------------------------------------------------------------*/

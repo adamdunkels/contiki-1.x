@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.h,v 1.7 2003/07/30 23:29:38 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.8 2003/08/13 22:52:15 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -59,6 +59,8 @@ struct dispatcher_proc {
   void (* signalhandler)(void);
   void (* uiphandler)(void);
 #endif /* CC_FUNCTION_POINTER_ARGS */
+
+  unsigned char signals[EK_CONF_NUMSIGNALS];
 };
 
 #define DISPATCHER_PROCS()   dispatcher_procs
@@ -72,7 +74,8 @@ void dispatcher_exit(struct dispatcher_proc *p);
 void dispatcher_listen(ek_signal_t s);
 
 void dispatcher_timer(ek_signal_t s, ek_data_t data, ek_ticks_t t);
-#define dispatcher_emit ek_emit
+/*#define dispatcher_emit ek_emit*/
+ek_err_t dispatcher_emit(ek_signal_t s, ek_data_t data, ek_id_t id);
 
 struct dispatcher_proc *dispatcher_process(ek_id_t id);
 
@@ -131,5 +134,10 @@ void dispatcher_uiplisten(u16_t port);
 extern ek_id_t dispatcher_current;
 extern struct dispatcher_proc *dispatcher_procs;
 extern ek_signal_t dispatcher_signal_quit;
+
+void dispatcher_signal(void);
+void dispatcher_idle(void);
+
+void dispatcher_run(void);
 
 #endif /* __DISPATCHER_H__ */
