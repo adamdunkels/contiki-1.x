@@ -32,18 +32,18 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.h,v 1.1 2003/04/11 20:29:31 adamdunkels Exp $
+ * $Id: loader-arch.h,v 1.2 2004/07/04 19:58:56 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_ARCH_H__
 #define __LOADER_ARCH_H__
 
-unsigned char loader_arch_load(const char *name);
+unsigned char loader_arch_load(const char *name, char *arg);
 void loader_arch_free(void *addr);
 
 extern void *loader_arch_loadaddr;
 
-#define LOADER_LOAD(name) loader_arch_load(name)
+#define LOADER_LOAD(name, arg) loader_arch_load(name, arg)
 #define LOADER_UNLOAD() loader_arch_free(&loader_arch_loadaddr)
 
 #endif /* __LOADER_ARCH_H__ */

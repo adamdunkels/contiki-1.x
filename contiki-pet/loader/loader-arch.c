@@ -32,12 +32,13 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.1 2003/04/11 20:29:31 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.2 2004/07/04 19:58:56 adamdunkels Exp $
  *
  */
 
 #include <modload.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "loader-arch.h"
 
 /*-----------------------------------------------------------------------------------*/
@@ -48,7 +49,7 @@
  */
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-loader_arch_load(const char *name)
+loader_arch_load(const char *name, char *arg)
 {
   static struct mod_ctrl ctrl = {
     read            /* Read from disk */
@@ -76,7 +77,7 @@ loader_arch_load(const char *name)
     /* We've successfully loaded the module. Call its main function. We
      * could also evaluate the function result code if necessary.
      */
-    ((void (*)(void))ctrl.module)();
+    ((void (*)(char *))ctrl.module)(arg);
     
   } else {
     

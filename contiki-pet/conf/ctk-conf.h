@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.2 2004/06/27 12:51:23 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.3 2004/07/04 19:58:56 adamdunkels Exp $
  *
  */
 
@@ -45,11 +42,13 @@
 */
 
 /* Defines which key that is to be used for activating the menus */
-#define CTK_CONF_MENU_KEY             CH_F1
+#define CTK_CONF_MENU_KEY             0
 
 /* Defines which key that is to be used for switching the frontmost
    window.  */
-#define CTK_CONF_WINDOWSWITCH_KEY     CH_F3
+#define CTK_CONF_WINDOWSWITCH_KEY     1
+#define CTK_CONF_WIDGETUP_KEY         2
+#define CTK_CONF_WIDGETDOWN_KEY       3
 
 /* Toggles support for icons. */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
