@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rrnet-drv.c,v 1.1 2003/07/30 22:40:36 adamdunkels Exp $
+ * $Id: rrnet-drv.c,v 1.2 2003/07/31 23:12:51 adamdunkels Exp $
  *
  */
 
@@ -137,7 +137,7 @@ LOADER_INIT_FUNC(rrnet_drv_init)
     asm("sta $de01");
     cs8900a_init();
     
-    dispatcher_listen(uip_signal_uninstall);
+    dispatcher_listen(dispatcher_signal_quit);
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -146,7 +146,7 @@ DISPATCHER_SIGHANDLER(rrnet_drv_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == uip_signal_uninstall) {
+  if(s == dispatcher_signal_quit) {
     dispatcher_exit(&p);
     id = EK_ID_NONE;
     LOADER_UNLOAD();   
