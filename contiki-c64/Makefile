@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/03/19 16:26:18 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2003/04/08 18:21:57 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -39,24 +39,28 @@ usage:
 	@echo "Make sure the Contiki sources is in the directory $(CONTIKI)"
 	@echo 'To compile Contiki, use "'$(MAKE)' target" where target'
 	@echo 'is one of the following:'
-	@echo c64-tfe
-	@echo c64-rs232-eyecandy
-	@echo c64-rs232-blueround
-	@echo c64-rs232-conio
+	@echo tfe
+	@echo rs232-eyecandy programs
+	@echo rs232-blueround
+	@echo rs232-conio programs
+	@echo d64
+	@echo programs
 	@echo '(Also check the Makefile for more targets to try...)'
 
-c64-tfe:
-	$(MAKE) CONTIKI=$(CONTIKI) -fMakefile.c64-tfe
-c64-rs232-eyecandy:
-	$(MAKE) CONTIKI=$(CONTIKI) -fMakefile.c64-rs232-eyecandy
-c64-rs232-conio:
-	$(MAKE) CONTIKI=$(CONTIKI) -fMakefile.c64-rs232-conio
-c64-rs232-blueround:
-	$(MAKE) CONTIKI=$(CONTIKI) -fMakefile.c64-rs232-blueround
+programs:
+	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.programs
+tfe:
+	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-tfe
+rs232-eyecandy:
+	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232-eyecandy
+rs232-conio:
+	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232-conio
+rs232-blueround:
+	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232-blueround
 
 depend:
 	gcc -MM -D_CBM__ -D__C64__ -v \
-        -Ictk -Iuip -Iconf \
+        -Iapps -Ictk -Iuip -Iconf \
 	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
         -I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
         *.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
@@ -65,4 +69,9 @@ size:
 codesize:
 	od65 --dump-segsize *.o | egrep '\.o|CODE'
 clean:
-	rm -f *.o *~ *core contiki *.s
+	rm -f *.o *~ *core contiki *.s *.prg contiki-labels
+d64:
+	c1541 -format contiki,64 d64 contiki.d64
+	c1541 -attach contiki.d64 -write contiki
+	c1541 -attach contiki.d64 -write about.prg -write email.prg -write memstat.prg -write netconf.prg -write processes.prg -write simpletelnet.prg -write test.prg -write www.prg
+	c1541 -attach contiki.d64 -list
