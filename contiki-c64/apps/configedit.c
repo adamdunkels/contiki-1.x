@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.1 2003/08/06 22:57:05 adamdunkels Exp $
+ * $Id: configedit.c,v 1.2 2003/08/06 23:14:20 adamdunkels Exp $
  *
  */
 
@@ -239,7 +239,7 @@ initscript(void)
   char line[40], *lineptr;
   struct c64_fs_file f;
 
-  if(c64_fs_open("init.cfg", &f) == -1) {
+  if(c64_fs_open("config.cfg", &f) == -1) {
     return;
   }
   line[0] = ' ';
@@ -274,8 +274,7 @@ savescript(void)
   struct c64_fs_file f;
   int len;
 
-  if(c64_fs_open("init.cfg", &f) == -1) {
-    asm("inc $d020");
+  if(c64_fs_open("config.cfg", &f) == -1) {
     return;
   }
   if(theme[0] != 0) {
@@ -381,7 +380,7 @@ DISPATCHER_SIGHANDLER(configedit_sighandler, s, data)
       configedit_quit();
       dispatcher_emit(uip_signal_uninstall, NULL,
 		      DISPATCHER_BROADCAST);
-      program_handler_load("init.prg");
+      program_handler_load("config.prg");
     }
   } else if(s == ctk_signal_window_close ||
 	    s == dispatcher_signal_quit) {
