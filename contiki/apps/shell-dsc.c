@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: shell-dsc.c,v 1.3 2004/07/04 17:46:52 adamdunkels Exp $
+ * $Id: shell-dsc.c,v 1.4 2005/03/18 00:49:42 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char shellicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon shell_icon =
   {CTK_ICON("Command shell", shellicon_bitmap, shellicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

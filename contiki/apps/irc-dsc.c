@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: irc-dsc.c,v 1.2 2004/09/09 21:05:56 adamdunkels Exp $
+ * $Id: irc-dsc.c,v 1.3 2005/03/18 00:49:42 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char irc_icon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon irc_icon =
   {CTK_ICON("IRC client", irc_icon_bitmap, irc_icon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

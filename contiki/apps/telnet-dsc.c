@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: telnet-dsc.c,v 1.6 2004/12/24 15:17:17 oliverschmidt Exp $
+ * $Id: telnet-dsc.c,v 1.7 2005/03/18 00:49:42 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char telneticon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon telnet_icon =
   {CTK_ICON("Telnet", telneticon_bitmap, telneticon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

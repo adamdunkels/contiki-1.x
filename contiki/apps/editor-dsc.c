@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: editor-dsc.c,v 1.1 2004/08/09 20:08:10 adamdunkels Exp $
+ * $Id: editor-dsc.c,v 1.2 2005/03/18 00:49:42 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char editoricon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon icon =
   {CTK_ICON("Editor", editoricon_bitmap, editoricon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: vnc-dsc.c,v 1.4 2004/09/12 07:33:26 adamdunkels Exp $
+ * $Id: vnc-dsc.c,v 1.5 2005/03/18 00:49:42 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char vncicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon icon =
   {CTK_ICON("VNC viewer", vncicon_bitmap, vncicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

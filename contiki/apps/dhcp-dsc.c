@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: dhcp-dsc.c,v 1.1 2004/09/17 20:42:08 adamdunkels Exp $
+ * $Id: dhcp-dsc.c,v 1.2 2005/03/18 00:49:42 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char tcpipconficon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon dhcp_icon =
   {CTK_ICON("DHCP client", tcpipconficon_bitmap, tcpipconficon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: webserver-dsc.c,v 1.2 2004/06/27 12:34:24 oliverschmidt Exp $
+ * $Id: webserver-dsc.c,v 1.3 2005/03/18 00:49:42 oliverschmidt Exp $
  *
  */
 
@@ -67,6 +67,8 @@ static char webservericon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon webserver_icon =
   {CTK_ICON("Web server", webservericon_bitmap, webservericon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
