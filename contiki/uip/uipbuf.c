@@ -75,7 +75,8 @@ uipbuf_bufto(struct uipbuf_buffer *buf, u8_t endmarker,
   
   return UIPBUF_FULL;
 }
-/*----------------------------------------------------------------------------*/u16_t
+/*----------------------------------------------------------------------------*/
+u16_t
 uipbuf_len(struct uipbuf_buffer *buf)
 {
   return buf->bufsize - buf->left;
