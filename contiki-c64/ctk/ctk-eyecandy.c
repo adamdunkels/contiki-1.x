@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-eyecandy.c,v 1.2 2003/03/28 12:16:24 adamdunkels Exp $
+ * $Id: ctk-eyecandy.c,v 1.3 2003/04/02 09:59:15 adamdunkels Exp $
  *
  */
 #include "ctk.h"
@@ -696,16 +696,30 @@ ctk_draw_widget(struct ctk_widget *w,
 }
 /*-----------------------------------------------------------------------------------*/
 void
+ctk_draw_clear_window(struct ctk_window *window,
+		      unsigned char focus,
+		      unsigned char clipy1,
+		      unsigned char clipy2)
+{
+  unsigned char h;
+
+  hires_color(colors[focus]);
+  
+  h = window->y + 2 + window->h;
+  /* Clear window contents. */
+  for(i = window->y + 2; i < h; ++i) {
+    if(i >= clipy1 && i < clipy2) {
+      hires_cclearxy(window->x + 1, i, window->w);
+    }
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+void
 ctk_draw_window(register struct ctk_window *window,
 		unsigned char focus,
 		unsigned char clipy1, unsigned char clipy2)
 {
   register struct ctk_widget *w;
-  
-  /*  if(clipy1 >= clipy2) {
-    return;
-    }*/
-  
   
   x = window->x;
   y = window->y + 1;
@@ -715,22 +729,13 @@ ctk_draw_window(register struct ctk_window *window,
   if(clipy2 < y) {
     return;
   }
-
+  
+  hires_color(colors[focus+1]);
+  
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + window->w;
   y2 = y1 + window->h;
- 
-  
-  hires_color(colors[focus]);
-  
-  h = y1 + window->h;
-  /* Clear window contents. */
-  for(i = y1; i < h; ++i) {
-    if(i >= clipy1 && i < clipy2) {
-      hires_cclearxy(x1, i, window->w);
-    }
-  }
 
   hires_color(colors[focus+1]);
     
