@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h.example,v 1.2 2003/04/09 00:30:45 adamdunkels Exp $
+ * $Id: ctk-conf.h.example,v 1.3 2003/04/11 20:17:18 adamdunkels Exp $
  *
  */
 
@@ -53,7 +53,7 @@
 
 /* Toggles mouse support (must have support functions in the
 architecture specific files to work). */
-#define CTK_CONF_MOUSE_SUPPORT        0
+#define CTK_CONF_MOUSE_SUPPORT        0 /* 1342 bytes */
 
 /* Toggles support for desktop icons. */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
