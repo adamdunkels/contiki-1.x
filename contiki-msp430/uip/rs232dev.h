@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev.h,v 1.1 2003/09/04 19:46:33 adamdunkels Exp $
+ * $Id: rs232dev.h,v 1.2 2005/01/26 23:36:37 oliverschmidt Exp $
  *
  */
 
@@ -44,7 +44,7 @@ void rs232dev_init(void);
 u8_t rs232dev_read(void);
 void rs232dev_send(void);
 
-#if UIP_BUFSIZE > 255
+#if MAX_SIZE > 255
 u16_t rs232dev_poll(void);
 #else 
 u8_t rs232dev_poll(void);
