@@ -1,54 +1,65 @@
 #include "socket.h"
 
-/*---------------------------------------------------------------------------*/
-/*PT_THREAD(socket_wait_data(struct socket *socket))
-{
-  PT_START(&socket->socketpt);
-  if(socket->state == SOCKET_STATE_READ || !uip_newdata()) {
-    socket->state = SOCKET_STATE_BLOCKED_NEWDATA;
-    PT_RESTART(&socket->socketpt);
-  }
-  socket->state = SOCKET_STATE_READ;
-  PT_EXIT(&socket->socketpt);
-}*/
-/*---------------------------------------------------------------------------*/
-PT_THREAD(socket_send(struct socket *socket))
-{
-  PT_START(&socket->socketpt);
+#define SOCKET_STATE_NONE 0
+#define SOCKET_STATE_ACKED 1
+#define SOCKET_STATE_READ 2
+#define SOCKET_STATE_BLOCKED_NEWDATA 3
+#define SOCKET_STATE_BLOCKED_CLOSE 4
+#define SOCKET_STATE_BLOCKED_SEND 5
+#define SOCKET_STATE_DATA_SENT 6
 
-  if(socket->sendlen == 0) {
-    PT_EXIT(&socket->socketpt);
-  }
-  
-  if(uip_newdata()) {
-    socket->readptr = (u8_t *)uip_appdata;
-    socket->readlen = uip_datalen();
-    uipbuf_bufdata(&socket->buf, socket->bufsize,
-		   &socket->readptr,
-		   &socket->readlen);
-  }
-  
-  if(socket->state == SOCKET_STATE_ACKED || !uip_acked()) {
-    if(socket->sendlen > uip_mss()) {   
-      uip_send(socket->sendptr, uip_mss());
+/*---------------------------------------------------------------------------*/
+static char
+send_data(struct socket *s)
+{
+  if(s->state != SOCKET_STATE_DATA_SENT || uip_rexmit()) {
+    if(s->sendlen > uip_mss()) {
+      uip_send(s->sendptr, uip_mss());
     } else {
-      uip_send(socket->sendptr, socket->sendlen);
+      uip_send(s->sendptr, s->sendlen);
     }
-    socket->state = SOCKET_STATE_BLOCKED_SEND;
-    PT_RESTART(&socket->socketpt);
-  } else {
-    if(socket->sendlen > uip_mss()) {
-      socket->sendlen -= uip_mss();
-      socket->sendptr += uip_mss();
-      socket->state = SOCKET_STATE_BLOCKED_SEND;
-      PT_RESTART(&socket->socketpt);
-    }
+    s->state = SOCKET_STATE_DATA_SENT;
+    return 1;
   }
-  socket->state = SOCKET_STATE_ACKED;
-  PT_EXIT(&socket->socketpt);
+  return 0;
 }
 /*---------------------------------------------------------------------------*/
-PT_THREAD(socket_close(struct socket *socket))
+static char
+data_sent(struct socket *s)
+{
+  if(s->state == SOCKET_STATE_DATA_SENT && uip_acked()) {
+    if(s->sendlen > uip_mss()) {
+      s->sendlen -= uip_mss();
+      s->sendptr += uip_mss();
+    } else {
+      s->sendptr += s->sendlen;
+      s->sendlen = 0;
+    }
+    s->state = SOCKET_STATE_ACKED;
+    return 1;
+  }
+  return 0;
+}
+/*---------------------------------------------------------------------------*/
+PT_THREAD(socket_send(struct socket *s, char *buf, unsigned int len))
+{
+  PT_START(&s->socketpt);
+
+  if(len == 0) {
+    PT_EXIT(&s->socketpt);
+  }
+  
+  s->sendptr = buf;
+  s->sendlen = len;
+  
+  while(s->sendlen > 0) {
+    PT_WAIT_UNTIL(&s->socketpt, data_sent(s) && send_data(s));
+  }
+
+  PT_EXIT(&s->socketpt);
+}
+/*---------------------------------------------------------------------------*/
+/*PT_THREAD(socket_closew(struct socket *socket))
 {
   PT_START(&socket->socketpt);
   uip_close();
@@ -56,32 +67,37 @@ PT_THREAD(socket_close(struct socket *socket))
   PT_WAIT_UNTIL(&socket->socketpt,
 		uip_closed() || uip_timedout() || uip_aborted());
   PT_EXIT(&socket->socketpt);
-}
+}*/
 /*---------------------------------------------------------------------------*/
 static char
-newdata(struct socket *socket)
+newdata_available(struct socket *s)
 {
-  char cond;
-  cond = (socket->state == SOCKET_STATE_READ || !uip_newdata());
-
-  if(cond) {
-    socket->state = SOCKET_STATE_BLOCKED_NEWDATA;
+  if(s->state == SOCKET_STATE_READ) {
+    /* Data in uip_appdata buffer already consumed. */
+    s->state = SOCKET_STATE_BLOCKED_NEWDATA;
+    return 0;
+  } else if(uip_newdata()) {
+    /* There is new data that has not been consumed. */
+    return 1;
+  } else {
+    /* There is no new data. */
+    return 0;
   }
-  return cond;
 }
 /*---------------------------------------------------------------------------*/
 PT_THREAD(socket_readto(struct socket *socket, unsigned char c))
 {
 
   PT_START(&socket->socketpt);
-  
+
   uipbuf_setup(&socket->buf, socket->bufptr, socket->bufsize);
   
-  /* XXX: Must add uipbuf_checkmarker() before do{} loop. */
-  
+  /* XXX: Should add uipbuf_checkmarker() before do{} loop, if
+     incoming data has been handled while waiting for a write. */
+
   do {
     if(socket->readlen == 0) {
-      PT_WAIT_WHILE(&socket->socketpt, newdata(socket));
+      PT_WAIT_UNTIL(&socket->socketpt, newdata_available(socket));  
       socket->state = SOCKET_STATE_READ;
       socket->readptr = (u8_t *)uip_appdata;
       socket->readlen = uip_datalen();
@@ -91,11 +107,16 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c))
 			&socket->readlen) & UIPBUF_FOUND) == 0 &&
 	  socket->readlen > 0);
 
+  if(uipbuf_len(&socket->buf) == 0) {
+    socket->state = SOCKET_STATE_NONE;
+    PT_RESTART(&socket->socketpt);
+  }
+  
   PT_EXIT(&socket->socketpt);
 }
 /*---------------------------------------------------------------------------*/
 void
-socket_setup(struct socket *socket, char *buffer, int buffersize)
+socket_init(struct socket *socket, char *buffer, unsigned int buffersize)
 {
   socket->state = SOCKET_STATE_NONE;
   socket->readlen = 0;
@@ -104,15 +125,5 @@ socket_setup(struct socket *socket, char *buffer, int buffersize)
   uipbuf_setup(&socket->buf, buffer, buffersize);
   PT_INIT(&socket->pt);
   PT_INIT(&socket->socketpt);
-}
-/*---------------------------------------------------------------------------*/
-void *
-socket_alloc(struct memb_blocks *m)
-{
-  void *s;
-  
-  s = memb_alloc(m);
-  tcp_markconn(uip_conn, s);
-  return s;
 }
 /*---------------------------------------------------------------------------*/
