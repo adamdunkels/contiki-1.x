@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.10 2004/07/04 18:33:07 adamdunkels Exp $
+ * $Id: configedit.c,v 1.11 2004/08/09 21:00:28 adamdunkels Exp $
  *
  */
 
@@ -47,7 +44,7 @@
 
 #include "program-handler.h"
 
-#include "c64-fs.h"
+#include "cfs.h"
 
 #include "loader.h"
 
@@ -252,9 +249,10 @@ static void
 initscript(void)
 {
   char line[40], *lineptr;
-  struct c64_fs_file f;
+  /*  struct c64_fs_file f;*/
+  int f;
 
-  if(c64_fs_open("config.cfg", &f) == -1) {
+  if((f = cfs_open("config.cfg", 0)) == -1) {
     return;
   }
   line[0] = ' ';
@@ -262,8 +260,8 @@ initscript(void)
 	line[0] != 0) {
     lineptr = line;
     do {
-      if(c64_fs_read(&f, lineptr, 1) != 1) {
-	c64_fs_close(&f);
+      if(cfs_read(f, lineptr, 1) != 1) {
+	cfs_close(f);
 	return;
       }
       ++lineptr;
@@ -278,7 +276,7 @@ initscript(void)
     }
     
   }
-  c64_fs_close(&f);
+  cfs_close(f);
   return;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -301,38 +299,39 @@ static void
 savescript(void)
 {
   char line[40];
-  struct c64_fs_file f;
+  /*  struct c64_fs_file f;*/
+  int f;
 
-  if(c64_fs_open("config.cfg", &f) == -1) {
+  if((f = cfs_open("config.cfg", CFS_WRITE)) == -1) {
     return;
   }
   if(theme[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 't', theme));
+    cfs_write(f, line, makeline(line, 't', theme));
   }
   if(driver[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 'n', driver));
+    cfs_write(f, line, makeline(line, 'n', driver));
   }
   if(ipaddr[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 'i', ipaddr));
+    cfs_write(f, line, makeline(line, 'i', ipaddr));
   }
   if(netmask[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 'm', netmask));
+    cfs_write(f, line, makeline(line, 'm', netmask));
   }
   if(gateway[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 'r', gateway));
+    cfs_write(f, line, makeline(line, 'r', gateway));
   }
   if(dnsserver[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 'd', dnsserver));
+    cfs_write(f, line, makeline(line, 'd', dnsserver));
   }
   
   if(screensaver[0] != 0) {
-    c64_fs_write(&f, line, makeline(line, 's', screensaver));
+    cfs_write(f, line, makeline(line, 's', screensaver));
   }
   
   strcpy(line, ".\n\0\n\n\n");
-  c64_fs_write(&f, line, strlen(line));
+  cfs_write(f, line, strlen(line));
   
-  c64_fs_close(&f);
+  cfs_close(f);
   
 }
 /*-----------------------------------------------------------------------------------*/

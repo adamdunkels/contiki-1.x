@@ -28,13 +28,13 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.9 2004/07/04 19:56:29 adamdunkels Exp $
+ * $Id: shell.c,v 1.10 2004/08/09 21:00:28 adamdunkels Exp $
  *
  */
 
 #include "program-handler.h"
 #include "loader.h"
-#include "c64-fs.h"
+#include "cfs.h"
 #include "uip.h"
 #include "uip_arp.h"
 #include "resolv.h"
@@ -46,7 +46,7 @@
 #include <string.h>
 
 static char showingdir = 0;
-static struct c64_fs_dir dir;
+static struct cfs_dir dir;
 static unsigned int totsize;
 
 struct ptentry {
@@ -206,13 +206,14 @@ help(char *str)
 static void
 directory(char *str)
 {
-  if(c64_fs_opendir(&dir) != 0) {
+  if(cfs_opendir(&dir, "/") != 0) {
     shell_output("Cannot open directory", "");
     showingdir = 0;
   } else {
     shell_output("Disk directory:", "");
     showingdir = 1;
     totsize = 0;
+    ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_CONTINUE, NULL);
   }
   
 }
@@ -254,7 +255,7 @@ shell_input(char *cmd)
   if(showingdir != 0) {
     showingdir = 0;
     shell_output("Directory stopped", "");
-    c64_fs_closedir(&dir);
+    cfs_closedir(&dir);
   }
   parse(cmd, configparsetab);
   if(showingdir == 0) {
@@ -263,21 +264,25 @@ shell_input(char *cmd)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-shell_idle(void)
+shell_eventhandler(ek_event_t ev, ek_data_t data)
 {
-  static struct c64_fs_dirent dirent;
+  static struct cfs_dirent dirent;
   static char size[10];
-  if(showingdir != 0) {
-    c64_fs_readdir_dirent(&dir, &dirent);
-    totsize += dirent.size;
-    inttostr(size, dirent.size);
-    shell_output(size, dirent.name);
-    if(c64_fs_readdir_next(&dir) != 0) {
-      c64_fs_closedir(&dir);
-      showingdir = 0;
-      inttostr(size, totsize);
-      shell_output("Total number of blocks: ", size);
-      shell_prompt("contiki-c64> ");
+
+  if(ev == EK_EVENT_CONTINUE) {
+    if(showingdir != 0) {
+      if(cfs_readdir(&dir, &dirent) != 0) {
+	cfs_closedir(&dir);
+	showingdir = 0;
+	inttostr(size, totsize);
+	shell_output("Total number of blocks: ", size);
+	shell_prompt("contiki-c64> ");
+      } else {
+	totsize += dirent.size;
+	inttostr(size, dirent.size);
+	shell_output(size, dirent.name);
+	ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_CONTINUE, NULL);
+      }
     }
   }
 }

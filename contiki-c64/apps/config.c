@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,13 +28,13 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.7 2004/07/04 18:33:07 adamdunkels Exp $
+ * $Id: config.c,v 1.8 2004/08/09 21:00:28 adamdunkels Exp $
  *
  */
 
 #include "program-handler.h"
 #include "loader.h"
-#include "c64-fs.h"
+#include "cfs.h"
 #include "uip.h"
 #include "uiplib.h"
 #include "uip_arp.h"
@@ -223,18 +220,20 @@ static void
 configscript(void)
 {
   static char line[40], *lineptr;
-  static struct c64_fs_file f;
+  /*  static struct c64_fs_file f;*/
+  int f;
 
-  if(c64_fs_open("config.cfg", &f) == -1) {
+  if((f = cfs_open("config.cfg", 0)) == -1) {
     return;
   }
+
   line[0] = ' ';
   while(line[0] != '.' &&
 	line[0] != 0) {
     lineptr = line;
     do {
-      if(c64_fs_read(&f, lineptr, 1) != 1) {
-	c64_fs_close(&f);
+      if(cfs_read(f, lineptr, 1) != 1) {
+	cfs_close(f);
 	return;
       }
       ++lineptr;
@@ -249,14 +248,14 @@ configscript(void)
     }
     
   }
-  c64_fs_close(&f);
+  cfs_close(f);
   return;
 }
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(config_init, arg)
 {
   arg_free(arg);
-  program_handler_screensaver(NULL);
+  program_handler_screensaver(NULL);  
   configscript();
   LOADER_UNLOAD();
 }
