@@ -1,0 +1,62 @@
+SYS=c64
+
+CC=cc65
+AS=ca65
+CFLAGS=-I ctk -I uip -I conf \
+       -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
+       -I $(CONTIKI)/lib -I $(CONTIKI)/uip \
+       -t $(SYS) --add-source 
+OPT=-Or
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: ctk/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: uip/%.c
+	$(CC) $(CFLAGS)  -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: $(CONTIKI)/apps/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: $(CONTIKI)/ctk/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: $(CONTIKI)/ek/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: $(CONTIKI)/lib/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+%.o: $(CONTIKI)/uip/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
+
+%.o: ctk/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
+include Makefile.depend
+
+UIP=uip.o uip_arch.o uip_main.o resolv.o
+
+
+CTK_CONIO=ctk-conio.o
+CTK_EYECANDY=ctk-eyecandy.o ctk-eyecandy-asm.o
+CTK_BLUEROUND=ctk-blueround.o ctk-blueround-asm.o
+
+
+WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 
+EMAIL=email.o smtp.o smtp-strings.o
+WEBSERVER=webserver.o http-strings.o 
+TELNET=simpletelnet.o telnet.o
+
+
