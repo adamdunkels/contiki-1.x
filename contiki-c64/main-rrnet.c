@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2004, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -27,115 +27,140 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki operating system
  *
- * $Id: main-rrnet.c,v 1.3 2004/09/12 14:07:30 adamdunkels Exp $
+ * $Id: main-rrnet.c,v 1.4 2004/09/18 20:52:10 adamdunkels Exp $
  *
  */
 
+#include "contiki.h"
+
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 
 #include "program-handler.h"
 
-#include "uip_main.h"
-#include "uip-signal.h"
+
 #include "uip.h"
 #include "uip_arp.h"
-#if WITH_TFE
-void tfe_drv_init(void);
-#endif /* WITH_TFE */
-#if WITH_RRNET
-void rrnet_drv_init(void);
-#endif /* WITH_RRNET */
+
 #include "resolv.h"
-#include "rs232dev.h"
 
-#include "about-dsc.h"
 #include "netconf-dsc.h"
-#include "processes-dsc.h"
-#include "memstat-dsc.h"
-#include "directory-dsc.h"
-#include "wget-dsc.h"
-#include "www-dsc.h"
+#include "irc-dsc.h"
+#include "dhcp-dsc.h"
 
+#include "cfs-cbm.h"
 
-#include "webserver.h"
+#include "clock.h"
 
+#include <cbm.h>
+
+unsigned char
+uip_fw_forward(void)
+{
+  return 0;
+}
+void
+uip_fw_periodic(void)
+{
+  return;
+}
 /*-----------------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
+EK_EVENTHANDLER(eventhandler, ev, data)
 {
   u16_t addr[2];
- 
-  c64_dio_init(8);
- 
-  dispatcher_init();
+  switch(ev) {
+  case EK_EVENT_INIT:
+    uip_ipaddr(addr, 192,168,3,2);
+    uip_sethostaddr(addr);
+    
+    uip_ipaddr(addr, 192,168,3,1);
+    uip_setdraddr(addr);
+    
+    uip_ipaddr(addr, 255,255,255,0);
+    uip_setnetmask(addr);
+    
+    uip_ipaddr(addr, 195,54,122,204);
+    resolv_conf(addr);
+
+    /*    program_handler_load("config.prg", NULL);*/
+    break;
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_PROCESS(init, "Init", EK_PRIO_LOWEST,
+	   eventhandler, NULL, NULL);
+/*-----------------------------------------------------------------------------------*/
+void
+log_message(char *part1, char *part2)
+{
+  while(*part1 != 0) {
+    cbm_k_bsout(*part1++);
+  }
+
+  while(*part2 != 0) {
+    cbm_k_bsout(*part2++);
+  }
+
+  
+  cbm_k_bsout('\n');
+}
+/*-----------------------------------------------------------------------------------*/
+clock_time_t
+clock_time(void)
+{
+  return clock();
+}
+/*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
+static void
+setup_curunit(void)
+{
+  asm("lda $ba");
+  asm("sta %v", _curunit);
+}
+#pragma optimize(pop)
+/*-----------------------------------------------------------------------------------*/
+void
+main(void)
+{
+
+  setup_curunit();
+  
+  log_message("Starting ", CONTIKI_VERSION_STRING);
+  
+  ek_init();
+
+  ek_start(&init);
+    
+  log_message(": TCP/IP", "");
+    
+  tcpip_init(NULL);
+
+  resolv_init(NULL); 
+
+  log_message(": CTK GUI", "");
   ctk_init();
 
-  uip_init();
-  uip_signal_init();
-  resolv_init();
+  /*  log_message(": Initial filesystem", "");
+      cfs_init_init(NULL);*/
 
-  /* XXX: just for making it easier to test. */
-#if 0
-  uip_ipaddr(addr, 193,10,67,150);
-  uip_sethostaddr(addr);
- 
-  uip_ipaddr(addr, 193,10,64,1);
-  uip_setdraddr(addr);
- 
-  uip_ipaddr(addr, 255,255,252,0);
-  uip_setnetmask(addr);
-
-  uip_ipaddr(addr, 193,10,66,195);
-  resolv_conf(addr);
-
-#else
-  uip_ipaddr(addr, 192,168,254,2);
-  uip_sethostaddr(addr);
- 
-  uip_ipaddr(addr, 192,168,254,1);
-  uip_setdraddr(addr);
- 
-  uip_ipaddr(addr, 255,255,255,0);
-  uip_setnetmask(addr);
-
-  uip_ipaddr(addr, 195,54,122,204);
-  resolv_conf(addr);
-#endif
-  
-  rrnet_drv_init();
-	    
   program_handler_init();
-
-    
-  /*program_handler_add(&directory_dsc, "Directory", 1);*/
-  program_handler_add(&netconf_dsc, "Network setup", 1);  
-  /*  program_handler_add(&processes_dsc, "Processes", 1);
-
-  program_handler_add(&memstat_dsc, "Memory stats", 1);*/
-  program_handler_add(&wget_dsc, "Web downloader", 1);
-  /*  program_handler_add(&about_dsc, "About", 0);*/
-
-  /*  program_handler_add(&vnc_dsc, "VNC viewer", 1);
-      program_handler_add(&www_dsc, "Web browser", 1);*/
+   
+  program_handler_add(&netconf_dsc, "Network config", 1);
+  program_handler_add(&dhcp_dsc, "DHCP", 1);
+  program_handler_add(&irc_dsc, "IRC", 1);
   
-  
-  /*  webserver_init();*/
-  /*  netconf_init();*/
-  wget_init();
 
-  /*  processes_init();*/
+  ctk_80col_service_init(NULL);
+  rrnet_drv_init(NULL);  
   
-  dispatcher_run();
+  log_message("Starting process scheduling", "");  
 
-  clrscr();
-  
-  return 0;
-
-  argv = argv;
-  argc = argc;
+  while(1) {
+    ek_run();
+  }
 }
 /*-----------------------------------------------------------------------------------*/

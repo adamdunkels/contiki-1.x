@@ -30,25 +30,30 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-wget,v 1.1 2003/09/04 22:00:19 adamdunkels Exp $
+# $Id: Makefile.c64-wget,v 1.2 2004/09/18 20:52:10 adamdunkels Exp $
 #
 
-all: contiki
+all: contiki-exo
 
 include $(CONTIKICC65)/Makefile.common
 SYS=c64
 
 CFLAGS:=$(CFLAGSCOMMON) -t $(SYS) \
         -DCTK_HIRES \
-	-DWITH_UIP -DWITH_RRNET -DWITH_ETHERNET 
+	-DWITH_UIP -DWITH_RRNET -DWITH_ETHERNET \
+        -DCONTIKI_VERSION_STRING='"Contiki 1.2-devel1 IRC/DHCP edition"'
 
 contiki:  main-rrnet.o petsciiconv.o \
- ctk.o ek.o dispatcher.o arg.o \
+ ctk.o ek.o ek.o ek-service.o arg.o timer.o \
  program-handler.o \
- ctk-hires.o ctk-hires-asm.o ctk-hires-theme-default.o \
- ctk-mouse.o ctk-mouse-asm.o ctk-mouse-joy.o \
  $(UIP) uip_arp.o cs8900a.o rrnet-drv.o rrnet-drv-asm.o \
+ ctk-80col.o ctk-80col-asm.o ctk-draw.o \
  netconf.o netconf-dsc.o \
- $(WGET) wget-dsc.o c64-dio.o c64-dio-asm.o
+ dhcp-dsc.o dhcp.o dhcpc.o lc-asm.o \
+ irc.o ircc.o ircc-strings.o socket.o uipbuf.o  irc-dsc.o \
+# $(WGET) wget-dsc.o c64-dio.o c64-dio-asm.o
 	cl65 -Ln labels -o contiki -t $(SYS) $^
 
+contiki-exo: contiki
+	exomizer -s sys -o contiki-exo contiki
+	
