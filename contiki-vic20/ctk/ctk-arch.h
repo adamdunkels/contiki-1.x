@@ -32,12 +32,14 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.1 2003/04/05 12:35:32 adamdunkels Exp $
+ * $Id: ctk-arch.h,v 1.2 2004/06/06 06:47:34 adamdunkels Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
 #define __CTK_ARCH_H__
 
 #include "ctk-conio.h"
+
+#define ctk_arch_isprint(x) isprint(x)
 
 #endif /* __CTK_ARCH_H__ */
