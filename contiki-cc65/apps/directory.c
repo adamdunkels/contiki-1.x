@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.5 2004/06/06 06:40:25 adamdunkels Exp $
+ * $Id: directory.c,v 1.6 2004/07/04 17:55:54 adamdunkels Exp $
  *
  */
 
@@ -42,7 +39,7 @@
 
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "loader.h"
 
 #include "program-handler.h"
@@ -77,10 +74,14 @@ static struct ctk_button backbutton =
 static struct ctk_button reloadbutton =
   {CTK_BUTTON(30, 20, 6, "Reload")};
 
-static DISPATCHER_SIGHANDLER(directory_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(directory_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Directory browser", NULL, directory_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
+EK_EVENTHANDLER(directory_eventhandler, ev, data);
+EK_PROCESS(p, "Directory browser", EK_PRIO_NORMAL,
+	   directory_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 static unsigned char width, height;
 
@@ -179,21 +180,8 @@ LOADER_INIT_FUNC(directory_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-
-    width = ctk_draw_width() - 4;
-    height = ctk_draw_height() - 4;
-    
-    ctk_window_new(&window, width, height, "Directory");
-
-    loaddirectory();
-    makewindow(0);
-    
-    dispatcher_listen(ctk_signal_widget_activate);
-    dispatcher_listen(ctk_signal_widget_select);
-    dispatcher_listen(ctk_signal_window_close);
+    id = ek_start(&p);
   }
-  ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -205,18 +193,28 @@ quit(void)
   for(i = 0; dscs[i] != NULL; ++i) {
     LOADER_UNLOAD_DSC(dscs[i]);
   }
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
+EK_EVENTHANDLER(directory_eventhandler, ev, data)
 {
   unsigned char i;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_widget_activate) {
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+    width = ctk_draw_width() - 4;
+    height = ctk_draw_height() - 4;
+    
+    ctk_window_new(&window, width, height, "Directory");
+
+    loaddirectory();
+    makewindow(0);
+    
+    ctk_window_open(&window);
+
+  } else if(ev == ctk_signal_widget_activate) {
     if(data == (ek_data_t)&reloadbutton) {
       for(i = 0; dscs[i] != NULL; ++i) {
 	LOADER_UNLOAD_DSC(dscs[i]);
@@ -250,7 +248,7 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
 	}
       }
     }
-  } else if(s == ctk_signal_widget_select) {
+  } else if(ev == ctk_signal_widget_select) {
     if(data == (ek_data_t)&reloadbutton) {
       show_statustext("Reload directory");
     } else if(data == (ek_data_t)&morebutton) {
@@ -267,10 +265,10 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
 	}
       }
     }
-  } else if(s == ctk_signal_window_close &&
+  } else if(ev == ctk_signal_window_close &&
 	    data == (ek_data_t)&window) {
     quit();
-  } else if(s == dispatcher_signal_quit) {
+  } else if(ev == EK_EVENT_REQUEST_EXIT) {
     ctk_window_close(&window);
     quit();
   }

@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,14 +29,14 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.3 2003/09/07 18:09:57 adamdunkels Exp $
+ * $Id: memstat.c,v 1.4 2004/07/04 17:55:55 adamdunkels Exp $
  *
  */
 
 #include <stdlib.h>
 
 #include "ctk.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "loader.h"
 
 static struct ctk_window window;
@@ -60,10 +57,14 @@ static struct ctk_button updatebutton =
 static struct ctk_button closebutton =
   {CTK_BUTTON(17, 4, 5, "Close")};
 
-static DISPATCHER_SIGHANDLER(memstat_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(memstat_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Memory statistics", NULL, memstat_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
+EK_EVENTHANDLER(memstat_eventhandler, ev, data);
+EK_PROCESS(p, "Memory statistics", EK_PRIO_NORMAL,
+	   memstat_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -92,8 +93,26 @@ LOADER_INIT_FUNC(memstat_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    id = ek_start(&p);
     
+  } else {
+    ctk_window_open(&window);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+quit(void)
+{
+  ek_exit();
+  id = EK_ID_NONE;
+  LOADER_UNLOAD();
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(memstat_eventhandler, ev, data)
+{
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
     ctk_window_new(&window, 24, 5, "Memory stats");
     ctk_window_move(&window, 0, 1);
 
@@ -110,26 +129,9 @@ LOADER_INIT_FUNC(memstat_init, arg)
     
     update();
     
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
-  }
-  ctk_window_open(&window);
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-quit(void)
-{
-  dispatcher_exit(&p);
-  id = EK_ID_NONE;
-  LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(memstat_sighandler, s, data)
-{
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_button_activate) {
+    ctk_window_open(&window);
+    
+  } else if(ev == ctk_signal_button_activate) {
     if(data == (ek_data_t)&updatebutton) {
       update();
       ctk_window_redraw(&window);
@@ -137,8 +139,9 @@ DISPATCHER_SIGHANDLER(memstat_sighandler, s, data)
       ctk_window_close(&window);
       quit();
     }
-  } else if(s == ctk_signal_window_close &&
-	    data == (ek_data_t)&window) {
+  } else if((ev == ctk_signal_window_close &&
+	    data == (ek_data_t)&window) ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     quit();
   }
 }
