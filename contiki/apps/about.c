@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.11 2004/07/04 11:35:07 adamdunkels Exp $
+ * $Id: about.c,v 1.12 2004/07/11 12:20:23 oliverschmidt Exp $
  *
  */
 
@@ -45,7 +45,7 @@
 
 static struct ctk_window aboutdialog;
 static struct ctk_label aboutlabel1 =
-  {CTK_LABEL(5, 0, 23, 1, "The Contiki Operating System")};
+  {CTK_LABEL(2, 0, 28, 1, "The Contiki Operating System")};
 static struct ctk_label aboutlabel2 =
   {CTK_LABEL(3, 2, 28, 1, "A modern, Internet-enabled")};
 static struct ctk_label aboutlabel3 =
