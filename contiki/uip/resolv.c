@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.4 2003/08/05 13:51:50 adamdunkels Exp $
+ * $Id: resolv.c,v 1.5 2003/08/15 18:50:36 adamdunkels Exp $
  *
  */
 
@@ -90,7 +90,7 @@ struct namemap {
   u16_t ipaddr[2];
 };
 
-#define RESOLV_ENTRIES 8
+#define RESOLV_ENTRIES 4
 
 static struct namemap names[RESOLV_ENTRIES];
 
@@ -134,8 +134,8 @@ check_entries(void)
 {
   register struct dns_hdr *hdr;
   char *query, *nptr, *nameptr;
-  u8_t i;
-  u8_t n;
+  static u8_t i;
+  static u8_t n;
   register struct namemap *namemapptr;
   
   for(i = 0; i < RESOLV_ENTRIES; ++i) {
@@ -162,11 +162,10 @@ check_entries(void)
 	namemapptr->retries = 0;
       }
       hdr = (struct dns_hdr *)uip_appdata;
+      memset(hdr, 0, sizeof(struct dns_hdr));
       hdr->id = htons(i);
       hdr->flags1 = DNS_FLAG1_RD;
-      hdr->flags2 = 0;
       hdr->numquestions = HTONS(1);
-      hdr->numanswers = hdr->numauthrr = hdr->numextrarr = 0;
       query = (char *)uip_appdata + 12;
       nameptr = namemapptr->name;
       --nameptr;
@@ -187,19 +186,6 @@ check_entries(void)
 	  {0,0,1,0,1};
 	memcpy(query, endquery, 5);
       }
-#if 0
-      nptr = query;      
-      *nptr = 0; /* End of query name. */
-      ++nptr;
-      *nptr = 0; /* High byte of query type. */
-      ++nptr;
-      *nptr = 1; /* Low byte of query type. 1 == IP address query. */
-      ++nptr;
-      *nptr = 0; /* High byte of query class. */
-      ++nptr;
-      *nptr = 1; /* Low byte of query class. */
-      ++nptr;
-#endif
       uip_udp_send((unsigned char)(query + 5 - (char *)uip_appdata));
       break;
     }
@@ -212,8 +198,8 @@ newdata(void)
   char *nameptr;
   struct dns_answer *ans;
   struct dns_hdr *hdr;
-  u8_t nquestions, nanswers;
-  u8_t i;
+  static u8_t nquestions, nanswers;
+  static u8_t i;
   register struct namemap *namemapptr;
   
   hdr = (struct dns_hdr *)uip_appdata;
@@ -269,9 +255,8 @@ newdata(void)
 
       ans = (struct dns_answer *)nameptr;
       /*      printf("Answer: type %x, class %x, ttl %x, length %x\n",
-	     htons(ans->type), htons(ans->class),
-	     (htons(ans->ttl[0]) << 16) | htons(ans->ttl[1]),
-	     htons(ans->len));*/
+	     htons(ans->type), htons(ans->class), (htons(ans->ttl[0])
+	     << 16) | htons(ans->ttl[1]), htons(ans->len));*/
 
       /* Check for IP address type and Internet class. Others are
 	 discarded. */
@@ -287,6 +272,7 @@ newdata(void)
 	   we want. */
 	namemapptr->ipaddr[0] = ans->ipaddr[0];
 	namemapptr->ipaddr[1] = ans->ipaddr[1];
+	
 	resolv_found(namemapptr->name, namemapptr->ipaddr);
 	return;
       } else {
@@ -323,8 +309,8 @@ udp_appcall(void)
 void
 resolv_query(char *name)
 {
-  u8_t i;
-  u8_t lseq, lseqi;
+  static u8_t i;
+  static u8_t lseq, lseqi;
   register struct namemap *nameptr;
       
   lseq = lseqi = 0;
@@ -357,7 +343,7 @@ resolv_query(char *name)
 u16_t *
 resolv_lookup(char *name)
 {
-  u8_t i;
+  static u8_t i;
   struct namemap *nameptr;
   
   /* Walk through the list to see if the name is in there. If it is
@@ -365,7 +351,7 @@ resolv_lookup(char *name)
   for(i = 0; i < RESOLV_ENTRIES; ++i) {
     nameptr = &names[i];
     if(nameptr->state == STATE_DONE &&
-       strcmp(name, nameptr->name) == 0) {
+       strcmp(name, nameptr->name) == 0) {            
       return nameptr->ipaddr;
     }
   }
@@ -395,8 +381,8 @@ resolv_conf(u16_t *dnsserver)
 void
 resolv_init(void)
 {
-  u8_t i;
-
+  static u8_t i;
+  
   for(i = 0; i < RESOLV_ENTRIES; ++i) {
     names[i].state = STATE_DONE;
   }
