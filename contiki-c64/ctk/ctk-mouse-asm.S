@@ -1,5 +1,8 @@
 
 ;---------------------------------------------------------------------
+	;; The 1351 mouse code was taken from the CC65 libraries,
+	;; written by Ullrich von Bassewitz 
+;---------------------------------------------------------------------	
 
         .macpack        generic
 
