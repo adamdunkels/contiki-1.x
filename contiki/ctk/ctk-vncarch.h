@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncarch.h,v 1.3 2004/06/06 05:52:21 adamdunkels Exp $
+ * $Id: ctk-vncarch.h,v 1.4 2004/08/09 20:24:17 adamdunkels Exp $
  *
  */
 #ifndef __CTK_VNCARCH_H__
@@ -57,8 +57,11 @@ ctk_arch_key_t ctk_arch_getkey(void);
 
 
 #define CH_F1 0xbe
+#define CH_F2 0xbf
 #define CH_F3 0xc0
+#define CH_F4 0xc1
 #define CH_F5 0xc2
+#define CH_F6 0xc3
 #define CH_F7 0xc4
 
 
