@@ -1,3 +1,15 @@
+main-rrnet.o: main-rrnet.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/ctk/ctk-draw.h ../contiki/apps/program-handler.h \
+ ../contiki/uip/uip_arp.h ../contiki/apps/netconf-dsc.h \
+ ../contiki/apps/irc-dsc.h ../contiki/apps/dhcp-dsc.h loader/cfs-cbm.h
 main.o: main.c ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
@@ -15,6 +27,22 @@ blueround-dsc.o: apps/blueround-dsc.c ../contiki/ek/dsc.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
  ../contiki-cc65/loader/loader-arch.h
+cgterm-dsc.o: apps/cgterm-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki-cc65/loader/loader-arch.h
+cgterm.o: apps/cgterm.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/uip/socket.h ../contiki/ek/pt.h ../contiki-cc65/lib/lc.h \
+ ../contiki/uip/uipbuf.h ../contiki/ctk/ctk-draw.h
 config.o: apps/config.c ../contiki/apps/program-handler.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/ek/ek.h conf/ek-conf.h \
@@ -130,13 +158,23 @@ themeloader.o: apps/themeloader.c ../contiki/ek/loader.h \
  ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ctk/ctk-draw.h ctk/ctk-hires-theme.h
-vnc-draw.o: apps/vnc-draw.c ../contiki/apps/vnc-draw.h uip/uip_arch.h \
- ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
- ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+vnc-draw.o: apps/vnc-draw.c ../contiki/apps/vnc-draw.h \
+ ../contiki-cc65/uip/uip_arch.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
+ apps/vnc-draw-asm.h conf/vnc-conf.h
+welcome.o: apps/welcome.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
- ctk/ctk-arch.h ctk/ctk-hires.h apps/vnc-draw-asm.h conf/vnc-conf.h
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h
 wget-dsc.o: apps/wget-dsc.c ../contiki/ek/dsc.h ../contiki/ctk/ctk.h \
  conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
@@ -195,7 +233,6 @@ ctk-mouse.o: ctk/ctk-mouse.c ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk-mouse.h
 mtarch.o: lib/mtarch.c lib/mtarch.h
-posixdir.o: lib/posixdir.c
 c64-dio.o: loader/c64-dio.c loader/c64-dio.h loader/c64-dio-asm.h
 c64-fs-raw.o: loader/c64-fs-raw.c loader/c64-fs-raw.h loader/c64-fs.h \
  loader/c64-dio.h
@@ -230,33 +267,43 @@ loader-arch.o: loader/loader-arch.c ../contiki/lib/cfs.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
  ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
  ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h
-cs8900a.o: uip/cs8900a.c uip/cs8900a.h uip/uip_arch.h \
+cs8900a.o: uip/cs8900a.c uip/cs8900a.h ../contiki-cc65/uip/uip_arch.h \
  ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
  ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip_arp.h
-lan91c96-drv.o: uip/lan91c96-drv.c ../contiki/uip/packet-service.h \
+eth64-drv.o: uip/eth64-drv.c ../contiki/uip/packet-service.h \
  ../contiki/ek/ek-service.h ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
- uip/lan91c96.h uip/uip_arch.h ../contiki/uip/uip_arp.h
-lan91c96-dsc.o: uip/lan91c96-dsc.c ../contiki/ek/dsc.h \
- ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
- ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
- ../contiki/ek/arg.h ../contiki/ek/loader.h \
- ../contiki-cc65/loader/loader-arch.h
-lan91c96.o: uip/lan91c96.c uip/lan91c96.h uip/uip_arch.h \
- ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
- ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ uip/lan91c96.h ../contiki-cc65/uip/uip_arch.h \
+ ../contiki/uip/uip_arp.h
+eth64-dsc.o: uip/eth64-dsc.c ../contiki/ek/dsc.h ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h
+eth64-dump-drv.o: uip/eth64-dump-drv.c ../contiki/uip/packet-service.h \
+ ../contiki/ek/ek-service.h ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
- ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip_arp.h
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ uip/lan91c96.h ../contiki-cc65/uip/uip_arch.h \
+ ../contiki/uip/uip_arp.h ../contiki/uip/tcpdump.h
+lan91c96.o: uip/lan91c96.c uip/lan91c96.h \
+ ../contiki-cc65/uip/uip_arch.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
+ ../contiki/uip/uip_arp.h
 rrnet-drv.o: uip/rrnet-drv.c ../contiki/uip/packet-service.h \
  ../contiki/ek/ek-service.h ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
@@ -264,11 +311,20 @@ rrnet-drv.o: uip/rrnet-drv.c ../contiki/uip/packet-service.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
- uip/cs8900a.h uip/uip_arch.h ../contiki/uip/uip_arp.h
+ uip/cs8900a.h ../contiki-cc65/uip/uip_arch.h ../contiki/uip/uip_arp.h
 rrnet-dsc.o: uip/rrnet-dsc.c ../contiki/ek/dsc.h ../contiki/ctk/ctk.h \
  conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h
+rrnet-dump-drv.o: uip/rrnet-dump-drv.c ../contiki/uip/packet-service.h \
+ ../contiki/ek/ek-service.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ uip/cs8900a.h ../contiki-cc65/uip/uip_arch.h ../contiki/uip/uip_arp.h \
+ ../contiki/uip/tcpdump.h
 rs232dev-ss.o: uip/rs232dev-ss.c uip/rs232silversurfer.h \
  ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
  ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
@@ -283,18 +339,20 @@ tfe-drv.o: uip/tfe-drv.c ../contiki/uip/packet-service.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
- uip/cs8900a.h uip/uip_arch.h ../contiki/uip/uip_arp.h
+ uip/cs8900a.h ../contiki-cc65/uip/uip_arch.h ../contiki/uip/uip_arp.h
 tfe-dsc.o: uip/tfe-dsc.c ../contiki/ek/dsc.h ../contiki/ctk/ctk.h \
  conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h
-uip_arch.o: uip/uip_arch.c ../contiki/uip/uip.h \
+tfe-dump-drv.o: uip/tfe-dump-drv.c ../contiki/uip/packet-service.h \
+ ../contiki/ek/ek-service.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
- ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
- ../contiki/ek/arg.h ../contiki/ek/loader.h \
- ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
- ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
- uip/uip_arch.h
+ uip/cs8900a.h ../contiki-cc65/uip/uip_arch.h ../contiki/uip/uip_arp.h \
+ ../contiki/uip/tcpdump.h
 about-dsc.o: ../contiki/apps/about-dsc.c ../contiki/ek/dsc.h \
  ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
@@ -316,6 +374,21 @@ calc.o: ../contiki/apps/calc.c ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ctk/ctk-arch.h ctk/ctk-hires.h
+dhcp-dsc.o: ../contiki/apps/dhcp-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki-cc65/loader/loader-arch.h
+dhcp.o: ../contiki/apps/dhcp.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/uip/dhcpc.h
 directory.o: ../contiki/apps/directory.c ../contiki/ctk/ctk.h \
  conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
@@ -457,7 +530,7 @@ ircc.o: ../contiki/apps/ircc.c ../contiki/ek/contiki.h \
  ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
  ../contiki/apps/ircc.h ../contiki/uip/socket.h ../contiki/ek/pt.h \
  ../contiki-cc65/lib/lc.h ../contiki/uip/uipbuf.h conf/irc-conf.h \
- ../contiki/apps/ircc-strings.h
+ ../contiki/apps/ircc-strings.h ../contiki/lib/petsciiconv.h
 netconf-dsc.o: ../contiki/apps/netconf-dsc.c ../contiki/ek/dsc.h \
  ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
@@ -586,12 +659,26 @@ vnc-dsc.o: ../contiki/apps/vnc-dsc.c ../contiki/ek/dsc.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
  ../contiki-cc65/loader/loader-arch.h
 vnc-viewer.o: ../contiki/apps/vnc-viewer.c ../contiki/apps/vnc-draw.h \
- uip/uip_arch.h ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
- conf/uip-conf.h ../contiki/uip/tcpip.h ../contiki/ek/ek.h \
- conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki-cc65/uip/uip_arch.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
+ ../contiki/apps/vnc-viewer.h
+vnc.o: ../contiki/apps/vnc.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
- ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/apps/vnc-viewer.h
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/lib/petsciiconv.h ../contiki/ctk/ctk-mouse.h \
+ ../contiki/apps/telnet.h ../contiki/apps/vnc.h \
+ ../contiki/apps/vnc-draw.h ../contiki-cc65/uip/uip_arch.h \
+ ../contiki/apps/vnc-viewer.h conf/vnc-conf.h
 webclient.o: ../contiki/apps/webclient.c ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
@@ -641,12 +728,12 @@ ctk-conio-service.o: ../contiki/ctk/ctk-conio-service.c \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
  ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
  ../contiki/ctk/ctk-draw.h ../contiki/ctk/ctk-draw-service.h \
- ../contiki/ek/ek-service.h ctk/ctk-conio-conf.h
+ ../contiki/ek/ek-service.h conf/ctk-conio-conf.h
 ctk-conio.o: ../contiki/ctk/ctk-conio.c ../contiki/ctk/ctk.h \
  conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/ek/ek.h \
  conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
- ../contiki/ek/dsc.h ../contiki/ctk/ctk-draw.h ctk/ctk-conio-conf.h
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk-draw.h conf/ctk-conio-conf.h
 ctk-draw.o: ../contiki/ctk/ctk-draw.c ../contiki/ek/ek-service.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
@@ -742,6 +829,17 @@ petsciiconv.o: ../contiki/lib/petsciiconv.c
 strncasecmp.o: ../contiki/lib/strncasecmp.c
 timer.o: ../contiki/lib/timer.c ../contiki/lib/timer.h \
  ../contiki/lib/clock.h conf/clock-conf.h
+dhcpc.o: ../contiki/uip/dhcpc.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/uip/dhcpc.h ../contiki/uip/uip_arp.h ../contiki/ek/pt.h \
+ ../contiki-cc65/lib/lc.h
 resolv.o: ../contiki/uip/resolv.c ../contiki/ek/ek.h conf/ek-conf.h \
  ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
@@ -764,6 +862,12 @@ socket.o: ../contiki/uip/socket.c ../contiki/uip/socket.h \
  ../contiki/ek/loader.h ../contiki-cc65/loader/loader-arch.h \
  ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
  ctk/ctk-arch.h ctk/ctk-hires.h ../contiki/lib/memb.h
+tcpdump.o: ../contiki/uip/tcpdump.c ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h
 tcpip.o: ../contiki/uip/tcpip.c ../contiki/uip/tcpip.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
@@ -867,6 +971,18 @@ slip-dsc.o: ../contiki-cc65/uip/slip-dsc.c ../contiki/ek/dsc.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
  ../contiki/ek/arg.h ../contiki/ek/loader.h \
  ../contiki-cc65/loader/loader-arch.h
+slip-dump-drv.o: ../contiki-cc65/uip/slip-dump-drv.c \
+ ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki-cc65/loader/loader-arch.h ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-hires.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki-cc65/uip/rs232dev.h ../contiki/uip/packet-service.h \
+ ../contiki/ek/ek-service.h ../contiki/uip/tcpdump.h
 uip_arch.o: ../contiki-cc65/uip/uip_arch.c ../contiki/uip/uip.h \
  ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
  ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
