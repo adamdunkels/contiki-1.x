@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.5 2003/04/09 13:45:05 adamdunkels Exp $
+ * $Id: email.c,v 1.6 2003/04/11 20:13:33 adamdunkels Exp $
  *
  */
 
@@ -105,7 +105,7 @@ static struct ctk_label canceldialoglabel2 =
 static struct ctk_button cancelyesbutton =
   {CTK_BUTTON(4, 4, 3, "Yes")};
 static struct ctk_button cancelnobutton =
-  {CTK_BUTTON(18, 8, 2, "No")};
+  {CTK_BUTTON(18, 4, 2, "No")};
 
 /* The setup window. */
 static struct ctk_window setupwindow;
@@ -346,7 +346,7 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
       ctk_redraw();
     } else if(w == (struct ctk_widget *)&erasebutton) {
       ctk_dialog_open(&canceldialog);      
-      ctk_window_redraw(&mainwindow);
+      ctk_redraw();
     } else if(w == (struct ctk_widget *)&cancelyesbutton) {
       ctk_dialog_close();
       ctk_redraw();     
