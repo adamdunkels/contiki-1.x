@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.5 2004/09/03 10:08:03 adamdunkels Exp $
+ * $Id: lan91c96.c,v 1.6 2005/01/26 23:36:23 oliverschmidt Exp $
  *
  */
 
@@ -170,11 +170,7 @@ void lan91c96_init(void)
 
 
 #pragma optimize(push, off)
-#if UIP_BUFSIZE > 255
 u16_t lan91c96_poll(void)
-#else
-u8_t lan91c96_poll(void)
-#endif
 {
   // #######
 //  BANK(0);
@@ -290,11 +286,7 @@ void lan91c96_send(void)
   printf("SND: send packet\n");
   #endif
 
-  #if UIP_BUFSIZE > 255
   asm("lda _uip_len+1");  
-  #else
-  asm("lda #0");
-  #endif
   asm("ora #%%00100000");        //Allocate memory for TX
   asm("sta %w", ETHMMUCR);
 
@@ -396,11 +388,7 @@ void lan91c96_send(void)
     asm("sta ptr1+1");
 
     asm("ldy #0");
-    #if UIP_BUFSIZE > 255
     asm("ldx _uip_len+1");
-    #else
-    asm("ldx #0");
-    #endif
     asm("beq @RE1");               //packet_length < 256
 
     asm("@RL1:");

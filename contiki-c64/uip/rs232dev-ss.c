@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev-ss.c,v 1.2 2004/09/12 14:07:32 adamdunkels Exp $
+ * $Id: rs232dev-ss.c,v 1.3 2005/01/26 23:36:23 oliverschmidt Exp $
  *
  */
 
@@ -69,11 +69,7 @@
 
 static u8_t slip_buf[MAX_SIZE + 2];
 
-#if MAX_SIZE > 255
 static u16_t len, tmplen;
-#else
-static u8_t len, tmplen;
-#endif /* MAX_SIZE > 255 */
 
 #if 1
 #define printf(x)
@@ -122,11 +118,7 @@ rs232_err(char err)
 void
 rs232dev_send(void)
 {
-#if MAX_SIZE > 255
   u16_t i;
-#else
-  u8_t i;
-#endif /* MAX_SIZE > 255 */
   u8_t *ptr;
   u8_t c;
 
@@ -166,11 +158,7 @@ rs232dev_send(void)
  *
  */
 /*-----------------------------------------------------------------------------------*/
-#if MAX_SIZE > 255
 u16_t
-#else 
-u8_t
-#endif /* MAX_SIZE > 255 */
 rs232dev_poll(void)
 {
   u8_t c;
