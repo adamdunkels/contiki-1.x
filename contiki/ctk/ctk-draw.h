@@ -45,7 +45,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk-draw.h,v 1.6 2004/07/04 11:40:04 adamdunkels Exp $
+ * $Id: ctk-draw.h,v 1.7 2005/03/15 15:51:17 oliverschmidt Exp $
  *
  */
 
@@ -95,8 +95,10 @@
  * screen through the function ctk_draw_window().. A pseudo-code
  * implementation of this  function might look like this:
  * \code
-   ctk_draw_window(window, focus, clipy1, clipy2) {
-      draw_window_borders(window, focus, clipy1, clipy2);
+   ctk_draw_window(window, focus, clipy1, clipy2, draw_borders) {
+      if(draw_borders) {
+         draw_window_borders(window, focus, clipy1, clipy2);
+      }
       foreach(widget, window->inactive) {
          ctk_draw_widget(widget, focus, clipy1, clipy2);
       }
@@ -205,7 +207,8 @@ void ctk_draw_clear_window(struct ctk_window *window,
 void ctk_draw_window(struct ctk_window *window,
 		     unsigned char focus,
 		     unsigned char clipy1,
-		     unsigned char clipy2);
+		     unsigned char clipy2,
+		     unsigned char draw_borders);
 
 
 /**

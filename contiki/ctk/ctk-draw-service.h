@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-draw-service.h,v 1.3 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: ctk-draw-service.h,v 1.4 2005/03/15 15:51:17 oliverschmidt Exp $
  */
 #ifndef __CTK_DRAW_SERVICE_H__
 #define __CTK_DRAW_SERVICE_H__
@@ -56,7 +56,8 @@ struct ctk_draw_service_interface {
   void (* draw_window)(struct ctk_window *window,
 		       unsigned char focus,
 		       unsigned char clipy1,
-		       unsigned char clipy2);
+		       unsigned char clipy2,
+		       unsigned char draw_borders);
   void (* draw_dialog)(struct ctk_window *dialog);
   void (* draw_widget)(struct ctk_widget *widget,
 		       unsigned char focus,

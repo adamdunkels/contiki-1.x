@@ -3,7 +3,7 @@ Contiki toolkit (CTK) and the architecture specific parts of CTK (the
 so-called ctk-draw and ctk-arch layers).
 
 Author: Adam Dunkels <adam@dunkels.com>
-Version: $Id: ctk.txt,v 1.2 2003/04/02 09:54:00 adamdunkels Exp $
+Version: $Id: ctk.txt,v 1.3 2005/03/15 15:53:51 oliverschmidt Exp $
 
 
 * Introduction *
@@ -83,7 +83,8 @@ convenience:
    void ctk_draw_window(struct ctk_window *window,
                         unsigned char focus,
                         unsigned char clipy1,
-                        unsigned char clipy2);
+                        unsigned char clipy2,
+			unsigned char draw_borders);
    void ctk_draw_dialog(struct ctk_window *dialog);
    void ctk_draw_widget(struct ctk_widget *w,
                         unsigned char focus,
@@ -229,7 +230,8 @@ The function called by the CTK for drawing a window is:
    void ctk_draw_window(struct ctk_window *window,
                         unsigned char focus,
                         unsigned char clipy1,
-                        unsigned char clipy2);
+                        unsigned char clipy2,
+			unsigned char draw_borders);
 
 The "clipy1" and "clipy2" parameters specify the first and last + 1
 lines on screen that actually should be drawn (if clipy1 = 2 and
@@ -241,6 +243,8 @@ The focus parameter specifies if the window should be drawn in
 foreground or background colors and can be either CTK_FOCUS_NONE or
 CTK_FOCUS_WINDOW. Windows with a focus of CTK_FOCUS_WINDOW is usually
 drawn in a brighter color than those with CTK_FOCUS_NONE.
+
+The draw_borders parameter specifies if the window frame should be drawn.
 
 Finally, the "window" parameter gives the actual window to be
 drawn. This is specified as a struct ctk_window, which is defined in
@@ -290,8 +294,10 @@ focused. How CTK widgets are drawn is explained below.
 A pseudo-code implementation of a ctk_draw_window() function might
 look like this:
 
-   ctk_draw_window(window, focus, clipy1, clipy2) {
-      draw_window_borders(window, focus, clipy1, clipy2);
+   ctk_draw_window(window, focus, clipy1, clipy2, draw_borders) {
+      if(draw_borders) {
+         draw_window_borders(window, focus, clipy1, clipy2);
+      }
       foreach(widget, window->inactive) {
          draw_widget(widget, focus, clipy1, clipy2);
       }

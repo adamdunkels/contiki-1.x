@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-draw.c,v 1.4 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: ctk-draw.c,v 1.5 2005/03/15 15:51:17 oliverschmidt Exp $
  */
 
 #include "ek-service.h"
@@ -101,12 +101,13 @@ void
 ctk_draw_window(struct ctk_window *window,
 		unsigned char focus,
 		unsigned char clipy1,
-		unsigned char clipy2)
+		unsigned char clipy2,
+		unsigned char draw_borders)
 {
   struct ctk_draw_service_interface *interface;
   
   if((interface = find_interface()) != NULL) {   
-    interface->draw_window(window, focus, clipy1, clipy2);
+    interface->draw_window(window, focus, clipy1, clipy2, draw_borders);
   }
 }
 /*---------------------------------------------------------------------------*/

@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-service.c,v 1.5 2005/03/15 14:19:40 oliverschmidt Exp $
+ * $Id: ctk-conio-service.c,v 1.6 2005/03/15 15:51:17 oliverschmidt Exp $
  *
  */
 
@@ -334,7 +334,8 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
 /*-----------------------------------------------------------------------------------*/
 static void
 s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
-		  unsigned char clipy1, unsigned char clipy2)
+		  unsigned char clipy1, unsigned char clipy2,
+		  unsigned char draw_borders)
 {
   unsigned char x, y;
   unsigned char h;
@@ -346,53 +347,55 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
     
   x = window->x;
   y = window->y + 1;
-  
-  if(focus & CTK_FOCUS_WINDOW) {
-    textcolor(WINDOWCOLOR_FOCUS);
-  } else {
-    textcolor(WINDOWCOLOR);
-  }
-
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + window->w;
   y2 = y1 + window->h;
 
-  /* Draw window frame. */  
-  if(y >= clipy1) {
-    cputcxy(x, y, CH_ULCORNER);
-    gotoxy(wherex() + window->titlelen + 2, wherey());
-    chline(window->w - (wherex() - x) - 2);
-    cputcxy(x2, y, CH_URCORNER);
-  }
+  if(draw_borders) {  
 
-  h = window->h;
+    /* Draw window frame. */
+    if(focus & CTK_FOCUS_WINDOW) {
+      textcolor(WINDOWCOLOR_FOCUS);
+    } else {
+      textcolor(WINDOWCOLOR);
+    }
+
+    if(y >= clipy1) {
+      cputcxy(x, y, CH_ULCORNER);
+      gotoxy(wherex() + window->titlelen + 2, wherey());
+      chline(window->w - (wherex() - x) - 2);
+      cputcxy(x2, y, CH_URCORNER);
+    }
+
+    h = window->h;
   
-  if(clipy1 > y1) {
-    if(clipy1 - y1 < h) {
-      h = clipy1 - y1;
-            y1 = clipy1;
-    } else {
-      h = 0;
+    if(clipy1 > y1) {
+      if(clipy1 - y1 < h) {
+	h = clipy1 - y1;
+	      y1 = clipy1;
+      } else {
+	h = 0;
+      }
     }
-  }
 
-  if(clipy2 < y1 + h) {
-    if(y1 >= clipy2) {
-      h = 0;
-    } else {
-      h = clipy2 - y1;
+    if(clipy2 < y1 + h) {
+      if(y1 >= clipy2) {
+	h = 0;
+      } else {
+	h = clipy2 - y1;
+      }
     }
-  }
 
-  cvlinexy(x, y1, h);
-  cvlinexy(x2, y1, h);  
+    cvlinexy(x, y1, h);
+    cvlinexy(x2, y1, h);  
 
-  if(y + window->h >= clipy1 &&
-     y + window->h < clipy2) {
-    cputcxy(x, y2, CH_LLCORNER);
-    chlinexy(x1, y2, window->w);
-    cputcxy(x2, y2, CH_LRCORNER);
+    if(y + window->h >= clipy1 &&
+       y + window->h < clipy2) {
+      cputcxy(x, y2, CH_LLCORNER);
+      chlinexy(x1, y2, window->w);
+      cputcxy(x2, y2, CH_LRCORNER);
+    }
   }
 
   draw_window_contents(window, focus, clipy1, clipy2,

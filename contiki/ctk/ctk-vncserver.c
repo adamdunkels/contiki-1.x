@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.11 2004/12/27 22:03:04 oliverschmidt Exp $
+ * $Id: ctk-vncserver.c,v 1.12 2005/03/15 15:51:17 oliverschmidt Exp $
  *
  */
 
@@ -666,7 +666,8 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_window(struct ctk_window *window, unsigned char focus,
-		unsigned char clipy1, unsigned char clipy2)
+		unsigned char clipy1, unsigned char clipy2,
+		unsigned char draw_borders)
 {
   unsigned char x, y;
   unsigned char h;
@@ -680,63 +681,65 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
     
   x = window->x;
   y = window->y + 1;
-
-  textcolor(VNC_OUT_WINDOWCOLOR + focus);
-  /*  if(focus & CTK_FOCUS_WINDOW) {
-    textcolor(WINDOWCOLOR_FOCUS);
-  } else {
-    textcolor(WINDOWCOLOR);
-    }*/
-
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + window->w;
   y2 = y1 + window->h;
 
-  /* Draw window frame. */  
-  if(y >= clipy1) {
-    cputcxy(x, y, CH_ULCORNER);
-    for(i = wherex() + window->titlelen + 2; i < x2; ++i) {
-      cputcxy(i, y, CH_TITLEBAR);
-    }
-    cputcxy(x2, y, CH_URCORNER);
-  }
+  if(draw_borders) {
 
-  h = window->h;
-  
-  if(clipy1 > y1) {
-    if(clipy1 - y1 < h) {
-      h = clipy1 - y1;
-            y1 = clipy1;
+    /* Draw window frame. */  
+    textcolor(VNC_OUT_WINDOWCOLOR + focus);
+    /*  if(focus & CTK_FOCUS_WINDOW) {
+      textcolor(WINDOWCOLOR_FOCUS);
     } else {
-      h = 0;
-    }
-  }
+      textcolor(WINDOWCOLOR);
+      }*/
 
-  if(clipy2 < y1 + h) {
-    if(y1 >= clipy2) {
-      h = 0;
-    } else {
-      h = clipy2 - y1;
+    if(y >= clipy1) {
+      cputcxy(x, y, CH_ULCORNER);
+      for(i = wherex() + window->titlelen + 2; i < x2; ++i) {
+	cputcxy(i, y, CH_TITLEBAR);
+      }
+      cputcxy(x2, y, CH_URCORNER);
     }
-  }
+
+    h = window->h;
   
-  for(i = y1; i < y1 + h; ++i) {
-    cputcxy(x, i, CH_WINDOWLBORDER);
-    cputcxy(x2, i, CH_WINDOWRBORDER);
-  }
-
-  /*  cvlinexy(x, y1, h);
-      cvlinexy(x2, y1, h);  */
-
-  if(y + window->h >= clipy1 &&
-     y + window->h < clipy2) {
-    cputcxy(x, y2, CH_LLCORNER);
-    for(i = x1; i < x2; ++i) {
-      cputcxy(i, y2, CH_WINDOWLOWERBORDER);
+    if(clipy1 > y1) {
+      if(clipy1 - y1 < h) {
+	h = clipy1 - y1;
+	      y1 = clipy1;
+      } else {
+	h = 0;
+      }
     }
-    /*    chlinexy(x1, y2, window->w);*/
-    cputcxy(x2, y2, CH_LRCORNER);
+
+    if(clipy2 < y1 + h) {
+      if(y1 >= clipy2) {
+	h = 0;
+      } else {
+	h = clipy2 - y1;
+      }
+    }
+  
+    for(i = y1; i < y1 + h; ++i) {
+      cputcxy(x, i, CH_WINDOWLBORDER);
+      cputcxy(x2, i, CH_WINDOWRBORDER);
+    }
+
+    /*  cvlinexy(x, y1, h);
+	cvlinexy(x2, y1, h);  */
+
+    if(y + window->h >= clipy1 &&
+       y + window->h < clipy2) {
+      cputcxy(x, y2, CH_LLCORNER);
+      for(i = x1; i < x2; ++i) {
+	cputcxy(i, y2, CH_WINDOWLOWERBORDER);
+      }
+      /*    chlinexy(x1, y2, window->w);*/
+      cputcxy(x2, y2, CH_LRCORNER);
+    }
   }
 
   draw_window_contents(window, focus, clipy1, clipy2,

@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.44 2004/12/27 22:03:04 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.45 2005/03/15 15:51:17 oliverschmidt Exp $
  *
  */
 
@@ -646,7 +646,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
     /* Draw the windows from back to front. */
     for(; w != windows; w = w->prev) {
       ctk_draw_clear_window(w, 0, clipy1, clipy2);
-      ctk_draw_window(w, 0, clipy1, clipy2);
+      ctk_draw_window(w, 0, clipy1, clipy2, 1);
     }
 
     /* Draw focused window */
@@ -654,7 +654,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
 	    CTK_FOCUS_WIDGET|CTK_FOCUS_WINDOW:
 	    CTK_FOCUS_WINDOW;
     ctk_draw_clear_window(windows, focus, clipy1, clipy2);
-    ctk_draw_window(windows, focus, clipy1, clipy2);
+    ctk_draw_window(windows, focus, clipy1, clipy2, 1);
   }
 
   /* Draw dialog (if any) */
@@ -716,7 +716,7 @@ ctk_window_redraw(struct ctk_window *w)
 #endif /* CTK_CONF_MENUS */		    
 	    windows == w) {
     ctk_draw_window(w, CTK_FOCUS_WINDOW,
-		    0, height);
+		    0, height, 0);
   }  
 }
 /*-----------------------------------------------------------------------------------*/
