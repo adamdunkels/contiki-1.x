@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.3 2004/12/26 14:13:34 oliverschmidt Exp $
+ * $Id: config.c,v 1.4 2005/01/26 21:33:29 oliverschmidt Exp $
  *
  */
 
@@ -44,26 +44,25 @@
 #include "uiplib.h"
 #include "resolv.h"
 
+#include "program-handler.h"
+
 #include "config.h"
 
 
-static config_t config;
+static config_t config = {0, 4, "TFE.drv"};
 
 /*-----------------------------------------------------------------------------------*/
-static int
+static void
 config_load(void)
 {
   int fd;
-  int rv;
 
   fd = open("contiki.cfg", 0);
   if(fd == -1) {
-    return 0;
+    return;
   }
-  rv = read(fd, &config, sizeof(config));
+  read(fd, &config, sizeof(config));
   close(fd);
-
-  return rv == sizeof(config);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -74,6 +73,12 @@ config_apply(void)
   ctk_draw_setbackground(config.bkgnd);
 
 #endif /* __APPLE2ENH__ */
+
+  config_setlanslot(config.slot);
+
+  if(*config.driver) {
+    program_handler_load(config.driver, NULL);
+  }
 
 #ifdef WITH_UIP
 
@@ -94,9 +99,8 @@ config_apply(void)
 LOADER_INIT_FUNC(config_init, arg)
 {
   arg_free(arg);
-  if(config_load()) {
-    config_apply();
-  }
+  config_load();
+  config_apply();
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/

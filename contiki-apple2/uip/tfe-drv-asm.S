@@ -9,9 +9,8 @@
 
 ;---------------------------------------------------------------------
 
-	_cs8900a_rxtxreg	= $c0a0
-	_cs8900a_txcmd		= $c0a4
-	_cs8900a_txlen		= $c0a6
-	_cs8900a_packetpp	= $c0aa
-	_cs8900a_ppdata		= $c0ac
-
+	_cs8900a_rxtxreg	= $c080
+	_cs8900a_txcmd		= $c084
+	_cs8900a_txlen		= $c086
+	_cs8900a_packetpp	= $c08a
+	_cs8900a_ppdata		= $c08c

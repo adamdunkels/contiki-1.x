@@ -28,7 +28,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.1 2005/01/22 02:56:00 oliverschmidt Exp $
+ * $Id: cs8900a.c,v 1.2 2005/01/26 21:33:30 oliverschmidt Exp $
  *
  */
 
@@ -39,21 +39,16 @@
 #include "uip.h"
 #include "uip_arp.h"
 
-/*#define UIP_ETHADDR0 0x00
-#define UIP_ETHADDR1 0x00
-#define UIP_ETHADDR2 0x00
-#define UIP_ETHADDR3 0x64
-#define UIP_ETHADDR4 0x64
-#define UIP_ETHADDR5 0x64*/
-
+extern u8_t lanslot;
 extern u8_t *cs8900a_rxtxreg,
-  *cs8900a_txcmd,
-  *cs8900a_txlen,
-  *cs8900a_packetpp,
-  *cs8900a_ppdata;
+            *cs8900a_txcmd,
+            *cs8900a_txlen,
+            *cs8900a_packetpp,
+            *cs8900a_ppdata;
 
+static u8_t idx;
 static u16_t len;
-static u8_t r;
+static u16_t cnt;
 
 
 /*-----------------------------------------------------------------------------------*/
@@ -61,64 +56,71 @@ static u8_t r;
 void
 cs8900a_init(void)
 {
+  asm("lda %v", lanslot);
+  asm("asl");
+  asm("asl");
+  asm("asl");
+  asm("asl");
+  asm("sta %v", idx);
+  asm("tax");
+
   /* Turn on transmission and reception of frames. */
   /* PACKETPP = 0x0112;
      PPDATA   = 0x00c0; */
   asm("lda #$12");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
+  asm("sta %v+1,x", cs8900a_packetpp);
   asm("lda #$c0");
-  asm("sta %v", cs8900a_ppdata);
+  asm("sta %v,x", cs8900a_ppdata);
   asm("lda #$00");
-  asm("sta %v+1", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_ppdata);
 
   /* Accept valid unicast+broadcast frames. */
   /* PACKETPP = 0x0104;
      PPDATA   = 0x0d05; */
   asm("lda #$04");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
+  asm("sta %v+1,x", cs8900a_packetpp);
   asm("lda #$05");
-  asm("sta %v", cs8900a_ppdata);
+  asm("sta %v,x", cs8900a_ppdata);
   asm("lda #$0d");
-  asm("sta %v+1", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_ppdata);
 
   /* Set MAC address. */
   /* PACKETPP = 0x0158;
      PPDATA   = (ETHADDR1 << 8) | (ETHADDR0); */
   asm("lda #$58");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
+  asm("sta %v+1,x", cs8900a_packetpp);
   asm("lda %v", uip_ethaddr);
-  asm("sta %v", cs8900a_ppdata);
+  asm("sta %v,x", cs8900a_ppdata);
   asm("lda %v+1", uip_ethaddr);
-  asm("sta %v+1", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_ppdata);
 
   /* PACKETPP = 0x015a;
      PPDATA   = (ETHADDR3 << 8) | (ETHADDR2); */
   asm("lda #$5a");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
+  asm("sta %v+1,x", cs8900a_packetpp);
   asm("lda %v+2", uip_ethaddr);
-  asm("sta %v", cs8900a_ppdata);
+  asm("sta %v,x", cs8900a_ppdata);
   asm("lda %v+3", uip_ethaddr);
-  asm("sta %v+1", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_ppdata);
 
   /* PACKETPP = 0x015c;
      PPDATA   = (ETHADDR5 << 8) | (ETHADDR4); */
   asm("lda #$5c");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
+  asm("sta %v+1,x", cs8900a_packetpp);
   asm("lda %v+4", uip_ethaddr);
-  asm("sta %v", cs8900a_ppdata);
+  asm("sta %v,x", cs8900a_ppdata);
   asm("lda %v+5", uip_ethaddr);
-  asm("sta %v+1", cs8900a_ppdata);
-
+  asm("sta %v+1,x", cs8900a_ppdata);
 }
 #pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
@@ -126,68 +128,55 @@ cs8900a_init(void)
 void
 cs8900a_send(void)
 {
-  if(uip_len > UIP_BUFSIZE) {
-    asm("inc $d020");
-    return;
-  }
-    
+  asm("ldx %v", idx);
+
   /* Transmit command. */
   asm("lda #$c0");
-  asm("sta %v", cs8900a_txcmd);
+  asm("sta %v,x", cs8900a_txcmd);
   asm("lda #$00");
-  asm("sta %v+1", cs8900a_txcmd);
-  asm("lda _uip_len");
-  asm("sta %v", cs8900a_txlen);
-#if UIP_BUFSIZE > 255  
-  asm("lda _uip_len+1");
-#else
-  asm("lda #0");
-#endif      
-  asm("sta %v+1", cs8900a_txlen);
+  asm("sta %v+1,x", cs8900a_txcmd);
+  asm("lda %v", uip_len);
+  asm("sta %v,x", cs8900a_txlen);
+  asm("lda %v+1", uip_len);
+  asm("sta %v+1,x", cs8900a_txlen);
 
-  asm("ldx #8");
+  asm("ldy #8");
   asm("tryagain:");
   /* Check for avaliable buffer space. */
   asm("lda #$38");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
-  asm("lda %v+1", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_packetpp);
+  asm("lda %v+1,x", cs8900a_ppdata);
   asm("and #1");
   asm("bne send");
 
   /* No space avaliable, skip a received frame and try again. */
   asm("lda #$02");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
-  asm("lda %v", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_packetpp);
+  asm("lda %v,x", cs8900a_ppdata);
   asm("ora #$40");
-  asm("sta %v", cs8900a_ppdata);
+  asm("sta %v,x", cs8900a_ppdata);
 
-  asm("dex");
+  asm("dey");
   asm("bne tryagain");
-  
-  asm("bailout:");
   return;
 
   /* Send the frame. */
   asm("send:");
 
-  
   /* First, send 40+14=54 bytes of header. */
-  
-  asm("ldx #54");
   asm("ldy #0");
   asm("sendloop1:");
-  asm("lda _uip_buf,y");
-  asm("sta %v", cs8900a_rxtxreg);
-  asm("lda _uip_buf+1,y");
-  asm("sta %v+1", cs8900a_rxtxreg);
+  asm("lda %v,y", uip_buf);
+  asm("sta %v,x", cs8900a_rxtxreg);
   asm("iny");
+  asm("lda %v,y", uip_buf);
+  asm("sta %v+1,x", cs8900a_rxtxreg);
   asm("iny");
-  asm("dex");
-  asm("dex");
+  asm("cpy #54");
   asm("bne sendloop1");
 
   if(uip_len <= 54) {
@@ -195,51 +184,43 @@ cs8900a_send(void)
   }
 
   /* Next, send rest of the packet. */
-
   uip_len -= 54;
 
+  asm("ldx %v", idx);
+
+  asm("lda %v", uip_len);
+  asm("lsr");
+  asm("bcc noinc");
+  asm("inc %v", uip_len);
+  asm("bne noinc");
+  asm("inc %v+1", uip_len);
+  asm("noinc:");
 
   asm("lda ptr1");
   asm("pha");
   asm("lda ptr1+1");
   asm("pha");
   
-  asm("lda _uip_appdata");
+  asm("lda %v", uip_appdata);
   asm("sta ptr1");
-  asm("lda _uip_appdata+1");
+  asm("lda %v+1", uip_appdata);
   asm("sta ptr1+1");  
 
-  asm("sendloop2:");
-  asm("lda _uip_len");  
-  asm("tax");
-  asm("and #1");
-  asm("beq noinc");
-  asm("inx");
-  asm("noinc:");
-#if UIP_BUFSIZE > 255
-  asm("lda _uip_len+1");
-#else
-  asm("lda #0");
-#endif
-  asm("beq nozero");
-  asm("ldx #0");
-  asm("nozero:");
   asm("ldy #0");
-  asm("sendloop:");
+  asm("sendloop2:");
   asm("lda (ptr1),y");
-  asm("sta %v", cs8900a_rxtxreg);
+  asm("sta %v,x", cs8900a_rxtxreg);
   asm("iny");
   asm("lda (ptr1),y");
-  asm("sta %v+1", cs8900a_rxtxreg);
+  asm("sta %v+1,x", cs8900a_rxtxreg);
   asm("iny");
-  asm("dex");
-  asm("dex");
-  asm("bne sendloop");
+  asm("bne check");
   asm("inc ptr1+1");
-#if UIP_BUFSIZE > 255
-  asm("dec _uip_len+1");
+  asm("check:");
+  asm("cpy %v", uip_len);
+  asm("bne sendloop2");
+  asm("dec %v+1", uip_len);
   asm("bpl sendloop2");
-#endif
 
   asm("pla");
   asm("sta ptr1+1");
@@ -252,22 +233,27 @@ cs8900a_send(void)
 static void
 skip_frame(void)
 {
+  asm("ldx %v", idx);
+
   /* PACKETPP = 0x0102;
      PPDATA   = PPDATA | 0x0040; */
   asm("lda #$02");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
-  asm("lda %v", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_packetpp);
+  asm("lda %v,x", cs8900a_ppdata);
   asm("ora #$40");
-  asm("sta %v", cs8900a_ppdata);
+  asm("sta %v,x", cs8900a_ppdata);
 }
 #pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
 #pragma optimize(push, off)
-u8_t
+u16_t
 cs8900a_poll(void)
 {
+  asm("ldx %v", idx);
+  asm("beq bailout");
+
   /* Check receiver event register to see if there are any valid
      unicast frames avaliable.  */
   /* PACKETPP = 0x0124;
@@ -276,88 +262,74 @@ cs8900a_poll(void)
      }
   */
   asm("lda #$24");
-  asm("sta %v", cs8900a_packetpp);
+  asm("sta %v,x", cs8900a_packetpp);
   asm("lda #$01");
-  asm("sta %v+1", cs8900a_packetpp);
-  asm("lda %v+1", cs8900a_ppdata);
+  asm("sta %v+1,x", cs8900a_packetpp);
+  asm("lda %v+1,x", cs8900a_ppdata);
   asm("and #$0d");
   asm("cmp #$00");
   asm("bne noreturn");
   /* No frame ready. */
+  asm("bailout:");
   return 0;
   
   asm("noreturn:");
   /* Process the incoming frame. */
   
   /* Read receiver event and discard it. */
-  /* dummy = RXTXREG; */
-     
-  asm("lda %v+1", cs8900a_rxtxreg);
-  asm("sta _len+1");
-  asm("lda %v", cs8900a_rxtxreg);
-  asm("sta _len");
+  /* RXTXREG; */
+  asm("lda %v+1,x", cs8900a_rxtxreg);
+  asm("lda %v,x", cs8900a_rxtxreg);
   
   /* Read frame length. */
-  /* len = uip_len = RXTXREG; */
-  asm("lda %v+1", cs8900a_rxtxreg);
-  asm("sta _len+1");
-  asm("sta _uip_len+1");
-  asm("lda %v", cs8900a_rxtxreg);
-  asm("sta _len");
-  asm("sta _uip_len");
+  /* cnt = len = RXTXREG; */
+  asm("lda %v+1,x", cs8900a_rxtxreg);
+  asm("sta %v+1", len);
+  asm("sta %v+1", cnt);
+  asm("lda %v,x", cs8900a_rxtxreg);
+  asm("sta %v", len);
+  asm("sta %v", cnt);
 
-  
-  if(len > UIP_BUFSIZE) {
+  asm("lsr");
+  asm("bcc noinc");
+  asm("inc %v", cnt);
+  asm("bne noinc");
+  asm("inc %v+1", cnt);
+  asm("noinc:");
+
+  if(cnt > UIP_BUFSIZE) {
     skip_frame();
     return 0;
   }
-  
+
   /* Read bytes into uip_buf. */
+  asm("ldx %v", idx);
+
   asm("lda ptr1");
   asm("pha");
   asm("lda ptr1+1");
   asm("pha");
   
-  asm("lda #<_uip_buf");
+  asm("lda #<%v", uip_buf);
   asm("sta ptr1");
-  asm("lda #>_uip_buf");
+  asm("lda #>%v", uip_buf);
   asm("sta ptr1+1");  
   
-  asm("lda _len+1");
-  asm("beq read256");
-  
-    /* Read first 256*n bytes. */
   asm("ldy #0");
-  asm("read256loop:");
-  asm("lda %v", cs8900a_rxtxreg);
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("lda %v+1", cs8900a_rxtxreg);
-  asm("sta (ptr1),y");
-  asm("iny");
-  asm("bne read256loop");
-  asm("inc ptr1+1");
-  
-  asm("dec _len+1");
-  asm("bne read256loop");
-  
-  /* Read last 255 or less bytes. */
-  asm("read256:");
-  asm("lda _len");
-  asm("lsr");
-  asm("bcc noinc");
-  asm("inc _len");
-  asm("noinc:");
-  asm("ldy #$0");
   asm("readloop:");
-  asm("lda %v", cs8900a_rxtxreg);
+  asm("lda %v,x", cs8900a_rxtxreg);
   asm("sta (ptr1),y");
   asm("iny");
-  asm("lda %v+1", cs8900a_rxtxreg);
+  asm("lda %v+1,x", cs8900a_rxtxreg);
   asm("sta (ptr1),y");
   asm("iny");
-  asm("cpy _len");
+  asm("bne check");
+  asm("inc ptr1+1");
+  asm("check:");
+  asm("cpy %v", cnt);
   asm("bne readloop");
+  asm("dec %v+1", cnt);
+  asm("bpl readloop");
 
   asm("pla");
   asm("sta ptr1+1");

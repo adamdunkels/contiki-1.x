@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.6 2004/12/26 14:13:34 oliverschmidt Exp $
+ * $Id: main.c,v 1.7 2005/01/26 21:33:29 oliverschmidt Exp $
  *
  */
 
@@ -59,6 +59,9 @@
 #include "www-dsc.h"
 
 #include "clock.h"
+
+
+unsigned char lanslot;
 
 /*-----------------------------------------------------------------------------------*/
 unsigned char
@@ -123,7 +126,6 @@ main(void)
       break;
     }
   }
-
   while(1) {
     ek_run();
   }
