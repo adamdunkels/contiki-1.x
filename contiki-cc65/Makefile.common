@@ -65,6 +65,9 @@ OPT=-Or
 %.o: ctk/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
+%.o: uip/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
 %.o: $(CONTIKICC65)/apps/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
@@ -92,9 +95,9 @@ contiki-labels.s: contiki
 	./$(CONTIKICC65)/make-labels
 
 UIP=uip.o uip_arch.o uip_main.o resolv.o uip-signal.o
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o
+WWW=www.o webclient.o http-strings.o http-user-agent-string.o htmlparser.o html-strings.o 
 EMAIL=email.o smtp.o smtp-strings.o
-WEBSERVER=webserver.o http-strings.o
+WEBSERVER=webserver.o httpd.o httpd-cgi.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
 
 
@@ -112,8 +115,9 @@ codesize:
 	od65 --dump-segsize *.o | egrep '\.o|CODE'
 
 d64:
-	c1541 -format contiki,64 d64 contiki.d64
+	c1541 -format contiki,00 d64 contiki.d64
 	c1541 -attach contiki.d64 -write contiki
 	c1541 -attach contiki.d64 $(foreach dsc, $(wildcard *.dsc), -write $(dsc))
 	c1541 -attach contiki.d64 $(foreach prg, $(wildcard *.prg), -write $(prg))
+	c1541 -attach contiki.d64 $(foreach drv, $(wildcard *.drv), -write $(drv))
 	c1541 -attach contiki.d64 -list
