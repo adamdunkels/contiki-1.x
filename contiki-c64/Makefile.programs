@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.12 2003/08/06 23:13:06 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.13 2003/08/09 13:14:33 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -66,13 +66,15 @@ CFLAGS:=$(CFLAGSCOMMON) \
 	-DWITH_LOADER_ARCH \
         -DWITH_UIP -DWITH_ETHERNET
 
+directory.prg: directory.o
+
 configedit.prg: configedit.o c64-fs-write.o
 
 email.prg: $(EMAIL) 
 
 www.prg: $(WWW)
 
-webserver.prg: $(WEBSERVER)
+webserver.prg: $(WEBSERVER) c64-fs-raw.o
 
 simpletelnet.prg: $(TELNET)
 
