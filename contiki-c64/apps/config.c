@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.5 2003/08/24 22:35:22 adamdunkels Exp $
+ * $Id: config.c,v 1.6 2004/02/24 09:53:44 adamdunkels Exp $
  *
  */
 
@@ -39,7 +39,7 @@
 #include "loader.h"
 #include "c64-fs.h"
 #include "uip.h"
-#include "uip_main.h"
+#include "uiplib.h"
 #include "uip_arp.h"
 #include "resolv.h"
 
@@ -162,7 +162,7 @@ ipaddrconf(char *str)
   char *nt;
   
   nt = nullterminate(str);
-  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(str, (unsigned char *)addr)) {
     uip_sethostaddr(addr);
   }
 
@@ -175,7 +175,7 @@ netmaskconf(char *str)
   char *nt;
   
   nt = nullterminate(str);
-  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(str, (unsigned char *)addr)) {
     uip_setnetmask(addr);
   }
 
@@ -188,7 +188,7 @@ drconf(char *str)
   char *nt;
   
   nt = nullterminate(str);
-  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(str, (unsigned char *)addr)) {
     uip_setdraddr(addr);
   }
 
@@ -201,7 +201,7 @@ dnsconf(char *str)
   char *nt;
   
   nt = nullterminate(str);
-  if(uip_main_ipaddrconv(str, (unsigned char *)addr)) {
+  if(uiplib_ipaddrconv(str, (unsigned char *)addr)) {
     resolv_conf(addr);
   }
 

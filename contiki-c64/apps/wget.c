@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.7 2003/09/04 23:05:43 adamdunkels Exp $
+ * $Id: wget.c,v 1.8 2004/02/24 09:53:44 adamdunkels Exp $
  *
  */
 
@@ -42,7 +42,7 @@
 #include "webclient.h"
 #include "resolv.h"
 #include "petsciiconv.h"
-#include "uip_main.h"
+#include "uiplib.h"
 #include "loader.h"
 
 #include "program-handler.h"
@@ -250,7 +250,7 @@ start_get(void)
       
   
   /* First check if the host is an IP address. */
-  if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {    
+  if(uiplib_ipaddrconv(host, (unsigned char *)addr) == 0) {    
     
     /* Try to lookup the hostname. If it fails, we initiate a hostname
        lookup and print out an informative message on the

@@ -32,11 +32,10 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.8 2003/08/29 20:31:12 adamdunkels Exp $
+ * $Id: configedit.c,v 1.9 2004/02/24 09:53:44 adamdunkels Exp $
  *
  */
 
-#include "uip_main.h"
 #include "uip.h"
 #include "uip_arp.h"
 #include "resolv.h"
