@@ -24,7 +24,7 @@
  * being split across more than one TCP segment.
  *
  * Because each socket runs as a protothread, the socket has to be
- * started with a call to SOCKET_START() at the start of the function
+ * started with a call to SOCKET_BEGIN() at the start of the function
  * in which the socket is used. Similarly, the socket protothread can
  * be terminated by a call to SOCKET_EXIT().
  *
@@ -46,7 +46,7 @@
  * the code, as it mostly involves sending strings.
  *  
  * The function smtp_socketthread() is declared as a protothread using
- * the PT_THREAD() macro. The SOCKET_START() call at the first line of
+ * the PT_THREAD() macro. The SOCKET_BEGIN() call at the first line of
  * the smtp_socketthread() function starts the protothread. SMTP
  * specifies that the server will start with sending a welcome message
  * that should include the status code 220 if the server is ready to
@@ -82,7 +82,7 @@ MEMB(connections, sizeof(struct smtp_state), 2);
 static
 PT_THREAD(smtp_socketthread(struct smtp_state *s))
 {
-  SOCKET_START(&s->socket);
+  SOCKET_BEGIN(&s->socket);
 
   SOCKET_READTO(&s->socket, '\n');
    
@@ -133,7 +133,7 @@ PT_THREAD(smtp_socketthread(struct smtp_state *s))
 
   SEND_STRING(&s->socket, "QUIT\r\n");
   
-  SOCKET_CLOSE_EXIT(&s->socket);
+  SOCKET_END(&s->socket);
 }
 
 void
@@ -219,7 +219,7 @@ void socket_init(struct socket *socket, char *buffer, unsigned int buffersize);
  *
  * \hideinitializer
  */
-#define SOCKET_START(socket) PT_START(&(socket)->pt)
+#define SOCKET_BEGIN(socket) PT_BEGIN(&(socket)->pt)
 
 PT_THREAD(socket_send(struct socket *socket, char *buf, unsigned int len));
 /**
@@ -293,7 +293,7 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c));
  *
  * \hideinitializer
  */
-#define SOCKET_READLEN(socket) uipbuf_len(&(socket)->buf)
+#define SOCKET_DATALEN(socket) uipbuf_len(&(socket)->buf)
 
 /**
  * Exit the socket's protothread.
@@ -323,5 +323,57 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c));
     SOCKET_CLOSE(socket);			\
     SOCKET_EXIT(socket);			\
   } while(0)
+
+#define SOCKET_END(socket) PT_END(&(socket)->pt)
+
+char socket_newdata(struct socket *s);
+
+/**
+ * Check if new data has arrived on a socket.
+ *
+ * This macro is used in conjunction with the SOCKET_WAIT_UNTIL()
+ * macro to check if data has arrived on a socket.
+ *
+ * \param socket (struct socket *) A pointer to the socket.
+ *
+ * \hideinitializer
+ */
+#define SOCKET_NEWDATA(socket) socket_newdata(socket)
+
+/**
+ * Wait until data arrives or until a condition is true.
+ *
+ * This macro blocks the protothread until new data arrives on the
+ * socket or until the specified condition is true. After the
+ * protothread unblocks, the macro SOCKET_NEWDATA() must be used to
+ * check whether the protothread unblocked because of new data arrived
+ * or (only) if the condition was true.
+ *
+ * Typically, this macro is used as follows:
+ *
+ \code
+ PT_THREAD(thread(struct socket *s, struct timer *t))
+ {
+   SOCKET_BEGIN(s);
+
+   SOCKET_WAIT_UNTIL(s, timer_expired(t) || something_else());
+   
+   if(SOCKET_NEWDATA(s)) {
+     SOCKET_READTO(s, '\n');
+   } else {
+     handle_timed_out(s);
+   }
+   
+   SOCKET_END(s);
+ }
+ \endcode 
+ *
+ * \param socket (struct socket *) A pointer to the socket.
+ * \param condition The condition to wait for.
+ *
+ * \hideinitializer
+ */
+#define SOCKET_WAIT_UNTIL(socket, condition)    \
+  PT_WAIT_UNTIL(&(socket)->pt, socket_newdata(socket) || (condition));
 
 #endif /* __SOCKET_H__ */
