@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.1 2003/07/30 23:10:49 adamdunkels Exp $
+ * $Id: wget.c,v 1.2 2003/08/04 00:13:47 adamdunkels Exp $
  *
  */
 
@@ -51,10 +51,18 @@
 #include <string.h>
 #include <fcntl.h>
 
+#include "c64-dio.h"
 
 static struct ctk_window window;
 
-static struct ctk_label hostlabel =
+static struct ctk_label urllabel =
+  {CTK_LABEL(0, 1, 4, 1, "URL:")};
+static char url[80];
+static char urledit[80];
+struct ctk_textentry urltextentry =
+  {CTK_TEXTENTRY(5, 1, 29, 1, urledit, 78)};
+
+/*static struct ctk_label hostlabel =
   {CTK_LABEL(0, 1, 7, 1, "Server:")};
 static char hostedit[40];
 static char host[40];
@@ -66,22 +74,23 @@ static struct ctk_label filelabel =
 static char fileedit[40];
 static char file[40];
 static struct ctk_textentry filetextentry =
-  {CTK_TEXTENTRY(8, 3, 26, 1, fileedit, 38)};
+{CTK_TEXTENTRY(8, 3, 26, 1, fileedit, 38)};*/
+
 
 static struct ctk_label savefilenamelabel =
-  {CTK_LABEL(0, 5, 14, 1, "Save filename:")};
+  {CTK_LABEL(0, 3, 14, 1, "Save filename:")};
 static char savefilename[40];
 static struct ctk_textentry savefilenametextentry =
-  {CTK_TEXTENTRY(15, 5, 19, 1, savefilename, 38)};
+  {CTK_TEXTENTRY(15, 3, 19, 1, savefilename, 38)};
 
 static struct ctk_button filebutton =
-  {CTK_BUTTON(0, 7, 13, "Download file")};
+  {CTK_BUTTON(0, 5, 13, "Download file")};
 
 static struct ctk_button d64button =
-  {CTK_BUTTON(17, 7, 18, "Download D64 disk")};
+  {CTK_BUTTON(17, 5, 18, "Download D64 disk")};
 
 static struct ctk_label statustext =
-  {CTK_LABEL(0, 9, 36, 1, "")};
+  {CTK_LABEL(0, 7, 36, 1, "")};
 static char statusmsg[40];
 
 static struct ctk_window d64dialog;
@@ -133,13 +142,16 @@ LOADER_INIT_FUNC(wget_init)
     id = dispatcher_start(&p);
     
     /* Create the main window. */
-    ctk_window_new(&window, 36, 10, "Web downloader");
+    ctk_window_new(&window, 36, 8, "Web downloader");
 
-    CTK_WIDGET_ADD(&window, &hostlabel);
+    /*    CTK_WIDGET_ADD(&window, &hostlabel);
     CTK_WIDGET_ADD(&window, &hosttextentry);
 
     CTK_WIDGET_ADD(&window, &filelabel);
-    CTK_WIDGET_ADD(&window, &filetextentry);
+    CTK_WIDGET_ADD(&window, &filetextentry);*/
+    
+    CTK_WIDGET_ADD(&window, &urllabel);
+    CTK_WIDGET_ADD(&window, &urltextentry);
     
     CTK_WIDGET_ADD(&window, &savefilenamelabel);
     CTK_WIDGET_ADD(&window, &savefilenametextentry);
@@ -150,9 +162,12 @@ LOADER_INIT_FUNC(wget_init)
 
     CTK_WIDGET_ADD(&window, &statustext);
 
-    memset(hostedit, 0, sizeof(hostedit));
-    memset(fileedit, 0, sizeof(fileedit));
+    /*    memset(hostedit, 0, sizeof(hostedit));
+	  memset(fileedit, 0, sizeof(fileedit));*/
+    dload_state = DLOAD_NONE;
+      
     memset(savefilename, 0, sizeof(savefilename));
+    memset(url, 0, sizeof(url));
 
     ctk_dialog_new(&d64dialog, 36, 8);
     CTK_WIDGET_ADD(&d64dialog, &overwritelabel);
@@ -167,6 +182,7 @@ LOADER_INIT_FUNC(wget_init)
        signal. */
     dispatcher_listen(ctk_signal_window_close);
     dispatcher_listen(ctk_signal_button_activate);
+    dispatcher_listen(ctk_signal_hyperlink_activate);
     dispatcher_listen(resolv_signal_found);
   }
   ctk_window_open(&window);
@@ -189,12 +205,68 @@ static void
 start_get(void)
 {
   u16_t addr[2];
+  unsigned char i;
+  static char host[32];
+  char *file;
+  register char *urlptr;
+  unsigned short port;
+
+  /* Trim off any spaces in the end of the url. */
+  urlptr = url + strlen(url) - 1;
+  while(*urlptr == ' ' && urlptr > url) {
+    *urlptr = 0;
+    --urlptr;
+  }
+
+  /* Don't even try to go further if the URL is empty. */
+  if(urlptr == url) {
+    return;
+  }
+
+  /* See if the URL starts with http://, otherwise prepend it. */
+  if(strncmp(url, http_http, 7) != 0) {
+    while(urlptr >= url) {
+      *(urlptr + 7) = *urlptr;
+      --urlptr;
+    }
+    strncpy(url, http_http, 7);
+  } 
+
+  /* Find host part of the URL. */
+  urlptr = &url[7];  
+  for(i = 0; i < sizeof(host); ++i) {
+    if(*urlptr == 0 ||
+       *urlptr == '/' ||
+       *urlptr == ' ' ||
+       *urlptr == ':') {
+      host[i] = 0;
+      break;
+    }
+    host[i] = *urlptr;
+    ++urlptr;
+  }
+
+  /* XXX: Here we should find the port part of the URL, but this isn't
+     currently done because of laziness from the programmer's side
+     :-) */
+  
+  /* Find file part of the URL. */
+  while(*urlptr != '/' && *urlptr != 0) {
+    ++urlptr;
+  }
+  if(*urlptr == '/') {
+    file = urlptr;
+  } else {
+    file = "/";
+  }
+      
   
   /* First check if the host is an IP address. */
   if(uip_main_ipaddrconv(host, (unsigned char *)addr) == 0) {    
     
     /* Try to lookup the hostname. If it fails, we initiate a hostname
-       lookup and print out an informative message on the statusbar. */
+       lookup and print out an informative message on the
+       statusbar. */
     if(resolv_lookup(host) == NULL) {
       resolv_query(host);
       show_statustext("Resolving host...");
@@ -225,10 +297,12 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
 	sprintf(statusmsg, "Open error with '%s'", savefilename);
 	show_statustext(statusmsg);
       } else {
-	strncpy(host, hostedit, sizeof(host));
-	strncpy(file, fileedit, sizeof(file));
-	petsciiconv_toascii(host, sizeof(host));
-	petsciiconv_toascii(file, sizeof(file));
+	/*	strncpy(host, hostedit, sizeof(host));
+		strncpy(file, fileedit, sizeof(file));*/
+	/*	petsciiconv_toascii(host, sizeof(host));
+		petsciiconv_toascii(file, sizeof(file));*/
+	strncpy(url, urledit, sizeof(url));
+	petsciiconv_toascii(url, sizeof(url));
 	start_get();
 	dload_bytes = 0;
 	dload_state = DLOAD_FILE;
@@ -239,16 +313,28 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
       ctk_dialog_close();
     } else if(data == (void *)&overwritebutton) {
       ctk_dialog_close();
-      strncpy(host, hostedit, sizeof(host));
+      /*      strncpy(host, hostedit, sizeof(host));
       strncpy(file, fileedit, sizeof(file));
       petsciiconv_toascii(host, sizeof(host));
-      petsciiconv_toascii(file, sizeof(file));
+      petsciiconv_toascii(file, sizeof(file));*/
+      strncpy(url, urledit, sizeof(url));
+      petsciiconv_toascii(url, sizeof(url));
       start_get();
       dload_bytes = 0;
       dload_state = DLOAD_D64;
       ds.track = 1;
       ds.sect = 0;
       bufferptr = 0;
+      /*      c64_dio_init(8);*/
+    }
+  } else if(s == ctk_signal_hyperlink_activate) {
+    if(dload_state == DLOAD_NONE) {
+      /*      open_link(w->widget.hyperlink.url);*/
+      strncpy(urledit,
+	      ((struct ctk_widget *)data)->widget.hyperlink.url, sizeof(urledit));
+      petsciiconv_topetscii(urledit, sizeof(urledit));
+      CTK_WIDGET_REDRAW(&urltextentry);
+      CTK_WIDGET_FOCUS(&window, &urltextentry);
     }
   } else if(s == resolv_signal_found) {
     /* Either found a hostname, or not. */
@@ -368,22 +454,24 @@ static void
 write_sector(u8_t device, u8_t track, u8_t sect, void *mem)
 {
   u16_t ret;
-  u8_t cmd[32];
+  static u8_t cmd[32];
   
   x_open(15, device, 15, NULL);
   x_open(2, device, 2, "#");
 
-  sprintf(cmd, "u2: 2  0%3d%3d", track, sect);  
-  cbm_write(15, cmd, strlen(cmd));
-  printf("%s\n", cmd);
-    
   ret = cbm_write(2, mem, 256);
+  
+  sprintf(cmd, "u2: 2 0 %d %d", track, sect);  
+  cbm_write(15, cmd, strlen(cmd));
+  /*  printf("%s\n", cmd);*/
+    
+
   /*  ret = 0;*/
   if(ret == -1) {
     sprintf(statusmsg, "Write error at %d:%d", track, sect);
     show_statustext(statusmsg);
   } else {
-    sprintf(statusmsg, "Wrote %d:%d", track, sect);
+    sprintf(statusmsg, "Wrote %d bytes to %d:%d", ret, track, sect);
     show_statustext(statusmsg);
   }
   /*  printf("write: wrote %d bytes\n", ret);*/
@@ -427,7 +515,10 @@ next_sector(void)
 static void
 write_buffer(void)
 {
-  write_sector(8, ds.track, ds.sect, buffer);
+  /*  write_sector(8, ds.track, ds.sect, buffer);*/
+  asm("dec $d020");
+  c64_dio_write_block(ds.track, ds.sect, buffer);
+  asm("inc $d020");
   if(next_sector() != 0) {
     dload_state = DLOAD_NONE;
   }
