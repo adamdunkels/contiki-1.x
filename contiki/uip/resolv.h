@@ -34,14 +34,14 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.h,v 1.3 2003/10/01 11:25:37 adamdunkels Exp $
+ * $Id: resolv.h,v 1.4 2003/11/27 15:54:02 adamdunkels Exp $
  *
  */
 #ifndef __RESOLV_H__
 #define __RESOLV_H__
 
 #include "uip.h"
-#include "ek.h"
+#include "dispatcher.h"
 
 /**
  * \addtogroup signals
@@ -60,7 +60,7 @@ void resolv_found(char *name, u16_t *ipaddr);
 /* Functions. */
 void resolv_conf(u16_t *dnsserver);
 u16_t *resolv_getserver(void);
-void resolv_init(void);
+LOADER_INIT_FUNC(resolv_init, arg);
 u16_t *resolv_lookup(char *name);
 void resolv_query(char *name);
 
