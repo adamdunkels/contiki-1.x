@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.1 2003/03/19 14:13:32 adamdunkels Exp $
+ * $Id: email.c,v 1.2 2003/04/08 11:50:20 adamdunkels Exp $
  *
  */
 
@@ -42,11 +42,13 @@
 #include "smtp.h"
 #include "uip_main.h"
 #include "petsciiconv.h"
+#include "loader.h"
+
 
 #define MAXNUMMSGS 6
 
 static struct ctk_menu menu;
-unsigned char menuitem_open, menuitem_setup;
+unsigned char menuitem_open, menuitem_setup, menuitem_quit;
 
 /* The main window. */
 static struct ctk_window mainwindow;
@@ -255,12 +257,14 @@ email_init(void)
     ctk_menu_new(&menu, "E-mail");
     menuitem_setup = ctk_menuitem_add(&menu, "Setup");
     menuitem_open = ctk_menuitem_add(&menu, "Open");
+    menuitem_quit = ctk_menuitem_add(&menu, "Quit");
     ctk_menu_add(&menu);
 
     /* Attach listeners to signals. */
     dispatcher_listen(ctk_signal_button_activate);
     dispatcher_listen(ctk_signal_menu_activate);
-
+    dispatcher_listen(ctk_signal_window_close);
+    
     /* Open setup window */
     ctk_window_open(&setupwindow);
   } else {
@@ -360,10 +364,18 @@ sighandler(ek_signal_t s, ek_data_t data)
 	ctk_window_open(&mainwindow);
       } else if(menu.active == menuitem_setup) {
 	ctk_window_open(&setupwindow);
+      } else if(menu.active == menuitem_quit) {
+	dispatcher_exit(&p);
+	id = 0;
+	LOADER_UNLOAD();
       }
       ctk_redraw();
     }
-
+  } else if(s == ctk_signal_window_close &&
+	    data == (ek_data_t)&mainwindow) {
+    dispatcher_exit(&p);
+    id = 0;
+    LOADER_UNLOAD();
   }
 }
 /*-----------------------------------------------------------------------------------*/

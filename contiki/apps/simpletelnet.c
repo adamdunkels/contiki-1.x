@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.1 2003/03/19 14:13:33 adamdunkels Exp $
+ * $Id: simpletelnet.c,v 1.2 2003/04/08 11:50:20 adamdunkels Exp $
  *
  */
 
@@ -44,6 +44,7 @@
 #include "resolv.h"
 #include "telnet.h"
 #include "simpletelnet.h"
+#include "loader.h"
 
 /* Telnet window */
 static struct ctk_window telnetwindow;
@@ -127,7 +128,7 @@ simpletelnet_init(void)
        
     /* Attach as a listener to the CTK button press signal. */
     dispatcher_listen(ctk_signal_button_activate);
-
+    dispatcher_listen(ctk_signal_window_close);
     dispatcher_listen(resolv_signal_found);
   }
   
@@ -270,6 +271,10 @@ sighandler(ek_signal_t s, ek_data_t data)
 	show("Host not found");
       }
     }
+  } else if(s == ctk_signal_window_close) {
+    dispatcher_exit(&p);
+    id = 0;
+    LOADER_UNLOAD();
   }
 }
 /*-----------------------------------------------------------------------------------*/

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.4 2003/04/08 07:20:11 adamdunkels Exp $
+ * $Id: www.c,v 1.5 2003/04/08 11:50:20 adamdunkels Exp $
  *
  */
 
@@ -45,6 +45,8 @@
 #include "resolv.h"
 
 #include "petsciiconv.h"
+
+#include "loader.h"
 
 #include "www-conf.h"
 
@@ -198,7 +200,7 @@ redraw_window(void)
  * to open the browser window.
  */
 void
-www_init(void)     
+www_init(void)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
@@ -472,6 +474,7 @@ sighandler(ek_signal_t s, ek_data_t data)
   } else if(s == ctk_signal_window_close) {
     dispatcher_exit(&p);
     id = 0;
+    LOADER_UNLOAD();
   }
 }
 /*-----------------------------------------------------------------------------------*/
