@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.c,v 1.3 2003/08/09 13:29:53 adamdunkels Exp $
+ * $Id: htmlparser.c,v 1.4 2003/09/04 19:33:05 adamdunkels Exp $
  *
  */
 
@@ -172,7 +172,7 @@ static struct htmlparser_state s;
 /*-----------------------------------------------------------------------------------*/
 static char last[1] = {0xff};
 
-static char *tags[] = {
+static const char *tags[] = {
 #define TAG_FIRST       0
 #define TAG_SLASHA      0
   html_slasha,
@@ -353,7 +353,7 @@ parse_tag(void)
       parse_char(ISO_nl);
       parse_char(ISO_rbrack);
       parse_char(ISO_space);
-      htmlparser_link(html_frame, s.tagattrparam);
+      htmlparser_link((char *)html_frame, s.tagattrparam);
       PRINTF(("Frame [%s]\n", s.tagattrparam));
       parse_char(ISO_space);
       parse_char(ISO_lbrack);
