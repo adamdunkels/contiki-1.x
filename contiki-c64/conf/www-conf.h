@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h,v 1.10 2004/09/12 17:50:02 adamdunkels Exp $
+ * $Id: www-conf.h,v 1.11 2004/09/19 20:05:40 adamdunkels Exp $
  *
  */
 #ifndef __WWW_CONF_H__
@@ -49,13 +49,13 @@
 
 /* The maxiumum number of widgets (i.e., hyperlinks, form elements) on
    a page. */
-#define WWW_CONF_MAX_NUMPAGEWIDGETS 5
+#define WWW_CONF_MAX_NUMPAGEWIDGETS 8
 
 /* Turns <center> support on or off; must be on for forms to work. */
-#define WWW_CONF_RENDERSTATE 1
+#define WWW_CONF_RENDERSTATE 0
 
 /* Toggles support for HTML forms. */
-#define WWW_CONF_FORMS       1
+#define WWW_CONF_FORMS       0
 
 /* Maximum lengths for various HTML form parameters. */
 #define WWW_CONF_MAX_FORMACTIONLEN  30
