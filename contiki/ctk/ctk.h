@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.10 2003/04/28 23:21:42 adamdunkels Exp $
+ * $Id: ctk.h,v 1.11 2003/06/30 20:45:50 adamdunkels Exp $
  *
  */
 
@@ -56,46 +56,45 @@
 struct ctk_widget;
 
 #define CTK_SEPARATOR(x, y, w) \
- NULL, NULL, x, y, CTK_WIDGET_SEPARATOR, w
+ NULL, NULL, x, y, CTK_WIDGET_SEPARATOR, w, 1
 struct ctk_separator {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
 };
 
 #define CTK_BUTTON(x, y, w, text) \
- NULL, NULL, x, y, CTK_WIDGET_BUTTON, w, text
+ NULL, NULL, x, y, CTK_WIDGET_BUTTON, w, 1, text
 struct ctk_button {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
   char *text;
 };
 
 #define CTK_LABEL(x, y, w, h, text) \
- NULL, NULL, x, y, CTK_WIDGET_LABEL, w, text, h
+ NULL, NULL, x, y, CTK_WIDGET_LABEL, w, h, text,
 struct ctk_label {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
   char *text;
-  unsigned char h;
 };
 
 #define CTK_HYPERLINK(x, y, w, text, url) \
- NULL, NULL, x, y, CTK_WIDGET_HYPERLINK, w, text, url
+ NULL, NULL, x, y, CTK_WIDGET_HYPERLINK, w, 1, text, url
 struct ctk_hyperlink {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
   char *text;
   char *url;
 };
@@ -106,16 +105,15 @@ struct ctk_hyperlink {
 
 
 #define CTK_TEXTENTRY(x, y, w, h, text, len) \
-  NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, text, h, len, \
+  NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, h, text, len, \
   CTK_TEXTENTRY_NORMAL, 0, 0
 struct ctk_textentry {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
   char *text;
-  unsigned char h;
   unsigned char len;
   unsigned char state;
   unsigned char xpos, ypos;
@@ -123,33 +121,47 @@ struct ctk_textentry {
 
 
 #define CTK_ICON(title, bitmap, textmap) \
- NULL, NULL, 0, 0, CTK_WIDGET_ICON, 2, title, 4, 0, bitmap, textmap
+ NULL, NULL, 0, 0, CTK_WIDGET_ICON, 2, 4, title, 0, bitmap, textmap
 struct ctk_icon {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
   char *title;
-  unsigned char h;
   ek_id_t owner;
   unsigned char *bitmap;
   char *textmap;
 };
 
 #define CTK_BITMAP(x, y, w, h, bitmap) \
-  NULL, NULL, x, y, CTK_WIDGET_BITMAP, w, bitmap, h
+  NULL, NULL, x, y, CTK_WIDGET_BITMAP, w, h, bitmap,
 struct ctk_bitmap {
   struct ctk_widget *next;
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
   unsigned char *bitmap;
-  unsigned char h;
 };
 
+#define CTK_TEXTMAP_NORMAL 0
+#define CTK_TEXTMAP_ACTIVE 1
 
+#define CTK_TEXTMAP(x, y, w, h, textmap, flags) \
+ NULL, NULL, x, y, CTK_WIDGET_LABEL, w, h, text, flags, CTK_TEXTMAP_NORMAL
+struct ctk_textmap {
+  struct ctk_widget *next;
+  struct ctk_window *window;
+  unsigned char x, y;
+  unsigned char type;
+  unsigned char w, h;
+  char *textmap;
+  unsigned char flags;
+  unsigned char state;
+};
+
+  
 
 struct ctk_widget_button {
   char *text;
@@ -157,7 +169,6 @@ struct ctk_widget_button {
 
 struct ctk_widget_label {
   char *text;
-  unsigned char h;
 };
 
 struct ctk_widget_hyperlink {
@@ -167,7 +178,6 @@ struct ctk_widget_hyperlink {
 
 struct ctk_widget_textentry {
   char *text;
-  unsigned char h;
   unsigned char len;
   unsigned char state;
   unsigned char xpos, ypos;
@@ -175,7 +185,6 @@ struct ctk_widget_textentry {
 
 struct ctk_widget_icon {
   char *title;
-  unsigned char h;
   ek_id_t owner;
   unsigned char *bitmap;
   char *textmap;
@@ -183,7 +192,6 @@ struct ctk_widget_icon {
 
 struct ctk_widget_bitmap {
   unsigned char *bitmap;
-  unsigned char h;
 };
 
 struct ctk_widget {
@@ -191,7 +199,7 @@ struct ctk_widget {
   struct ctk_window *window;
   unsigned char x, y;
   unsigned char type;
-  unsigned char w;
+  unsigned char w, h;
   union {
     struct ctk_widget_label label;
     struct ctk_widget_button button;
@@ -202,11 +210,15 @@ struct ctk_widget {
   } widget;
 };
 
+struct ctk_desktop;
+
 /* Definition of the CTK window structure. */
 struct ctk_window {
   struct ctk_window *next, *prev;
+  struct ctk_desktop *desktop;
+  
   ek_id_t owner;
-
+  
   char *title;
   unsigned char titlelen;
 
@@ -255,6 +267,51 @@ struct ctk_menus {
   struct ctk_menu *open;
   struct ctk_menu *desktopmenu;
 };
+
+/* Definition of the CTK desktop structure. */
+struct ctk_desktop {
+  char *name;
+  
+  struct ctk_window desktop_window;
+  struct ctk_window *windows;
+  struct ctk_window *dialog;
+  
+#if CTK_CONF_MENUS
+  struct ctk_menus menus;
+  struct ctk_menu *lastmenu;
+  struct ctk_menu desktopmenu;
+#endif /* CTK_CONF_MENUS */
+
+  unsigned char height, width;
+  
+#define CTK_REDRAW_NONE         0
+#define CTK_REDRAW_ALL          1
+#define CTK_REDRAW_WINDOWS      2
+#define CTK_REDRAW_WIDGETS      4
+#define CTK_REDRAW_MENUS        8
+#define CTK_REDRAW_PART        16
+
+#ifndef CTK_CONF_MAX_REDRAWWIDGETS
+#define CTK_CONF_MAX_REDRAWWIDGETS 8
+#endif /* CTK_CONF_MAX_REDRAWWIDGETS */
+#ifndef CTK_CONF_MAX_REDRAWWINDOWS
+#define CTK_CONF_MAX_REDRAWWINDOWS 8
+#endif /* CTK_CONF_MAX_REDRAWWINDOWS */
+  
+  
+
+  unsigned char redraw;
+  
+  struct ctk_widget *redraw_widgets[CTK_CONF_MAX_REDRAWWIDGETS];
+  unsigned char redraw_widgetptr;
+
+  struct ctk_window *redraw_windows[CTK_CONF_MAX_REDRAWWINDOWS];
+  unsigned char redraw_windowptr;
+
+  
+  unsigned char redraw_y1, redraw_y2;
+};
+
 
 /* Global CTK modes. */
 #define CTK_MODE_NORMAL      0
@@ -336,6 +393,7 @@ void ctk_widget_redraw(struct ctk_widget *w);
  (widg)->x = (xpos); \
  (widg)->y = (ypos); \
  (widg)->w = (width); \
+ (widg)->h = 1; \
  (widg)->text = (buttontext)
 
 #define CTK_LABEL_NEW(widg, xpos, ypos, width, height, labeltext) \
@@ -381,12 +439,14 @@ void ctk_widget_redraw(struct ctk_widget *w);
  (widg)->x = (xpos); \
  (widg)->y = (ypos); \
  (widg)->w = (width); \
+ (widg)->h = 1; \
  (widg)->text = (linktext); \
  (widg)->url = (linkurl)
 
 /* Desktop interface. */
-unsigned char ctk_desktop_width(struct ctk_window *w);
-unsigned char ctk_desktop_height(struct ctk_window *w);
+void ctk_desktop_redraw(struct ctk_desktop *d);
+unsigned char ctk_desktop_width(struct ctk_desktop *d);
+unsigned char ctk_desktop_height(struct ctk_desktop *d);
 
 /* Signals. */
 extern ek_signal_t ctk_signal_keypress,
