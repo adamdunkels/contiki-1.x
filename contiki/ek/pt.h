@@ -136,9 +136,7 @@ struct pt {
  */
 #define PT_START(pt)				\
   do {						\
-    if((pt)->lc == LC_NULL) {			\
-      LC_SET((pt)->lc);				\
-    } else {					\
+    if((pt)->lc != LC_NULL) {			\
       LC_RESUME((pt)->lc);			\
     } 						\
   } while(0)
@@ -226,6 +224,22 @@ struct pt {
  */
 #define PT_WAIT_THREAD(pt, thread)		\
   PT_WAIT_UNTIL((pt), (thread))
+
+/**
+ * Spawn a child protothread and wait until it exits.
+ *
+ * This macro spawns a child protothread and waits until it exits.
+ *
+ * \param pt A pointer to the protothread control structure.
+ * \param thread The child protothread with arguments
+ *
+ * \hideinitializer
+ */
+#define PT_SPAWN(pt, thread)			\
+  do {						\
+    PT_INIT((pt));				\
+    PT_WAIT_THREAD((pt), (thread));		\
+  } while(0)
 
 /**
  * Restart the protothread.
