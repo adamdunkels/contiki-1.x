@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.41 2004/09/01 18:14:37 adamdunkels Exp $
+ * $Id: ctk.c,v 1.42 2004/09/19 15:24:19 adamdunkels Exp $
  *
  */
 
@@ -1070,6 +1070,9 @@ switch_focus_widget(unsigned char direction)
   focus = window->focused;
   if(focus == NULL) {
     focus = window->active;
+    if(focus == NULL) {
+      return;
+    }
   }
   add_redrawwidget(focus);
   
