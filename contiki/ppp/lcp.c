@@ -44,7 +44,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: lcp.c,v 1.2 2004/08/29 15:11:46 oliverschmidt Exp $
+ * $Id: lcp.c,v 1.3 2005/01/26 23:36:22 oliverschmidt Exp $
  *
  */
 
@@ -59,13 +59,13 @@
 #include "ahdlc.h"
 #include "lcp.h"
 
-#if 1
+#if 0
 #define DEBUG1(x)
 #define DEBUG2(x)
 #else
 #include <stdio.h>
-#define DEBUG1(x) printf x
-#define DEBUG2(x) printf x
+#define DEBUG1(x) debug_printf x
+#define DEBUG2(x) debug_printf x
 #endif
 
 #define TIMER_expire()
@@ -118,8 +118,8 @@ lcp_rx(u8_t *buffer, u16_t count)
 {
   u8_t *bptr = buffer, *tptr;
   u8_t error = 0;
-  u8_t id, j;
-  u16_t len;
+  u8_t id;
+  u16_t len, j;
 
   switch(*bptr++) {
   case CONF_REQ:			/* config request */
@@ -128,7 +128,7 @@ lcp_rx(u8_t *buffer, u16_t count)
     len = (*bptr++ << 8);
     len |= *bptr++;
     /*len -= 2;*/
-    DEBUG1(("rcvd [LCP ConfReq id %u",id));
+    DEBUG1(("received [LCP Config Request id %u\n",id));
     if(scan_packet((u16_t)LCP, lcplist, buffer, bptr, (u16_t)(len-4))) {
       /* must do the -4 here, !scan packet */
       
@@ -159,7 +159,7 @@ lcp_rx(u8_t *buffer, u16_t count)
 	  j += *bptr++;
 	  if((j==0) || (j==0x3fc)) {
 	    // ok
-	    DEBUG1(("<asyncmap %x>",j));
+	    DEBUG1(("<asyncmap 0x%04x>",j));
 	  } else {
 	    /*
 	     * fail we only support default or all zeros
@@ -229,7 +229,7 @@ lcp_rx(u8_t *buffer, u16_t count)
 	DEBUG1(("\nWriting NAK frame \n"));
 	// Send packet ahdlc_txz(procol,header,data,headerlen,datalen);				
 	ahdlc_tx(LCP, 0, buffer, 0, (u16_t)(tptr-buffer));
-	DEBUG1(("- End NAK Write frame\n"));
+	DEBUG1(("- end NAK Write frame\n"));
 	
       } else {
 	/*
@@ -250,7 +250,7 @@ lcp_rx(u8_t *buffer, u16_t count)
 	DEBUG2(("Writing ACK frame \n"));
 	/* Send packet ahdlc_txz(procol,header,data,headerlen,datalen);	*/
 	ahdlc_tx(LCP, 0, buffer, 0, count /*bptr-buffer*/);
-       DEBUG2(("- End ACK Write frame\n"));
+       DEBUG2(("- end ACK Write frame\n"));
 	
 	/* expire the timer to make things happen after a state change */
 	/*timer_expire();*/
@@ -287,7 +287,7 @@ lcp_rx(u8_t *buffer, u16_t count)
     bptr = buffer;
     *bptr++ = TERM_ACK;			/* Write TERM_ACK */
     /* write the reject frame */
-    DEBUG1(("Writing TERM_ACK Frame \n"));
+    DEBUG1(("Writing TERM_ACK frame \n"));
     /* Send packet ahdlc_txz(procol,header,data,headerlen,datalen); */
     ahdlc_tx(LCP, 0, buffer, 0, count);
     lcp_state &= ~LCP_TX_UP;	
@@ -320,7 +320,7 @@ lcp_task(u8_t *buffer)
     /* Check if we have a request pending */
     /*t=get_seconds()-lcp_tx_time;*/
     if(1 == TIMER_timeout(LCP_TX_TIMEOUT)) {
-      DEBUG1(("\nSending LCP Request packet - "));
+      DEBUG1(("\nSending LCP request packet - "));
       /*
        * No pending request, lets build one
        */
@@ -390,7 +390,7 @@ lcp_task(u8_t *buffer)
       t = bptr - buffer;
       pkt->len = htons(t);			/* length here -  code and ID + */
       
-      DEBUG1((" Len %d\n",t));
+      DEBUG1((" len %d\n",t));
       
       /* Send packet */
       /* Send packet ahdlc_txz(procol,header,data,headerlen,datalen); */

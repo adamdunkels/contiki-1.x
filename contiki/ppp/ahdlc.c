@@ -46,7 +46,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ahdlc.c,v 1.2 2004/08/29 15:11:45 oliverschmidt Exp $
+ * $Id: ahdlc.c,v 1.3 2005/01/26 23:36:22 oliverschmidt Exp $
  *
  */
 
@@ -57,12 +57,14 @@
 #include "uip.h"
 #include "ppp.h"
 
-#if 1
+#if 0
 #define DEBUG1(x)
 #else
 #include <stdio.h>
-#define DEBUG1(x) printf x
+#define DEBUG1(x) debug_printf x
 #endif
+
+#define	PACKET_TX_DEBUG	1
 
 /*---------------------------------------------------------------------------
  * ahdlc flags bit defins, for ahdlc_flags variable
@@ -197,7 +199,7 @@ ahdlc_rx(u8_t c)
     } else if(c == 0x7e) {
       /* handle frame end */
       if(ahdlc_rx_crc == CRC_GOOD_VALUE) {
-	DEBUG1(("\npacket with good crc value, len %d\n",ahdlc_rx_count));
+	DEBUG1(("\nReceiving packet with good crc value, len %d\n",ahdlc_rx_count));
 	/* we hae a good packet, turn off CTS until we are done with
 	   this packet */
 	/*CTS_OFF();*/
@@ -223,7 +225,7 @@ ahdlc_rx(u8_t c)
 	ahdlc_rx_ready();
 	return 0;
       } else if(ahdlc_rx_count > 3) {	
-	DEBUG1(("\npacket with bad crc value, was %x len %d\n",ahdlc_rx_crc, ahdlc_rx_count));
+	DEBUG1(("\nReceiving packet with bad crc value, was 0x%04x len %d\n",ahdlc_rx_crc, ahdlc_rx_count));
 #ifdef AHDLC_COUNTERS
 	++ahdlc_crc_error;
 #endif
@@ -260,7 +262,7 @@ ahdlc_rx(u8_t c)
     }		
   } else {
     /* we are busy and didn't process the character. */
-    DEBUG1(("busy/not active\n"));
+    DEBUG1(("Busy/not active\n"));
     return 1;
   }
   return 0;
@@ -309,8 +311,19 @@ ahdlc_tx(u16_t protocol, u8_t *header, u8_t *buffer,
   u16_t i;
   u8_t c;
 
-  DEBUG1(("\nAHDLC_TX - transmit frame, protocol %x, length %d\n",protocol,datalen+headerlen));
+  DEBUG1(("\nAHDLC_TX - transmit frame, protocol 0x%04x, length %d\n",protocol,datalen+headerlen));
   
+#if PACKET_TX_DEBUG
+  DEBUG1(("\n"));
+  for(i = 0; i < headerlen; ++i) {
+    DEBUG1(("0x%02x ", header[i]));
+  }
+  for(i = 0; i < datalen; ++i) {
+    DEBUG1(("0x%02x ", buffer[i]));
+  }
+  DEBUG1(("\n\n"));
+#endif
+
   /* Check to see that physical layer is up, we can assume is some
      cases */
   
@@ -319,7 +332,7 @@ ahdlc_tx(u16_t protocol, u8_t *header, u8_t *buffer,
 
   /* set initial CRC value */
   ahdlc_tx_crc = 0xffff;
-  /* send HDLC address and control if not disabled or of LCP frame type */
+  /* send HDLC control and address if not disabled or of LCP frame type */
   /*if((0==(ahdlc_flags & PPP_ACFC)) || ((0xc0==buffer[0]) && (0x21==buffer[1]))) */
   if((0 == (ahdlc_flags & PPP_ACFC)) || (protocol == LCP)) {
     ahdlc_tx_char(protocol, 0xff);

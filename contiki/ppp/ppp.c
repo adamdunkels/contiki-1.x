@@ -43,7 +43,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp.c,v 1.3 2004/08/29 15:11:46 oliverschmidt Exp $
+ * $Id: ppp.c,v 1.4 2005/01/26 23:36:22 oliverschmidt Exp $
  *
  */
 
@@ -58,23 +58,17 @@
 /*#include "time.h"*/
 /*#include "mip.h"*/
 
-#if 1
+#if 0
 #define DEBUG1(x)
 #else
 #include <stdio.h>
-#define DEBUG1(x) printf x
+#define DEBUG1(x) debug_printf x
 #endif
 
 /*
   Set the debug message level
 */
 #define	PACKET_RX_DEBUG	1
-#define DEBUG_LV1	1
-#define DEBUG_LV2	2
-
-#if PACKET_RX_DEBUG
-#include <stdio.h> 
-#endif
 
 /*
   Include stuff
@@ -187,13 +181,14 @@ dump_ppp_packet(u8_t *buffer, u16_t len)
 {
   int i;
 
+  DEBUG1(("\n"));
   for(i = 0;i < len; ++i) {
     if((i & 0x1f) == 0x10) {
-      printf("\n");
+      DEBUG1(("\n"));
     }
-    printf("%x ",buffer[i]);
+    DEBUG1(("0x%02x ",buffer[i]));
   }
-  printf("\n");  
+  DEBUG1(("\n\n"));
 }
 #endif
 /*---------------------------------------------------------------------------*/
@@ -304,6 +299,10 @@ ppp_poll(void)
 
   uip_len = 0;
 
+  if(!(ppp_flags & PPP_RX_READY)) {
+    return;
+  }
+
   while(uip_len == 0 && ppp_arch_getchar(&c)) {
     ahdlc_rx(c);
   }
@@ -336,9 +335,7 @@ ppp_upcall(u16_t protocol, u8_t *buffer, u16_t len)
 {
 #if PACKET_RX_DEBUG
   ++ppp_rx_frame_count;
-  /*	DEBUG1(("\n<<<<<<<<<<<<<<-----------\n"));
-  	dump_ppp_packet(buffer, len);
-  	DEBUG1(("\n<<<<<<<<<<<<<<-----------\n")); */
+  dump_ppp_packet(buffer, len);
   if(ppp_rx_frame_count > 18) {
     done = 1;
   }
@@ -370,7 +367,7 @@ ppp_upcall(u16_t protocol, u8_t *buffer, u16_t len)
       DEBUG1(("\n"));
       break;
     default:
-      DEBUG1(("Unknown PPP Packet Type %x - ",protocol));
+      DEBUG1(("Unknown PPP Packet Type 0x%04x - ",protocol));
       ppp_reject_protocol(protocol, buffer, len);
       DEBUG1(("\n"));
       break;
@@ -411,7 +408,7 @@ scan_packet(u16_t protocol, u8_t *list, u8_t *buffer, u8_t *options, u16_t len)
       }
       if(!good) {
 	/* we don't understand it, write it back */
-	DEBUG1(("We don't understand option %x\n",i));
+	DEBUG1(("We don't understand option 0x%02x\n",i));
 	bad = 1;
 	*tptr++ = i;
 	j = *tptr++ = *bptr++;
