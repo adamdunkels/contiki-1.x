@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.13 2004/02/16 20:52:07 adamdunkels Exp $
+ * $Id: uip.c,v 1.14 2004/06/06 06:14:19 adamdunkels Exp $
  *
  */
 
@@ -76,36 +76,36 @@ header fields and finally send the packet back to the peer.
 const u16_t uip_hostaddr[2] =
   {HTONS((UIP_IPADDR0 << 8) | UIP_IPADDR1),
    HTONS((UIP_IPADDR2 << 8) | UIP_IPADDR3)};
-const u16_t uip_arp_draddr[2] =
+const u16_t uip_draddr[2] =
   {HTONS((UIP_DRIPADDR0 << 8) | UIP_DRIPADDR1),
    HTONS((UIP_DRIPADDR2 << 8) | UIP_DRIPADDR3)};
-const u16_t uip_arp_netmask[2] =
+const u16_t uip_netmask[2] =
   {HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1),
    HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)};
 #else
 u16_t uip_hostaddr[2];       
-u16_t uip_arp_draddr[2], uip_arp_netmask[2];
+u16_t uip_draddr[2], uip_netmask[2];
 #endif /* UIP_FIXEDADDR */
 
 u8_t uip_buf[UIP_BUFSIZE+2];   /* The packet buffer that contains
 				incoming packets. */
-volatile u8_t *uip_appdata;  /* The uip_appdata pointer points to
+u8_t *uip_appdata;  /* The uip_appdata pointer points to
 				application data. */
-volatile u8_t *uip_sappdata;  /* The uip_appdata pointer points to the
+u8_t *uip_sappdata;  /* The uip_appdata pointer points to the
 				 application data which is to be sent. */
 #if UIP_URGDATA > 0
-volatile u8_t *uip_urgdata;  /* The uip_urgdata pointer points to
+u8_t *uip_urgdata;  /* The uip_urgdata pointer points to
 				urgent data (out-of-band data), if
 				present. */
-volatile u8_t uip_urglen, uip_surglen;
+u8_t uip_urglen, uip_surglen;
 #endif /* UIP_URGDATA > 0 */
 
-volatile u16_t uip_len, uip_slen;
+u16_t uip_len, uip_slen;
                              /* The uip_len is either 8 or 16 bits,
 				depending on the maximum packet
 				size. */
 
-volatile u8_t uip_flags;     /* The uip_flags variable is used for
+u8_t uip_flags;     /* The uip_flags variable is used for
 				communication between the TCP/IP stack
 				and the application program. */
 struct uip_conn *uip_conn;   /* uip_conn always points to the current
@@ -122,7 +122,6 @@ struct uip_udp_conn *uip_udp_conn;
 struct uip_udp_conn uip_udp_conns[UIP_UDP_CONNS];
 #endif /* UIP_UDP */
 
-
 static u16_t ipid;           /* Ths ipid variable is an increasing
 				number that is used for the IP ID
 				field. */
@@ -136,7 +135,7 @@ static u16_t lastport;       /* Keeps track of the last port used for
 #endif /* UIP_ACTIVE_OPEN */
 
 /* Temporary variables. */
-volatile u8_t uip_acc32[4];
+u8_t uip_acc32[4];
 static u8_t c, opt;
 static u16_t tmp16;
 
@@ -614,8 +613,10 @@ uip_process(u8_t flag)
   }
   
   /* Check the size of the packet. If the size reported to us in
-     uip_len doesn't match the size reported in the IP header, there
-     has been a transmission error and we drop the packet. */
+     uip_len doesn't match the size reported in the IP header, the
+     packet has been padded by the network device. We correct the
+     uip_len variable based on the reported length in the IP
+     header. */
   
   if(BUF->len[0] != (uip_len >> 8)) { /* IP length, high byte. */
     uip_len = (uip_len & 0xff) | (BUF->len[0] << 8);
@@ -654,16 +655,27 @@ uip_process(u8_t flag)
     }
   }
 #endif /* UIP_PINGADDRCONF */
+
+  /* If IP broadcast support is configured, we check for a broadcast
+     UDP packet, which may be destined to us. */
+#if UIP_BROADCAST
+  if(BUF->proto == UIP_PROTO_UDP &&
+     BUF->destipaddr[0] == 0xffff &&
+     BUF->destipaddr[1] == 0xffff &&
+     uip_ipchksum() == 0xffff) {
+    goto udp_input;
+  }
+#endif /* UIP_BROADCAST */
   
   /* Check if the packet is destined for our IP address. */  
   if(BUF->destipaddr[0] != uip_hostaddr[0]) {
     UIP_STAT(++uip_stat.ip.drop);
-    UIP_LOG("ip: packet not for us.");        
+    /*    UIP_LOG("ip: packet not for us.");        */
     goto drop;
   }
   if(BUF->destipaddr[1] != uip_hostaddr[1]) {
     UIP_STAT(++uip_stat.ip.drop);
-    UIP_LOG("ip: packet not for us.");        
+    /*    UIP_LOG("ip: packet not for us.");        */
     goto drop;
   }
 
@@ -671,7 +683,7 @@ uip_process(u8_t flag)
 				    checksum. */
     UIP_STAT(++uip_stat.ip.drop);
     UIP_STAT(++uip_stat.ip.chkerr);
-    UIP_LOG("ip: bad checksum.");    
+    UIP_LOG("ip: bad checksum.");
     goto drop;
   }
 
@@ -757,15 +769,25 @@ uip_process(u8_t flag)
   for(uip_udp_conn = &uip_udp_conns[0];
       uip_udp_conn < &uip_udp_conns[UIP_UDP_CONNS];
       ++uip_udp_conn) {
-    if(uip_udp_conn->lport != 0 &&
+    /* If the local UDP port is non-zero, the connection is considered
+       to be used. If so, the local port number is checked against the
+       destination port number in the received packet. If the two port
+       numbers match, the remote port number is checked if the
+       connection is bound to a remote port. Finally, if the
+       connection is bound to a remote IP address, the source IP
+       address of the packet is checked. */
+    if(uip_udp_conn->lport != 0 && 
        UDPBUF->destport == uip_udp_conn->lport &&
        (uip_udp_conn->rport == 0 ||
         UDPBUF->srcport == uip_udp_conn->rport) &&
-       BUF->srcipaddr[0] == uip_udp_conn->ripaddr[0] &&
-       BUF->srcipaddr[1] == uip_udp_conn->ripaddr[1]) {
+       ((uip_udp_conn->ripaddr[0] | uip_udp_conn->ripaddr[1]) == 0 ||
+	(uip_udp_conn->ripaddr[0] == 0xffff &&
+	 uip_udp_conn->ripaddr[1] == 0xffff) ||	
+	uip_ipaddr_cmp(BUF->srcipaddr, uip_udp_conn->ripaddr))) {
       goto udp_found; 
     }
   }
+  UIP_LOG("udp: no matching connection found");    
   goto drop;
   
  udp_found:
@@ -818,9 +840,11 @@ uip_process(u8_t flag)
 				       checksum. */
     UIP_STAT(++uip_stat.tcp.drop);
     UIP_STAT(++uip_stat.tcp.chkerr);
-    UIP_LOG("tcp: bad checksum.");    
+    UIP_LOG("tcp: bad checksum.");
+    /*    printf("uip_len %d sum 0x%04x\n", uip_len, uip_tcpchksum());*/
     goto drop;
   }
+  
   
   /* Demultiplex this segment. */
   /* First check any active connections. */
@@ -1024,7 +1048,6 @@ uip_process(u8_t flag)
  found:
   uip_conn = uip_connr;
   uip_flags = 0;
-
   /* We do a very naive form of TCP reset processing; we just accept
      any RST and kill our connection. We should in fact check if the
      sequence number of this reset is wihtin our advertised window
@@ -1208,7 +1231,7 @@ uip_process(u8_t flag)
 
     /* Check the URG flag. If this is set, the segment carries urgent
        data that we must pass to the application. */
-    if(BUF->flags & TCP_URG) {
+    if((BUF->flags & TCP_URG) != 0) {
 #if UIP_URGDATA > 0
       uip_urglen = (BUF->urgp[0] << 8) | BUF->urgp[1];
       if(uip_urglen > uip_len) {
@@ -1221,12 +1244,12 @@ uip_process(u8_t flag)
       uip_appdata += uip_urglen;
     } else {
       uip_urglen = 0;
-#endif /* UIP_URGDATA > 0 */
+#else /* UIP_URGDATA > 0 */      
       uip_appdata += (BUF->urgp[0] << 8) | BUF->urgp[1];
       uip_len -= (BUF->urgp[0] << 8) | BUF->urgp[1];
+#endif /* UIP_URGDATA > 0 */      
     }
-    
-    
+
     /* If uip_len > 0 we have TCP data in the packet, and we flag this
        by setting the UIP_NEWDATA flag and update the sequence number
        we acknowledge. If the application has stopped the dataflow
@@ -1467,6 +1490,8 @@ uip_process(u8_t flag)
   BUF->len[0] = (uip_len >> 8);
   BUF->len[1] = (uip_len & 0xff);
 
+  BUF->urgp[0] = BUF->urgp[1] = 0;
+  
   /* Calculate TCP checksum. */
   BUF->tcpchksum = 0;
   BUF->tcpchksum = ~(uip_tcpchksum());
@@ -1487,6 +1512,7 @@ uip_process(u8_t flag)
 
   UIP_STAT(++uip_stat.tcp.sent);
  send:
+  
   UIP_STAT(++uip_stat.ip.sent);
   /* Return and let the caller do the actual transmission. */
   return;
