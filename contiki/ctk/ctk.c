@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.7 2003/04/09 00:30:46 adamdunkels Exp $
+ * $Id: ctk.c,v 1.8 2003/04/09 09:02:52 adamdunkels Exp $
  *
  */
 
@@ -101,7 +101,7 @@ ek_signal_t ctk_signal_keypress,
   ctk_signal_pointer_down,
   ctk_signal_pointer_up;
 
-unsigned short mouse_last_x, mouse_last_y;
+unsigned short mouse_last_x, mouse_last_y, mouse_last_button;
 
 static unsigned short screensaver_timer;
 #define SCREENSAVER_TIMEOUT (5*60)
@@ -594,6 +594,31 @@ ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
   }
 }
 /*-----------------------------------------------------------------------------------*/
+static void
+focus_widget(struct ctk_widget *focus)
+{
+  struct ctk_window *window;
+
+  window = focus->window;
+  
+  if(focus != window->focused) {
+    window->focused = focus;
+    /* The operation changed the focus, so we emit a "hover" signal
+       for those widgets that support it. */
+    
+    if(window->focused->type == CTK_WIDGET_HYPERLINK) {    
+      dispatcher_emit(ctk_signal_hyperlink_hover, window->focused,
+		      window->owner);
+    } else if(window->focused->type == CTK_WIDGET_BUTTON) {    
+      dispatcher_emit(ctk_signal_button_hover, window->focused,
+		      window->owner);      
+    } 
+    
+    add_redrawwidget(window->focused);
+  }
+
+}
+/*-----------------------------------------------------------------------------------*/
 #define UP 0
 #define DOWN 1
 #define LEFT 2
@@ -643,22 +668,8 @@ switch_focus_widget(unsigned char direction)
   if(focus == NULL) {
     focus = window->active;
   }
-  
-  if(focus != window->focused) {
-    window->focused = focus;
-    /* The operation changed the focus, so we emit a "hover" signal
-       for those widgets that support it. */
-    
-    if(window->focused->type == CTK_WIDGET_HYPERLINK) {    
-      dispatcher_emit(ctk_signal_hyperlink_hover, window->focused,
-		      window->owner);
-    } else if(window->focused->type == CTK_WIDGET_BUTTON) {    
-      dispatcher_emit(ctk_signal_button_hover, window->focused,
-		      window->owner);      
-    } 
-    
-    add_redrawwidget(window->focused);
-  }
+
+  focus_widget(focus);
 }
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_MENUS
@@ -932,7 +943,7 @@ static void
 ctk_idle(void)     
 {
   static ctk_arch_key_t c;
-  static unsigned char i, mxc, myc;  
+  static unsigned char i, mxc, myc, mouse_clicked;  
   register struct ctk_window *window;
   register struct ctk_widget *widget;  
   
@@ -954,14 +965,32 @@ ctk_idle(void)
       ctk_redraw();
     }
   } else if(mode == CTK_MODE_NORMAL) {
+    if(dialog != NULL) {
+      window = dialog;
+    } else {
+      window = windows;
+    }
 
+
+    /* If there has been a change in the mouse button(s), we send out
+       a signal. */
+    mouse_clicked = 0;
+    if(ctk_mouse_button() != mouse_last_button) {
+      mouse_last_button = ctk_mouse_button();
+      if(mouse_last_button == 0) {
+	dispatcher_emit(ctk_signal_pointer_up, NULL, window->owner);
+      } else {
+	dispatcher_emit(ctk_signal_pointer_down, (ek_data_t)mouse_last_button,
+			window->owner);
+	mouse_clicked = 1;
+      }
+    }
+    
     /* Check if the mouse pointer has moved, and if so we emit a
        signal. */
     if(ctk_mouse_x() != mouse_last_x ||
-       ctk_mouse_y() != mouse_last_y) {
-
-      window = windows;
-      
+       ctk_mouse_y() != mouse_last_y ||
+       mouse_clicked != 0) {            
       mouse_last_x = ctk_mouse_x();
       mouse_last_y = ctk_mouse_y();
       dispatcher_emit(ctk_signal_pointer_move, NULL, window->owner);
@@ -969,17 +998,17 @@ ctk_idle(void)
       /* Find out which widget currently is under the mouse pointer
 	 and give it focus, unless it already has focus. */
       mxc = ctk_mouse_xtoc(mouse_last_x);
-      myc = ctk_mouse_ytoc(mouse_last_y);
-
+      myc = ctk_mouse_ytoc(mouse_last_y) - 1;
  	
-      /* Check if the mouse even is in the current window. */
+      /* Check if the mouse is in the current window. */
       if(mxc >= window->x &&
 	 mxc <= window->x + window->w &&
 	 myc >= window->y &&
 	 myc <= window->y + window->h) {
 	
-	mxc -= window->x;
-	myc -= window->y;
+	mxc = mxc - window->x - 1;
+	myc = myc - window->y - 1;
+	
 	
 	redraw |= REDRAW_WIDGETS;
 	add_redrawwidget(window->focused);
@@ -989,16 +1018,22 @@ ctk_idle(void)
 	for(widget = window->active; widget != NULL; widget = widget->next) {
 	  if(mxc >= widget->x &&
 	     mxc <= widget->x + widget->w &&
-	     myc - widget->y == 0 /* &&
+	     myc == widget->y /* &&
 	     ((widget->type == CTK_WIDGET_BITMAP ||
 	       widget->type == CTK_WIDGET_TEXTENTRY ||
 	       widget->type == CTK_WIDGET_ICON) &&
 	       (myc <= widget->y + ((struct ctk_bitmap *)widget)->h))*/) {
-	    CTK_WIDGET_FOCUS(window, widget);
-	    add_redrawwidget(widget);
+	    focus_widget(widget);
+	    if(mouse_clicked != 0) {
+	      redraw |= activate(widget);
+	    }
 	    break;
 	  }
 	}
+      } else {
+	redraw |= REDRAW_WIDGETS;
+	add_redrawwidget(window->focused);
+	window->focused = NULL;
       }
     }
     
