@@ -13,17 +13,17 @@
 #pragma pack(push, 4)
 
 typedef struct {
-  DWORD dwAddr;
-  DWORD dwIndex;
-  DWORD dwMask;
-  DWORD dwBCastAddr;
-  DWORD dwReasmSize;
+  DWORD          dwAddr;
+  DWORD          dwIndex;
+  DWORD          dwMask;
+  DWORD          dwBCastAddr;
+  DWORD          dwReasmSize;
   unsigned short unused1;
   unsigned short unused2;
 } MIB_IPADDRROW;
 
 typedef struct {
-  DWORD dwNumEntries;
+  DWORD         dwNumEntries;
   MIB_IPADDRROW table[0];
 } MIB_IPADDRTABLE;
 
@@ -53,7 +53,7 @@ static SOCKET rawsock = INVALID_SOCKET;
 static void
 create_proxyarp(void)
 {
-  DWORD retval;
+  DWORD          retval;
   struct in_addr addr;
 
   if(proxyaddr == 0) {
@@ -67,7 +67,7 @@ create_proxyarp(void)
 static void
 delete_proxyarp(void)
 {
-  DWORD retval;
+  DWORD          retval;
   struct in_addr addr;
 
   if(proxyaddr == 0) {
@@ -89,15 +89,15 @@ error_exit(char *message, int value)
 void
 rawsock_init(void)
 {
-  DWORD hostaddr;
-  HMODULE iphlpapi;
-  MIB_IPADDRTABLE *addrtable;
-  DWORD addrtablesize = 0;
-  DWORD retval;
-  DWORD entry = 0;
-  WSADATA wsadata;
-  struct sockaddr_in addr;
-  unsigned long on = 1;
+  static unsigned long on = 1;
+  DWORD                hostaddr;
+  HMODULE              iphlpapi;
+  MIB_IPADDRTABLE      *addrtable;
+  DWORD                addrtablesize = 0;
+  DWORD                retval;
+  DWORD                entry = 0;
+  WSADATA              wsadata;
+  struct sockaddr_in   addr;
 
   hostaddr = inet_addr(__argv[1]);
   if(hostaddr == INADDR_NONE) {
@@ -188,13 +188,12 @@ rawsock_init(void)
 void
 rawsock_send(void)
 {
-  char sendbuf[UIP_BUFSIZE];
-  struct sockaddr_in addr;
-  unsigned long off = 0;
-  unsigned long on = 1;
-
-  memcpy(sendbuf,      uip_buf,     40);
-  memcpy(sendbuf + 40, uip_appdata, uip_len - 40);
+  static unsigned long off = 0;
+  static unsigned long on  = 1;
+  struct sockaddr_in   addr;
+  DWORD                dummy;
+  WSABUF               sendbuf[2] = {{          40, uip_buf},
+				     {uip_len - 40, uip_appdata}};
 
   if(ioctlsocket(rawsock, FIONBIO, &off) == SOCKET_ERROR) {
     error_exit("ioctlsocket(!FIONBIO) error: %d\n", WSAGetLastError());
@@ -203,8 +202,8 @@ rawsock_send(void)
   addr.sin_family      = AF_INET;
   addr.sin_addr.s_addr = *(unsigned long *)BUF->destipaddr;
   addr.sin_port        = 0;
-  if(sendto(rawsock, sendbuf, uip_len, 0,
-	    (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
+  if(WSASendTo(rawsock, sendbuf, 2, &dummy, 0, (struct sockaddr *)&addr,
+	       sizeof(addr), NULL, NULL) == SOCKET_ERROR) {
 
     if(WSAGetLastError() != WSAEADDRNOTAVAIL &&
        WSAGetLastError() != WSAEHOSTUNREACH) {
