@@ -53,7 +53,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.9 2004/03/18 21:07:35 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.10 2004/03/25 09:46:32 adamdunkels Exp $
  *
  */
 
@@ -235,7 +235,11 @@ typedef unsigned short uip_stats_t;
  *
  * \hideinitializer
  */
+#ifdef UIP_CONF_UDP_CONNS
+#define UIP_UDP_CONNS UIP_CONF_UDP_CONNS
+#else /* UIP_CONF_UDP_CONNS */
 #define UIP_UDP_CONNS    10
+#endif /* UIP_CONF_UDP_CONNS */
 
 /**
  * The name of the function that should be called when UDP datagrams arrive.
@@ -347,7 +351,7 @@ typedef unsigned short uip_stats_t;
  *
  * This is should not be to set to more than UIP_BUFSIZE - UIP_LLH_LEN - 40.
  */
-#define UIP_TCP_MSS     (UIP_BUFSIZE - UIP_LLH_LEN - 40)
+#define UIP_TCP_MSS     (UIP_BUFSIZE - (UIP_LLH_LEN) - 40)
 
 /**
  * How long a connection should stay in the TIME_WAIT state.
