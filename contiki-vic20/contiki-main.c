@@ -32,15 +32,16 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.4 2004/06/06 06:46:18 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.5 2004/07/04 20:11:14 adamdunkels Exp $
  *
  */
 
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
+#include "ek.h"
 
 
+#include "clock.h"
 #include "uiplib.h"
 #include "uip.h"
 #include "uip_arp.h"
@@ -57,11 +58,13 @@
 
 /*-----------------------------------------------------------------------------------*/
 int
-main(int argc, char **argv)
+main(void)
 {
 
+  ek_init();
+  
 #ifdef WITH_UIP
-  uip_init();
+  tcpip_init();
   resolv_init();
 
 #ifdef WITH_RS232
@@ -70,9 +73,9 @@ main(int argc, char **argv)
   
 #endif /* WITH_UIP */
   
-  dispatcher_init();
   ctk_init();
   
+
   program_handler_init();
   
   program_handler_add(&directory_dsc, "Directory", 1);
@@ -80,18 +83,18 @@ main(int argc, char **argv)
   program_handler_add(&processes_dsc, "Processes", 0);
   program_handler_add(&about_dsc, "About", 0);
 
-  dispatcher_run();
+  while(1) {
+    ek_run();
+  }
 
   clrscr();
   
   return 0;
 
-  argv = argv;
-  argc = argc;
 }
 /*-----------------------------------------------------------------------------------*/
-ek_clock_t
-ek_clock(void)
+clock_time_t
+clock_time(void)
 {
   return clock();
 }

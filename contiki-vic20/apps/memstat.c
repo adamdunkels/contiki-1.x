@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,40 +29,42 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.2 2004/06/06 06:46:43 adamdunkels Exp $
+ * $Id: memstat.c,v 1.3 2004/07/04 20:11:15 adamdunkels Exp $
  *
  */
 
 #include <stdlib.h>
 
 #include "ctk.h"
-#include "dispatcher.h"
+#include "ek.h"
 #include "loader.h"
-
-#include "arg.h"
 
 static struct ctk_window window;
 static struct ctk_label freemsg =
-  {CTK_LABEL(0, 0, 12, 1, "Free memory:")};
+  {CTK_LABEL(2, 0, 12, 1, "Free memory:")};
 static char freemem[6];
 static struct ctk_label freenum =
-  {CTK_LABEL(14, 0, 5, 1, freemem)};
+  {CTK_LABEL(18, 0, 5, 1, freemem)};
 
 static struct ctk_label lblockmsg =
-  {CTK_LABEL(0, 2, 14, 1, "Largest block:")};
+  {CTK_LABEL(2, 2, 14, 1, "Largest block:")};
 static char lblock[6];
 static struct ctk_label lblocknum =
-  {CTK_LABEL(14, 2, 5, 1, lblock)};
+  {CTK_LABEL(18, 2, 5, 1, lblock)};
 
 static struct ctk_button updatebutton =
   {CTK_BUTTON(0, 4, 6, "Update")};
 static struct ctk_button closebutton =
-  {CTK_BUTTON(12, 4, 5, "Close")};
+  {CTK_BUTTON(17, 4, 5, "Close")};
 
-static void memstat_sighandler(ek_signal_t s, ek_data_t data);
+/*static DISPATCHER_SIGHANDLER(memstat_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Memory statistics", NULL, memstat_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
+EK_EVENTHANDLER(memstat_eventhandler, ev, data);
+EK_PROCESS(p, "Memory statistics", EK_PRIO_NORMAL,
+	   memstat_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -89,14 +88,32 @@ update(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(processes_init, arg)
+LOADER_INIT_FUNC(memstat_init, arg)
 {
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    id = ek_start(&p);
     
-    ctk_window_new(&window, 19, 5, "Memory stats");
+  } else {
+    ctk_window_open(&window);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+quit(void)
+{
+  ek_exit();
+  id = EK_ID_NONE;
+  LOADER_UNLOAD();
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(memstat_eventhandler, ev, data)
+{
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&window, 24, 5, "Memory stats");
     ctk_window_move(&window, 0, 1);
 
     CTK_WIDGET_ADD(&window, &freemsg);
@@ -112,24 +129,9 @@ LOADER_INIT_FUNC(processes_init, arg)
     
     update();
     
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
-  }
-  ctk_window_open(&window);
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-quit(void)
-{
-  dispatcher_exit(&p);
-  id = EK_ID_NONE;
-  LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-memstat_sighandler(ek_signal_t s, ek_data_t data)
-{
-  if(s == ctk_signal_button_activate) {
+    ctk_window_open(&window);
+    
+  } else if(ev == ctk_signal_button_activate) {
     if(data == (ek_data_t)&updatebutton) {
       update();
       ctk_window_redraw(&window);
@@ -137,8 +139,9 @@ memstat_sighandler(ek_signal_t s, ek_data_t data)
       ctk_window_close(&window);
       quit();
     }
-  } else if(s == ctk_signal_window_close &&
-	    data == (ek_data_t)&window) {
+  } else if((ev == ctk_signal_window_close &&
+	    data == (ek_data_t)&window) ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     quit();
   }
 }

@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.2 2004/06/06 06:47:34 adamdunkels Exp $
+ * $Id: ctk-arch.h,v 1.3 2004/07/04 20:11:15 adamdunkels Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
@@ -40,6 +37,5 @@
 
 #include "ctk-conio.h"
 
-#define ctk_arch_isprint(x) isprint(x)
 
 #endif /* __CTK_ARCH_H__ */

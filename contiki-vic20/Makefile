@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.5 2004/06/06 06:45:05 adamdunkels Exp $
+# $Id: Makefile,v 1.6 2004/07/04 20:11:14 adamdunkels Exp $
 #
 
 all: contiki loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -55,7 +55,7 @@ WEBSERVER=webserver.o http-strings.o
 TELNET=simpletelnet.o telnet.o
 
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
- ctk-conio.o ctk.o dispatcher.o arg.o \
+ ctk-conio.o ctk.o ek.o arg.o timer.o \
  program-handler.o loader-arch.o \
  about-dsc.o netconf-dsc.o processes-dsc.o directory-dsc.o 
 	$(CL) $(CLFLAGS) -C vic20.cfg -o contiki -t $(SYS) $^
