@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.13 2004/09/17 20:59:23 adamdunkels Exp $
+ * $Id: uip.h,v 1.14 2005/02/07 07:00:54 adamdunkels Exp $
  *
  */
 
@@ -285,7 +285,7 @@ void uip_init(void);
 /**
  * Periodic processing for a UDP connection identified by its number.
  *
- * This function is essentially the same as uip_prerioic(), but for
+ * This function is essentially the same as uip_periodic(), but for
  * UDP connections. It is called in a similar fashion as the
  * uip_periodic() function:
  \code
@@ -352,9 +352,13 @@ void uip_init(void);
  void
  devicedriver_send(void)
  {
-    hwsend(&uip_buf[0], UIP_LLH_LEN);
-    hwsend(&uip_buf[UIP_LLH_LEN], 40);
-    hwsend(uip_appdata, uip_len - 40 - UIP_LLH_LEN);
+    hwsend(&uip_buf[0], UIP_LLH_LEN); 
+    if(uip_len <= UIP_LLH_LEN + 40) {
+      hwsend(&uip_buf[UIP_LLH_LEN], uip_len - UIP_LLH_LEN);    
+    } else {
+      hwsend(&uip_buf[UIP_LLH_LEN], 40);
+      hwsend(uip_appdata, uip_len - 40 - UIP_LLH_LEN);
+    }
  }
  \endcode
  */
@@ -417,7 +421,7 @@ void uip_unlisten(u16_t port);
  * has been configured by defining UIP_ACTIVE_OPEN to 1 in uipopt.h.
  *
  * \note Since this function requires the port number to be in network
- * byte order, a convertion using HTONS() or htons() is necessary.
+ * byte order, a conversion using HTONS() or htons() is necessary.
  *
  \code
  u16_t ipaddr[2];
