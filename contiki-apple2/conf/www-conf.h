@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h,v 1.1 2003/04/10 07:25:27 adamdunkels Exp $
+ * $Id: www-conf.h,v 1.2 2004/06/08 20:28:33 oliverschmidt Exp $
  *
  */
 #ifndef __WWW_CONF_H__
@@ -40,17 +40,17 @@
 
 /* The size of the HTML viewing area. */
 #define WWW_CONF_WEBPAGE_WIDTH 36
-#define WWW_CONF_WEBPAGE_HEIGHT 17
+#define WWW_CONF_WEBPAGE_HEIGHT 16
 
 /* The size of the "Back" history. */
 #define WWW_CONF_HISTORY_SIZE 4
 
 /* Defines the maximum length of an URL */
-#define WWW_CONF_MAX_URLLEN 100
+#define WWW_CONF_MAX_URLLEN 65
 
 /* The maxiumum number of widgets (i.e., hyperlinks, form elements) on
    a page. */
-#define WWW_CONF_MAX_NUMPAGEWIDGETS 20
+#define WWW_CONF_MAX_NUMPAGEWIDGETS 26
 
 /* Turns <center> support on or off; must be on for forms to work. */
 #define WWW_CONF_RENDERSTATE 1
@@ -59,7 +59,7 @@
 #define WWW_CONF_FORMS       1
 
 /* Maximum lengths for various HTML form parameters. */
-#define WWW_CONF_MAX_FORMACTIONLEN  40
+#define WWW_CONF_MAX_FORMACTIONLEN  30
 #define WWW_CONF_MAX_FORMNAMELEN    20
 #define WWW_CONF_MAX_INPUTNAMELEN   20
 #define WWW_CONF_MAX_INPUTVALUELEN  34

@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.1 2003/04/10 07:25:27 adamdunkels Exp $
+ * $Id: ctk-arch.h,v 1.2 2004/06/08 20:28:33 oliverschmidt Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
@@ -40,7 +40,16 @@
 
 #include "ctk-conio.h"
 
-#undef CH_ENTER
-#define CH_ENTER 0x0d
+#ifndef CH_CURS_UP
+#define CH_CURS_UP  	0x0B	/* Ctrl-K */
+#endif /* CH_CURS_UP */
+
+#ifndef CH_CURS_DOWN
+#define CH_CURS_DOWN	0x0A	/* Ctrl-J */
+#endif /* CH_CURS_DOWN */
+
+#ifndef CH_DEL
+#define CH_DEL		0x04	/* Ctrl-D */
+#endif /* CH_DEL */
 
 #endif /* __CTK_ARCH_H__ */

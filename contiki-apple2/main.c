@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.2 2003/08/05 14:37:49 adamdunkels Exp $
+ * $Id: main.c,v 1.1 2004/06/08 20:28:33 oliverschmidt Exp $
  *
  */
 
@@ -40,44 +40,48 @@
 #include "ctk-draw.h"
 #include "dispatcher.h"
 
-
-#include "uip_main.h"
-#include "uip.h"
-#include "uip_arp.h"
-#if WITH_TFE
-#include "cs8900a.h"
-#endif /* WITH_TFE */
-#include "resolv.h"
-
 #include "program-handler.h"
 
+
+#include "uip-signal.h"
+#include "uip.h"
+#include "uip_arp.h"
+
+#include "resolv.h"
+
+#include "netconf-dsc.h"
+#include "www-dsc.h"
+#include "telnet-dsc.h"
+#include "processes-dsc.h"
+#include "about-dsc.h"
+
 /*-----------------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
+ek_clock_t
+ek_clock(void)
 {
-
-#ifdef WITH_UIP
-  uip_init();
-  uip_main_init();
-  resolv_init();
-
-#ifdef WITH_RS232
-  rs232dev_init();
-#endif /* WITH_RS232 */
-  
-#endif /* WITH_UIP */
-  
-  ek_init();
+  return clock();
+}
+/*-----------------------------------------------------------------------------------*/
+void
+main(void)
+{
   dispatcher_init();
+  uip_init();
+  
   ctk_init();
+
+  resolv_init(NULL);
+  
+  uip_signal_init();
   
   program_handler_init();
-  
-  ek_run();
 
-  return 0;
+  program_handler_add(&netconf_dsc,   "Network setup", 1);
+  program_handler_add(&www_dsc,       "Web browser",   1);
+  program_handler_add(&telnet_dsc,    "Telnet",        1);
+  program_handler_add(&processes_dsc, "Processes",     1);
+  program_handler_add(&about_dsc,     "About Contiki", 0);
 
-  argv = argv;
-  argc = argc;
+  dispatcher_run();
 }
 /*-----------------------------------------------------------------------------------*/
