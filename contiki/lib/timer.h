@@ -1,3 +1,15 @@
+/**
+ * \addtogroup timer
+ * @{
+ */
+
+/**
+ * \file
+ * Timer library header file.
+ * \author
+ * Adam Dunkels <adam@sics.se>
+ */
+
 /*
  * Copyright (c) 2004, Swedish Institute of Computer Science.
  * All rights reserved. 
@@ -30,13 +42,21 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: timer.h,v 1.3 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: timer.h,v 1.4 2005/02/07 22:45:15 adamdunkels Exp $
  */
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
 #include "clock.h"
 
+/**
+ * A timer.
+ *
+ * This structure is used for declaring a timer. The timer must be set
+ * with timer_set() before it can be used.
+ *
+ * \hideinitializer
+ */
 struct timer {
   clock_time_t start;
   clock_time_t interval;
@@ -44,6 +64,7 @@ struct timer {
 
 void timer_set(struct timer *t, clock_time_t interval);
 void timer_reset(struct timer *t);
+void timer_restart(struct timer *t);
 int timer_expired(struct timer *t);
 
 #endif /* __TIMER_H__ */
