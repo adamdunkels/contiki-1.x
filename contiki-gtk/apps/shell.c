@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.1 2004/02/16 21:14:03 adamdunkels Exp $
+ * $Id: shell.c,v 1.2 2004/02/16 21:44:24 adamdunkels Exp $
  *
  */
 
@@ -250,5 +250,16 @@ shell_idle(void)
   static char size[10];
   if(showingdir != 0) {
   }
+}
+/*-----------------------------------------------------------------------------------*/
+void
+shell_start(void)
+{
+  /*  printf("Start\n");*/
+ 
+  shell_output("Contiki command shell", "");
+  shell_output("Type '?' for help", "");
+  shell_prompt("contiki-gtk> ");
+  
 }
 /*-----------------------------------------------------------------------------------*/
