@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -30,16 +27,16 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki desktop environment
  *
- * $Id: config-dsc.h,v 1.2 2004/07/11 12:24:52 oliverschmidt Exp $
+ * $Id: configedit-dsc.h,v 1.1 2004/12/26 14:13:34 oliverschmidt Exp $
  *
  */
-#ifndef __CONFIG_DSC_H__
-#define __CONFIG_DSC_H__
+#ifndef __CONFIGEDIT_DSC_H__
+#define __CONFIGEDIT_DSC_H__
 
 #include "dsc.h"
 
-DSC_HEADER(config_dsc);
+DSC_HEADER(configedit_dsc);
 
-#endif /* __CONFIG_DSC_H__ */
+#endif /* __CONFIGEDIT_DSC_H__ */

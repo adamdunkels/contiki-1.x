@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.5 2004/10/09 07:24:26 oliverschmidt Exp $
+ * $Id: main.c,v 1.6 2004/12/26 14:13:34 oliverschmidt Exp $
  *
  */
 
@@ -47,14 +47,16 @@
 
 #include "resolv.h"
 
-#include "config.h"
-
-#include "config-dsc.h"
-#include "www-dsc.h"
-#include "telnet-dsc.h"
-#include "calc-dsc.h"
-#include "processes-dsc.h"
 #include "about-dsc.h"
+#include "calc-dsc.h"
+#include "configedit-dsc.h"
+#include "dhcp-dsc.h"
+#include "email-dsc.h"
+#include "irc-dsc.h"
+#include "memstat-dsc.h"
+#include "telnet-dsc.h"
+#include "processes-dsc.h"
+#include "www-dsc.h"
 
 #include "clock.h"
 
@@ -71,6 +73,18 @@ uip_fw_periodic(void)
   return;
 }
 /*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  switch(ev) {
+  case EK_EVENT_INIT:
+    program_handler_load("config.prg", NULL);
+    break;
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_PROCESS(init, "Init", EK_PRIO_LOWEST,
+	   eventhandler, NULL, NULL);
+/*-----------------------------------------------------------------------------------*/
 clock_time_t
 clock_time(void)
 {
@@ -83,22 +97,32 @@ void
 main(void)
 {
   ek_init();
+  ek_start(&init);
+
   tcpip_init(NULL);
+  resolv_init(NULL);
   
   ctk_init();
-
-  resolv_init(NULL);
   
   program_handler_init();
 
-  program_handler_add(&config_dsc,    "Configuration", 0);
-  program_handler_add(&www_dsc,       "Web browser",   1);
-  program_handler_add(&telnet_dsc,    "Telnet",        1);
-  program_handler_add(&calc_dsc,      "Calculator",    1);
-  program_handler_add(&processes_dsc, "Processes",     1);
-  program_handler_add(&about_dsc,     "About Contiki", 0);
+  program_handler_add(&www_dsc,        "Web browser",   1);
+  program_handler_add(&email_dsc,      "E-mail",        1);
+  program_handler_add(&irc_dsc,        "IRC client",    1);
+  program_handler_add(&telnet_dsc,     "Telnet",        1);
+  program_handler_add(&processes_dsc,  "Processes",     1);
+  program_handler_add(&memstat_dsc,    "Memory stats",  1);
+  program_handler_add(&calc_dsc,       "Calculator",    1);
+  program_handler_add(&dhcp_dsc,       "DHCP client",   1);
+  program_handler_add(&configedit_dsc, "Configuration", 0);
+  program_handler_add(&about_dsc,      "About Contiki", 0);
 
-  config_apply();
+  while(1) {
+    if(ek_run() == 0) {
+      program_handler_load("welcome.prg", NULL);
+      break;
+    }
+  }
 
   while(1) {
     ek_run();

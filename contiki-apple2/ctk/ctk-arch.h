@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.5 2004/07/11 12:24:53 oliverschmidt Exp $
+ * $Id: ctk-arch.h,v 1.6 2004/12/26 14:13:35 oliverschmidt Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
@@ -51,5 +51,18 @@
 #ifndef CH_DEL
 #define CH_DEL		0x04	/* Ctrl-D */
 #endif /* CH_DEL */
+
+#define bgcolor(c)
+#define bordercolor(c)
+#define textcolor(c)
+
+#ifdef __APPLE2ENH__
+
+extern unsigned char ctk_draw_background;
+
+#define ctk_draw_getbackground()      ctk_draw_background
+#define ctk_draw_setbackground(bkgnd) ctk_draw_background = (bkgnd)
+
+#endif /* __APPLE2ENH__ */
 
 #endif /* __CTK_ARCH_H__ */

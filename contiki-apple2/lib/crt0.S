@@ -1,222 +1,132 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-; Custom startup code for Contiki on the Apple ][ (Oliver Schmidt)
+; Startup code for Contiki (Apple2 version)
 ;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; This must be the *first* file on the linker command line
+;
 
+	.export		_exit, __Exit
+	.export		__heaporg, __heapptr, __heapend
+	.export		__heapfirst, __heaplast
+	.import	   	initlib, donelib
+	.import	   	zerobss
+       	.import	       	__RAM_START__, __RAM_LAST__	; Linker generated
+	.import		callmain
+	.importzp	sp
 
-.export 	_exit, SETWND, BASCALC
-.importzp	sp
-.import 	zerobss, initlib, callmain, donelib
-.import 	__CONF_MEM_START__, __CONF_MEM_LAST__
-.import 	__CODE_MEM_START__, __CODE_MEM_LAST__
-.import 	__DATA_MEM_START__, __DATA_MEM_LAST__
-.import		__RODATA_LOAD__, __RODATA_RUN__, __RODATA_SIZE__
-.import		__DATA_SIZE__, __BSS_SIZE__, __STACKLAST__
+; ------------------------------------------------------------------------
+; The executable header
 
+.segment	"EXEHDR"
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+       	.word  	__RAM_START__			; Start address
+       	.word  	__RAM_LAST__ - __RAM_START__	; Size
 
+; ------------------------------------------------------------------------
+; Place the startup code in a special segment.
 
-.segment	"CONF_HDR"
+.segment       	"STARTUP"
 
-	.word	__CONF_MEM_START__
-	.word	__CONF_MEM_LAST__ - __CONF_MEM_START__
+; ProDOS TechRefMan, chapter 5.2.1:
+; "For maximum interrupt efficiency, a system program should not use more
+;  than the upper 3/4 of the stack."
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-.segment	"CODE_HDR"
-
-	.word	__CODE_MEM_START__
-	.word	__CODE_MEM_LAST__ - __CODE_MEM_START__
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-.segment	"CODE_1ST"
-
-	; Reset CPU stack
 	ldx	#$FF
-	txs
+	txs	       		; Init stack pointer
 
-	; Init operand stack
-	lda	#<__STACKLAST__
-	ldx	#>__STACKLAST__
-	sta	sp
-	stx	sp + 1
+; Switch to 80 column mode
 
-	; Make RESET reboot
-	lda	$03F3
-	sta	$03F4
-
-.ifdef __APPLE2__
-
-	; Switch in LC bank 1 for R/W
-	bit	$C08B
-	bit	$C08B
-
-	; Get addr of RESET handler
-	lda	#<reset
-	ldx	#>reset
-
-	; Set RESET vector into LC
-	sta	$FFFC
-	stx	$FFFD
-	
-	; Get addr of IRQ handler
-	lda	#<irq_init
-	ldx	#>irq_init
-
-.else
-
-	; Switch to 80 column mode
-	lda	#$00
+	.ifdef __APPLE2ENH__
+	lda	#$0D
 	jsr	$C300
+	.endif
 
-	; Get IRQ vector from ROM
-	lda	$FFFE
-	ldx	$FFFF
+; Save the original RESET vector
 
-	; Switch in LC bank 1 for R/W
-	bit	$C08B
-	bit	$C08B
+	ldx	#$02
+:	lda	$03F2,x
+	sta	rvsave,x
+	dex
+	bpl	:-
 
-.endif
+; ProDOS TechRefMan, chapter 5.3.5:
+; "Your system program should place in the RESET vector the address of a
+;  routine that ... closes the files."
 
-	; Set IRQ vector into LC
-	sta	$FFFE
-	stx	$FFFF
+	lda	#<_exit
+	sta	$03F2
+	lda	#>_exit
+	sta	$03F3
+	eor	#$A5
+	sta	$03F4
+		
+; Switch in LC bank 2 for R/W
 
-	; Set BBS to zero
+	bit	$C083
+	bit	$C083
+
+; Clear the BSS data
+
 	jsr	zerobss
 
-	; Go for it ...
+; Setup the stack in LC bank 2
+
+	lda    	#$00
+	sta	sp
+	lda	#$E0
+       	sta	sp+1
+
+; Setup the heap end (aligned down to a page boundary)
+
+	lda	$73+1		; HIMEM
+	sec
+	sbc	#$04		; 1kB ProDOS8 I/O buffer
+	sta	__heapend+1
+
+; Call module constructors
+
 	jsr	initlib
+
+; Push arguments and call main()
+
 	jsr	callmain
-_exit:	jsr	donelib
 
-	; Switch in ROM and do RESET
-reset:	bit	$C08A
-	jmp	($FFFC)
+; Restore the original RESET vector. This is also the _exit entry
 
+_exit:	ldx	#$02
+:	lda	rvsave,x
+	sta	$03F2,x
+	dex
+	bpl	:-
 
-SETWND:
+; Call module destructors
 
-.ifdef __APPLE2__
-	sei
-.endif
-	; Switch in ROM and call SETWND
-	bit	$C08A
-	jsr	$FB4B
+	jsr	donelib
 
-	; Switch in LC bank 1 for R/W
-	bit	$C08B
-	bit	$C08B
+; ProDOS TechRefMan, chapter 5.2.1:
+; "System programs should set the stack pointer to $FF at the warm-start
+;  entry point." This is also the __Exit entry
 
-.ifdef __APPLE2__
-	cli
-.endif
-	rts
+__Exit:	ldx	#$FF
+	txs			; Re-init stack pointer
 
+; Back to DOS
 
-BASCALC:
+	jmp	$03D0
 
-.ifdef __APPLE2__
-	sei
-.endif
-	; Switch in ROM and call BASCALC
-	bit	$C08A
-	jsr	$FBC1
+; ------------------------------------------------------------------------
+; Data
 
-	; Switch in LC bank 1 for R/W
-	bit	$C08B
-	bit	$C08B
+.data
 
-.ifdef __APPLE2__
-	cli
-.endif
-	rts
+rvsave:	.res	3
 
-
-.ifref irq_init
-irq_init:
-	; Save registers on CPU stack
-	pha
-	txa
-	pha
-	tya
-	pha
-
-	; Create another interrupt frame
-	lda	#>irq_exit
-	pha
-	lda	#<irq_exit
-	pha
-	php
-
-	; Execute user IRQ handler
-	jmp	($03FE)
-.endif
-
-
-.ifref irq_exit
-irq_exit:
-	; Restore registers and return
-	pla
-	tay
-	pla
-	tax
-	pla
-	rti
-.endif
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-.segment	"DATA_HDR"
-
-	.word	__DATA_MEM_START__
-	.word	__DATA_MEM_LAST__ - __DATA_MEM_START__
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-.segment	"DATA_1ST"
-
-	; Switch in LC bank 1 for W/O
-	bit	$C089
-	bit	$C089
-
-	; Set source start
-	lda	#<__RODATA_LOAD__
-	ldx	#>__RODATA_LOAD__
-	sta	$3C
-	stx	$3D
-
-	; Set source end
-	lda	#<(__RODATA_LOAD__ + __RODATA_SIZE__ + __DATA_SIZE__)
-	ldx	#>(__RODATA_LOAD__ + __RODATA_SIZE__ + __DATA_SIZE__)
-	sta	$3E
-	stx	$3F
-
-	; Set destination
-	lda	#<__RODATA_RUN__
-	ldx	#>__RODATA_RUN__
-	sta	$42
-	stx	$43
-
-	; Reset index and call MOVE
-	ldy	#$00
-	jsr	$FE2C
-
-	; Switch in ROM and return
-	bit	$C08A
-	rts
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+__heaporg:
+       	.word  	__RAM_LAST__	; Linker calculates this symbol
+__heapptr:
+      	.word	__RAM_LAST__	; Dito
+__heapend:
+       	.word	0
+__heapfirst:
+      	.word	0
+__heaplast:
+      	.word	0

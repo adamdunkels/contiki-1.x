@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2004, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -30,30 +27,46 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment 
+ * This file is part of the Contiki desktop environment
  *
- * $Id: config-dsc.c,v 1.3 2004/07/11 12:24:52 oliverschmidt Exp $
+ * $Id: configedit-dsc.c,v 1.1 2004/12/26 14:13:34 oliverschmidt Exp $
  *
  */
 
 #include "dsc.h"
 
-extern struct ctk_icon config_icon;
+extern struct ctk_icon configedit_icon;
 /*-----------------------------------------------------------------------------------*/
-DSC(config_dsc,
-    NULL,
-    NULL,
-    config_init,
-    &config_icon);
+DSC(configedit_dsc,
+    "Edit Contiki configuration",
+    "configedit.prg",
+    configedit_init,
+    &configedit_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
+static unsigned char tcpipconficon_bitmap[3*3*8] = {
+  0x00, 0x79, 0x43, 0x73, 0x47, 0x77, 0x47, 0x6f,
+  0x00, 0xfe, 0xfe, 0xfc, 0xfc, 0xfc, 0xf8, 0xfb,
+  0x00, 0x16, 0x02, 0x00, 0x02, 0x00, 0x00, 0xc2,
+
+  0x48, 0x4c, 0x5f, 0x5f, 0x1f, 0x3f, 0x3f, 0x03,
+  0x79, 0xf0, 0xf0, 0xf0, 0xe0, 0xe0, 0xfe, 0xfc,
+  0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+  0x77, 0x47, 0x70, 0x43, 0x79, 0x41, 0x7c, 0x00,
+  0xfc, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xf7, 0x00,
+  0x00, 0x80, 0x00, 0x00, 0x00, 0x84, 0xf0, 0x00
+};
+#endif /* CTK_CONF_ICON_BITMAPS */
+
 #if CTK_CONF_ICON_TEXTMAPS
-static char configicon_textmap[9] = {
-  'c', 'o', 'n',
-  'f', 'i', 'g',
-  '-', '-', '-'
+static char tcpipconficon_textmap[9] = {
+  'C', 'F', 'G',
+  ' ', ' ', ' ',
+  'C', 'F', 'G'
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
-static struct ctk_icon config_icon =
-  {CTK_ICON("Configuration", NULL, configicon_textmap)};
+static struct ctk_icon configedit_icon =
+  {CTK_ICON("Configuration", tcpipconficon_bitmap, tcpipconficon_textmap)};
 /*-----------------------------------------------------------------------------------*/

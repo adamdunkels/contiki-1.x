@@ -32,25 +32,19 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: config.h,v 1.2 2004/07/11 12:24:52 oliverschmidt Exp $
+ * $Id: config.h,v 1.3 2004/12/26 14:13:34 oliverschmidt Exp $
  *
  */
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
 typedef struct {
-  char bkgnd[2];
-  char slot[2];
-  char ipaddr[16];
-#ifdef WITH_ETHERNET
-  char netmask[16];
-  char gateway[16];
-#endif /* WITH_ETHERNET */
-  char dnsserver[16];
+  unsigned char bkgnd;
+  unsigned char slot;
+  u16_t ipaddr[2];
+  u16_t netmask[2];
+  u16_t gateway[2];
+  u16_t dnsserver[2];
 } config_t;
-
-extern config_t config;
-
-void config_apply(void);
 
 #endif /* __CONFIG_H__ */

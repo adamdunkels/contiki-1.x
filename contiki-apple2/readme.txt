@@ -2,48 +2,65 @@
 Contiki on the Apple ][ (Oliver Schmidt)
 ========================================
 
-To make as much as possible memory available to Contiki the DOS 3.3 (clone)
-used for loading Contiki into memory will be overwritten on Contiki startup.
 
-Contiki requires DOS to be moved into language card (bank 2). It has been
-successfully tested with:
+Installation
+------------
 
-- DavidDOS with HIDOS
-- DavidDOS II with HIDOS
-- DiversiDOS with DDMOVER
-- 64k DiversiDOS
+1. Build the two targets apple2enh and programsenh.
 
-With the 'a2tools by Terry Kyriacopoulos' you use the following commands to
-insert Contiki into an (already existing) DOS 3.3 (clone) dsk image file:
 
-a2tools in    t contiki.dsk CONTIKI.TEXT contiki.txt
-a2tools in -r b contiki.dsk CONTIKI.CONF contiki.con
-a2tools in -r b contiki.dsk CONTIKI.CODE contiki.cod
-a2tools in -r b contiki.dsk CONTIKI.DATA contiki.dat
+2. Get the 'Apple][ ProDOS 8 system program for loading binary programs':
+   ftp://ftp.musoftware.de/pub/uz/cc65/contrib/loader-1.0.zip
 
-If you built the 'apple2enh' target replace the last two commands with the
-following ones to allow the Contiki wrapper program to work as expected:
 
-a2tools in -r b contiki.dsk CONTIKI.CODE.ENH contiki.cod
-a2tools in -r b contiki.dsk CONTIKI.DATA.ENH contiki.dat
+3. Use the 'a2tools' by Terry Kyriacopoulos to copy these files into a DOS 3.3
+   disk image:
 
-On the Apple ][ enter the following commands on the Applesoft prompt (']') to
-create the Contiki wrapper program.
+   a2 in b      dos33.dsk CONTIKI.SYSTEM loader.system
+   a2 in -r b   dos33.dsk CONTIKI        contiki
+   a2 in b.0000 dos33.dsk ABOUT.PRG      about.prg
+   a2 in b.0000 dos33.dsk CALC.PRG       calc.prg
+   a2 in b.0000 dos33.dsk DHCP.PRG       dhcp.prg
+   a2 in b.0000 dos33.dsk EMAIL.PRG      email.prg
+   a2 in b.0000 dos33.dsk IRC.PRG        irc.prg
+   a2 in b.0000 dos33.dsk MEMSTAT.PRG    memstat.prg
+   a2 in b.0000 dos33.dsk CONFIG.PRG     config.prg
+   a2 in b.0000 dos33.dsk CONFIGEDIT.PRG config~1.prg
+   a2 in b.0000 dos33.dsk PROCESSES.PRG  proces~1.prg
+   a2 in b.0000 dos33.dsk TELNET.PRG     telnet.prg
+   a2 in b.0000 dos33.dsk WELCOME.PRG    welcome.prg
+   a2 in b.0000 dos33.dsk WWW.PRG        www.prg
 
-NEW
-EXEC CONTIKI.TEXT
-SAVE CONTIKI
 
-Contiki uses the follwoing keys:
+4. Use any ProDOS 8 file utility program capable of reading DOS 3.3 files to
+   copy the files from the DOS 3.3 disk to a ProDOS 8 disk.
 
-toggle menu: ESC
-next widget: TAB
-prev widget: CONTROL-A
-next window: CONTROL-W
 
-As there is no DOS available while Contiki is running the configuration data
-is saved by running the Contiki wrapper program again immediately after exiting
-Contiki via Ctrl-Reset and rebooting. The wrapper program checks if the data is
-still available and prints "SAVING CONTIKI CONF..." if it is.
+5. Use BASIC.SYSTEM to convert the loader from a BIN to a SYS file:
+
+   BLOAD  CONTIKI.SYSTEM
+   DELETE CONTIKI.SYSTEM
+   CREATE CONTIKI.SYSTEM,TSYS
+   BSAVE  CONTIKI.SYSTEM,TSYS,A$2000,L350
+
+
+6. Use BASIC.SYSTEM to create an empty configuration file:
+
+   CREATE CONTIKI.CFG,TBIN
+
+
+Usage
+-----
+
+Select CONTIKI.SYSTEM from the ProDOS 8 dispatcher or use BASIC.SYSTEM:
+
+   - CONTIKI.SYSTEM
+
+
+Note
+----
+
+Contiki uses $D400-$DFFF in the language card bank2 although this memory is
+marked as reserved by ProDOS 8.
 
 eof

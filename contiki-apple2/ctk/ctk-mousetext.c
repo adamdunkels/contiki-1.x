@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.8 2004/07/29 11:50:24 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.9 2004/12/26 14:13:35 oliverschmidt Exp $
  *
  */
 
@@ -37,6 +37,7 @@
 
 #include "ctk.h"
 #include "ctk-draw.h"
+#include "uip.h"
 #include "config.h"
 
 #include "ctk-conio-conf.h"
@@ -51,6 +52,7 @@ unsigned char ctk_draw_windowborder_height = 1;
 unsigned char ctk_draw_windowborder_width = 1;
 unsigned char ctk_draw_windowtitle_height = 1;
 
+unsigned char ctk_draw_background;
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -365,7 +367,7 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
   char c1, c2;
   unsigned char i;
 
-  if(*config.bkgnd == 'x') {
+  if(ctk_draw_background) {
     c1 = 'V';
     c2 = 'W';
   } else {
