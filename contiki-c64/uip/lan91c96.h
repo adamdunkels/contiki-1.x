@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: lan91c96.h,v 1.3 2004/09/12 20:30:04 adamdunkels Exp $
+ * $Id: lan91c96.h,v 1.4 2005/01/26 23:50:06 oliverschmidt Exp $
  */
 
 #ifndef _LAN91C96_H
@@ -41,11 +41,7 @@
 void lan91c96_init(void);
 void lan91c96_done(void);
 void lan91c96_send(void);
-#if UIP_BUFSIZE > 255
 u16_t lan91c96_poll(void);
-#else
-u8_t lan91c96_poll(void);
-#endif
 
 /* End of lan91c96.h */
 #endif
