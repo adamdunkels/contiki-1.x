@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.25 2004/09/03 09:55:22 adamdunkels Exp $
+ * $Id: www.c,v 1.26 2005/01/21 14:25:27 oliverschmidt Exp $
  *
  */
 
@@ -811,6 +811,10 @@ htmlparser_newline(void)
     return;
   }
   
+  if(!loading) {
+    return;
+  }
+
   webpageptr += (WWW_CONF_WEBPAGE_WIDTH - x);
   ++y;
   x = 0;
