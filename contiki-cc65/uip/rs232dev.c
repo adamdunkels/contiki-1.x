@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev.c,v 1.1 2003/04/25 08:48:25 adamdunkels Exp $
+ * $Id: rs232dev.c,v 1.2 2003/07/31 23:16:47 adamdunkels Exp $
  *
  */
 
@@ -190,7 +190,7 @@ rs232dev_poll(void)
       lastc = c;
       /* End marker found, we copy our input buffer to the uip_buf
 	 buffer and return the size of the packet we copied. */
-      memcpy(uip_buf, slip_buf, len);
+      memcpy(uip_buf + UIP_LLH_LEN, slip_buf, len);
       tmplen = len;
       len = 0;
       return tmplen;
