@@ -54,7 +54,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.9 2003/10/14 11:12:50 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.10 2004/02/24 10:13:55 adamdunkels Exp $
  *
  */
 
@@ -214,6 +214,7 @@ uip_arp_update(u16_t *ipaddr, struct uip_eth_addr *ethaddr)
       }
     }
     i = c;
+    tabptr = &arp_table[i];
   }
 
   /* Now, i is the ARP table entry which we will fill with the new
