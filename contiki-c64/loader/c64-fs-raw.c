@@ -1,3 +1,22 @@
+/**
+ * \addtogroup c64fs
+ * @{
+ */
+
+/**
+ * \file
+ * "Raw" C64 file system access.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * This file provides functions that allow reading data from files
+ * without updating the file descriptor pointer. The functions are not
+ * automatically included in the core Contiki code and therefore
+ * application programs that use tham must manually link with this
+ * file.
+ *
+ */
+
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +30,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +48,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs-raw.c,v 1.2 2003/08/20 19:56:16 adamdunkels Exp $
+ * $Id: c64-fs-raw.c,v 1.3 2004/02/16 21:00:14 adamdunkels Exp $
  *
  */
 
@@ -60,6 +76,25 @@ extern unsigned char _c64_fs_filebuftrack, _c64_fs_filebufsect;
 void _c64_fs_readdirbuf(unsigned char track, unsigned char sect);
 
 
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Read data from a file without updating the file descriptor pointer.
+ *
+ * This function reads data from an open file into a buffer than must
+ * be allocated by the caller, but does not update the file
+ * description pointer like the c64_fs_read() function does.
+ *
+ * \param f A pointer to a file descriptor structure that must have
+ * been opened with c64_fs_open().
+ *
+ * \param buf A pointer to the buffer in which the data should be placed.
+ *
+ * \param len The maxiumum amount of bytes to read.
+ *
+ * \return The number of bytes that actually was read, or 0 if an end
+ * of file was encountered.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 int __fastcall__
 c64_fs_read_raw(register struct c64_fs_file *f, char *buf, int len)
@@ -112,6 +147,19 @@ c64_fs_read_raw(register struct c64_fs_file *f, char *buf, int len)
   return i;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Move the file descriptior pointer forward in the file.
+ *
+ *
+ * \param f A pointer to a file descriptor structure that must have
+ * been opened with c64_fs_open().
+ *
+ * \param len The number of bytes the pointer should be moved forward.
+ *
+ * \return The number of bytes that the pointer actually was moved, or
+ * 0 if an end of file was encountered.
+ */
+/*-----------------------------------------------------------------------------------*/
 int
 c64_fs_read_next(register struct c64_fs_file *f, int len)
 {
@@ -154,3 +202,4 @@ c64_fs_read_next(register struct c64_fs_file *f, int len)
   return i;
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */

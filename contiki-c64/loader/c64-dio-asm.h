@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: c64-dio-asm.h,v 1.1 2003/08/04 00:12:50 adamdunkels Exp $
+ * $Id: c64-dio-asm.h,v 1.2 2004/02/16 21:00:14 adamdunkels Exp $
  *
  */
 #ifndef __C64_DIO_ASM_H__
@@ -44,7 +44,7 @@ extern unsigned char c64_dio_asm_track,
 extern unsigned char *c64_dio_asm_ptr;
 
 void __fastcall__ c64_dio_asm_init(unsigned char drive);
-void c64_dio_asm_read_block(void);
-void c64_dio_asm_write_block(void);
+unsigned char c64_dio_asm_read_block(void);
+unsigned char c64_dio_asm_write_block(void);
 
 #endif /* __C64_DIO_H__ */

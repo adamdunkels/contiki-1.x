@@ -1,3 +1,13 @@
+/**
+ * \file
+ * File loader implementation.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * This file implements dynamically loadable files for Contiki using
+ * the cc65 module loading system. The actual file operations are
+ * implemented in other files.
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +21,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.7 2003/08/24 22:35:23 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.8 2004/02/16 21:00:14 adamdunkels Exp $
  *
  */
 
@@ -63,10 +70,11 @@ struct loader_arch_hdr {
 };
 
 /*-----------------------------------------------------------------------------------*/
-/* load(name)
+/**
+ * \internal
+ * Load a program from disk and execute it.
  *
- * Loads a program from disk and executes it. Code originally written by
- * Ullrich von Bassewitz.
+ * Code originally written by Ullrich von Bassewitz.
  */
 /*-----------------------------------------------------------------------------------*/
 static unsigned char
@@ -104,6 +112,13 @@ load(const char *name)
   return LOADER_OK;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Load and start a program.
+ *
+ * \param name The name of the program file.
+ * \param arg A pointer that will be passed to the new process.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
 loader_arch_load(const char *name, char *arg)
 {
@@ -126,6 +141,18 @@ loader_arch_load(const char *name, char *arg)
   return LOADER_OK;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Load a DSC file into memory.
+ *
+ * The memory must be deallocated with the loader_arch_free() function
+ * after is has been used.
+ *
+ * \param name The name of the DSC file.
+ *
+ * \return A pointer to the struct dsc or NULL if the DSC file could
+ * not be loaded.
+ */
+/*-----------------------------------------------------------------------------------*/
 struct dsc *
 loader_arch_load_dsc(const char *name)
 {
@@ -137,6 +164,15 @@ loader_arch_load_dsc(const char *name)
   }
   return NULL;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Deallocate memory previously allocated by the loader.
+ *
+ * The loader allocates memory when it loads programs or DSC
+ * files. All such memory must be deallocated with this function. Memory for programs is automatically deallocated when calling the LOADER_UNLOAD() function, but memory for DSCs must be explicitly deallcated with this function.
+ *
+ * \param addr A pointer to memory allocated by the loader.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 loader_arch_free(void *addr)

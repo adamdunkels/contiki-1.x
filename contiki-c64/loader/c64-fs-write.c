@@ -1,3 +1,19 @@
+/**
+ * \addtogroup c64fs
+ * @{
+ */
+
+/**
+ * \file
+ * Implementation of C64 file writes.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * The functions in this file are not included in the core Contiki
+ * code, but must be explicitly linked by an application that that
+ * wishes to be able to write to files.
+ */
+
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +27,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +45,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs-write.c,v 1.2 2003/08/06 23:39:33 adamdunkels Exp $
+ * $Id: c64-fs-write.c,v 1.3 2004/02/16 21:00:14 adamdunkels Exp $
  *
  */
 
@@ -48,6 +61,22 @@ extern unsigned char _c64_fs_filebuftrack,
   _c64_fs_filebufsect;
 
 
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Write data to an open file.
+ *
+ * \note This function currently does not support writing to other than a single block file (cannot be more than 254 bytes long).
+ *
+ * \param f A pointer to a file descriptor previously opened with c64_fs_open().
+ *
+ * \param buf A pointer to a buffer with data that should be written
+ * to the file.
+ *
+ * \param len The length of the data that should be written.
+ *
+ * \return The number of bytes actually written.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 int __fastcall__
 c64_fs_write(register struct c64_fs_file *f, char *buf, int len)
@@ -89,3 +118,4 @@ c64_fs_write(register struct c64_fs_file *f, char *buf, int len)
   return i;
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */

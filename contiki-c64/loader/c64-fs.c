@@ -1,3 +1,28 @@
+/**
+ * \defgroup c64fs C64 file system and disk functions.
+ * @{
+ *
+ * The C64 file system functions are divided into two categories:
+ * those that deal with C64 files and the C64 disk directory, and
+ * those that allow direct block access to the disk. The former
+ * functions can be used for accessing regular files, whereas the
+ * latter functions are used e.g. to download D64 files onto 1541
+ * disks.
+ *
+ * \note The C64 filesystem functions currently only work with the
+ * 1541/1541-II/1571 and compatible drives, and not with the IDE64
+ * hard disks or the 1581/FD2000 3.5" drives.
+ *
+ * 
+ */
+
+/**
+ * \file
+ * C64 file system operations interface for Contiki.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +36,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +54,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.8 2003/08/24 22:28:37 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.9 2004/02/16 21:00:14 adamdunkels Exp $
  *
  */
 
@@ -61,9 +83,23 @@ unsigned char _c64_fs_filebuftrack = 0, _c64_fs_filebufsect = 0;
 
 static struct c64_fs_dirent lastdirent;
 
-/*-----------------------------------------------------------------------------------*/
 static struct c64_fs_dir opendir;
 static struct c64_fs_dirent opendirent;
+
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Open a file.
+ *
+ * The file description must be allocated by the caller and a pointer
+ * to it is passed to this function.
+ *
+ * \param name A pointer to the name of the file to be opened.
+ * \param f A pointer to the file descriptor struct.
+ *
+ * \retval 0 If the file was successfully opened.
+ * \retval -1 If the file does not exist.
+ */
+/*-----------------------------------------------------------------------------------*/
 int
 c64_fs_open(const char *name, register struct c64_fs_file *f)
 {
@@ -97,6 +133,23 @@ c64_fs_open(const char *name, register struct c64_fs_file *f)
   _c64_fs_dirbuftrack = 0; /* There are no disk blocks on track 0. */
   return -1;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Read data from an open file.
+ *
+ * This function reads data from an open file into a buffer than must
+ * be allocated by the caller.
+ *
+ * \param f A pointer to a file descriptor structure that must have
+ * been opened with c64_fs_open().
+ *
+ * \param buf A pointer to the buffer in which the data should be placed.
+ *
+ * \param len The maxiumum amount of bytes to read.
+ *
+ * \return The number of bytes that actually was read, or 0 if an end
+ * of file was encountered.
+ */
 /*-----------------------------------------------------------------------------------*/
 int __fastcall__
 c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
@@ -202,11 +255,28 @@ c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
   return i;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Close an open file.
+ *
+ * \param f A pointer to a file descriptor struct that previously has
+ * been opened with c64_fs_open().
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 c64_fs_close(struct c64_fs_file *f)
 {
   
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * \internal
+ * Read a directory buffer into the _c64_fs_dirbuf buffer.
+ *
+ * This function is shared between this and  the c64-fs-raw module.
+ *
+ * \param track The track of the directory block.
+ * \param sect The sector of the directory block.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 _c64_fs_readdirbuf(unsigned char track, unsigned char sect)
@@ -221,6 +291,15 @@ _c64_fs_readdirbuf(unsigned char track, unsigned char sect)
   _c64_fs_dirbufsect = sect;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Open the disk directory for reading.
+ *
+ * The caller must supply a pointer to a directory descriptor.
+ *
+ * \param d A pointer to a directory description that must be
+ * allocated by the caller.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
 c64_fs_opendir(register struct c64_fs_dir *d)
 {
@@ -230,6 +309,22 @@ c64_fs_opendir(register struct c64_fs_dir *d)
 
   return 0;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Read the current directory entry.
+ *
+ * This function reads the directory entry to which the directory
+ * descriptor currently points into a struct c64_fs_dirent supplied by
+ * the caller.
+ *
+ * The function c64_fs_readdir_next() is used to move the directory
+ * entry pointer forward in the directory.
+ *
+ * \param d A pointer to a directory descriptor previously opened with c64_fs_opendir().
+ *
+ * \param f A pointer to a directory entry that must have been
+ * previously allocated by the caller.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 c64_fs_readdir_dirent(register struct c64_fs_dir *d,
@@ -256,6 +351,20 @@ c64_fs_readdir_dirent(register struct c64_fs_dir *d,
   memcpy(&lastdirent, f, sizeof(struct c64_fs_dirent));
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Move the directory pointer forward.
+ *
+ * This function moves the directory entry pointer in the directory
+ * descriptor forward so that it points to the next file.
+ *
+ * \param d A pointer to a directory descriptor previously opened with
+ * c64_fs_opendir().
+ *
+ * \retval 1 If there are no more directory entried in the directory.
+ * \retval 0 There were more directory entries and the pointer has
+ * been moved to point to the next one.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
 c64_fs_readdir_next(struct c64_fs_dir *d)
 {
@@ -280,9 +389,17 @@ c64_fs_readdir_next(struct c64_fs_dir *d)
   return 0;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Close a directory descriptor previously opened by c64_fs_opendir().
+ *
+ * \param d A poitner to a directory descriptor previously opened with
+ * c64_fs_opendir().
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 c64_fs_closedir(struct c64_fs_dir *d)
 {
   
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */

@@ -1,3 +1,15 @@
+/**
+ * \addtogroup c64fs
+ * @{
+ */
+
+/**
+ * \file
+ * Header file for the C64 filesystem functions.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -29,7 +41,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.h,v 1.5 2003/09/04 19:40:36 adamdunkels Exp $
+ * $Id: c64-fs.h,v 1.6 2004/02/16 21:00:14 adamdunkels Exp $
  *
  */
 #ifndef __C64_FS_H__
@@ -37,6 +49,10 @@
 
 #include "c64-dio.h"
 
+/**
+ * An opaque structure with no user visible elements that represents
+ * an open file.
+ */
 struct c64_fs_file {
   unsigned char track, sect, ptr;
 };
@@ -49,14 +65,21 @@ int __fastcall__ c64_fs_read(struct c64_fs_file *f,
 int __fastcall__ c64_fs_write(struct c64_fs_file *f,
 			      char *buf, int len);
 
+/**
+ * An opaque structure with no user visible elements that represents a
+ * directory descriptor.
+ */
 struct c64_fs_dir {
   unsigned char track, sect, ptr;
 };
 
+/**
+ * A C64 directory entry.
+ */
 struct c64_fs_dirent {
-  char name[17];
-  unsigned short size;
-  unsigned char track,
+  char name[17];        /**< The name of the directory entry. */
+  unsigned short size;  /**< The size of the directory entry in 256 byte blocks. */
+  unsigned char track,  
     sect;
 };
 
@@ -69,5 +92,6 @@ unsigned char c64_fs_readdir_next(struct c64_fs_dir *d);
 
 void c64_fs_closedir(struct c64_fs_dir *d);
 
+/** @} */
 
 #endif /* __C64_FS_H__ */

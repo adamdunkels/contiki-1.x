@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs-raw.h,v 1.2 2003/08/20 19:56:29 adamdunkels Exp $
+ * $Id: c64-fs-raw.h,v 1.3 2004/02/16 21:00:14 adamdunkels Exp $
  *
  */
 #ifndef __C64_FS_RAW_H__
