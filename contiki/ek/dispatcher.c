@@ -125,7 +125,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.18 2003/09/04 19:37:46 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.19 2003/09/07 18:13:50 adamdunkels Exp $
  *
  */
 
@@ -322,6 +322,7 @@ ek_clock(void)
 {
   return clock();
 }
+#ifdef WITH_UIP
 /*-----------------------------------------------------------------------------------*/
 /**
  * Starts to connect to a remote host using TCP.
@@ -393,7 +394,6 @@ dispatcher_connect(u16_t *ripaddr, u16_t port, void *appstate)
  *
  */
 /*-----------------------------------------------------------------------------------*/
-#ifdef WITH_UIP
 void
 dispatcher_uipcall(void)     
 {
