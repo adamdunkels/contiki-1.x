@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.29 2003/08/24 22:38:12 adamdunkels Exp $
+ * $Id: ctk.c,v 1.30 2003/08/29 20:38:54 adamdunkels Exp $
  *
  */
 
@@ -577,6 +577,38 @@ add_redrawwidget(struct ctk_widget *w)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+static void
+widget_redraw(struct ctk_widget *widget)
+{
+  struct ctk_window *window;
+
+  if(mode != CTK_MODE_NORMAL || widget == NULL) {
+    return;
+  }
+
+  /* Only redraw widgets that are in the foremost window. If we would
+     allow redrawing widgets in non-focused windows, we would have to
+     redraw all the windows that cover the non-focused window as well,
+     which would lead to flickering.
+
+     Also, we avoid drawing any widgets when the menus are active.
+    */
+    
+#if CTK_CONF_MENUS
+  if(menus.open == NULL)
+#endif /* CTK_CONF_MENUS */
+    {
+      window = widget->window;
+      if(window == dialog) {
+	ctk_draw_widget(widget, CTK_FOCUS_DIALOG, 0, height);
+      } else if(dialog == NULL &&
+		(window == windows ||
+		 window == &desktop_window)) {
+	ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);
+      }
+    }
+}
+/*-----------------------------------------------------------------------------------*/
 void 
 ctk_widget_redraw(struct ctk_widget *widget)
 {
@@ -586,35 +618,9 @@ ctk_widget_redraw(struct ctk_widget *widget)
     return;
   }
 
-  /* If this function isn't called by CTK itself, we only queue the
+  /* Since this function isn't called by CTK itself, we only queue the
      redraw request. */
-  if(DISPATCHER_CURRENT() != ctkid) {
-    redraw |= REDRAW_WIDGETS;
-    add_redrawwidget(widget);
-  } else {
-    
-    /* Only redraw widgets that are in the foremost window. If we
-       would allow redrawing widgets in non-focused windows, we would
-       have to redraw all the windows that cover the non-focused
-       window as well, which would lead to flickering.
-
-       Also, we avoid drawing any widgets when the menus are active.
-    */
-    
-#if CTK_CONF_MENUS
-    if(menus.open == NULL)
-#endif /* CTK_CONF_MENUS */
-      {
-	window = widget->window;
-	if(window == dialog) {
-	  ctk_draw_widget(widget, CTK_FOCUS_DIALOG, 0, height);
-	} else if(dialog == NULL &&
-		  (window == windows ||
-		   window == &desktop_window)) {
-	  ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);
-	}
-      }
-  }
+  add_redrawwidget(widget);
 }
 /*-----------------------------------------------------------------------------------*/
 void CC_FASTCALL
@@ -1370,24 +1376,26 @@ ctk_idle(void)
 	    } else {
 	      /*	      window->focused = NULL;*/
 	      unfocus_widget(window->focused);
-	      dispatcher_emit(ctk_signal_keypress, (void *)c,
-			      window->owner);
+	      dispatcher_fastemit(ctk_signal_keypress, (void *)c,
+				  window->owner);
 	    }
 	  }
 	  break;
 	}
       }
 
+#if 0
       if(redraw & REDRAW_WIDGETS) {
 	widgetptr = redraw_widgets;
 	for(i = 0; i < MAX_REDRAWWIDGETS; ++i) {
-	  ctk_widget_redraw(*widgetptr);
+	  widget_redraw(*widgetptr);
 	  *widgetptr = NULL;
 	  ++widgetptr;
 	}
 	redraw &= ~REDRAW_WIDGETS;
 	redraw_widgetptr = 0;
       }
+#endif /* 0 */
     }
 #if CTK_CONF_WINDOWMOVE
   } else if(mode == CTK_MODE_WINDOWMOVE) {
@@ -1489,7 +1497,7 @@ ctk_idle(void)
   } else if(redraw & REDRAW_WIDGETS) {
     widgetptr = redraw_widgets;
     for(i = 0; i < MAX_REDRAWWIDGETS; ++i) {
-      ctk_widget_redraw(*widgetptr);
+      widget_redraw(*widgetptr);
       *widgetptr = NULL;
       ++widgetptr;
     }
