@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.40 2004/08/09 20:29:35 adamdunkels Exp $
+ * $Id: ctk.c,v 1.41 2004/09/01 18:14:37 adamdunkels Exp $
  *
  */
 
@@ -1688,9 +1688,9 @@ EK_POLLHANDLER(ctk_poll)
 	window = windows;
       } else {
 	window = &desktop_window;
-      }      
+      }
+      
       widget = window->focused;
-
 	  
       if(widget != NULL &&
 	 widget->type == CTK_WIDGET_TEXTENTRY &&
@@ -1730,6 +1730,7 @@ EK_POLLHANDLER(ctk_poll)
 	  }
 	  break;
 	default:
+
 	  if(c == CH_ENTER &&
 	     widget != NULL) {
 	    redraw |= activate(widget);
@@ -1742,7 +1743,7 @@ EK_POLLHANDLER(ctk_poll)
 	    } else {
 	      /*	      window->focused = NULL;*/
 	      unfocus_widget(window->focused);
-	      ek_post_synch(window->owner, ctk_signal_keypress, (void *)c);
+	      ek_post_synch(window->owner, ctk_signal_keypress, (ek_data_t)c);
 	    }
 	  }
 	  break;
