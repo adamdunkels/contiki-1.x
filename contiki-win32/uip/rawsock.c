@@ -83,7 +83,7 @@ rawsock_send(void)
   if(sendto(rawsock, sendbuf, uip_len, 0,
 	    (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
 
-    if (WSAGetLastError() != WSAEHOSTUNREACH) {
+    if(WSAGetLastError() != WSAEHOSTUNREACH) {
       error_exit("sendto() error: %d\n", WSAGetLastError());
     }
   }
@@ -98,7 +98,7 @@ rawsock_poll(void)
 {
   int received;
 
-  if (rawsock == INVALID_SOCKET) {
+  if(rawsock == INVALID_SOCKET) {
     return 0;
   }
 
