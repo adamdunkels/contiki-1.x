@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.1 2003/04/08 17:56:44 adamdunkels Exp $
+ * $Id: processes.c,v 1.2 2003/04/08 23:27:33 adamdunkels Exp $
  *
  */
 
@@ -106,12 +106,11 @@ LOADER_INIT_FUNC(processes_init)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-quit(void)
+processes_quit(void)
 {
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
-  ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -124,11 +123,12 @@ processes_sighandler(ek_signal_t s, ek_data_t data)
       ctk_redraw();
     } else if(data == (ek_data_t)&processclosebutton) {
       ctk_window_close(&processwindow);
-      quit();
+      processes_quit();
+      ctk_redraw();
     }
   } else if(s == ctk_signal_window_close &&
 	    data == (ek_data_t)&processwindow) {
-    quit();
+    processes_quit();
   }
 }
 /*-----------------------------------------------------------------------------------*/

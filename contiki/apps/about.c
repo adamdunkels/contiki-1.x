@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.1 2003/04/08 17:56:43 adamdunkels Exp $
+ * $Id: about.c,v 1.2 2003/04/08 23:27:33 adamdunkels Exp $
  *
  */
 
@@ -96,7 +96,7 @@ LOADER_INIT_FUNC(about_init)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-quit(void)
+about_quit(void)
 {
   ctk_dialog_close();
   dispatcher_exit(&p);
@@ -110,11 +110,11 @@ about_sighandler(ek_signal_t s, ek_data_t data)
 {
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&aboutclose) {
-      quit();
+      about_quit();
     }
   } else if(s == ctk_signal_hyperlink_activate) {
     if((struct ctk_widget *)data == (struct ctk_widget *)&abouturl) {
-      quit();
+      about_quit();
     }
   }
 }

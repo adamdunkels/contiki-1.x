@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.3 2003/04/08 19:24:55 adamdunkels Exp $
+ * $Id: email.c,v 1.4 2003/04/08 23:27:33 adamdunkels Exp $
  *
  */
 
@@ -150,7 +150,7 @@ static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
 static void
-quit(void)
+email_quit(void)
 {
   ctk_window_close(&setupwindow);
   ctk_window_close(&mainwindow);
@@ -375,13 +375,13 @@ sighandler(ek_signal_t s, ek_data_t data)
       } else if(menu.active == menuitem_setup) {
 	ctk_window_open(&setupwindow);
       } else if(menu.active == menuitem_quit) {
-	quit();
+	email_quit();
       }
       ctk_redraw();
     }
   } else if(s == ctk_signal_window_close &&
 	    data == (ek_data_t)&mainwindow) {
-    quit();
+    email_quit();
   }
 }
 /*-----------------------------------------------------------------------------------*/
