@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit-dsc.c,v 1.1 2003/08/06 22:57:05 adamdunkels Exp $
+ * $Id: configedit-dsc.c,v 1.2 2003/08/06 23:14:02 adamdunkels Exp $
  *
  */
 
@@ -58,8 +58,8 @@ static unsigned char tcpipconficon_bitmap[3*3*8] = {
 };
 
 static char tcpipconficon_textmap[9] = {
-  'S', 't', 'a',
-  'r', 't', ' ',
+  'C', 'F', 'G',
+  ' ', ' ', ' ',
   'C', 'F', 'G'
 };
 
