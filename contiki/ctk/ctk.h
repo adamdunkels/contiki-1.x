@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.11 2003/06/30 20:45:50 adamdunkels Exp $
+ * $Id: ctk.h,v 1.12 2003/08/09 23:32:37 adamdunkels Exp $
  *
  */
 
@@ -323,7 +323,7 @@ struct ctk_desktop {
 void ctk_init(void);
 void ctk_mode_set(unsigned char mode);
 unsigned char ctk_mode_get(void);
-void ctk_redraw(void);
+/*void ctk_redraw(void);*/
 
 /* Functions for manipulating windows. */
 void ctk_window_new(struct ctk_window *window,
@@ -459,9 +459,8 @@ extern ek_signal_t ctk_signal_keypress,
   ctk_signal_pointer_button;
 
 #if CTK_CONF_SCREENSAVER
-extern ek_signal_t ctk_signal_screensaver_start,
-  ctk_signal_screensaver_stop,
-  ctk_signal_screensaver_uninstall;
+extern ek_signal_t ctk_signal_screensaver_stop,
+  ctk_signal_screensaver_start;
 
 extern unsigned short ctk_screensaver_timeout;
 #define CTK_SCREENSAVER_SET_TIMEOUT(t) ctk_screensaver_timeout = (t)

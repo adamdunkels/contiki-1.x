@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.23 2003/08/09 13:34:16 adamdunkels Exp $
+ * $Id: ctk.c,v 1.24 2003/08/09 23:32:37 adamdunkels Exp $
  *
  */
 
@@ -103,9 +103,8 @@ ek_signal_t ctk_signal_keypress,
   ctk_signal_pointer_button;
 
 #if CTK_CONF_SCREENSAVER
-ek_signal_t ctk_signal_screensaver_start,
-  ctk_signal_screensaver_stop,
-  ctk_signal_screensaver_uninstall;
+ek_signal_t ctk_signal_screensaver_stop,
+  ctk_signal_screensaver_start;
 #endif /* CTK_CONF_SCREENSAVER */
 
 
@@ -113,10 +112,9 @@ ek_signal_t ctk_signal_screensaver_start,
 unsigned short mouse_x, mouse_y, mouse_button;
 #endif /* CTK_CONF_MOUSE_SUPPORT */
 
-static unsigned short screensaver_timer;
+static unsigned short screensaver_timer = 0;
 unsigned short ctk_screensaver_timeout = (5*60);
-static u16_t start, current;
-/*#define SCREENSAVER_TIMEOUT (5*60)*/
+static ek_clock_t start, current;
 
 #if CTK_CONF_MENUS
 /*-----------------------------------------------------------------------------------*/
@@ -194,7 +192,6 @@ ctk_init(void)
 #if CTK_CONF_SCREENSAVER
   ctk_signal_screensaver_start = dispatcher_sigalloc();
   ctk_signal_screensaver_stop = dispatcher_sigalloc();
-  ctk_signal_screensaver_uninstall = dispatcher_sigalloc();
 #endif /* CTK_CONF_SCREENSAVER */
     
 
@@ -457,7 +454,7 @@ ctk_desktop_redraw(struct ctk_desktop *d)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void
+void 
 ctk_window_redraw(struct ctk_window *w)
 {
   /* Only redraw the window if it is a dialog or if it is the foremost
@@ -524,8 +521,7 @@ ctk_dialog_new(CC_REGISTER_ARG struct ctk_window *window,
 {
   window_new(window, w, h, NULL);
 }
-/*-----------------------------------------------------------------------------------*/
-void
+/*-----------------------------------------------------------------------------------*/void
 ctk_menu_new(CC_REGISTER_ARG struct ctk_menu *menu,
 	     char *title)
 {
@@ -574,7 +570,7 @@ add_redrawwidget(struct ctk_widget *w)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void
+void 
 ctk_widget_redraw(struct ctk_widget *widget)
 {
   struct ctk_window *window;
@@ -606,15 +602,15 @@ ctk_widget_redraw(struct ctk_widget *widget)
 	if(window == dialog) {
 	  ctk_draw_widget(widget, CTK_FOCUS_DIALOG, 0, height);
 	} else if(dialog == NULL &&
-		  window == windows ||
-		  window == &desktop_window) {
+		  (window == windows ||
+		   window == &desktop_window)) {
 	  ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);
 	}
       }
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void
+void 
 ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
 	       CC_REGISTER_ARG struct ctk_widget *widget)
 {  
@@ -645,7 +641,7 @@ ctk_desktop_height(struct ctk_desktop *w)
   return ctk_draw_height();
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void 
 select_widget(struct ctk_widget *focus)
 {
   struct ctk_window *window;
@@ -678,7 +674,7 @@ select_widget(struct ctk_widget *focus)
 #define DOWN 1
 #define LEFT 2
 #define RIGHT 3
-static void
+static void 
 switch_focus_widget(unsigned char direction)
 {
   register struct ctk_window *window;
@@ -768,7 +764,7 @@ switch_open_menu(unsigned char rightleft)
   /*  ctk_desktop_redraw();*/
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void 
 switch_menu_item(unsigned char updown)
 {
   register struct ctk_menu *m;
@@ -847,7 +843,7 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
   return REDRAW_NONE;
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void 
 textentry_input(ctk_arch_key_t c,
 		CC_REGISTER_ARG struct ctk_textentry *t)
 {
@@ -923,6 +919,15 @@ textentry_input(ctk_arch_key_t c,
 #endif /* CTK_CONF_TEXTENTRY_MULTILINE */
     break;
     
+  case CTK_CONF_WIDGETDOWN_KEY:
+    t->state = CTK_TEXTENTRY_NORMAL;
+    switch_focus_widget(DOWN);
+    break;
+  case CTK_CONF_WIDGETUP_KEY:
+    t->state = CTK_TEXTENTRY_NORMAL;
+    switch_focus_widget(UP);
+    break;
+    
   default:
     len = tlen - txpos - 1;
     if(c == CH_DEL) {
@@ -952,7 +957,7 @@ textentry_input(ctk_arch_key_t c,
 }
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_MENUS
-static unsigned char
+static unsigned char 
 activate_menu(void)
 {
   struct ctk_window *w;
@@ -1019,14 +1024,14 @@ timer(void)
 {
   if(mode == CTK_MODE_NORMAL) {
     ++screensaver_timer;
-    if(screensaver_timer == ctk_screensaver_timeout) {
+    if(screensaver_timer >= ctk_screensaver_timeout) {
 #if CTK_CONF_SCREENSAVER
       dispatcher_emit(ctk_signal_screensaver_start, NULL,
 		      DISPATCHER_BROADCAST);
 #ifdef CTK_SCREENSAVER_INIT
       CTK_SCREENSAVER_INIT();
 #endif /* CTK_SCREENSAVER_INIT */
-      mode = CTK_MODE_SCREENSAVER;
+
 #endif /* CTK_CONF_SCREENSAVER */
       screensaver_timer = 0;
     }
@@ -1052,7 +1057,7 @@ ctk_idle(void)
 
   current = ek_clock();
   
-  if((current - start) >= CLK_TCK/2) {
+  if((current - start) >= CLK_TCK) {
     timer();
     start = current;
   }    
@@ -1319,16 +1324,10 @@ ctk_idle(void)
 #endif /* CTK_CONF_MENUS */
       } else {      
 	switch(c) {
-	case CH_CURS_RIGHT:
-	  switch_focus_widget(RIGHT);
-	  break;
-	case CH_CURS_DOWN:
+	case CTK_CONF_WIDGETDOWN_KEY:
 	  switch_focus_widget(DOWN);
 	  break;
-	case CH_CURS_LEFT:
-	  switch_focus_widget(LEFT);
-	  break;
-	case CH_CURS_UP:
+	case CTK_CONF_WIDGETUP_KEY:
 	  switch_focus_widget(UP);
 	  break;
 	case CH_ENTER:
