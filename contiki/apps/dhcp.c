@@ -54,42 +54,6 @@ set_statustext(char *text)
   CTK_WIDGET_REDRAW(&statuslabel);
 }
 /*---------------------------------------------------------------------------*/
-EK_EVENTHANDLER(eventhandler, ev, data)
-{
-  if(ev == EK_EVENT_INIT) {
-    ctk_window_new(&window, 28, 7, "DHCP");
-    CTK_WIDGET_ADD(&window, &getbutton);
-    CTK_WIDGET_ADD(&window, &statuslabel);
-    
-    CTK_WIDGET_ADD(&window, &ipaddrlabel);
-    CTK_WIDGET_ADD(&window, &ipaddrentry);
-    CTK_WIDGET_ADD(&window, &netmasklabel);
-    CTK_WIDGET_ADD(&window, &netmaskentry);
-    CTK_WIDGET_ADD(&window, &gatewaylabel);
-    CTK_WIDGET_ADD(&window, &gatewayentry);
-    CTK_WIDGET_ADD(&window, &dnsserverlabel);
-    CTK_WIDGET_ADD(&window, &dnsserverentry);
-    
-    ctk_window_open(&window);
-    dhcpc_init();
-  } else if(ev == ctk_signal_widget_activate) {
-    if(data == (ek_data_t)&getbutton) {
-      dhcpc_request();
-      set_statustext("Requesting...");
-    }
-  } else if(ev == tcpip_event) {
-    dhcpc_appcall(data);
-  } else if(ev == EK_EVENT_REQUEST_EXIT ||
-	    ev == ctk_signal_window_close) {
-    ctk_window_close(&window);
-    ek_exit();
-    LOADER_UNLOAD();
-  } else if(ev == SHOWCONFIG) {
-    makestrings();
-    ctk_window_redraw(&window);  
-  }
-}
-/*---------------------------------------------------------------------------*/
 static char *
 makebyte(u8_t byte, char *str)
 {
@@ -136,6 +100,42 @@ makestrings(void)
     makeaddr(addrptr, dnsserver);
   }
  
+}
+/*---------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&window, 28, 7, "DHCP");
+    CTK_WIDGET_ADD(&window, &getbutton);
+    CTK_WIDGET_ADD(&window, &statuslabel);
+    
+    CTK_WIDGET_ADD(&window, &ipaddrlabel);
+    CTK_WIDGET_ADD(&window, &ipaddrentry);
+    CTK_WIDGET_ADD(&window, &netmasklabel);
+    CTK_WIDGET_ADD(&window, &netmaskentry);
+    CTK_WIDGET_ADD(&window, &gatewaylabel);
+    CTK_WIDGET_ADD(&window, &gatewayentry);
+    CTK_WIDGET_ADD(&window, &dnsserverlabel);
+    CTK_WIDGET_ADD(&window, &dnsserverentry);
+    
+    ctk_window_open(&window);
+    dhcpc_init();
+  } else if(ev == ctk_signal_widget_activate) {
+    if(data == (ek_data_t)&getbutton) {
+      dhcpc_request();
+      set_statustext("Requesting...");
+    }
+  } else if(ev == tcpip_event) {
+    dhcpc_appcall(data);
+  } else if(ev == EK_EVENT_REQUEST_EXIT ||
+	    ev == ctk_signal_window_close) {
+    ctk_window_close(&window);
+    ek_exit();
+    LOADER_UNLOAD();
+  } else if(ev == SHOWCONFIG) {
+    makestrings();
+    ctk_window_redraw(&window);  
+  }
 }
 /*---------------------------------------------------------------------------*/
 void
