@@ -54,7 +54,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.10 2004/02/24 10:13:55 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.11 2004/03/25 09:46:10 adamdunkels Exp $
  *
  */
 
@@ -237,6 +237,7 @@ uip_arp_update(u16_t *ipaddr, struct uip_eth_addr *ethaddr)
  * variable uip_len.
  */
 /*-----------------------------------------------------------------------------------*/
+#if 0
 void
 uip_arp_ipin(void)
 {
@@ -256,6 +257,7 @@ uip_arp_ipin(void)
   
   return;
 }
+#endif /* 0 */
 /*-----------------------------------------------------------------------------------*/
 /**
  * ARP processing for incoming ARP packets.
@@ -296,6 +298,12 @@ uip_arp_arpin(void)
        reply. */
     if(BUF->dipaddr[0] == uip_hostaddr[0] &&
        BUF->dipaddr[1] == uip_hostaddr[1]) {
+
+      /* First, we register the one who made the request in our ARP
+	 table, since it is likely that we will do more communication
+	 with this host in the future. */
+      uip_arp_update(BUF->sipaddr, &BUF->shwaddr);
+      
       /* The reply opcode is 2. */
       BUF->opcode = HTONS(2);
 
@@ -358,6 +366,13 @@ void
 uip_arp_out(void)
 {
   struct arp_entry *tabptr;
+
+  /* Only work with IP packets. */
+  if(IPBUF->ethhdr.type != HTONS(UIP_ETHTYPE_IP)) {
+    return;
+  }
+      
+  
   /* Find the destination IP address in the ARP table and construct
      the Ethernet header. If the destination IP addres isn't on the
      local network, we use the default router's IP address instead.
