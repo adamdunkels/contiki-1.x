@@ -23,6 +23,10 @@ OPT=-Or
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
+%.o: loader/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
 %.o: uip/%.c
 	$(CC) $(CFLAGS)  -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
@@ -65,6 +69,9 @@ OPT=-Or
 %.o: ctk/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
+%.o: loader/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
 %.o: uip/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
@@ -99,10 +106,10 @@ WWW=www.o webclient.o http-strings.o http-user-agent-string.o htmlparser.o html-
 EMAIL=email.o smtp.o smtp-strings.o
 WEBSERVER=webserver.o httpd.o httpd-cgi.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
-
+WGET=wget.o webclient.o http-strings.o http-user-agent-string.o 
 
 clean:
-	rm -f *.o *~ *core contiki *.s *.dsc *.prg contiki-labels
+	rm -f *.o *~ *core contiki *.s *.dsc *.prg *.drv contiki-labels
 
 depend:
 	gcc $(CCDEPFLAGS) -MM -Iapps -Ictk -Iuip -Iconf \
