@@ -1,5 +1,5 @@
 #include "contiki.h"
-#include "socket.h"
+#include "psock.h"
 #include "ctk-draw.h"
 
 #include <cbm.h>
@@ -21,10 +21,10 @@ static void ctkmode(void);
 static
 PT_THREAD(send(void))
 {
-  SOCKET_BEGIN(&s.sout);
+  PSOCK_BEGIN(&s.sout);
   
-  SOCKET_SEND(&s.sout, s.outputbuf, s.len);
-  SOCKET_END(&s.sout);    
+  PSOCK_SEND(&s.sout, s.outputbuf, s.len);
+  PSOCK_END(&s.sout);    
 }
 /*---------------------------------------------------------------------------*/
 static
@@ -96,8 +96,8 @@ appcall(void *state)
 static struct uip_conn *
 connect(u16_t *host, u16_t port)
 {
-  SOCKET_INIT(&s.sin, s.inputbuf, sizeof(s.inputbuf));
-  SOCKET_INIT(&s.sout, s.inputbuf, sizeof(s.inputbuf));
+  PSOCK_INIT(&s.sin, s.inputbuf, sizeof(s.inputbuf));
+  PSOCK_INIT(&s.sout, s.inputbuf, sizeof(s.inputbuf));
   PT_INIT(&s.inpt);
   PT_INIT(&s.outpt);
   return tcp_connect(host, htons(port), NULL);
