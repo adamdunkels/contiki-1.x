@@ -4,6 +4,8 @@
 #include "uip-fw.h"
 #include "uip_arch.h"
 
+#include "tcpip.h"
+
 #define BUF ((uip_tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
 
 /*-----------------------------------------------------------------------------*/
@@ -39,7 +41,8 @@ uip_split_output(void)
     BUF->ipchksum = ~(uip_ipchksum());
 
     /* Transmit the first packet. */
-    uip_fw_output();
+    /*    uip_fw_output();*/
+    tcpip_output();
 
     /* Now, create the second packet. To do this, it is not enough to
        just alter the length field, but we must also update the TCP
@@ -67,9 +70,11 @@ uip_split_output(void)
     BUF->ipchksum = ~(uip_ipchksum());
 
     /* Transmit the second packet. */
-    uip_fw_output();
+    /*    uip_fw_output();*/
+    tcpip_output();
   } else {
-    uip_fw_output();
+    /*    uip_fw_output();*/
+    tcpip_output();
   }
      
 }
