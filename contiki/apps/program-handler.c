@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.4 2003/04/09 19:23:27 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.5 2003/04/10 07:05:18 adamdunkels Exp $
  *
  */
 
@@ -194,10 +194,10 @@ static struct ctk_label namelabel =
 
 static char name[31];
 static struct ctk_textentry nameentry =
-  {CTK_TEXTENTRY(0, 0, 18, 1, name, 30)};
+  {CTK_TEXTENTRY(0, 1, 14, 1, name, 30)};
 
 static struct ctk_button loadbutton =
-  {CTK_BUTTON(20, 0, 4, "Load")};
+  {CTK_BUTTON(10, 2, 4, "Load")};
 
 static DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -290,7 +290,7 @@ program_handler_init(void)
 #endif /* WITH_TELNET */  
     
 
-    ctk_window_new(&runwindow, 26, 1, "Run program");
+    ctk_window_new(&runwindow, 16, 3, "Run");
  
     CTK_WIDGET_ADD(&runwindow, &namelabel);
     CTK_WIDGET_ADD(&runwindow, &nameentry);
