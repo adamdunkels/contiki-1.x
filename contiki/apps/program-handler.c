@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.10 2003/06/30 20:49:01 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.11 2003/07/31 23:47:30 adamdunkels Exp $
  *
  */
 
@@ -96,8 +96,8 @@ static char *errormsgs[] = {
   "Header error",
   "OS error",
   "Data format error",
-  "Memory error",
-  "Open error"
+  "Out of memory",
+  "Could not open file"
 };
 
 static ek_signal_t loader_signal_load;
@@ -203,6 +203,7 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 	    contikidsc[contikimenu.active - 1]->init);
       } else if(contikimenu.active == runmenuitem) {
 	ctk_window_open(&runwindow);
+	CTK_WIDGET_FOCUS(&runwindow, &nameentry);
       }
 #else /* WITH_LOADER_ARCH */
       if(contikidsc[contikimenu.active] != NULL) {
