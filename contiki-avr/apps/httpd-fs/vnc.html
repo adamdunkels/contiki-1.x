@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>Welcome to the Contiki-demo server!</title>
+    <link rel="stylesheet" type="text/css" href="/contiki.css">  
+  </head>
+  <body bgcolor="#e0e0e0" text="black">
+    <table width="100%" cellspacing=0 cellpadding=0 border=0>
+      <tr valign="top">
+	<td width="25%" valign="top">
+	  <br>
+	  <table width="100%" cellspacing=0 cellpadding=0 border=0>
+	    <tr>
+	      <td class="btl" width=16 height=16>&nbsp;</td>
+	      <td class="bt" height=16>&nbsp;</td>
+	      <td class="btr" width=16 height=16>&nbsp;</td>
+	    </tr>
+	    <tr>
+	      <td class="bl" width=16>&nbsp;</td>
+	      <td class="menu">
+		<br>
+		<a href="/">Front page</a><br>
+		<br>		      
+		<a href="/vnc.html">Remote display</a><br>
+		<br>		      
+		<a href="/cgi/files">File statistics</a><br>
+		<br>		      			  
+		<a href="/cgi/tcp">Network connections</a><br>
+		<br>			
+		<a href="/cgi/processes">Running processes</a><br>
+		<br>			
+	      </td>
+	      <td class="br" width=16>&nbsp;</td>
+	    </tr>
+	    <tr>
+	      <td class="bbl" width=16 height=16>&nbsp;</td>
+	      <td class="bb" height=16>&nbsp;</td>
+	      <td class="bbr" width=16 height=16>&nbsp;</td>
+	    </tr>
+	  </table>
+	</td>
+	<td class="content">
+	  <h1>Welcome to the <a
+	      href="http://dunkels.com/adam/contiki/">Contiki</a>
+	      demo server!</h1>
+	  <p class="intro">
+	    The Contiki VNC server lets you access the desktop from
+	    the Contiki server in your web browser, from anywhere in
+	    the world. Note that the device on which this is running
+	    does not have any monitor or any other kind of display; in
+	    fact, it does not even have a graphics chip.
+	  </p>
+
+	  <h3>Java client</h3>
+	  <p>
+	    The Java client makes it possible to access the virtual
+	    Contiki display directly from the web browser. It requires
+	    Java to be turned on in the browser.
+	  </p>
+	  <p>
+	    When asked for a password, just click the "Ok" button
+	    without typing in any password.
+	  </p>
+	  <center>
+	    <b><a href="#" onClick='window.open("vncjava.html",
+	    "Contiki",
+	    "toolbar=no,location=no,status=yes,menubar=no,scrollbars=yes,resizable=yes");'>Click
+	    here to launch in new window</a></b></center>
+	  <br>
+	    <center><b><a href="vncjava.html">Click here to launch in
+	    this window</a></b>
+	    </center>
+
+	    <p>
+	      The server is able to keep 8 connections up. In order to
+	      avoid monopolization of the connections, each user is
+	      only allowed to use the display for a short while.
+	    </p>
+	    
+	    <h3>Download VNC client</h3>
+	    <p>
+	      If you don't have Java installed, you can download a
+	      free VNC client program from <a
+	      href="http://www.realvnc.com">RealVNC</a>. Start the
+	      program with <b>contiki-demo.sics.se:0</b> as the
+	      display.
+	    </p>
+	   
+	   <h3>Unix/X clients</h3>
+ 	   <p>
+	     Unix/X VNC clients need the <tt>-bgr233</tt> option
+	     to work. Use the following command:
+	   </p>
+	   <center><tt>vncviewer -bgr233 contiki-demo.sics.se:0</tt></center>
+	  <p align="right">
+	    /<a href="http://dunkels.com/adam/">Adam Dunkels</a>
+	  </p>
+	</td>
+      </tr>
+    </table>
+    
+  </body>
+</html>

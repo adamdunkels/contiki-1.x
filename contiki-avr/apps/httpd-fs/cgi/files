@@ -1,0 +1,40 @@
+i /header.html
+t <h1>File statistics</h1><br><center><b>Total numer of page loads:
+c e
+t </b></center><br><table width="100%"><tr><td><a href="/index.html">/index.html</a></td><td>
+c a /index.html
+t </td></tr> <tr><td><a href="/vnc.html">/vnc.html</a></td><td>
+c a /vnc.html
+t </td></tr> <tr><td><a href="/vncviewer.jar">/vncviewer.jar</a></td><td>
+c a /vncviewer.jar
+t </td></tr> <tr><td><a href="/cgi/files">/cgi/files</a></td><td>
+c a /cgi/files
+t </td></tr> <tr><td><a href="/cgi/tcp">/cgi/tcp</a></td><td>
+c a /cgi/tcp
+t </td></tr> <tr><td><a href="/cgi/processes">/cgi/processes</a></td><td>
+c a /cgi/processes
+t </td></tr> <tr><td><a href="/contiki.css">/contiki.css</a></td><td>
+c a /contiki.css
+t </td></tr> <tr><td><a href="/404.html">/404.html</a></td><td>
+c a /404.html
+t </td></tr> <tr><td><a href="/img/screenshot.png">/img/screenshot.png</a></td><td>
+c a /img/screenshot.png
+t </td></tr> <tr><td><a href="/img/bb.png">/img/bb.png</a></td><td>
+c a /img/bb.png
+t </td></tr> <tr><td><a href="/img/bbl.png">/img/bbl.png</a></td><td>
+c a /img/bbl.png
+t </td></tr> <tr><td><a href="/img/bbr.png">/img/bbr.png</a></td><td>
+c a /img/bbr.png
+t </td></tr> <tr><td><a href="/img/bl.png">/img/bl.png</a></td><td>
+c a /img/bl.png
+t </td></tr> <tr><td><a href="/img/br.png">/img/br.png</a></td><td>
+c a /img/br.png
+t </td></tr> <tr><td><a href="/img/bt.png">/img/bt.png</a></td><td>
+c a /img/bt.png
+t </td></tr> <tr><td><a href="/img/btl.png">/img/btl.png</a></td><td>
+c a /img/btl.png
+t </td></tr> <tr><td><a href="/img/btr.png">/img/btr.png</a></td><td>
+c a /img/btr.png
+t </td></tr></table>
+i /footer.plain
+.

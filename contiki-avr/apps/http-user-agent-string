@@ -1,0 +1,1 @@
+http_user_agent_fields "Connection: close\r\nUser-Agent: Contiki/pre-1.1 (Atmel AVR Atmega128; http://dunkels.com/adam/contiki/)\r\n\r\n"
