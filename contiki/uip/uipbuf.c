@@ -64,11 +64,13 @@ uipbuf_bufdata_endmarker(struct uipbuf_buffer *buf, u8_t endmarker,
   }
 
   while(*datalen > 0) {
-    if(**dataptr == endmarker) {
-      return UIPBUF_FOUND | UIPBUF_FULL;
-    }
+    c = **dataptr;
     --*datalen;
     ++*dataptr;
+    
+    if(c == endmarker) {
+      return UIPBUF_FOUND | UIPBUF_FULL;
+    }
   }
   
   return UIPBUF_FULL;
