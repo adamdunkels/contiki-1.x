@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd.c,v 1.6 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: httpd.c,v 1.7 2004/12/22 09:36:10 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -39,7 +39,7 @@
 #include "httpd-cgi.h"
 #include "socket.h"
 
-#include <strings.h>
+#include <string.h>
 
 #define STATE_WAITING 0
 #define STATE_OUTPUT  1
