@@ -66,6 +66,7 @@ u8_t uip_fw_forward(void);
 u8_t uip_fw_output(void);
 void uip_fw_register(struct uip_fw_netif *netif);
 void uip_fw_default(struct uip_fw_netif *netif);
+void uip_fw_periodic(void);
 
 
 /**
@@ -121,5 +122,6 @@ void uip_fw_default(struct uip_fw_netif *netif);
  * \hideinitializer
  */
 #define UIP_FW_DROPPED   5
+
 
 #endif /* __UIP_FW_H__ */

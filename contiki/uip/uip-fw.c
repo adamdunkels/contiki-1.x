@@ -110,19 +110,20 @@ struct icmpip_hdr {
  * duplicate packets.
  */
 struct fwcache_entry {
-  u16_t timestamp;
+  u16_t timer;
   
   u16_t len, offset, ipid;
   u16_t srcipaddr[2];
   u16_t destipaddr[2];
-  u16_t payload[2];  
+  u16_t payload[2];
+  u8_t proto;
 };
 
 /**
  * \internal
  * The number of packets to remember when looking for duplicates.
  */
-#define FWCACHE_SIZE 2
+#define FWCACHE_SIZE 20
 
 /**
  * \internal
@@ -130,6 +131,12 @@ struct fwcache_entry {
  * identifying duplicate packets.
  */
 static struct fwcache_entry fwcache[FWCACHE_SIZE];
+
+/**
+ * \internal
+ * The time that a packet cache is active.
+ */
+#define FW_TIME 20
 
 /*------------------------------------------------------------------------------*/
 /**
@@ -233,9 +240,23 @@ static void
 fwcache_register(void)
 {
   struct fwcache_entry *fw;
+  int i, oldest;
 
-  /* Register packet in forwarding cache. */
-  fw = &fwcache[0];
+  oldest = FW_TIME;
+  fw = NULL;
+  
+  /* Find the oldest entry in the cache. */
+  for(i = 0; i < FWCACHE_SIZE; ++i) {
+    if(fwcache[i].timer == 0) {
+      fw = &fwcache[i];
+      break;
+    } else if(fwcache[i].timer <= oldest) {
+      fw = &fwcache[i];
+      oldest = fwcache[i].timer;
+    }
+  }
+
+  fw->timer = FW_TIME;
   fw->len = BUF->len;
   fw->offset = BUF->ipoffset;
   fw->ipid = BUF->ipid;
@@ -245,6 +266,7 @@ fwcache_register(void)
   fw->destipaddr[1] = BUF->destipaddr[1];
   fw->payload[0] = BUF->srcport;
   fw->payload[1] = BUF->destport;
+  fw->proto = BUF->proto;
 }
 /*------------------------------------------------------------------------------*/
 /**
@@ -314,7 +336,7 @@ uip_fw_output(void)
  *
  * 
  *
- * \return UIP_FW_FORWARDED if the packet was forwarded, UIP_FW_OK if
+ * \return UIP_FW_FORWARDED if the packet was forwarded, UIP_FW_LOCAL if
  * the packet should be processed locally.
  */
 /*------------------------------------------------------------------------------*/
@@ -328,7 +350,7 @@ uip_fw_forward(void)
      to indicate that the packet should be processed locally. */
   if(BUF->destipaddr[0] == uip_hostaddr[0] &&
      BUF->destipaddr[1] == uip_hostaddr[1]) {
-    return 0;
+    return UIP_FW_LOCAL;
   }
 
   /* If we use ping IP address configuration, and our IP address is
@@ -337,29 +359,30 @@ uip_fw_forward(void)
   if((uip_hostaddr[0] | uip_hostaddr[1]) == 0 &&
      BUF->proto == UIP_PROTO_ICMP &&
      ICMPBUF->type == ICMP_ECHO) {
-    return 0;
+    return UIP_FW_LOCAL;
   }
 #endif /* UIP_PINGADDRCONF */
 
   /* Check if the packet is in the forwarding cache already, and if so
      we drop it. */
-  /*  for(fw = fwcache; fw <= &fwcache[FWCACHE_SIZE]; ++fw) {*/
-  fw = &fwcache[0];
-  {
-    if(fw->len == BUF->len &&
+
+  for(fw = fwcache; fw <= &fwcache[FWCACHE_SIZE]; ++fw) {
+    if(fw->timer != 0 &&
+       fw->len == BUF->len &&
        fw->offset == BUF->ipoffset &&
-       fw->ipid == BUF->ipid &&
+       fw->ipid == BUF->ipid &&      
        fw->srcipaddr[0] == BUF->srcipaddr[0] &&
        fw->srcipaddr[1] == BUF->srcipaddr[1] &&
        fw->destipaddr[0] == BUF->destipaddr[0] &&
        fw->destipaddr[1] == BUF->destipaddr[1] &&
+       fw->proto == BUF->proto &&
        fw->payload[0] == BUF->srcport &&
        fw->payload[1] == BUF->destport) {
       /* Drop packet. */
-      return 1;
+      return UIP_FW_FORWARDED;
     }       
   }
-  
+
   netif = find_netif();
 
   /* Decrement the TTL (time-to-live) value in the IP header */
@@ -390,7 +413,7 @@ uip_fw_forward(void)
 
   /* Return non-zero to indicate that the packet was forwarded and that no
      other processing should be made. */
-  return 1;
+  return UIP_FW_FORWARDED;
 }
 /*------------------------------------------------------------------------------*/
 /**
@@ -421,5 +444,20 @@ void
 uip_fw_default(struct uip_fw_netif *netif)
 {
   defaultnetif = netif;
+}
+/*------------------------------------------------------------------------------*/
+/**
+ * Perform periodic processing.
+ */
+/*------------------------------------------------------------------------------*/
+void
+uip_fw_periodic(void)
+{
+  struct fwcache_entry *fw;
+  for(fw = fwcache; fw <= &fwcache[FWCACHE_SIZE]; ++fw) {
+    if(fw->timer > 0) {
+      --fw->timer;
+    }    
+  }
 }
 /*------------------------------------------------------------------------------*/
