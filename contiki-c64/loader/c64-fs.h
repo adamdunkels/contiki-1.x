@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.h,v 1.2 2003/08/06 23:12:06 adamdunkels Exp $
+ * $Id: c64-fs.h,v 1.3 2003/08/09 13:28:13 adamdunkels Exp $
  *
  */
 #ifndef __C64_FS_H__
@@ -58,9 +58,9 @@ struct c64_fs_dir {
 
 struct c64_fs_dirent {
   char name[17];
-  /*  unsigned int size;
-      unsigned char type;
-      unsigned char access;*/
+  unsigned short size;
+  /*    unsigned char type;
+	unsigned char access;*/
   unsigned char track,
     sect;
 };
