@@ -1,0 +1,46 @@
+The contiki/ek/ directory contains the source code for the Contiki
+kernel and the concurrency libraries (multithreading, protothreads).
+
+arc.[ch]
+
+  Implementation of the argument buffer.
+
+contiki-version.h
+
+  A string holding the current version of Contiki.
+
+contiki.h
+
+  Header file which includes the core Contiki includes.
+
+dsc.h
+
+  Header file for the DSC file description format used by Contiki.
+
+ek-service.[ch]
+
+  The Contiki service layer.
+
+ek.[ch]
+
+  The Contiki event-driven kernel.
+
+loader.h
+
+  Header file for the program loader.
+
+log.h
+
+  Header file for the system loggin facility.
+
+mt.[ch]
+
+  Multithreading library.
+
+pt.h
+
+  Protothreads implementation.
+
+pt-sem.h
+
+  Semaphores for protothreads.              

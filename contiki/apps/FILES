@@ -1,0 +1,69 @@
+The contiki/apps/ directory contains source code for a number of
+Contiki application programs.
+
+about*.[ch]
+
+  A program showing an "About Contiki" dialog box.
+
+calc*.[ch]
+
+  A simple desktop calculator
+
+email*.[ch], smtp*.[ch], pop*.[ch]
+
+  An email program with network protocols SMTP and POP3.
+
+ftp*.[ch], ftpc*.[ch]
+
+  An FTP client.
+
+htmlparser.[ch], http-*[ch], webclient.[ch], www.[ch]
+
+  A simple web browser with an HTML parser and an HTTP client
+  implementation.
+
+httpd*.[ch], webserver.[ch]
+
+  A simple web server (HTTP server implementation).
+
+irc*.[ch], ircc*.[ch]
+
+  An IRC client.
+
+netconf*.[ch]
+
+  A program for changing network settings.
+
+processes*.[ch]
+
+  A program that shows currently running processes.
+
+shell*.[ch]
+
+  A command shell
+
+telnet*.[ch]
+
+  A simple telnet-like program
+
+telnetd*.[ch]
+
+  A telnet server.
+
+vnc*.[ch]
+
+  A VNC client.  
+  
+makestrings
+
+  Creates .c and .h files from the -strings files.
+
+httpd-fs/
+
+  Directory containing static files for the web server.  
+  
+makefsdata
+
+  Creates the httpd-fsdata.c file from the httpd-fs/ directory
+             
+  

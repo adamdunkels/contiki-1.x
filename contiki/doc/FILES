@@ -1,0 +1,25 @@
+The contiki/doc/ directory contains files for automatic generation of
+documentation from the Contiki source code. Documentation is generated
+with the doxygen tool (http://www.doxygen.org/).
+
+Doxyfile
+
+  Configuration file for the doxygen tool.
+
+contiki-mainpage.txt
+
+  The text for the first page in the documentation.
+
+ctk.txt
+
+  General documentation about CTK, the Contiki GUI toolkit. This file
+  is mostly obsolete, as the information has been moved into the
+  source code.
+
+release.txt
+
+  Release checklist.
+
+uip-doc.txt
+
+  Documentation for the uIP TCP/IP stack.

@@ -1,0 +1,48 @@
+The contiki/lib/ directory contains the source code for a number of
+utility function that are part of Contiki but are optional and not
+generally required.
+
+cc.h
+
+  Header file for C compiler tweaks.
+
+cfs.[ch], cfs-service.[ch]
+
+  The Contiki filesystem service interface.
+
+cfs-posix.[ch]
+
+  A CFS implementation using POSIX functions.
+
+ctk-filedialog.[ch]
+
+  A CTK file dialog widget.
+
+ctk-textedit.[ch]
+
+  A CTK text editor widget.
+
+libconio.[ch]
+
+  An implementation of selected parts of the Borland conio
+  interface. Used for easy porting of the ctk-conio.c CTK driver.
+
+list.[ch]
+
+  A generic list library.
+
+memb.[ch]
+
+  A generic memory block allocator library.
+
+petsciiconv.[ch]
+
+  Conversion routines between ASCII and PETSCII character encodings.
+
+strncasecmp.c
+
+  Implementation of the strncasecmp() function.
+
+timer.[ch]
+
+  A generic timer library.                  

@@ -1,0 +1,61 @@
+The contiki/uip/ directory contains the source code for the uIP TCP/IP
+stack and associated utility libraries.
+
+packet-service.h
+
+  The Contiki/uIP packet driver interface, used by network device
+  drivers.
+  
+packet-service.c.example
+
+  An example implementation of the packet driver interface.
+
+resolv.[ch]
+
+  DNS hostname resolver library.
+
+slipdev.[ch]
+
+  A generic SLIP implementation.
+
+socket.[ch]
+
+  A BSD socket-like API built on top of the uIP API using
+  protothreads.
+
+tcpip.[ch]
+
+  The glue module between Contiki and uIP.
+
+uip-fw*.[ch]
+
+  uIP packet routing/forwarding.
+
+uip-split.[ch]
+
+  uIP TCP throughput booster hack.
+
+uip.[ch]
+
+  The uIP TCP/IP stack.
+
+uip_arch.h
+
+  The uIP architecture dependant functions interface.
+
+uip_arp.[ch]
+
+  ARP protocol implementation.
+
+uipbuf.[ch]
+
+  uIP input buffering utility functions.
+
+uiplib.[ch]
+
+  uIP conversion utility functions.
+
+uipopt.h
+
+  uIP options file with Contiki-specific settings.    
+            

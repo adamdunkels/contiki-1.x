@@ -1,0 +1,30 @@
+The contiki/ctk/ directory contains the source code for CTK, the
+Contiki ToolKit, that provides the Contiki graphical user interface.
+
+ctk-conio*.[ch]
+
+  A CTK driver that provides a text-mode version of the CTK GUI for a
+  locally connected display.
+
+ctk-draw*.[ch]
+
+  The interface that all CTK drivers use to communicate with CTK.
+
+ctk-mouse.[ch]
+
+  The CTK mouse pointer interface.
+
+ctk-term*.[ch]
+
+  A CTK driver that provides a text-mode version of the CTK GUI for a
+  remotely connected display over a serial line or via Telnet.
+
+ctk-vnc*[ch], vnc*.[ch]
+
+  A CTK driver that provides a graphical version of the CTK GUI for a
+  remotely connected display over an IP network using the VNC
+  protocol.
+
+ctk.[ch]
+
+  CTK implementation. 
