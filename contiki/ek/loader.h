@@ -32,11 +32,26 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader.h,v 1.4 2003/04/17 20:06:35 adamdunkels Exp $
+ * $Id: loader.h,v 1.5 2003/04/24 17:18:43 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_H__
 #define __LOADER_H__
+
+
+/* Errors that the LOADER_LOAD() function may return: */
+
+#define LOADER_OK                0
+#define LOADER_ERR_READ          1       /* Read error */
+#define LOADER_ERR_HDR           2       /* Header error */
+#define LOADER_ERR_OS            3       /* Wrong OS */
+#define LOADER_ERR_FMT           4       /* Data format error */
+#define LOADER_ERR_MEM           5       /* Not enough memory */
+#define LOADER_ERR_OPEN          6       /* Could not open file */
+#define LOADER_ERR_ARCH          7       /* Wrong architecture */
+#define LOADER_ERR_VERSION       8       /* Wrong version */
+
+
 
 #ifdef WITH_LOADER_ARCH
 #include "loader-arch.h"
@@ -63,6 +78,5 @@
 
 
 
-#define LOADER_OK 0
 
 #endif /* __LOADER_H__ */
