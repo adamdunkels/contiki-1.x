@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: pt-sem.h,v 1.2 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: pt-sem.h,v 1.3 2004/09/13 21:47:46 adamdunkels Exp $
  */
 
 /**
@@ -72,7 +72,7 @@ PT_THREAD(producer(struct pt *pt))
 {
   static int produced;
   
-  PT_START(pt);
+  PT_BEGIN(pt);
   
   for(produced = 0; produced < NUM_ITEMS; ++produced) {
   
@@ -85,14 +85,14 @@ PT_THREAD(producer(struct pt *pt))
     PT_SEM_SIGNAL(pt, &empty);
   }
 
-  PT_EXIT(pt);
+  PT_END(pt);
 }
 
 PT_THREAD(consumer(struct pt *pt))
 {
   static int consumed;
   
-  PT_START(pt);
+  PT_BEGIN(pt);
 
   for(consumed = 0; consumed < NUM_ITEMS; ++consumed) {
     
@@ -105,14 +105,14 @@ PT_THREAD(consumer(struct pt *pt))
     PT_SEM_SIGNAL(pt, &full);
   }
 
-  PT_EXIT(pt);
+  PT_END(pt);
 }
 
 PT_THREAD(driver_thread(struct pt *pt))
 {
   static struct pt pt_producer, pt_consumer;
 
-  PT_START(pt);
+  PT_BEGIN(pt);
   
   PT_SEM_INIT(&empty, 0);
   PT_SEM_INIT(&full, BUFSIZE);
@@ -124,7 +124,7 @@ PT_THREAD(driver_thread(struct pt *pt))
   PT_WAIT_THREAD(pt, producer(&pt_producer) &
 		     consumer(&pt_consumer));
 
-  PT_EXIT(pt);
+  PT_END(pt);
 }
  \endcode
  *
