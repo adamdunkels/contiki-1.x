@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.8 2003/04/18 00:18:39 adamdunkels Exp $
+ * $Id: ctk.h,v 1.9 2003/04/24 17:18:27 adamdunkels Exp $
  *
  */
 
@@ -310,6 +310,13 @@ void ctk_widget_redraw(struct ctk_widget *w);
 
 #define CTK_WIDGET_TYPE(w) ((w)->type)
 
+#define CTK_WIDGET_SET_XPOS(w, xpos) ((struct ctk_widget *)(w))->x = (xpos)
+#define CTK_WIDGET_SET_YPOS(w, ypos) ((struct ctk_widget *)(w))->y = (ypos)
+
+#define CTK_WIDGET_SET_WIDTH(widget, width) do { \
+    ((struct ctk_widget *)(widget))->w = (width); } while(0)
+
+#define CTK_WIDGET_XPOS(w) (((struct ctk_widget *)(w))->x)
 #define CTK_WIDGET_YPOS(w) (((struct ctk_widget *)(w))->y)
 
 #define ctk_textentry_set_height(w, height) \
@@ -386,6 +393,12 @@ extern ek_signal_t ctk_signal_keypress,
   ctk_signal_window_close,
   ctk_signal_pointer_move,
   ctk_signal_pointer_button;
+
+#if CTK_CONF_SCREENSAVER
+extern ek_signal_t ctk_signal_screensaver_start,
+  ctk_signal_screensaver_stop,
+  ctk_signal_screensaver_uninstall;
+#endif /* CTK_CONF_SCREENSAVER */
 
 /* These should no longer be used: */
 extern ek_signal_t ctk_signal_button_activate,
