@@ -18,6 +18,6 @@ with VNC or Telnet.
 Contiki is written in the C programming language and is freely
 available as open source under a BSD-style license. More information
 about Contiki can be found at the Contiki home page:
-http://dunkels.com/adam/contiki/
+http://www.sics.se/~adam/contiki/
 
 */
