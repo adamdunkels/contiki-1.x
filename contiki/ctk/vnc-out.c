@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-out.c,v 1.2 2003/08/12 21:11:09 adamdunkels Exp $
+ * $Id: vnc-out.c,v 1.3 2003/09/02 21:46:41 adamdunkels Exp $
  *
  */
 
@@ -72,85 +72,85 @@
 
 #define BGCOLOR BGR(1,0,1)
 
-static u8_t menucolor[] = {
+static const u8_t menucolor[] = {
   BGR(0,7,7), /* Background. */           
   BGR(0,5,5), /* Anti-alias font color. */ 
   BGR(0,0,0), /* Font color. */            
 };
 
 
-static u8_t activemenucolor[] = {
+static const u8_t activemenucolor[] = {
   BGR(3,7,7), /* Background. */           
   BGR(3,6,6), /* Anti-alias font color. */ 
   BGR(0,0,0), /* Font color. */            
 };
 
 
-static unsigned char backgroundcolor[] = {BGR(1,0,1)};
+static const unsigned char backgroundcolor[] = {BGR(1,0,1)};
 
-static unsigned char wincol[] =
+static const unsigned char wincol[] =
  {BGR(2,5,5),BGR(2,2,2),BGR(0,1,1),BGR(1,0,0),BGR(2,0,0),BGR(2,1,1)};
-static unsigned char wincol_f[] =
+static const unsigned char wincol_f[] =
  {BGR(3,6,6),BGR(1,2,2),BGR(0,1,1),BGR(2,0,0),BGR(3,2,2),BGR(3,4,4)};
-static unsigned char wincol_d[] =
+static const unsigned char wincol_d[] =
  {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0),BGR(2,0,0),BGR(3,2,2),BGR(3,4,4)};
 
-static unsigned char sepcol[] =
+static const unsigned char sepcol[] =
  {BGR(2,5,5),BGR(2,6,6),BGR(3,6,6)};
-static unsigned char sepcol_f[] =
+static const unsigned char sepcol_f[] =
  {BGR(3,6,6),BGR(3,5,5),BGR(2,5,5)};
-static unsigned char sepcol_d[] =
+static const unsigned char sepcol_d[] =
  {BGR(3,7,7),BGR(1,5,7),BGR(0,0,0)};
 
-static unsigned char labcol[] =
+static const unsigned char labcol[] =
  {BGR(2,5,5),BGR(1,3,3),BGR(0,1,1)};
-static unsigned char labcol_f[] =
+static const unsigned char labcol_f[] =
  {BGR(3,6,6),BGR(3,5,5),BGR(0,0,0)};
-static unsigned char labcol_d[] =
+static const unsigned char labcol_d[] =
  {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0)};
 
 
-static unsigned char butcol[] =
+static const unsigned char butcol[] =
  {BGR(2,4,4),BGR(1,3,3),BGR(0,1,1),BGR(2,4,4),BGR(2,4,4),BGR(2,4,4),
   BGR(2,5,5),BGR(2,5,5)};
-static unsigned char butcol_w[] =
+static const unsigned char butcol_w[] =
  {BGR(2,4,4),BGR(1,3,3),BGR(0,1,1),BGR(2,4,4),BGR(2,4,4),BGR(2,4,4),
   BGR(2,5,5),BGR(2,5,5)};
-static unsigned char butcol_f[] =
+static const unsigned char butcol_f[] =
  {BGR(2,3,3),BGR(3,5,5),BGR(3,6,6),BGR(3,5,5),BGR(3,6,6),BGR(3,7,7),
   BGR(3,6,6),BGR(2,5,5)};
-static unsigned char butcol_fw[] =
+static const unsigned char butcol_fw[] =
  {BGR(3,7,7),BGR(3,6,6),BGR(0,0,0),BGR(1,7,7),BGR(2,7,7),BGR(3,7,7),
   BGR(3,6,6),BGR(3,7,6)};
-static unsigned char butcol_d[] =
+static const unsigned char butcol_d[] =
  {BGR(2,3,3),BGR(2,5,5),BGR(3,6,6),BGR(1,3,4),BGR(1,5,6),BGR(2,6,7),
   BGR(3,7,7),BGR(2,5,5)};
-static unsigned char butcol_dw[] =
+static const unsigned char butcol_dw[] =
  {BGR(0,0,0),BGR(2,5,5),BGR(3,7,7),BGR(1,3,4),BGR(1,5,6),BGR(2,6,7),
   BGR(3,7,7),BGR(2,5,5)};
 
 
-static unsigned char hlcol[] =
+static const unsigned char hlcol[] =
  {BGR(2,5,5),BGR(1,3,3),BGR(1,0,0)};
-static unsigned char hlcol_w[] =
+static const unsigned char hlcol_w[] =
  {BGR(2,5,5),BGR(1,3,3),BGR(1,0,0)};
-static unsigned char hlcol_f[] =
+static const unsigned char hlcol_f[] =
  {BGR(3,6,6),BGR(3,5,5),BGR(3,0,0)};
-static unsigned char hlcol_fw[] =
+static const unsigned char hlcol_fw[] =
  {BGR(3,6,6),BGR(3,6,7),BGR(3,7,7)};
-static unsigned char hlcol_d[] =
+static const unsigned char hlcol_d[] =
  {BGR(3,7,7),BGR(3,5,5),BGR(2,0,0)};
-static unsigned char hlcol_dw[] =
+static const unsigned char hlcol_dw[] =
  {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0)};
 
-static unsigned char iconcol[] =
+static const unsigned char iconcol[] =
  {BGR(0,1,1),BGR(2,3,3),BGR(2,5,5)};
-static unsigned char iconcol_w[] =
+static const unsigned char iconcol_w[] =
  {BGR(0,1,1),BGR(2,5,5),BGR(3,7,7)};
 
 
 
-static u8_t *colortheme[] =
+static const u8_t *colortheme[] =
   {
     backgroundcolor,
     
