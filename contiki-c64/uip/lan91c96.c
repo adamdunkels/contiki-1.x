@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.6 2005/01/26 23:36:23 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.7 2005/02/23 22:43:00 oliverschmidt Exp $
  *
  */
 
@@ -276,7 +276,7 @@ u16_t lan91c96_poll(void)
 }
 #pragma optimize(pop)
 
-/* First 40+14 (IP nad TCP header) is send from uip_buf */
+/* First 14+40 (IP and TCP header) is send from uip_buf */
 /* than data from uip_appdata                           */
 
 #pragma optimize(push, off)
@@ -352,9 +352,9 @@ void lan91c96_send(void)
 //  print_packet(uip_buf, uip_len);
   #endif
 
-  /* Send 40+14=54 bytes of header */
+  /* Send 14+40=54 bytes of header */
 
-  if(uip_len <= 54) {
+  if(uip_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
 
     #ifdef DEBUG
     printf("SND: short packet sent.\n");
@@ -371,7 +371,7 @@ void lan91c96_send(void)
 
   } else {
 
-    asm("ldx #54");
+    asm("ldx #%b", UIP_LLH_LEN + UIP_TCPIP_HLEN);
     asm("ldy #0");
     asm("@WL2:");
     asm("lda _uip_buf,y");
@@ -380,7 +380,7 @@ void lan91c96_send(void)
     asm("dex");
     asm("bne @WL2");
 
-    uip_len -= 54;
+    uip_len -= UIP_LLH_LEN + UIP_TCPIP_HLEN;
 
     asm("lda _uip_appdata");       //uip_appdata is pointer
     asm("sta ptr1");
