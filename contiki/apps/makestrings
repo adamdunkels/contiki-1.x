@@ -33,8 +33,8 @@ sub stringify {
   close(OUTPUTC);
   close(OUTPUTH);
 }
-
 stringify("http-strings");
+stringify("http-user-agent-string");
 stringify("smtp-strings");
 stringify("html-strings");
 
