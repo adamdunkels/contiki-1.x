@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_main.c,v 1.2 2003/04/05 11:47:20 adamdunkels Exp $
+ * $Id: uip_main.c,v 1.3 2003/04/25 08:48:57 adamdunkels Exp $
  *
  */
 
@@ -56,12 +56,14 @@
 static u8_t i, arptimer;
 static u16_t start, current;
 
+#if 0
 static void idle(void);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("uIP TCP/IP stack", idle, NULL, NULL)};
 static ek_id_t id;
+#endif /* 0 */
 
-
+#if 0
 /*-----------------------------------------------------------------------------------*/
 static void
 timer(void)
@@ -95,19 +97,22 @@ timer(void)
     }
   }   
 }
+#endif /* 0 */
 /*-----------------------------------------------------------------------------------*/
 void
 uip_main_init(void)
 {
+#if 0
   u16_t ipaddr[2];
 
   id = dispatcher_start(&p);
   
   arptimer = 0;
   start = ek_clock();
-  
+#endif /* 0 */
 }
 /*-----------------------------------------------------------------------------------*/
+#if 0
 static void
 idle(void)
 {
@@ -159,6 +164,7 @@ idle(void)
     start = current;
   }    
 }
+#endif /* 0 */
 /*-----------------------------------------------------------------------------------*/
 unsigned char
 uip_main_ipaddrconv(char *addrstr, unsigned char *ipaddr)
