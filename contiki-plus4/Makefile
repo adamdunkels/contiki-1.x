@@ -27,12 +27,12 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.2 2004/07/04 20:01:15 adamdunkels Exp $
+# $Id: Makefile,v 1.3 2004/12/24 15:16:53 oliverschmidt Exp $
 #
 
 all: contiki loader-arch-module.o contiki-labels.o \
      about.prg processes.prg netconf.prg memstat.prg \
-     www.prg email.prg simpletelnet.prg vnc.prg
+     www.prg email.prg telnet.prg vnc.prg
 
 CONTIKI=../contiki
 CONTIKICC65=../contiki-cc65
@@ -115,7 +115,7 @@ VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
 
 email.prg: $(EMAIL) 
 www.prg: $(WWW)
-simpletelnet.prg: $(TELNET)
+telnet.prg: $(TELNET)
 vnc.prg: $(VNC)
 
 contiki-labels.o: contiki-labels.s
