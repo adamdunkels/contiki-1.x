@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.10 2004/08/09 20:27:07 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.11 2004/12/27 22:03:04 oliverschmidt Exp $
  *
  */
 
@@ -739,7 +739,7 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
     cputcxy(x2, y2, CH_LRCORNER);
   }
 
-  draw_window_contents(window, focus & CTK_FOCUS_WINDOW, clipy1, clipy2,
+  draw_window_contents(window, focus, clipy1, clipy2,
 		       x1, x2, y + 1, y2);
 
   update_area(window->x, window->y, window->w + 2, window->h + 2);

@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.43 2004/12/22 22:52:53 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.44 2004/12/27 22:03:04 oliverschmidt Exp $
  *
  */
 
@@ -623,6 +623,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
 {
   struct ctk_window *w;
   static struct ctk_widget *widget;
+  unsigned char focus;
 
   if(mode != CTK_MODE_NORMAL &&
      mode != CTK_MODE_WINDOWMOVE) {
@@ -647,9 +648,13 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
       ctk_draw_clear_window(w, 0, clipy1, clipy2);
       ctk_draw_window(w, 0, clipy1, clipy2);
     }
+
     /* Draw focused window */
-    ctk_draw_clear_window(windows, CTK_FOCUS_WINDOW, clipy1, clipy2);
-    ctk_draw_window(windows, CTK_FOCUS_WINDOW, clipy1, clipy2);
+    focus = mode == CTK_MODE_WINDOWMOVE?
+	    CTK_FOCUS_WIDGET|CTK_FOCUS_WINDOW:
+	    CTK_FOCUS_WINDOW;
+    ctk_draw_clear_window(windows, focus, clipy1, clipy2);
+    ctk_draw_window(windows, focus, clipy1, clipy2);
   }
 
   /* Draw dialog (if any) */
@@ -1185,9 +1190,10 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
       return REDRAW_ALL;
 #endif /* CTK_CONF_WINDOWCLOSE */
     } else if(w == (struct ctk_widget *)&windows->titlebutton) {
-#if CTK_CONF_WINDOWCLOSE
+#if CTK_CONF_WINDOWMOVE
       mode = CTK_MODE_WINDOWMOVE;
-#endif /* CTK_CONF_WINDOWCLOSE */
+      return REDRAW_ALL;
+#endif /* CTK_CONF_WINDOWMOVE */
     } else {
       ek_post(w->window->owner, ctk_signal_widget_activate, w);
     }

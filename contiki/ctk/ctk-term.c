@@ -758,7 +758,7 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
     cputcxy(x2, y2, CH_LRCORNER);
   }
 
-  draw_window_contents(window, (unsigned char)(focus & CTK_FOCUS_WINDOW), clipy1, clipy2,
+  draw_window_contents(window, focus, clipy1, clipy2,
 		       x1, x2, (unsigned char)(y + 1), y2);
 
   update_area(window->x, window->y, 
