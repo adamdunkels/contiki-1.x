@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.3 2004/06/27 18:32:39 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.4 2004/06/27 21:01:03 oliverschmidt Exp $
  *
  */
 
@@ -49,13 +49,20 @@
 static unsigned char sizex, sizey;
 
 /*-----------------------------------------------------------------------------------*/
-static char tmp[80];
 static void
 cputsn(char *str, unsigned char len)
 {
-  strncpy(tmp, str, len);
-  tmp[len] = 0;
-  cputs(tmp);
+  char c;
+
+  while(len > 0) {
+    --len;
+    c = *str;
+    if(c == 0) {
+      break;
+    }
+    cputc(c);
+    ++str;
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 void
