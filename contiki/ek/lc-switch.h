@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: lc-switch.h,v 1.1 2005/02/22 22:36:51 adamdunkels Exp $
+ * $Id: lc-switch.h,v 1.2 2005/04/01 08:12:37 adamdunkels Exp $
  */
 
 /**
@@ -63,13 +63,13 @@
 /** \hideinitializer */
 typedef unsigned short lc_t;
 
-#define LC_SET(s) case __LINE__: s = __LINE__
+#define LC_INIT(s) s = 0;
 
 #define LC_RESUME(s) switch(s) { case 0:
 
-#define LC_END(s) }
+#define LC_SET(s) s = __LINE__; case __LINE__: 
 
-#define LC_INIT(s) s = 0;
+#define LC_END(s) }
 
 #endif /* __LC_SWITCH_H__ */
 

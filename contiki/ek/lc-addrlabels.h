@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: lc-addrlabels.h,v 1.1 2005/02/22 22:36:51 adamdunkels Exp $
+ * $Id: lc-addrlabels.h,v 1.2 2005/04/01 08:12:36 adamdunkels Exp $
  */
 
 /**
@@ -61,6 +61,15 @@
 /** \hideinitializer */
 typedef void * lc_t;
 
+#define LC_INIT(s) s = NULL
+
+#define LC_RESUME(s)				\
+  do {						\
+    if(s != NULL) {				\
+      goto *s;					\
+    }						\
+  } while(0)
+
 #define LC_CONCAT2(s1, s2) s1##s2
 #define LC_CONCAT(s1, s2) LC_CONCAT2(s1, s2)
 
@@ -70,15 +79,6 @@ typedef void * lc_t;
     (s) = &&LC_CONCAT(LC_LABEL, __LINE__);	\
   } while(0)
 
-#define LC_RESUME(s)				\
-  do {						\
-    if(s != NULL) {				\
-      goto *s;					\
-    }						\
-  } while(0)
-
 #define LC_END(s)
-
-#define LC_INIT(s) s = NULL
 
 #endif /* __LC_ADDRLABELS_H__ */
