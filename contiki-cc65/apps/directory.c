@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.1 2003/04/24 17:01:20 adamdunkels Exp $
+ * $Id: directory.c,v 1.2 2003/07/31 23:15:34 adamdunkels Exp $
  *
  */
 
@@ -59,6 +59,14 @@ static struct ctk_window window;
 
 static struct ctk_label description =
   {CTK_LABEL(0, HEIGHT - 1, WIDTH, 1, "")};
+
+static char autoexit = 1;
+static struct ctk_button autoexitbutton =
+  {CTK_BUTTON(0, 20, 9, "Auto-exit")};
+static char autoexiton[] = "is On ";
+static char autoexitoff[] = "is Off";
+static struct ctk_label autoexitlabel =
+  {CTK_LABEL(12, 20, 6, 1, autoexiton)};
 
 static struct ctk_button morebutton =
   {CTK_BUTTON(0, 20, 4, "More")};
@@ -126,7 +134,7 @@ makewindow(unsigned char i)
   unsigned char x, y;
 
   ctk_window_clear(&window);
-  CTK_WIDGET_SET_YPOS(&description, height - 2);
+  CTK_WIDGET_SET_YPOS(&description, height - 3);
   CTK_WIDGET_SET_WIDTH(&description, width);
   CTK_WIDGET_ADD(&window, &description);
 
@@ -139,8 +147,6 @@ makewindow(unsigned char i)
       y += 5;
       x = 0;
       if(y >= height - 2 - 4) {
-	CTK_WIDGET_SET_YPOS(&morebutton, height - 1);
-	CTK_WIDGET_ADD(&window, &morebutton);
 	morestart = i;
 	break;
       }
@@ -151,11 +157,17 @@ makewindow(unsigned char i)
 
     x += strlen(dscs[i]->icon->title) + 1;
   }
+  CTK_WIDGET_SET_YPOS(&autoexitbutton, height - 2);
+  CTK_WIDGET_ADD(&window, &autoexitbutton);
+  CTK_WIDGET_SET_YPOS(&autoexitlabel, height - 2);
+  CTK_WIDGET_ADD(&window, &autoexitlabel);
 
   if(i != morestart) {
     CTK_WIDGET_SET_YPOS(&backbutton, height - 1);
     CTK_WIDGET_ADD(&window, &backbutton);
-
+  } else {
+    CTK_WIDGET_SET_YPOS(&morebutton, height - 1);
+    CTK_WIDGET_ADD(&window, &morebutton);
   }
   CTK_WIDGET_SET_XPOS(&reloadbutton, width - 8);
   CTK_WIDGET_SET_YPOS(&reloadbutton, height - 1);
@@ -209,18 +221,29 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
       }     
       loaddirectory();
       makewindow(0);
-      ctk_redraw();
+      ctk_window_open(&window);
     } else if(data == (ek_data_t)&morebutton) {
       makewindow(morestart);
-      ctk_redraw();
+      ctk_window_open(&window);
     } else if(data == (ek_data_t)&backbutton) {
       makewindow(0);
-      ctk_redraw();
+      ctk_window_open(&window);
+    } else if(data == (ek_data_t)&autoexitbutton) {
+      autoexit = 1 - autoexit;
+      if(autoexit == 1) {
+	ctk_label_set_text(&autoexitlabel, autoexiton);
+      } else {
+	ctk_label_set_text(&autoexitlabel, autoexitoff);
+      }
+      CTK_WIDGET_REDRAW(&autoexitlabel);
     } else {
       for(i = 0; dscs[i] != NULL; ++i) {
 	if(data == (ek_data_t)(dscs[i]->icon)) {
 	  program_handler_load(dscs[i]->prgname);
-	  /*	  quit();*/
+	  if(autoexit) {
+	    ctk_window_close(&window);
+	    quit();
+	  }
 	  break;
 	}
       }
@@ -232,6 +255,8 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
       show_statustext("Show more files");
     } else if(data == (ek_data_t)&backbutton) {
       show_statustext("Show first files");
+    } else if(data == (ek_data_t)&autoexitbutton) {
+      show_statustext("Exit when loading program");
     } else {
       for(i = 0; dscs[i] != NULL; ++i) {
 	if(data == (ek_data_t)(dscs[i]->icon)) {
@@ -242,6 +267,9 @@ DISPATCHER_SIGHANDLER(directory_sighandler, s, data)
     }
   } else if(s == ctk_signal_window_close &&
 	    data == (ek_data_t)&window) {
+    quit();
+  } else if(s == dispatcher_signal_quit) {
+    ctk_window_close(&window);
     quit();
   }
 }
