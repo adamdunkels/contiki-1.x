@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.5 2003/08/09 13:26:22 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.6 2003/08/15 18:46:25 adamdunkels Exp $
  *
  */
 
@@ -79,9 +79,6 @@ unsigned char *ctk_hires_bitmapptr;
 /*-----------------------------------------------------------------------------------*/
 /* Tables. */
 
-
-
-
 unsigned short ctk_hires_yscreenaddr[25] =
   {0 * SCREEN_WIDTH + SCREENADDR, 1 * SCREEN_WIDTH + SCREENADDR,
    2 * SCREEN_WIDTH + SCREENADDR, 3 * SCREEN_WIDTH + SCREENADDR,
@@ -122,7 +119,7 @@ struct ctk_hires_theme *ctk_hires_theme_ptr = &ctk_hires_theme;
 static void __fastcall__
 hires_cvline(unsigned char length)
 {
-  unsigned char i;
+  static unsigned char i;
   
   for(i = 0; i < length; ++i) {
     ctk_hires_cputc('|');
@@ -435,11 +432,12 @@ draw_widget(register struct ctk_widget *w,
 	    unsigned char clipy1, unsigned char clipy2,
 	    unsigned char focus)
 {
-  unsigned char xpos, ypos, xscroll;
-  unsigned char i;
-  char c, *text;
-  unsigned char len;
-
+  static unsigned char xpos, ypos, xscroll;
+  static unsigned char i;
+  static char c;
+  static unsigned char len;
+  char *text;
+  
   xpos = x + w->x;
   ypos = y + w->y;
   
@@ -608,7 +606,7 @@ ctk_draw_clear_window(register struct ctk_window *window,
 		      unsigned char clipy1,
 		      unsigned char clipy2)
 {
-  unsigned char h;
+  static unsigned char h;
 
   hires_color(ctk_hires_theme.windowcolors[focus]);
   
@@ -755,7 +753,7 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
 static void
 draw_menu(register struct ctk_menu *m)
 {
-  unsigned char x, x2, y;
+  static unsigned char x, x2, y;
   
   hires_color(ctk_hires_theme.openmenucolor);
   x = hires_wherex();
@@ -789,7 +787,7 @@ void
 ctk_draw_menus(struct ctk_menus *menus)
 {
   struct ctk_menu *m;
-    
+  
   /* Draw menus */
   hires_color(ctk_hires_theme.menucolor); 
   hires_gotoxy(0, 0);
