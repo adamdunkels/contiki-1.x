@@ -240,11 +240,15 @@ PT_THREAD(socket_send(struct socket *socket, const char *buf, unsigned int len))
  * \hideinitializer
  */
 #define SOCKET_SEND(socket, data, datalen)		\
-    PT_WAIT_THREAD(&((socket)->pt), socket_send(socket, data, datalen));	
+    PT_WAIT_THREAD(&((socket)->pt), socket_send(socket, data, datalen))
 
-/*
-#define SOCKET_SEND_DYNAMIC(socket, dataptr, function_call)
-*/
+PT_THREAD(socket_generator_send(struct socket *socket,
+				unsigned short (*f)(void *), void *arg));
+
+#define SOCKET_GENERATOR_SEND(socket, generator, arg)     \
+    PT_WAIT_THREAD(&((socket)->pt),					\
+		   socket_generator_send(socket, generator, arg))
+
 
 /*PT_THREAD(socket_closew(struct socket *socket));
 #define SOCKET_CLOSEW(socket)				\

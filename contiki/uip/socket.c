@@ -55,9 +55,34 @@ PT_THREAD(socket_send(register struct socket *s, const char *buf, unsigned int l
   s->state = SOCKET_STATE_NONE;
   
   while(s->sendlen > 0) {
-    PT_WAIT_UNTIL(&s->socketpt,  data_sent(s) & send_data(s));
+    PT_WAIT_UNTIL(&s->socketpt, data_sent(s) & send_data(s));
   }
 
+  s->state = SOCKET_STATE_NONE;
+  
+  PT_END(&s->socketpt);
+}
+/*---------------------------------------------------------------------------*/
+PT_THREAD(socket_generator_send(register struct socket *s,
+			       unsigned short (*generate)(void *), void *arg))
+{
+  PT_BEGIN(&s->socketpt);
+
+  if(generate == NULL) {
+    PT_EXIT(&s->socketpt);
+  }
+  
+  s->state = SOCKET_STATE_NONE;
+  s->sendlen = generate(arg);
+  s->sendptr = uip_appdata;
+  do {
+
+    if(uip_rexmit()) {
+      generate(arg);
+    }
+    PT_WAIT_UNTIL(&s->socketpt, data_sent(s) & send_data(s));
+  } while(s->sendlen > 0);    
+  
   s->state = SOCKET_STATE_NONE;
   
   PT_END(&s->socketpt);
@@ -105,9 +130,7 @@ PT_THREAD(socket_readto(register struct socket *socket, unsigned char c))
   if(uipbuf_len(&socket->buf) == 0) {
     socket->state = SOCKET_STATE_NONE;
     PT_RESTART(&socket->socketpt);
-  }
-
-  
+  }  
   PT_END(&socket->socketpt);
 }
 /*---------------------------------------------------------------------------*/
