@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.c,v 1.5 2005/01/29 23:11:09 oliverschmidt Exp $
+ * $Id: ctk-console.c,v 1.6 2005/02/06 21:13:59 oliverschmidt Exp $
  *
  */
 
@@ -72,7 +72,7 @@ console_init(void)
   screensize(&width, &height);
 
   GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
-  saved_color = consoleinfo.wAttributes;
+  saved_color = (unsigned char)consoleinfo.wAttributes;
 
   GetConsoleTitle(saved_title, sizeof(saved_title));
   SetConsoleTitle("Contiki");
@@ -120,9 +120,9 @@ console_resize(void)
 static void
 setcolor(void)
 {
-  SetConsoleTextAttribute(stdouthandle, reversed? (color & 0x0F) << 4 |
-						  (color & 0xF0) >> 4
-					        : color);
+  SetConsoleTextAttribute(stdouthandle, (WORD)(reversed? (color & 0x0F) << 4 |
+							 (color & 0xF0) >> 4
+						       : color));
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
@@ -131,7 +131,7 @@ wherex(void)
   CONSOLE_SCREEN_BUFFER_INFO consoleinfo;
 
   GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
-  return consoleinfo.dwCursorPosition.X;
+  return (unsigned char)consoleinfo.dwCursorPosition.X;
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
@@ -140,7 +140,7 @@ wherey(void)
   CONSOLE_SCREEN_BUFFER_INFO consoleinfo;
 
   GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
-  return consoleinfo.dwCursorPosition.Y;
+  return (unsigned char)consoleinfo.dwCursorPosition.Y;
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -164,7 +164,8 @@ revers(unsigned char c)
 void
 cclear(unsigned char length)
 {
-  int i;
+  unsigned char i;
+
   for(i = 0; i < length; ++i) {
     putch(' ');
   }  
@@ -173,7 +174,8 @@ cclear(unsigned char length)
 void
 chline(unsigned char length)
 {
-  int i;
+  unsigned char i;
+
   for(i = 0; i < length; ++i) {
     putch(0xC4);
   }
@@ -182,10 +184,13 @@ chline(unsigned char length)
 void
 cvline(unsigned char length)
 {
-  int i;
+  unsigned char i, x, y;
+
+  x = wherex();
+  y = wherey();
+
   for(i = 0; i < length; ++i) {
-    putch(0xB3);
-    gotoxy(wherex() - 1, wherey() + 1);
+    cputcxy(x, (unsigned char)(y + i), (char)0xB3);
   }
 }
 /*-----------------------------------------------------------------------------------*/
