@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.12 2004/07/18 13:19:47 oliverschmidt Exp $
+ * $Id: ctk-hires.c,v 1.13 2004/08/09 21:30:18 adamdunkels Exp $
  *
  */
 
@@ -43,6 +43,7 @@
 #include "ctk-hires-theme.h"
 
 #include <string.h>
+#include <ctype.h>
 
 #ifndef NULL
 #define NULL (void *)0
@@ -345,6 +346,7 @@ void
 ctk_draw_init(void)
 {
   unsigned char i, *ptr1, *ptr2;
+
   
   setup_nmi();
   
@@ -664,9 +666,10 @@ ctk_draw_window(register struct ctk_window *window,
 		unsigned char clipy1, unsigned char clipy2)
 {
   register struct ctk_widget *w;
+
   x = window->x;
   y = window->y + 1;
-
+  
   ++clipy2;
   
   if(clipy2 <= y) {
@@ -698,7 +701,7 @@ ctk_draw_window(register struct ctk_window *window,
      ctk_hires_windowparams.clipy2 > 0) {
     ctk_hires_draw_windowborders();
   }
-
+  
   focus = focus & CTK_FOCUS_WINDOW;
   
   /* Draw inactive widgets. */
@@ -862,8 +865,8 @@ ctk_draw_width(void)
   return SCREEN_WIDTH;
 }
 /*-----------------------------------------------------------------------------------*/
-unsigned char
+/*unsigned char
 ctk_arch_isprint(char c)
 {
   return isprint(c);
-}
+}*/
