@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.1 2005/01/22 02:56:00 oliverschmidt Exp $
+ * $Id: tfe-drv.c,v 1.2 2005/01/24 23:24:31 oliverschmidt Exp $
  *
  */
 
@@ -40,8 +40,9 @@
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
+/* 00:0E:3A is the OUI of Cirrus Logic, A2:A2:A2 just means Apple2 */
 static const struct uip_eth_addr addr =
-  {{0x00,0x0d,0x60,0x64,0x64,0x64}};
+  {{0x00,0x0e,0x3a,0xa2,0xa2,0xa2}};
 
 static const struct packet_service_state state =
   {
