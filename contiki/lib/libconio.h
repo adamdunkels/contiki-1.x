@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: libconio.h,v 1.1 2003/03/19 14:16:05 adamdunkels Exp $
+ * $Id: libconio.h,v 1.2 2003/04/05 12:21:13 adamdunkels Exp $
  *
  */
 
@@ -59,7 +59,11 @@ void ctk_arch_draw_char(char c,
 
 /* These are function declarations for functions implemented in libconio.c */
 unsigned char wherex(void);
+unsigned char wherey(void);
 void clrscr(void);
+void bgcolor(unsigned char c);
+void bordercolor(unsigned char c);
+void screensize(unsigned char *x, unsigned char *y);
 void revers(unsigned char c);
 void cputc(char c);
 void cputs(char *str);
