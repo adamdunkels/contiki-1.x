@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.2 2003/04/05 12:33:29 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.3 2003/04/08 07:19:09 adamdunkels Exp $
  *
  */
 
@@ -56,7 +56,7 @@ struct listenport {
   ek_id_t id;
 };
 static struct listenport listenports[UIP_LISTENPORTS];
-static u8_t listenportsptr;
+/*static u8_t listenportsptr;*/
 
 /*-----------------------------------------------------------------------------------*/
 ek_signal_t
@@ -69,8 +69,17 @@ ek_id_t
 dispatcher_start(struct dispatcher_proc *p)
 {
   ek_id_t id;
-
+  struct dispatcher_proc *q;
+  
+ again:
   id = ids++;
+
+  /* Check if this ID is use. */
+  for(q = procs; q != NULL; q = q->next) {
+    if(id == q->id) {
+      goto again;
+    }
+  }
   
   if(procs == NULL) {
     procs = p;
@@ -83,6 +92,31 @@ dispatcher_start(struct dispatcher_proc *p)
   dispatcher_current = id;
   
   return id;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+dispatcher_exit(struct dispatcher_proc *p)
+{
+  struct dispatcher_proc *q;
+  unsigned char i;
+  
+  /* If this process has any listening TCP ports, we remove them. */
+  for(i = 0; i < UIP_LISTENPORTS; ++i) {
+    if(listenports[i].id == p->id) {
+      listenports[i].port = 0;
+    } 
+  }
+  /* Remove process from the process list. */
+  if(p == procs) {
+    procs = procs->next;    
+  } else {
+    for(q = procs; q != NULL; q = q->next) {
+      if(q->next == p) {
+	q->next = p->next;
+	break;
+      }
+    }
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -131,7 +165,7 @@ dispatcher_uipcall(void)
   /* If this is a connection request for a listening port, we must
      mark the connection with the right process ID. */
   if(uip_connected()) {
-    for(i = 0; i < listenportsptr; ++i) {
+    for(i = 0; i < UIP_LISTENPORTS; ++i) {
       if(listenports[i].port == uip_conn->lport) {
 	s->id = listenports[i].id;
 	break;
@@ -145,18 +179,29 @@ dispatcher_uipcall(void)
        p->uiphandler != NULL) {
       dispatcher_current = p->id;
       p->uiphandler(s->state);
+      return;
     }
   }
+  /* If we get here, the process that created the connection has
+     exited, so we abort this connection. */
+  uip_abort();
 }
 #endif /* WITH_UIP */
 /*-----------------------------------------------------------------------------------*/
 void
 dispatcher_uiplisten(u16_t port)
 {
-  listenports[listenportsptr].port = HTONS(port);
-  listenports[listenportsptr].id = dispatcher_current;
+  unsigned char i;
 
-  ++listenportsptr;
+  for(i = 0; i < UIP_LISTENPORTS; ++i) {
+    if(listenports[i].port == 0) {
+      listenports[i].port = HTONS(port);
+      listenports[i].id = dispatcher_current;
+      break;
+    }
+  }
+
+  /*  ++listenportsptr;*/
 
 #ifdef WITH_UIP
   uip_listen(port);
@@ -201,6 +246,10 @@ dispatcher_process(ek_id_t id)
 void
 dispatcher_init(void)
 {
-  listenportsptr = 0;
+  unsigned char i;
+  /*  listenportsptr = 0;*/
+  for(i = 0; i < UIP_LISTENPORTS; ++i) {
+    listenports[i].port = 0;
+  }
 }
 /*-----------------------------------------------------------------------------------*/
