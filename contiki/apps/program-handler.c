@@ -43,19 +43,17 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.23 2004/02/24 09:57:50 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.24 2004/07/04 11:35:07 adamdunkels Exp $
  *
  */
 
 #include <string.h>
 
+#include "ek.h"
 #include "petsciiconv.h"
-#include "uip.h"
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-conf.h"
-#include "dispatcher.h"
-#include "resolv.h"
 
 #include "loader.h"
 
@@ -101,10 +99,14 @@ static struct ctk_button errorokbutton =
 
 #endif /* WITH_LOADER_ARCH */
 
-static DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Program handler", NULL, program_handler_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
+EK_EVENTHANDLER(program_handler_eventhandler, ev, data);
+EK_PROCESS(p, "Program handler", EK_PRIO_NORMAL,
+	   program_handler_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 
 static const char * const errormsgs[] = {
@@ -118,8 +120,8 @@ static const char * const errormsgs[] = {
   "No loader"
 };
 
-static ek_signal_t loader_signal_load;
-static ek_signal_t loader_signal_display_name;
+#define LOADER_EVENT_LOAD 1
+#define LOADER_EVENT_DISPLAY_NAME 2
 
 static char *displayname;
 
@@ -161,49 +163,8 @@ void
 program_handler_init(void)     
 {
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-
-    /* Create the menus */
+    id = ek_start(&p);
     ctk_menu_new(&contikimenu, "Contiki");
-    ctk_menu_add(&contikimenu);
-#if WITH_LOADER_ARCH
-    runmenuitem = ctk_menuitem_add(&contikimenu, "Run program...");
-    
-    ctk_window_new(&runwindow, 16, 3, "Run");
- 
-    CTK_WIDGET_ADD(&runwindow, &namelabel);
-    CTK_WIDGET_ADD(&runwindow, &nameentry);
-    CTK_WIDGET_ADD(&runwindow, &loadbutton);
-
-    CTK_WIDGET_FOCUS(&runwindow, &nameentry);
-
-    ctk_dialog_new(&loadingdialog, 25, 1);
-    CTK_WIDGET_ADD(&loadingdialog, &loadingmsg);
-    CTK_WIDGET_ADD(&loadingdialog, &loadingname);
-
-    ctk_dialog_new(&errordialog, 22, 8);
-    CTK_WIDGET_ADD(&errordialog, &errormsg);
-    CTK_WIDGET_ADD(&errordialog, &errorfilelabel);
-    CTK_WIDGET_ADD(&errordialog, &errortype);
-    CTK_WIDGET_ADD(&errordialog, &errorokbutton);
-    CTK_WIDGET_FOCUS(&errordialog, &errorokbutton);
-#endif /* WITH_LOADER_ARCH */
-    
-    dispatcher_listen(ctk_signal_menu_activate);
-    dispatcher_listen(ctk_signal_button_activate);
-
-#if CTK_CONF_SCREENSAVER
-    dispatcher_listen(ctk_signal_screensaver_start);
-#endif /* CTK_CONF_SCREENSAVER */
-    
-    loader_signal_load = dispatcher_sigalloc();
-    dispatcher_listen(loader_signal_load);
-    loader_signal_display_name = dispatcher_sigalloc();
-    dispatcher_listen(loader_signal_display_name);
-
-    displayname = NULL;
-
-    screensaver[0] = 0;
   }
   
 }
@@ -259,7 +220,7 @@ program_handler_load(char *name, char *arg)
   
   pnarg = pnarg_copy(name, arg);
   if(pnarg != NULL) {
-    dispatcher_emit(loader_signal_display_name, pnarg, id);
+    ek_post(id, LOADER_EVENT_DISPLAY_NAME, pnarg);
   } else {
     ctk_label_set_text(&errortype, "Out of memory");
     ctk_dialog_open(&errordialog);
@@ -293,8 +254,9 @@ program_handler_screensaver(char *name)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
+/*static
+  DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)*/
+EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
 {
 #ifdef WITH_LOADER_ARCH
   unsigned char err;
@@ -302,9 +264,41 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 #endif /* WITH_LOADER_ARCH */
   unsigned char i;
   struct dsc **dscp;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_button_activate) {
+  /*  DISPATCHER_SIGHANDLER_ARGS(s, data);*/
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+        /* Create the menus */
+    ctk_menu_add(&contikimenu);
+#if WITH_LOADER_ARCH
+    runmenuitem = ctk_menuitem_add(&contikimenu, "Run program...");
+    
+    ctk_window_new(&runwindow, 16, 3, "Run");
+ 
+    CTK_WIDGET_ADD(&runwindow, &namelabel);
+    CTK_WIDGET_ADD(&runwindow, &nameentry);
+    CTK_WIDGET_ADD(&runwindow, &loadbutton);
+
+    CTK_WIDGET_FOCUS(&runwindow, &nameentry);
+
+    ctk_dialog_new(&loadingdialog, 25, 1);
+    CTK_WIDGET_ADD(&loadingdialog, &loadingmsg);
+    CTK_WIDGET_ADD(&loadingdialog, &loadingname);
+
+    ctk_dialog_new(&errordialog, 22, 8);
+    CTK_WIDGET_ADD(&errordialog, &errormsg);
+    CTK_WIDGET_ADD(&errordialog, &errorfilelabel);
+    CTK_WIDGET_ADD(&errordialog, &errortype);
+    CTK_WIDGET_ADD(&errordialog, &errorokbutton);
+    CTK_WIDGET_FOCUS(&errordialog, &errorokbutton);
+#endif /* WITH_LOADER_ARCH */
+    
+    
+    displayname = NULL;
+
+    screensaver[0] = 0;
+
+  } else if(ev == ctk_signal_button_activate) {
 #ifdef WITH_LOADER_ARCH
     if(data == (ek_data_t)&loadbutton) {
       ctk_window_close(&runwindow);
@@ -322,10 +316,10 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
       }
       ++dscp;
     }
-  } else if(s == ctk_signal_menu_activate) {
+  } else if(ev == ctk_signal_menu_activate) {
     if((struct ctk_menu *)data == &contikimenu) {
 #if WITH_LOADER_ARCH
-      dsc = contikidsc[contikimenu.active - 1];
+      dsc = contikidsc[contikimenu.active];
       if(dsc != NULL) {
 	RUN(dsc->prgname, dsc->init, NULL);
       } else if(contikimenu.active == runmenuitem) {
@@ -341,26 +335,28 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 #endif /* WITH_LOADER_ARCH */
     }
 #if CTK_CONF_SCREENSAVER
-  } else if(s == ctk_signal_screensaver_start) {
+  } else if(ev == ctk_signal_screensaver_start) {
 #if WITH_LOADER_ARCH
     if(screensaver[0] != 0) {
       program_handler_load(screensaver, NULL);
     }
 #endif /* WITH_LOADER_ARCH */
 #endif /* CTK_CONF_SCREENSAVER */
-  } else if(s == loader_signal_display_name) {
+  } else if(ev == LOADER_EVENT_DISPLAY_NAME) {
 #if WITH_LOADER_ARCH
     if(displayname == NULL) {
       ctk_label_set_text(&loadingname, ((struct pnarg *)data)->name);
       ctk_dialog_open(&loadingdialog);
-      dispatcher_emit(loader_signal_load, data, id);
+      /*      dispatcher_emit(loader_signal_load, data, id);*/
+      ek_post(id, LOADER_EVENT_LOAD, data);
       displayname = data;
     } else {
       /* Try again. */
-      dispatcher_emit(loader_signal_display_name, data, id);
+      /*      dispatcher_emit(loader_signal_display_name, data, id);*/
+      ek_post(id, LOADER_EVENT_DISPLAY_NAME, data);
     }
 #endif /* WITH_LOADER_ARCH */
-  } else if(s == loader_signal_load) {
+  } else if(ev == LOADER_EVENT_LOAD) {
 #if WITH_LOADER_ARCH
     if(displayname == data) {
       ctk_dialog_close();
@@ -378,7 +374,8 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
       pnarg_free(data);
     } else {
       /* Try again. */
-      dispatcher_emit(loader_signal_display_name, data, id);
+/*      dispatcher_emit(loader_signal_display_name, data, id);*/
+      ek_post(id, LOADER_EVENT_DISPLAY_NAME, data);
     }
 #endif /* WITH_LOADEER_ARCH */
   } 

@@ -29,14 +29,14 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.23 2004/06/06 06:03:03 adamdunkels Exp $
+ * $Id: www.c,v 1.24 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 
 #include <string.h>
 
+#include "ek.h"
 #include "ctk.h"
-#include "dispatcher.h"
 #include "webclient.h"
 #include "htmlparser.h"
 #include "http-strings.h"
@@ -47,6 +47,8 @@
 #include "program-handler.h"
 
 #include "uiplib.h"
+
+#include "tcpip.h"
 
 #include "loader.h"
 
@@ -179,10 +181,16 @@ static char receivingmsgs[4][23] = {
 };
 
 
-static DISPATCHER_SIGHANDLER(www_sighandler, s, data);
+EK_EVENTHANDLER(www_eventhandler, ev, data);
+EK_PROCESS(p, "Web browser", EK_PRIO_NORMAL,
+	   www_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
+
+/*static DISPATCHER_SIGHANDLER(www_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Web browser", NULL, www_sighandler, webclient_appcall)};
-static ek_id_t id;
+  static ek_id_t id;*/
+
 
 
 static void formsubmit(struct formattribs *attribs);
@@ -202,6 +210,7 @@ make_window(void)
   CTK_WIDGET_ADD(&mainwindow, &urlentry);
   CTK_WIDGET_ADD(&mainwindow, &sep1);
   CTK_WIDGET_ADD(&mainwindow, &webpagelabel);
+  CTK_WIDGET_SET_FLAG(&webpagelabel, CTK_WIDGET_FLAG_MONOSPACE);
   CTK_WIDGET_ADD(&mainwindow, &sep2);
   CTK_WIDGET_ADD(&mainwindow, &statustext);
 
@@ -230,36 +239,10 @@ LOADER_INIT_FUNC(www_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    /*    id = dispatcher_start(&p);*/
+    id = ek_start(&p);
     
-    /* Create the main window. */
-    memset(webpage, 0, sizeof(webpage));
-    ctk_window_new(&mainwindow, WWW_CONF_WEBPAGE_WIDTH, 
-                   WWW_CONF_WEBPAGE_HEIGHT+5, "Web browser");
-    make_window();
-#ifdef WWW_CONF_HOMEPAGE
-    strncpy(editurl, WWW_CONF_HOMEPAGE, sizeof(editurl));
-#endif /* WWW_CONF_HOMEPAGE */    
-    CTK_WIDGET_FOCUS(&mainwindow, &urlentry);
-
-    /* Create download dialog.*/
-    ctk_dialog_new(&wgetdialog, 38, 7);
-    CTK_WIDGET_ADD(&wgetdialog, &wgetlabel1);
-    CTK_WIDGET_ADD(&wgetdialog, &wgetlabel2);
-    CTK_WIDGET_ADD(&wgetdialog, &wgetnobutton);
-    CTK_WIDGET_ADD(&wgetdialog, &wgetyesbutton);
-    
-    /* Attach as a listener to a number of signals ("Button activate",
-       "Hyperlink activate" and "Hyperlink hover", and the resolver's
-       signal. */
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_widget_activate);
-    dispatcher_listen(ctk_signal_hyperlink_activate);
-    dispatcher_listen(ctk_signal_hyperlink_hover);
-    dispatcher_listen(resolv_signal_found);
-
   }
-  ctk_window_open(&mainwindow);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -445,7 +428,7 @@ static void
 quit(void)
 {
   ctk_window_close(&mainwindow);
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
@@ -455,18 +438,43 @@ quit(void)
  * The program's signal dispatcher function. Is called by the ek
  * dispatcher whenever a signal arrives.
  */
-static
-DISPATCHER_SIGHANDLER(www_sighandler, s, data)
+/*static
+  DISPATCHER_SIGHANDLER(www_sighandler, s, data)*/
+EK_EVENTHANDLER(www_eventhandler, ev, data)
 {
   static struct ctk_widget *w;
   static unsigned char i;
   static char *argptr;
   
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  /*  DISPATCHER_SIGHANDLER_ARGS(s, data);*/
+  EK_EVENTHANDLER_ARGS(ev, data);
 
   
   w = (struct ctk_widget *)data;
-  if(s == ctk_signal_widget_activate) {
+
+  if(ev == tcpip_event) {
+    webclient_appcall(data);
+  } else if(ev == EK_EVENT_INIT) {
+    /* Create the main window. */
+    memset(webpage, 0, sizeof(webpage));
+    ctk_window_new(&mainwindow, WWW_CONF_WEBPAGE_WIDTH, 
+                   WWW_CONF_WEBPAGE_HEIGHT+5, "Web browser");
+    make_window();
+#ifdef WWW_CONF_HOMEPAGE
+    strncpy(editurl, WWW_CONF_HOMEPAGE, sizeof(editurl));
+#endif /* WWW_CONF_HOMEPAGE */    
+    CTK_WIDGET_FOCUS(&mainwindow, &urlentry);
+
+    /* Create download dialog.*/
+    ctk_dialog_new(&wgetdialog, 38, 7);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetlabel1);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetlabel2);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetnobutton);
+    CTK_WIDGET_ADD(&wgetdialog, &wgetyesbutton);
+
+    ctk_window_open(&mainwindow);
+    
+  } else if(ev == ctk_signal_widget_activate) {
     if(w == (struct ctk_widget *)&backbutton) {
       scrolly = 0;
       run = 1;
@@ -525,13 +533,13 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
       }
 #endif /* WWW_CONF_FORMS */
     }
-  } else if(s == ctk_signal_hyperlink_activate) {
+  } else if(ev == ctk_signal_hyperlink_activate) {
     log_back();
     open_link(w->widget.hyperlink.url);
     CTK_WIDGET_FOCUS(&mainwindow, &stopbutton);
     /*    ctk_window_open(&mainwindow);*/
     run = 1;
-  } else if(s == ctk_signal_hyperlink_hover) {
+  } else if(ev == ctk_signal_hyperlink_hover) {
     if(CTK_WIDGET_TYPE((struct ctk_widget *)data) ==
        CTK_WIDGET_HYPERLINK) {
       strncpy(statustexturl, w->widget.hyperlink.url,
@@ -539,7 +547,7 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
       petsciiconv_topetscii(statustexturl, sizeof(statustexturl));
       show_statustext(statustexturl);
     }
-  } else if(s == resolv_signal_found) {
+  } else if(ev == resolv_event_found) {
     /* Either found a hostname, or not. */
     if((char *)data != NULL &&
        resolv_lookup((char *)data) != NULL) {
@@ -547,8 +555,8 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     } else {
       show_statustext("Host not found.");
     }
-  } else if(s == ctk_signal_window_close ||
-	    s == dispatcher_signal_quit) {
+  } else if(ev == ctk_signal_window_close ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     quit();
   }
 }
@@ -939,6 +947,7 @@ add_pagewidget(char *text, unsigned char type,
 	((struct formattribs *)dataptr)->inputvalue = webpageptr;
 	break;	
       }
+      CTK_WIDGET_SET_FLAG(lptr, CTK_WIDGET_FLAG_MONOSPACE);
       CTK_WIDGET_ADD(&mainwindow, lptr);
 
       ++pagewidgetptr;

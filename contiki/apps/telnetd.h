@@ -29,17 +29,19 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: telnetd.h,v 1.1 2003/10/14 11:23:04 adamdunkels Exp $
+ * $Id: telnetd.h,v 1.2 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 #ifndef __TELNETD_H__
 #define __TELNETD_H__
 
-#include "dispatcher.h"
+#include "contiki.h"
 
 LOADER_INIT_FUNC(telnetd_init, arg);
-DISPATCHER_UIPCALL(telnetd_appcall, s);
-DISPATCHER_SIGHANDLER(telnetd_gui_sighandler, s, data);
+/*DISPATCHER_UIPCALL(telnetd_appcall, s);
+  DISPATCHER_SIGHANDLER(telnetd_gui_sighandler, s, data);*/
+void telnetd_gui_eventhandler(ek_event_t ev, ek_data_t data);
+void telnetd_appcall(void *data);
 void telnetd_gui_output(char *str1, char *str2);
 void telnetd_gui_quit(void);
 void telnetd_quit(void);

@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.8 2004/02/24 09:57:50 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.9 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 
@@ -42,7 +42,7 @@
 
 #include "shell.h"
 
-#include "uip-signal.h"
+#include "uip-event.h"
 
 #include "telnetd.h"
 
@@ -56,12 +56,16 @@
 #define XSIZE 36
 #define YSIZE 12
 
-static DISPATCHER_SIGHANDLER(sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(sighandler, s, data);
 
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Shell server", shell_idle, sighandler,
 		   telnetd_appcall)};
-static ek_id_t id;
+		   static ek_id_t id = EK_ID_NONE;*/
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "Shell server", EK_PRIO_NORMAL,
+	   eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 MEMB(linemem, TELNETD_CONF_LINELEN, TELNETD_CONF_NUMLINES);
 
@@ -113,7 +117,7 @@ telnetd_quit(void)
 #if TELNETD_CONF_GUI
   telnetd_gui_quit();
 #endif /* TELNETD_CONF_GUI */
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
@@ -175,23 +179,25 @@ LOADER_INIT_FUNC(telnetd_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {    
-    id = dispatcher_start(&p);
-    dispatcher_uiplisten(HTONS(23));
-    memb_init(&linemem);
-    shell_init();
+    id = ek_start(&p);
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(sighandler, s, data)
+EK_EVENTHANDLER(eventhandler, ev, data)
 {
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  EK_EVENTHANDLER_ARGS(ev, data);
 
-  if(s == dispatcher_signal_quit) {
+  if(ev == EK_EVENT_INIT) {
+    tcp_listen(HTONS(23));
+    memb_init(&linemem);
+    shell_init();
+  } else if(ev == tcpip_event) {
+    telnetd_appcall(data);
+  } else if(ev == EK_EVENT_REQUEST_EXIT) {
     telnetd_quit();
   } else {
 #if TELNETD_CONF_GUI    
-    telnetd_gui_sighandler(s, data);
+    telnetd_gui_eventhandler(ev, data);
 #endif /* TELNETD_CONF_GUI */
   }
 }
@@ -357,11 +363,12 @@ newdata(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(telnetd_appcall, ts)
+void
+telnetd_appcall(void *ts)
 {
   static unsigned int i;
   if(uip_connected()) {
-    dispatcher_markconn(uip_conn, &s);
+    tcp_markconn(uip_conn, &s);
     for(i = 0; i < TELNETD_CONF_NUMLINES; ++i) {
       s.lines[i] = NULL;
     }

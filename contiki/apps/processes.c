@@ -29,12 +29,12 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.9 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: processes.c,v 1.10 2004/07/04 11:35:07 adamdunkels Exp $
  *
  */
 
+#include "ek.h"
 #include "ctk.h"
-#include "dispatcher.h"
 #include "loader.h"
 
 #define MAX_PROCESSLABELS 13
@@ -55,22 +55,30 @@ static struct ctk_button processupdatebutton =
 static struct ctk_button processclosebutton =
   {CTK_BUTTON(16, 15, 5, "Close")};
 
-static DISPATCHER_SIGHANDLER(processes_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(processes_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Process listing", NULL, processes_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
+EK_EVENTHANDLER(processes_eventhandler, ev, data);
+EK_PROCESS(p, "Process listing", EK_PRIO_NORMAL,
+	   processes_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
+
+enum {
+  EVENT_UPDATE
+};
 
 /*-----------------------------------------------------------------------------------*/
 static void
 update_processwindow(void)
 {
   unsigned char i, j, *idsptr;
-  struct dispatcher_proc *p;
+  struct ek_proc *p;
 
   /* Step through each possible process ID and see if there is a
      matching process. */
   j = 0;
-  for(p = DISPATCHER_PROCS(); p != NULL; p = p->next) {
+  for(p = EK_PROCS(); p != NULL; p = p->next) {
     idsptr = ids[j];
     i = p->id;
     idsptr[0] = '0' + i / 100;
@@ -85,7 +93,7 @@ update_processwindow(void)
     CTK_WIDGET_ADD(&processwindow, &processidlabels[j]);
     
     CTK_LABEL_NEW(&processnamelabels[j],
-		  4, j + 1, 19, 1, p->name);
+		  4, j + 1, 19, 1, (char *)p->name);
     CTK_WIDGET_ADD(&processwindow, &processnamelabels[j]);
 
     ++j;
@@ -106,21 +114,14 @@ LOADER_INIT_FUNC(processes_init, arg)
   arg_free(arg);
     
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
-    ctk_window_new(&processwindow, 23, 16, "Processes");
-    update_processwindow();
-    
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
-  }
-  ctk_window_open(&processwindow);
+    id = ek_start(&p);
+  }    
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 processes_quit(void)
 {
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
@@ -129,8 +130,9 @@ static void
 killproc(void)
 {
   int procnum;
-  u8_t i, j;
-
+  unsigned char i, j;
+  struct ek_proc *p;
+  
   /* Find first zero char in killprocnum string. */
   for(i = 0; killprocnum[i] != 0 &&
 	i < sizeof(killprocnum); ++i);
@@ -146,18 +148,41 @@ killproc(void)
     killprocnum[j] = 0;
   }
 
-  dispatcher_emit(dispatcher_signal_quit, NULL, procnum);
-  CTK_WIDGET_REDRAW(&killtextentry);
-  CTK_WIDGET_FOCUS(&processwindow, &processupdatebutton);
-  CTK_WIDGET_REDRAW(&killbutton);
-  CTK_WIDGET_REDRAW(&processupdatebutton);
+  /* Make sure the process ID exists. */
+  for(p = EK_PROCS(); p != NULL; p = p->next) {
+    if(EK_PROC_ID(p) == procnum) {
+      break;
+    }
+  }
+
+  if(p != NULL) {
+    ek_post(procnum, EK_EVENT_REQUEST_EXIT, NULL);
+    ek_post(id, EVENT_UPDATE, NULL);
+    CTK_WIDGET_REDRAW(&killtextentry);
+    CTK_WIDGET_FOCUS(&processwindow, &processupdatebutton);
+    CTK_WIDGET_REDRAW(&killbutton);
+    CTK_WIDGET_REDRAW(&processupdatebutton);
+  }
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(processes_sighandler, s, data)
+/*static
+  DISPATCHER_SIGHANDLER(processes_sighandler, s, data)*/
+EK_EVENTHANDLER(processes_eventhandler, ev, data)
 {
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  if(s == ctk_signal_button_activate) {
+/*  DISPATCHER_SIGHANDLER_ARGS(s, data);*/
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&processwindow, 23, 16, "Processes");
+    update_processwindow();
+    
+    ctk_window_open(&processwindow);
+  } else if(ev == EVENT_UPDATE) {
+    ctk_window_clear(&processwindow);
+    update_processwindow();
+    ctk_window_open(&processwindow);
+  } else if(ev == ctk_signal_button_activate) {
     if(data == (ek_data_t)&processupdatebutton) {
       ctk_window_clear(&processwindow);
       update_processwindow();
@@ -169,8 +194,8 @@ DISPATCHER_SIGHANDLER(processes_sighandler, s, data)
     } else if(data == (ek_data_t)&killbutton) {
       killproc();
     }
-  } else if(s == dispatcher_signal_quit ||
-	    (s == ctk_signal_window_close &&
+  } else if(ev == EK_EVENT_REQUEST_EXIT ||
+	    (ev == ctk_signal_window_close &&
 	     data == (ek_data_t)&processwindow)) {
     ctk_window_close(&processwindow);
     processes_quit();

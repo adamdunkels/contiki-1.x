@@ -28,9 +28,11 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.7 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: shell-gui.c,v 1.8 2004/07/04 11:35:07 adamdunkels Exp $
  *
  */
+
+#include "ek.h"
 
 #include "program-handler.h"
 #include "loader.h"
@@ -43,31 +45,37 @@
 
 #include "uip-signal.h"
 
+#include "shell-gui-conf.h"
+
 #include <string.h>
 
-#define XSIZE 36
-#define YSIZE 12
 
 static struct ctk_window window;
-static char log[XSIZE * YSIZE];
+static char log[SHELL_GUI_CONF_XSIZE * SHELL_GUI_CONF_YSIZE];
 static struct ctk_label loglabel =
-  {CTK_LABEL(0, 0, XSIZE, YSIZE, log)};
-static char command[XSIZE + 1];
+  {CTK_LABEL(0, 0, SHELL_GUI_CONF_XSIZE, SHELL_GUI_CONF_YSIZE, log)};
+static char command[SHELL_GUI_CONF_XSIZE + 1];
 static struct ctk_textentry commandentry =
-  {CTK_TEXTENTRY(0, YSIZE, XSIZE - 2, 1, command, XSIZE)};
+  {CTK_TEXTENTRY(0, SHELL_GUI_CONF_YSIZE, SHELL_GUI_CONF_XSIZE - 2,
+		 1, command, SHELL_GUI_CONF_XSIZE)};
 
-static DISPATCHER_SIGHANDLER(sighandler, s, data);
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "Command shell", EK_PRIO_NORMAL,
+	   eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
+
+/*static DISPATCHER_SIGHANDLER(sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Command shell", shell_idle, sighandler,
 		   NULL)};
-static ek_id_t id;
+		   static ek_id_t id;*/
 
 /*-----------------------------------------------------------------------------------*/
 void
 shell_quit(char *str)
 {
   ctk_window_close(&window);
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
@@ -77,16 +85,20 @@ shell_output(char *str1, char *str2)
 {
   static unsigned char i, len;
   
-  for(i = 1; i < YSIZE; ++i) {
-    memcpy(&log[(i - 1) * XSIZE], &log[i * XSIZE], XSIZE);
+  for(i = 1; i < SHELL_GUI_CONF_YSIZE; ++i) {
+    memcpy(&log[(i - 1) * SHELL_GUI_CONF_XSIZE],
+	   &log[i * SHELL_GUI_CONF_XSIZE], SHELL_GUI_CONF_XSIZE);
   }
-  memset(&log[(YSIZE - 1) * XSIZE], 0, XSIZE);
+  memset(&log[(SHELL_GUI_CONF_YSIZE - 1) * SHELL_GUI_CONF_XSIZE],
+	 0, SHELL_GUI_CONF_XSIZE);
 
   len = strlen(str1);
 
-  strncpy(&log[(YSIZE - 1) * XSIZE], str1, XSIZE);
-  if(len < XSIZE) {
-    strncpy(&log[(YSIZE - 1) * XSIZE] + len, str2, XSIZE - len);
+  strncpy(&log[(SHELL_GUI_CONF_YSIZE - 1) * SHELL_GUI_CONF_XSIZE],
+	  str1, SHELL_GUI_CONF_XSIZE);
+  if(len < SHELL_GUI_CONF_XSIZE) {
+    strncpy(&log[(SHELL_GUI_CONF_YSIZE - 1) * SHELL_GUI_CONF_XSIZE] + len,
+	    str2, SHELL_GUI_CONF_XSIZE - len);
   }
 
   CTK_WIDGET_REDRAW(&loglabel);
@@ -98,40 +110,41 @@ shell_prompt(char *str)
   
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(config_init, arg)
+LOADER_INIT_FUNC(shell_gui_init, arg)
 {
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_widget_activate);    
-
-    ctk_window_new(&window, XSIZE, YSIZE+1, "Command shell");
-    CTK_WIDGET_ADD(&window, &loglabel);
-    CTK_WIDGET_ADD(&window, &commandentry);
-    CTK_WIDGET_FOCUS(&window, &commandentry);
-    memset(log, ' ', sizeof(log));
-
-    shell_init();
+    id = ek_start(&p);
   }
-  ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(sighandler, s, data)
+EK_EVENTHANDLER(eventhandler, ev, data)
 {
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  EK_EVENTHANDLER_ARGS(ev, data);
 
-  if(s == ctk_signal_widget_activate &&
+  
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&window, SHELL_GUI_CONF_XSIZE,
+		   SHELL_GUI_CONF_YSIZE + 1, "Command shell");
+    CTK_WIDGET_ADD(&window, &loglabel);
+    /*    CTK_WIDGET_SET_FLAG(&loglabel, CTK_WIDGET_FLAG_MONOSPACE);*/
+    CTK_WIDGET_ADD(&window, &commandentry);
+    /*    CTK_WIDGET_SET_FLAG(&commandentry, CTK_WIDGET_FLAG_MONOSPACE);*/
+    CTK_WIDGET_FOCUS(&window, &commandentry);
+    memset(log, ' ', sizeof(log));
+    
+    shell_init();
+    ctk_window_open(&window);   
+  } else if(ev == ctk_signal_widget_activate &&
      data == (ek_data_t)&commandentry) {
     shell_output("> ", command);
     shell_input(command);
     CTK_TEXTENTRY_CLEAR(&commandentry);
     CTK_WIDGET_FOCUS(&window, &commandentry);
     CTK_WIDGET_REDRAW(&commandentry);
-  } else if(s == ctk_signal_window_close ||
-	    s == dispatcher_signal_quit) {
+  } else if(ev == ctk_signal_window_close ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     shell_quit(NULL);
   }
 }

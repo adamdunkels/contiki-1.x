@@ -29,21 +29,22 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.11 2004/06/13 09:48:32 oliverschmidt Exp $
+ * $Id: simpletelnet.c,v 1.12 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 
+#include <string.h>
+
+#include "ek.h"
 #include "petsciiconv.h"
 #include "uiplib.h"
 #include "uip.h"
 #include "ctk.h"
-#include "dispatcher.h"
 #include "resolv.h"
 #include "telnet.h"
 #include "simpletelnet.h"
 #include "loader.h"
-
-#include <string.h>
+#include "tcpip.h"
 
 /* Telnet window */
 static struct ctk_window telnetwindow;
@@ -91,46 +92,23 @@ static struct telnet_state ts_appstate;
 #define ISO_NL       0x0a
 #define ISO_CR       0x0d
 
+EK_EVENTHANDLER(simpletelnet_eventhandler, ev, data);
+EK_PROCESS(p, "Telnet client", EK_PRIO_NORMAL,
+	   simpletelnet_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
+/*
 static DISPATCHER_SIGHANDLER(simpletelnet_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Simple telnet", NULL, simpletelnet_sighandler,
 		   telnet_app)};
-static ek_id_t id;
+		   static ek_id_t id;*/
 
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(simpletelnet_init, arg)
 {
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-
-    /* Create Telnet window. */
-    ctk_window_new(&telnetwindow, 38, 20, "Simple telnet");
-    
-    CTK_WIDGET_ADD(&telnetwindow, &telnethostlabel);
-    CTK_WIDGET_ADD(&telnetwindow, &telnetportlabel);
-    CTK_WIDGET_ADD(&telnetwindow, &telnethosttextentry);
-    CTK_WIDGET_ADD(&telnetwindow, &telnetporttextentry);
-    CTK_WIDGET_ADD(&telnetwindow, &telnetconnectbutton);
-    CTK_WIDGET_ADD(&telnetwindow, &telnetdisconnectbutton);
-    CTK_WIDGET_ADD(&telnetwindow, &telnetlinetextentry);
-    CTK_WIDGET_ADD(&telnetwindow, &telnetsendbutton);
-    
-    CTK_WIDGET_ADD(&telnetwindow, &telnetsep1);
-    CTK_WIDGET_ADD(&telnetwindow, &telnettextarea);
-    
-    CTK_WIDGET_ADD(&telnetwindow, &telnetsep2);
-    CTK_WIDGET_ADD(&telnetwindow, &telnetstatus);
-
-    CTK_WIDGET_FOCUS(&telnetwindow, &telnethosttextentry);
-       
-    /* Attach as a listener to the CTK button press signal. */
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(resolv_signal_found);
+    id = ek_start(&p);
   }
-  
-  ctk_window_open(&telnetwindow);
-
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -220,7 +198,7 @@ connect(void)
   }
 
 
-  conn = dispatcher_connect(addrptr, htons(port), &ts_appstate);
+  conn = tcp_connect(addrptr, htons(port), &ts_appstate);
   if(conn == NULL) {
     show("Out of memory error");
     return;
@@ -230,14 +208,41 @@ connect(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(simpletelnet_sighandler, s, data)
+EK_EVENTHANDLER(simpletelnet_eventhandler, ev, data)
 {
   struct ctk_widget *w;
   char *ptr;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_button_activate) {
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+    /* Create Telnet window. */
+    ctk_window_new(&telnetwindow, 38, 20, "Simple telnet");
+    
+    CTK_WIDGET_ADD(&telnetwindow, &telnethostlabel);
+    CTK_WIDGET_ADD(&telnetwindow, &telnetportlabel);
+    CTK_WIDGET_ADD(&telnetwindow, &telnethosttextentry);
+    CTK_WIDGET_ADD(&telnetwindow, &telnetporttextentry);
+    CTK_WIDGET_ADD(&telnetwindow, &telnetconnectbutton);
+    CTK_WIDGET_ADD(&telnetwindow, &telnetdisconnectbutton);
+    CTK_WIDGET_ADD(&telnetwindow, &telnetlinetextentry);
+    CTK_WIDGET_ADD(&telnetwindow, &telnetsendbutton);
+    
+    CTK_WIDGET_ADD(&telnetwindow, &telnetsep1);
+    CTK_WIDGET_ADD(&telnetwindow, &telnettextarea);
+    
+    CTK_WIDGET_ADD(&telnetwindow, &telnetsep2);
+    CTK_WIDGET_ADD(&telnetwindow, &telnetstatus);
+
+    CTK_WIDGET_FOCUS(&telnetwindow, &telnethosttextentry);
+       
+    /* Attach as a listener to the CTK button press signal. */
+    /*    dispatcher_listen(ctk_signal_button_activate);
+    dispatcher_listen(ctk_signal_window_close);
+    dispatcher_listen(resolv_signal_found);*/
+    
+    ctk_window_open(&telnetwindow);
+
+  } else if(ev == ctk_signal_button_activate) {
     
     w = (struct ctk_widget *)data;
     if(w == (struct ctk_widget *)&telnetsendbutton) {
@@ -259,7 +264,7 @@ DISPATCHER_SIGHANDLER(simpletelnet_sighandler, s, data)
       connect();
       ctk_window_redraw(&telnetwindow);
     }
-  } else if(s == resolv_signal_found) {
+  } else if(ev == resolv_event_found) {
     if(strcmp(data, telnethost) == 0) {
       if(resolv_lookup(telnethost) != NULL) {
 	connect();
@@ -267,10 +272,14 @@ DISPATCHER_SIGHANDLER(simpletelnet_sighandler, s, data)
 	show("Host not found");
       }
     }
-  } else if(s == ctk_signal_window_close) {
-    dispatcher_exit(&p);
+  } else if(ev == ctk_signal_window_close ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
+    ek_exit();
+    ctk_window_close(&telnetwindow);
     id = 0;
     LOADER_UNLOAD();
+  } else if(ev == tcpip_event) {
+    telnet_app(data);
   }
 }
 /*-----------------------------------------------------------------------------------*/

@@ -29,21 +29,21 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.14 2004/06/13 09:48:32 oliverschmidt Exp $
+ * $Id: email.c,v 1.15 2004/07/04 11:35:07 adamdunkels Exp $
  *
  */
 
 
+#include "ek.h"
 #include "ctk.h"
-#include "dispatcher.h"
 #include "smtp.h"
 #include "uiplib.h"
 #include "petsciiconv.h"
 #include "loader.h"
+#include "tcpip.h"
 
 #include "ctk-textedit.h"
 
-#include <string.h>
 
 #define MAXNUMMSGS 6
 
@@ -137,11 +137,16 @@ static struct ctk_textentry pop3passwordtextentry =
 static struct ctk_button setupokbutton =
   {CTK_BUTTON(24, 15, 2, "Ok")};
 
+/*
 static DISPATCHER_SIGHANDLER(email_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("E-mail client", NULL, email_sighandler, smtp_appcall)};
 static ek_id_t id;
-
+*/
+EK_EVENTHANDLER(email_eventhandler, ev, data);
+EK_PROCESS(p, "E-mail client", EK_PRIO_NORMAL,
+	   email_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -150,7 +155,7 @@ email_quit(void)
   ctk_window_close(&setupwindow);
   ctk_window_close(&composewindow);
   ctk_menu_remove(&menu);
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
@@ -160,8 +165,59 @@ LOADER_INIT_FUNC(email_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
+    id = ek_start(&p);
+  } else {
+    ctk_window_open(&composewindow);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+applyconfig(void)
+{
+  u16_t addr[2];
+  char *cptr;
+
+  for(cptr = smtpserver; *cptr != ' ' && *cptr != 0; ++cptr);
+  *cptr = 0;
+  
+  if(uiplib_ipaddrconv(smtpserver, (unsigned char *)addr)) {
+    smtp_configure("contiki", addr);
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+prepare_message(void)
+{
+  int i;
+
+  /* Convert fields to ASCII. */
+  petsciiconv_toascii(to, sizeof(to));
+  petsciiconv_toascii(subject, sizeof(subject));  
+  petsciiconv_toascii(mail, 255);
+  petsciiconv_toascii(mail + 255, sizeof(mail) - 255);
+
+  /* Insert line delimiters. */
+  subject[sizeof(subject) - 2] = 0x0a;
+  subject[sizeof(subject) - 1] = 0x00;
+  for(i = 0; i < MAIL_HEIGHT; ++i) {
+    mail[MAIL_WIDTH - 1 + MAIL_WIDTH * i] = 0x0a;
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+/*static
+  DISPATCHER_SIGHANDLER(email_sighandler, s, data)*/
+EK_EVENTHANDLER(email_eventhandler, ev, data)
+{
+  struct ctk_widget *w;
+  unsigned char i;
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  ctk_textedit_eventhandler(&mailtextedit, ev, data);
+
+  if(ev == tcpip_event) {
+    smtp_appcall(data);
+  } else if(ev == EK_EVENT_INIT) {
+
     /* Create the "Really erase message?" dialog. */
     ctk_dialog_new(&erasedialog, 26, 6);
     CTK_WIDGET_ADD(&erasedialog, &erasedialoglabel1);
@@ -219,63 +275,16 @@ LOADER_INIT_FUNC(email_init, arg)
     ctk_menu_add(&menu);
 
     /* Attach listeners to signals. */
-    dispatcher_listen(ctk_signal_widget_activate);
+    /*    dispatcher_listen(ctk_signal_widget_activate);
     dispatcher_listen(ctk_signal_menu_activate);
     dispatcher_listen(ctk_signal_window_close);
 
-    dispatcher_listen(ctk_signal_keypress);
+    dispatcher_listen(ctk_signal_keypress);*/
     
     /* Open setup window */
     ctk_window_open(&setupwindow);
-  } else {
-    ctk_window_open(&composewindow);
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-applyconfig(void)
-{
-  u16_t addr[2];
-  char *cptr;
 
-  for(cptr = smtpserver; *cptr != ' ' && *cptr != 0; ++cptr);
-  *cptr = 0;
-  
-  if(uiplib_ipaddrconv(smtpserver, (unsigned char *)addr)) {
-    smtp_configure("contiki", addr);
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-prepare_message(void)
-{
-  int i;
-
-  /* Convert fields to ASCII. */
-  petsciiconv_toascii(to, sizeof(to));
-  petsciiconv_toascii(subject, sizeof(subject));  
-  petsciiconv_toascii(mail, 255);
-  petsciiconv_toascii(mail + 255, sizeof(mail) - 255);
-
-  /* Insert line delimiters. */
-  subject[sizeof(subject) - 2] = 0x0a;
-  subject[sizeof(subject) - 1] = 0x00;
-  for(i = 0; i < MAIL_HEIGHT; ++i) {
-    mail[MAIL_WIDTH - 1 + MAIL_WIDTH * i] = 0x0a;
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(email_sighandler, s, data)
-{
-  struct ctk_widget *w;
-  unsigned char i;
-
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-
-  ctk_textedit_sighandler(&mailtextedit, s, data);
-  
-  if(s == ctk_signal_widget_activate) {
+  } else if(ev == ctk_signal_widget_activate) {
     w = (struct ctk_widget *)data;
     if(w == (struct ctk_widget *)&sendbutton) {
       prepare_message();
@@ -297,7 +306,7 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
       ctk_window_close(&setupwindow);
       ctk_window_open(&composewindow);
     }
-  } else if(s == ctk_signal_menu_activate) {
+  } else if(ev == ctk_signal_menu_activate) {
     if((struct ctk_menu *)data == &menu) {
       if(menu.active == menuitem_compose) {
 	ctk_window_open(&composewindow);
@@ -307,9 +316,9 @@ DISPATCHER_SIGHANDLER(email_sighandler, s, data)
 	email_quit();
       }
     }
-  } else if(s == dispatcher_signal_quit) {
+  } else if(ev == EK_EVENT_REQUEST_EXIT) {
     email_quit();
-  }
+  } 
 }
 /*-----------------------------------------------------------------------------------*/
 void

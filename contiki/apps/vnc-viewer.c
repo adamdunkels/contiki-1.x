@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-viewer.c,v 1.7 2004/06/06 06:03:03 adamdunkels Exp $
+ * $Id: vnc-viewer.c,v 1.8 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 
@@ -87,7 +87,7 @@ vnc_viewer_connect(u16_t *server, u8_t display)
   if(conn == NULL) {
     return;
   }
-  dispatcher_markconn(conn, NULL);
+  tcp_markconn(conn, NULL);
 
   vs->close = 0;
 }
@@ -668,7 +668,8 @@ acked(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(vnc_viewer_app, nullptr)
+void
+vnc_viewer_app(void * nullptr)
 {
   if(vs->close == 1) {
     uip_close();

@@ -29,17 +29,17 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.12 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: netconf.c,v 1.13 2004/07/04 11:35:07 adamdunkels Exp $
  *
  */
 
+#include "ek.h"
 #include "uip.h"
 #include "uiplib.h"
 #include "uip_arp.h"
 #include "resolv.h"
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
 
 #include "loader.h"
 
@@ -83,10 +83,15 @@ static struct ctk_textentry dnsservertextentry =
 static struct ctk_button tcpipclosebutton =
   {CTK_BUTTON(0, 9, 2, "Ok")};
 
-static DISPATCHER_SIGHANDLER(netconf_sighandler, s, data);
+EK_EVENTHANDLER(netconf_eventhandler, ev, data);
+EK_PROCESS(p, "Network configuration", EK_PRIO_NORMAL,
+	   netconf_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
+
+/*static DISPATCHER_SIGHANDLER(netconf_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Network config", NULL, netconf_sighandler, NULL)};
-static ek_id_t id;
+  static ek_id_t id;*/
 
 
 static void makestrings(void);
@@ -97,47 +102,8 @@ LOADER_INIT_FUNC(netconf_init, arg)
   arg_free(arg);
     
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
-    /* Create TCP/IP configuration window. */
-    ctk_window_new(&tcpipwindow, 30, 10, "TCP/IP config");
-    if(ctk_desktop_width(tcpipwindow.desktop) < 30) {
-      ctk_window_move(&tcpipwindow, 0,
-		      (ctk_desktop_height(tcpipwindow.desktop) - 10) / 2 - 2);
-    } else {
-      ctk_window_move(&tcpipwindow,
-		      (ctk_desktop_width(tcpipwindow.desktop) - 30) / 2,
-		      (ctk_desktop_height(tcpipwindow.desktop) - 10) / 2 - 2);
-    }
-    
-#ifdef WITH_ETHERNET
-    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrlabel);  
-    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrtextentry);
-    CTK_WIDGET_ADD(&tcpipwindow, &netmasklabel);
-    CTK_WIDGET_ADD(&tcpipwindow, &netmasktextentry);
-    CTK_WIDGET_ADD(&tcpipwindow, &gatewaylabel);
-    CTK_WIDGET_ADD(&tcpipwindow, &gatewaytextentry);
-    CTK_WIDGET_ADD(&tcpipwindow, &dnsserverlabel);
-    CTK_WIDGET_ADD(&tcpipwindow, &dnsservertextentry);
-#else
-    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrlabel);  
-    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrtextentry);
-    CTK_WIDGET_ADD(&tcpipwindow, &dnsserverlabel);
-    CTK_WIDGET_ADD(&tcpipwindow, &dnsservertextentry);  
-#endif /* WITH_ETHERNET */
-    
-    CTK_WIDGET_ADD(&tcpipwindow, &tcpipclosebutton);
-    
-    CTK_WIDGET_FOCUS(&tcpipwindow, &ipaddrtextentry);  
-
-    /* Fill the configuration strings with values from the current
-       configuration */
-    makestrings();
-    
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
+    id = ek_start(&p);
   }
-  ctk_window_open(&tcpipwindow);
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
@@ -235,25 +201,63 @@ apply_tcpipconfig(void)
 static void
 netconf_quit(void)
 {
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(netconf_sighandler, s, data)
+EK_EVENTHANDLER(netconf_eventhandler, ev, data)
 {
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
-  
-  if(s == ctk_signal_button_activate) {   
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+    /* Create TCP/IP configuration window. */
+    ctk_window_new(&tcpipwindow, 30, 10, "TCP/IP config");
+    /*    if(ctk_desktop_width(tcpipwindow.desktop) < 30) {
+      ctk_window_move(&tcpipwindow, 0,
+		      (ctk_desktop_height(tcpipwindow.desktop) - 10) / 2 - 2);
+    } else {
+      ctk_window_move(&tcpipwindow,
+		      (ctk_desktop_width(tcpipwindow.desktop) - 30) / 2,
+		      (ctk_desktop_height(tcpipwindow.desktop) - 10) / 2 - 2);
+		      }*/
+    
+#ifdef WITH_ETHERNET
+    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrlabel);  
+    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrtextentry);
+    CTK_WIDGET_ADD(&tcpipwindow, &netmasklabel);
+    CTK_WIDGET_ADD(&tcpipwindow, &netmasktextentry);
+    CTK_WIDGET_ADD(&tcpipwindow, &gatewaylabel);
+    CTK_WIDGET_ADD(&tcpipwindow, &gatewaytextentry);
+    CTK_WIDGET_ADD(&tcpipwindow, &dnsserverlabel);
+    CTK_WIDGET_ADD(&tcpipwindow, &dnsservertextentry);
+#else
+    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrlabel);  
+    CTK_WIDGET_ADD(&tcpipwindow, &ipaddrtextentry);
+    CTK_WIDGET_ADD(&tcpipwindow, &dnsserverlabel);
+    CTK_WIDGET_ADD(&tcpipwindow, &dnsservertextentry);  
+#endif /* WITH_ETHERNET */
+    
+    CTK_WIDGET_ADD(&tcpipwindow, &tcpipclosebutton);
+    
+    CTK_WIDGET_FOCUS(&tcpipwindow, &ipaddrtextentry);  
+
+    /* Fill the configuration strings with values from the current
+       configuration */
+    makestrings();
+    
+    /*    dispatcher_listen(ctk_signal_button_activate);
+	  dispatcher_listen(ctk_signal_window_close);*/
+    ctk_window_open(&tcpipwindow);
+  } else if(ev == ctk_signal_button_activate) {   
     if(data == (ek_data_t)&tcpipclosebutton) {
       apply_tcpipconfig();
       ctk_window_close(&tcpipwindow);
       netconf_quit();
       /*      ctk_desktop_redraw(tcpipwindow.desktop);*/
     }
-  } else if(s == ctk_signal_window_close ||
-	    s == dispatcher_signal_quit) {
+  } else if(ev == ctk_signal_window_close ||
+	    ev == EK_EVENT_REQUEST_EXIT) {
     ctk_window_close(&tcpipwindow);
     netconf_quit();
   }

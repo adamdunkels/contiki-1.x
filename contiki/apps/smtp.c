@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: smtp.c,v 1.5 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: smtp.c,v 1.6 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 
@@ -36,6 +36,8 @@
 #include "smtp.h"
 
 #include "smtp-strings.h"
+
+#include "tcpip.h"
 
 #include <string.h>
 
@@ -327,7 +329,9 @@ newdata(void)
     
 }
 /*-----------------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(smtp_appcall, state)
+/*DISPATCHER_UIPCALL(smtp_appcall, state)*/
+void
+smtp_appcall(void *state)
 {
   if(uip_connected()) {
     /*    senddata();*/
@@ -359,7 +363,7 @@ smtp_send(char *to, char *from, char *subject,
 {
   struct uip_conn *conn;
 
-  conn = dispatcher_connect(smtpserver, HTONS(25), NULL);
+  conn = tcp_connect(smtpserver, HTONS(25), NULL);
   if(conn == NULL) {
     return 0;
   }

@@ -29,18 +29,19 @@
  *
  * This file is part of the Contiki VNC client
  *
- * $Id: vnc.c,v 1.8 2004/06/06 06:03:03 adamdunkels Exp $
+ * $Id: vnc.c,v 1.9 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 
 #include <string.h>
+
+#include "contiki.h"
 
 #include "petsciiconv.h"
 #include "uiplib.h"
 #include "uip.h"
 #include "ctk.h"
 #include "ctk-mouse.h"
-#include "dispatcher.h"
 #include "resolv.h"
 #include "telnet.h"
 #include "vnc.h"
@@ -96,11 +97,15 @@ static struct ctk_button downbutton =
 static struct ctk_button rightbutton =
   {CTK_BUTTON(25, HEIGHT - 1, 5, "Right")};
 
-static DISPATCHER_SIGHANDLER(vnc_sighandler, s, data);
+/*static DISPATCHER_SIGHANDLER(vnc_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("VNC client", NULL, vnc_sighandler,
 		   vnc_viewer_app)};
-static ek_id_t id;
+		   static ek_id_t id;*/
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "VNC viewer", EK_PRIO_NORMAL,
+	   eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(vnc_init, arg)
@@ -108,36 +113,8 @@ LOADER_INIT_FUNC(vnc_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-
-    ctk_window_new(&mainwindow, 36, HEIGHT, "VNC client");
-    ctk_window_move(&mainwindow, 0, 0);
-    
-    CTK_WIDGET_ADD(&mainwindow, &hosttextentry);
-    CTK_WIDGET_FOCUS(&mainwindow, &hosttextentry);
-    CTK_WIDGET_ADD(&mainwindow, &porttextentry);
-    CTK_WIDGET_ADD(&mainwindow, &connectbutton);
-
-    CTK_WIDGET_ADD(&mainwindow, &sep1);
-    
-    CTK_WIDGET_ADD(&mainwindow, &vncbitmap);
-
-    CTK_WIDGET_ADD(&mainwindow, &leftbutton);
-    CTK_WIDGET_ADD(&mainwindow, &upbutton);
-    CTK_WIDGET_ADD(&mainwindow, &downbutton);
-    CTK_WIDGET_ADD(&mainwindow, &rightbutton);
-
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(resolv_signal_found);
-
-    dispatcher_listen(ctk_signal_pointer_move);
-    
-    vnc_draw_init();
+    id = ek_start(&p);
   }
-  
-  ctk_window_open(&mainwindow);
-
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -184,22 +161,43 @@ connect(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(vnc_sighandler, s, data)
+EK_EVENTHANDLER(eventhandler, ev, data)
 {
   unsigned short x, y;
   unsigned char xc, yc;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  EK_EVENTHANDLER_ARGS(ev, data);
+
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&mainwindow, 36, HEIGHT, "VNC client");
+    ctk_window_move(&mainwindow, 0, 0);
     
-  if(s == ctk_signal_button_activate) {
+    CTK_WIDGET_ADD(&mainwindow, &hosttextentry);
+    CTK_WIDGET_FOCUS(&mainwindow, &hosttextentry);
+    CTK_WIDGET_ADD(&mainwindow, &porttextentry);
+    CTK_WIDGET_ADD(&mainwindow, &connectbutton);
+
+    CTK_WIDGET_ADD(&mainwindow, &sep1);
+    
+    CTK_WIDGET_ADD(&mainwindow, &vncbitmap);
+
+    CTK_WIDGET_ADD(&mainwindow, &leftbutton);
+    CTK_WIDGET_ADD(&mainwindow, &upbutton);
+    CTK_WIDGET_ADD(&mainwindow, &downbutton);
+    CTK_WIDGET_ADD(&mainwindow, &rightbutton);
+
+    vnc_draw_init();
+  
+    ctk_window_open(&mainwindow);
+
+  } else if(ev == ctk_signal_button_activate) {
     if(data == (ek_data_t)&connectbutton) {
       connect();
     }
-  } else if(s == ctk_signal_window_close) {
-    dispatcher_exit(&p);
+  } else if(ev == ctk_signal_window_close) {
+    ek_exit();
     id = EK_ID_NONE;
     LOADER_UNLOAD();
-  } else if(s == resolv_signal_found) {
+  } else if(ev == resolv_event_found) {
     if(strcmp(data, host) == 0) {
       if(resolv_lookup(host) != NULL) {
 	connect();
@@ -207,7 +205,7 @@ DISPATCHER_SIGHANDLER(vnc_sighandler, s, data)
 	show("Host not found");
       }
     }
-  } else if(s == ctk_signal_pointer_move) {
+  } else if(ev == ctk_signal_pointer_move) {
     /* Check if pointer is within the VNC viewer area */
     x = ctk_mouse_x();
     y = ctk_mouse_y();

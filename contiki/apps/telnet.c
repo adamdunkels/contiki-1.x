@@ -28,11 +28,11 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: telnet.c,v 1.4 2004/06/06 06:03:03 adamdunkels Exp $
+ * $Id: telnet.c,v 1.5 2004/07/04 11:35:08 adamdunkels Exp $
  *
  */
 
-#include "uip.h"
+#include "tcpip.h"
 
 #include "telnet.h"
 
@@ -103,10 +103,10 @@ senddata(struct telnet_state *s)
   uip_send(s->text, s->sentlen);
 }
 /*-----------------------------------------------------------------------------------*/
-DISPATCHER_UIPCALL(telnet_app, ts)
+void
+telnet_app(void *ts)
 {
   struct telnet_state *s = (struct telnet_state *)ts;
-  DISPATCHER_UIPCALL_ARG(ts);
     
   if(uip_connected()) {
     s->flags = 0;
