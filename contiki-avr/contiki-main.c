@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.5 2004/08/09 22:22:03 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.6 2004/09/13 23:23:16 adamdunkels Exp $
  *
  */
 
@@ -38,7 +38,6 @@
 #include "ctk-vncserver.h"
 #include "ctk-termtelnet.h"
 #include "ek.h"
-
 
 #include "uiplib.h"
 #include "uip.h"
@@ -51,6 +50,7 @@
 #include "webserver.h"
 #include "program-handler.h"
 #include "about-dsc.h"
+#include "irc-dsc.h"
 #include "netconf-dsc.h"
 #include "processes-dsc.h"
 #include "calc-dsc.h"
@@ -196,11 +196,12 @@ main(int argc, char **argv)
   webserver_init(NULL);
 
   /*  program_handler_add(&netconf_dsc, "Network config", 1);*/
+
   
-  program_handler_add(&calc_dsc, "Shell server", 1);
+  /*program_handler_add(&irc_dsc, "IRC client", 1);*/
+ 
   
-  program_handler_add(&telnetd_dsc, "Telnet server", 1);
-  
+
   program_handler_add(&calc_dsc, "Calculator", 0);
   program_handler_add(&weblinks_dsc, "Web links", 1);
 
