@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: email-dsc.c,v 1.2 2004/06/27 12:34:24 oliverschmidt Exp $
+ * $Id: email-dsc.c,v 1.3 2004/08/09 20:09:01 adamdunkels Exp $
  *
  */
 
@@ -68,5 +68,5 @@ static char tcpipconficon_textmap[9] = {
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon email_icon =
-  {CTK_ICON("E-mail program", tcpipconficon_bitmap, tcpipconficon_textmap)};
+  {CTK_ICON("E-mail", tcpipconficon_bitmap, tcpipconficon_textmap)};
 /*-----------------------------------------------------------------------------------*/
