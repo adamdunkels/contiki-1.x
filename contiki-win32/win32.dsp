@@ -507,6 +507,14 @@ SOURCE=..\contiki\ek\ek.h
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\ek\lc-switch.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\ek\lc.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\ek\loader.h
 # End Source File
 # Begin Source File
@@ -808,19 +816,19 @@ SOURCE="..\contiki\uip\packet-service.h"
 # End Source File
 # Begin Source File
 
+SOURCE=..\contiki\uip\psock.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\uip\psock.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\uip\resolv.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\contiki\uip\resolv.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\contiki\uip\socket.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\contiki\uip\socket.h
 # End Source File
 # Begin Source File
 
@@ -973,14 +981,6 @@ SOURCE=".\lib\cfs-win32.h"
 # Begin Source File
 
 SOURCE=.\lib\debug.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\lib\lc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\lib\lc.h
 # End Source File
 # End Group
 # Begin Group "contiki-win32-ppp"
