@@ -31,6 +31,7 @@ void ircc_join(struct ircc_state *s, char *channel);
 void ircc_part(struct ircc_state *s);
 void ircc_list(struct ircc_state *s);
 void ircc_msg(struct ircc_state *s, char *msg);
+void ircc_actionmsg(struct ircc_state *s, char *msg);
 
 void ircc_sent(struct ircc_state *s);
 

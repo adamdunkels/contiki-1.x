@@ -23,6 +23,7 @@ enum {
   COMMAND_JOIN,
   COMMAND_PART,  
   COMMAND_MSG,
+  COMMAND_ACTIONMSG,
   COMMAND_LIST,
   COMMAND_QUIT
 };
@@ -126,6 +127,29 @@ PT_THREAD(send_message(struct ircc_state *s))
   ptr = copystr(ptr, ircc_colon, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, s->msg, sizeof(s->outputbuf) - (ptr - s->outputbuf));
   ptr = copystr(ptr, ircc_crnl, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+
+  SEND_STRING(&s->s, s->outputbuf);
+
+  ircc_sent(s);
+  
+  SOCKET_END(&s->s);
+}
+/*---------------------------------------------------------------------------*/
+static
+PT_THREAD(send_actionmessage(struct ircc_state *s))
+{
+  char *ptr;
+  
+  SOCKET_BEGIN(&s->s);
+
+  ptr = s->outputbuf;
+  ptr = copystr(ptr, ircc_privmsg, sizeof(s->outputbuf));
+  ptr = copystr(ptr, s->channel, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_colon, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, ircc_action, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  ptr = copystr(ptr, s->msg, sizeof(s->outputbuf) - (ptr - s->outputbuf)); 
+  ptr = copystr(ptr, ircc_actioncrnl, sizeof(s->outputbuf) - (ptr - s->outputbuf));
+  
 
   SEND_STRING(&s->s, s->outputbuf);
 
@@ -342,6 +366,10 @@ PT_THREAD(handle_connection(struct ircc_state *s))
       s->command = COMMAND_NONE;
       PT_WAIT_THREAD(&s->pt, send_message(s));
       break;
+    case COMMAND_ACTIONMSG:
+      s->command = COMMAND_NONE;
+      PT_WAIT_THREAD(&s->pt, send_actionmessage(s));
+      break;
     case COMMAND_LIST:
       s->command = COMMAND_NONE;
       PT_WAIT_THREAD(&s->pt, list_channel(s));
@@ -386,6 +414,7 @@ ircc_connect(struct ircc_state *s, char *servername, u16_t *ipaddr,
   if(s->conn == NULL) {
     return NULL;
   }
+  uip_set_mss(s->conn, 120);
   s->server = servername;  
   s->nick = nick;
   return s;
@@ -421,5 +450,12 @@ ircc_msg(struct ircc_state *s, char *msg)
 {
   s->msg = msg;
   s->command = COMMAND_MSG;
+}
+/*---------------------------------------------------------------------------*/
+void
+ircc_actionmsg(struct ircc_state *s, char *msg)
+{
+  s->msg = msg;
+  s->command = COMMAND_ACTIONMSG;
 }
 /*---------------------------------------------------------------------------*/

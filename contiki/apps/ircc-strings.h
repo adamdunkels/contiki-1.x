@@ -9,3 +9,5 @@ extern const char ircc_list_[6];
 extern const char ircc_privmsg[9];
 extern const char ircc_colon[3];
 extern const char ircc_ping[6];
+extern const char ircc_action[9];
+extern const char ircc_actioncrnl[4];
