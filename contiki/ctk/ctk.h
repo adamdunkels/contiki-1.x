@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.6 2003/04/10 07:04:45 adamdunkels Exp $
+ * $Id: ctk.h,v 1.7 2003/04/11 20:16:02 adamdunkels Exp $
  *
  */
 
@@ -123,7 +123,7 @@ struct ctk_textentry {
 
 
 #define CTK_ICON(title, bitmap, textmap) \
- NULL, NULL, 0, 0, CTK_WIDGET_ICON, 0, title, 4, 0, bitmap, textmap
+ NULL, NULL, 0, 0, CTK_WIDGET_ICON, 2, title, 4, 0, bitmap, textmap
 struct ctk_icon {
   struct ctk_widget *next;
   struct ctk_window *window;
@@ -308,6 +308,8 @@ void ctk_widget_add(struct ctk_window *window,
  ctk_widget_redraw((struct ctk_widget *)widg)
 void ctk_widget_redraw(struct ctk_widget *w);
 
+#define CTK_WIDGET_TYPE(w) ((w)->type)
+
 #define CTK_WIDGET_YPOS(w) (((struct ctk_widget *)(w))->y)
 
 #define ctk_textentry_set_height(w, height) \
@@ -365,17 +367,20 @@ void ctk_widget_redraw(struct ctk_widget *w);
 
 /* Signals. */
 extern ek_signal_t ctk_signal_keypress,
+  ctk_signal_widget_activate,
+  ctk_signal_widget_select,
   ctk_signal_timer,
-  ctk_signal_button_activate,
-  ctk_signal_button_hover,
-  ctk_signal_hyperlink_activate,
-  ctk_signal_hyperlink_hover,
   ctk_signal_menu_activate,
   ctk_signal_window_close,
   ctk_signal_pointer_move,
-  ctk_signal_pointer_down,
-  ctk_signal_pointer_up;
-		       
+  ctk_signal_pointer_button;
+
+/* These should no longer be used: */
+extern ek_signal_t ctk_signal_button_activate,
+  ctk_signal_button_hover,
+  ctk_signal_hyperlink_activate,
+  ctk_signal_hyperlink_hover;
+
 /* Focus flags */
 #define CTK_FOCUS_NONE     0
 #define CTK_FOCUS_WIDGET   1
