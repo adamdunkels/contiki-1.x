@@ -1,9 +1,11 @@
+<center>
+[<a href="/">Front page</a> |		      
+<a href="/cgi/tcp">Network connections</a> |
+<a href="/cgi/processes">Processes</a> |
+<a href="/cgi/sensors">Sensors</a>]
+</center><br>			
 <p align="right">
 /<a href="http://www.sics.se/%7eadam/">Adam Dunkels</a>
 </p>
-</td>
-</tr>
-</table>
-    
 </body>
 </html>
