@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-draw.h,v 1.2 2003/04/09 19:15:26 adamdunkels Exp $
+ * $Id: ctk-draw.h,v 1.3 2005/03/15 15:56:51 oliverschmidt Exp $
  *
  */
 
@@ -62,7 +62,8 @@ void ctk_draw_widget(struct ctk_widget *w,
 void ctk_draw_window(struct ctk_window *window,
 		     unsigned char focus,
 		     unsigned char clipy1,
-		     unsigned char clipy2);
+		     unsigned char clipy2,
+		     unsigned char draw_borders);
 
 void ctk_draw_dialog(struct ctk_window *dialog);
 
