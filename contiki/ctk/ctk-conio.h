@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.h,v 1.1 2003/04/02 10:17:52 adamdunkels Exp $
+ * $Id: ctk-conio.h,v 1.2 2004/04/18 21:15:54 sannyx Exp $
  *
  */
 
@@ -46,7 +46,9 @@ typedef char ctk_arch_key_t;
 #define ctk_arch_keyavail kbhit
 #define ctk_arch_getkey   cgetc
 
+#ifndef CH_ENTER
 #define CH_ENTER '\n'
+#endif /* CH_ENTER */
 
 #ifndef CH_F1
 #define CH_F1 CH_ESC
