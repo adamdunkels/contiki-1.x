@@ -1,0 +1,25 @@
+This is the Gameboy (Color) port of Contiki, maintained by Groepaz/Hitmen
+<groepaz@gmx.net>.
+
+compiler: sdcc&lcc/gbdk, sdcc.sourceforge.net,	gbdk.sourceforge.net
+
+GB(C) specific stuff is enclosed into #ifdef __GAMEBOY__
+SDCC specific voodoo is enclosed into #ifdef __SDCC__
+
+have a look at arch/gb/SDCC-HACKING for some notes on sdcc-specific problems
+and how to work around them.
+
+- conio library functions work
+- contiki UI halfway works
+TODO: rearrange some code in contiki so sdcc can deal with it. also rewrite
+some stuff that sdcc chokes on in assembler. knock up a cable-wiring-sheme
+and a driver for regular rs232 using the linkport.
+
+Thanx and Acknowledgements must go to:
+
+Joshua (joshua@joshuawise.com, NonToxic @ efnet #gameboy)
+- ported ctk-gbc.c, ctk.c to sucky sdcc (gameboy(color))
+  added some sdcc voodoo to the contiki source :), also
+  helped a lot with general SDCC/GBDK related problems.
+
+have fun, groepaz/hitmen (groepaz@gmx.net)
