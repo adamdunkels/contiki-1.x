@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.22 2003/08/07 00:03:26 adamdunkels Exp $
+ * $Id: ctk.c,v 1.23 2003/08/09 13:34:16 adamdunkels Exp $
  *
  */
 
@@ -86,13 +86,11 @@ static unsigned char iconx, icony;
 #define ICONY_MAX    (height - 5)
 
 static void ctk_idle(void);
-static DISPATCHER_SIGHANDLER(ctk_sighandler, s, data);
 static struct dispatcher_proc p =
-  {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, ctk_sighandler, NULL)};
+  {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, NULL, NULL)};
 static ek_id_t ctkid;
 
 ek_signal_t ctk_signal_keypress,
-  ctk_signal_timer,
   ctk_signal_button_activate,
   ctk_signal_widget_activate,
   ctk_signal_button_hover,
@@ -117,6 +115,7 @@ unsigned short mouse_x, mouse_y, mouse_button;
 
 static unsigned short screensaver_timer;
 unsigned short ctk_screensaver_timeout = (5*60);
+static u16_t start, current;
 /*#define SCREENSAVER_TIMEOUT (5*60)*/
 
 #if CTK_CONF_MENUS
@@ -175,7 +174,6 @@ ctk_init(void)
   desktop_window.active = NULL;
   
   ctk_signal_keypress = dispatcher_sigalloc();
-  ctk_signal_timer = dispatcher_sigalloc();
   
   ctk_signal_button_activate =
     ctk_signal_widget_activate = dispatcher_sigalloc();
@@ -199,8 +197,6 @@ ctk_init(void)
   ctk_signal_screensaver_uninstall = dispatcher_sigalloc();
 #endif /* CTK_CONF_SCREENSAVER */
     
-  dispatcher_listen(ctk_signal_timer);
-  dispatcher_timer(ctk_signal_timer, NULL, CLK_TCK);
 
   mode = CTK_MODE_NORMAL;
 
@@ -208,6 +204,8 @@ ctk_init(void)
   icony = ICONY_START;
 
   redraw = REDRAW_ALL;
+
+  start = ek_clock();
 }
 /*-----------------------------------------------------------------------------------*/
 /* void ctk_mode_set()
@@ -1017,12 +1015,32 @@ menus_input(ctk_arch_key_t c)
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
 static void
+timer(void)
+{
+  if(mode == CTK_MODE_NORMAL) {
+    ++screensaver_timer;
+    if(screensaver_timer == ctk_screensaver_timeout) {
+#if CTK_CONF_SCREENSAVER
+      dispatcher_emit(ctk_signal_screensaver_start, NULL,
+		      DISPATCHER_BROADCAST);
+#ifdef CTK_SCREENSAVER_INIT
+      CTK_SCREENSAVER_INIT();
+#endif /* CTK_SCREENSAVER_INIT */
+      mode = CTK_MODE_SCREENSAVER;
+#endif /* CTK_CONF_SCREENSAVER */
+      screensaver_timer = 0;
+    }
+  }  
+}
+/*-----------------------------------------------------------------------------------*/
+static void
 ctk_idle(void)     
 {
   static ctk_arch_key_t c;
   static unsigned char i;
   register struct ctk_window *window;
   register struct ctk_widget *widget;
+  register struct ctk_widget **widgetptr;
 #if CTK_CONF_MOUSE_SUPPORT 
   static unsigned char mxc, myc, mouse_button_changed, mouse_moved,
     mouse_clicked;
@@ -1030,7 +1048,15 @@ ctk_idle(void)
   register struct ctk_menu *menu;
 
 #endif /* CTK_CONF_MOUSE_SUPPORT */
+
+
+  current = ek_clock();
   
+  if((current - start) >= CLK_TCK/2) {
+    timer();
+    start = current;
+  }    
+
 #if CTK_CONF_MENUS
   if(menus.open != NULL) {
     maxnitems = menus.open->nitems;
@@ -1118,6 +1144,8 @@ ctk_idle(void)
 	if(menus.open != NULL) {
 	  /* Do whatever needs to be done when a menu is open. */
 
+	  /* First check if the mouse pointer is in the currently open
+	     menu. */
 	  if(menus.open == &desktopmenu) {
 	    menux = width - CTK_CONF_MENUWIDTH;
 	  } else {
@@ -1128,6 +1156,8 @@ ctk_idle(void)
 	    }
 	  }
 
+	  /* Find out which of the menu items the mouse is pointing
+	     to. */
 	  if(mxc >= menux && mxc <= menux + CTK_CONF_MENUWIDTH) {
 	    if(myc <= menus.open->nitems) {
 	      menus.open->active = myc;
@@ -1341,8 +1371,15 @@ ctk_idle(void)
       }
 
       if(redraw & REDRAW_WIDGETS) {
-	for(i = 0; i < redraw_widgetptr; ++i) {
-	  ctk_widget_redraw(redraw_widgets[i]);	  
+	widgetptr = redraw_widgets;
+	for(i = 0; i < MAX_REDRAWWIDGETS; ++i) {
+	  /*	  if(redraw_widgets[i] != NULL) {
+	    ctk_widget_redraw(redraw_widgets[i]);
+	  }
+	  redraw_widgets[i] = NULL;*/
+	  ctk_widget_redraw(*widgetptr);
+	  *widgetptr = NULL;
+	  ++widgetptr;
 	}
 	redraw &= ~REDRAW_WIDGETS;
 	redraw_widgetptr = 0;
@@ -1451,8 +1488,14 @@ ctk_idle(void)
       ctk_window_redraw(&desktop_window);	
     }
   } else if(redraw & REDRAW_WIDGETS) {
-    for(i = 0; i < redraw_widgetptr; ++i) {
+    widgetptr = redraw_widgets;
+    /*    for(i = 0; i < redraw_widgetptr; ++i) {
       ctk_widget_redraw(redraw_widgets[i]);
+      }*/
+    for(i = 0; i < MAX_REDRAWWIDGETS; ++i) {
+      ctk_widget_redraw(*widgetptr);
+      *widgetptr = NULL;
+      ++widgetptr;
     }
   }    
   redraw = 0;
@@ -1460,6 +1503,7 @@ ctk_idle(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
+#if 0
 static
 DISPATCHER_SIGHANDLER(ctk_sighandler, s, data)
 {
@@ -1483,5 +1527,6 @@ DISPATCHER_SIGHANDLER(ctk_sighandler, s, data)
     dispatcher_timer(ctk_signal_timer, data, CLK_TCK);
   }
 }
+#endif /* 0 */
 /*-----------------------------------------------------------------------------------*/
 
