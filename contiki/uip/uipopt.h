@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uipopt.h,v 1.1 2003/03/19 14:16:07 adamdunkels Exp $
+ * $Id: uipopt.h,v 1.2 2003/04/08 19:29:41 adamdunkels Exp $
  *
  */
 
@@ -134,7 +134,7 @@ void udp_appcall(void);
 #ifdef WITH_ETHERNET
 #define UIP_BUFSIZE     360
 #else /* WITH_ETHERNET */
-#define UIP_BUFSIZE     360
+#define UIP_BUFSIZE     300
 #endif /* WITH_ETHERNET */
 
 /* UIP_STATISTICS: Determines if statistics support should be compiled
