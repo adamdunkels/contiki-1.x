@@ -42,7 +42,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.32 2003/09/02 21:47:27 adamdunkels Exp $
+ * $Id: ctk.c,v 1.33 2003/09/04 19:36:04 adamdunkels Exp $
  *
  */
 
@@ -286,15 +286,17 @@ ctk_mode_get(void) {
  * Add an icon to the desktop.
  *
  * \param icon The icon to be added.
+ *
+ * \param id The process ID of the process that owns the icon.
  */
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon)
+ctk_icon_add(CC_REGISTER_ARG struct ctk_widget *icon, ek_id_t id)
 {
-#if CTK_CONF_ICONS
+#if CTK_CONF_ICONS 
   icon->x = iconx;
   icon->y = icony;
-  icon->widget.icon.owner = DISPATCHER_CURRENT();
+  icon->widget.icon.owner = id;
 
   icony += ICONY_DELTA;
   if(icony >= ICONY_MAX) {

@@ -38,7 +38,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.16 2003/09/01 22:26:45 adamdunkels Exp $
+ * $Id: ctk.h,v 1.17 2003/09/04 19:36:04 adamdunkels Exp $
  *
  */
 
@@ -592,9 +592,11 @@ unsigned char ctk_menuitem_add(struct ctk_menu *menu, char *name);
  * Add an icon to the desktop.
  *
  * \param icon The icon to be added.
+ *
+ * \param id The process ID of the process that owns the icon.
  */
-#define CTK_ICON_ADD(icon) ctk_icon_add((struct ctk_widget *)icon)
-void ctk_icon_add(struct ctk_widget *icon);
+#define CTK_ICON_ADD(icon, id) ctk_icon_add((struct ctk_widget *)icon, id)
+void ctk_icon_add(struct ctk_widget *icon, ek_id_t id);
 
 /* Functions for manipulating widgets. */
 
