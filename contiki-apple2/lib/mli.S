@@ -12,7 +12,7 @@
 
 	.constructor	initprefix
         .destructor     closeallfiles, 17
-	.export		_open, _read, _write, _close
+	.export		_open, _read, _write, _close, PREFIX
 	.import		_uip_buf, popax
 	.importzp 	ptr1
 
