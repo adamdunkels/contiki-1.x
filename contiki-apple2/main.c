@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.3 2004/07/11 12:24:52 oliverschmidt Exp $
+ * $Id: main.c,v 1.4 2004/07/12 21:28:59 oliverschmidt Exp $
  *
  */
 
@@ -53,6 +53,7 @@
 #include "config-dsc.h"
 #include "www-dsc.h"
 #include "telnet-dsc.h"
+#include "calc-dsc.h"
 #include "processes-dsc.h"
 #include "about-dsc.h"
 
@@ -93,9 +94,10 @@ main(void)
   
   program_handler_init();
 
-  program_handler_add(&config_dsc,    "Configuration", 1);
+  program_handler_add(&config_dsc,    "Configuration", 0);
   program_handler_add(&www_dsc,       "Web browser",   1);
   program_handler_add(&telnet_dsc,    "Telnet",        1);
+  program_handler_add(&calc_dsc,      "Calculator",    1);
   program_handler_add(&processes_dsc, "Processes",     1);
   program_handler_add(&about_dsc,     "About Contiki", 0);
 
