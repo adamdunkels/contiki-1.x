@@ -1,4 +1,4 @@
-#include "dispatcher.h"
+#include "contiki.h"
 #include "loader.h"
 #include "ctk-term.h"
 #include "serial32.h"
@@ -23,24 +23,22 @@
  * Local variables
  */
 /*-----------------------------------------------------------------------------------*/
-static void ctk_termserial_idle(void);
-
 static ek_id_t id = EK_ID_NONE;
 
 static struct ctk_term_state* termstate;
 static unsigned char outbuffer[OUTPUT_BUFFER_SIZE];
 
-static struct dispatcher_proc p =
-  {DISPATCHER_PROC("CTK serial server", ctk_termserial_idle, NULL,
-		   NULL)};
+EK_POLLHANDLER(pollhandler);
+EK_EVENTHANDLER(eventhandler, ev, data);
+EK_PROCESS(p, "CTK serial server", EK_PRIO_NORMAL,
+	   eventhandler, pollhandler, NULL);
 
 /*-----------------------------------------------------------------------------------*/
 /* 
  * Idle function
  */
 /*-----------------------------------------------------------------------------------*/
-static void 
-ctk_termserial_idle(void)
+EK_POLLHANDLER(pollhandler)
 {
   unsigned char c;
   unsigned short len;
@@ -70,6 +68,11 @@ LOADER_INIT_FUNC(ctk_termserial_init, arg)
   termstate = ctk_term_alloc_state();
   if (termstate == NULL) return;
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
+    id = ek_start(&p);
   }
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(eventhandler, ev, data)
+{
+
 }
