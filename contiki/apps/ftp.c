@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ftp.c,v 1.4 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: ftp.c,v 1.5 2004/09/14 08:11:12 adamdunkels Exp $
  */
 /* Note to self: It would be nice to have a "View" option in the download dialog. */
 
@@ -370,7 +370,9 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 	      data == (ek_data_t)&window) {
       quit();
     } else if(ev == ctk_signal_widget_activate) {
-      if((struct ctk_button *)data == &cancelbutton) {
+      if((struct ctk_button *)data == &quitbutton) {
+	quit();
+      } else if((struct ctk_button *)data == &cancelbutton) {
 	ctk_dialog_close();
       } else if((struct ctk_button *)data == &downloadbutton) {
 	ctk_dialog_close();
