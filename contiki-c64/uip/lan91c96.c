@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.7 2005/02/23 22:43:00 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.8 2005/03/10 00:05:46 oliverschmidt Exp $
  *
  */
 
@@ -53,44 +53,44 @@
 
 #define ETHBASE 0xde10
 
-#define ETHBSR     ETHBASE+0x0e  //Bank select register             R/W (2B)
+#define ETHBSR     ETHBASE+0x0e	 /* Bank select register             R/W (2B) */
 
 /* Register bank 0 */
 
-#define ETHTCR     ETHBASE       //Transmition control register     R/W (2B)
-#define ETHEPHSR   ETHBASE+2     //EPH status register              R/O (2B)
-#define ETHRCR     ETHBASE+4     //Receive control register         R/W (2B)
-#define ETHECR     ETHBASE+6     //Counter register                 R/O (2B)
-#define ETHMIR     (ETHBASE+8)     //Memory information register      R/O (2B)
-#define ETHMCR     ETHBASE+0x0a  //Memory Config. reg.    +0 R/W +1 R/O (2B)
+#define ETHTCR     ETHBASE       /* Transmition control register     R/W (2B) */
+#define ETHEPHSR   ETHBASE+2     /* EPH status register              R/O (2B) */
+#define ETHRCR     ETHBASE+4     /* Receive control register         R/W (2B) */
+#define ETHECR     ETHBASE+6     /* Counter register                 R/O (2B) */
+#define ETHMIR     ETHBASE+8     /* Memory information register      R/O (2B) */
+#define ETHMCR     ETHBASE+0x0a  /* Memory Config. reg.    +0 R/W +1 R/O (2B) */
 
 /* Register bank 1 */
 
-#define ETHCR      ETHBASE       //Configuration register           R/W (2B)
-#define ETHBAR     ETHBASE+2     //Base address register            R/W (2B)
-#define ETHIAR     ETHBASE+4     //Individual address register      R/W (6B)
-#define ETHGPR     ETHBASE+0x0a  //General address register         R/W (2B)
-#define ETHCTR     ETHBASE+0x0c  //Control register                 R/W (2B)
+#define ETHCR      ETHBASE       /* Configuration register           R/W (2B) */
+#define ETHBAR     ETHBASE+2     /* Base address register            R/W (2B) */
+#define ETHIAR     ETHBASE+4     /* Individual address register      R/W (6B) */
+#define ETHGPR     ETHBASE+0x0a  /* General address register         R/W (2B) */
+#define ETHCTR     ETHBASE+0x0c  /* Control register                 R/W (2B) */
 
 /* Register bank 2 */
 
-#define ETHMMUCR   ETHBASE       //MMU command register             W/O (1B)
-#define ETHAUTOTX  ETHBASE+1     //AUTO TX start register           R/W (1B)
-#define ETHPNR     ETHBASE+2     //Packet number register           R/W (1B)
-#define ETHARR     ETHBASE+3     //Allocation result register       R/O (1B)
-#define ETHFIFO    ETHBASE+4     //FIFO ports register              R/O (2B)
-#define ETHPTR     ETHBASE+6     //Pointer register                 R/W (2B)
-#define ETHDATA    ETHBASE+8     //Data register                    R/W (4B)
-#define ETHIST     (ETHBASE+0x0c)  //Interrupt status register        R/O (1B)
-#define ETHACK     ETHBASE+0x0c  //Interrupt acknowledge register   W/O (1B)
-#define ETHMSK     ETHBASE+0x0d  //Interrupt mask register          R/W (1B)
+#define ETHMMUCR   ETHBASE       /* MMU command register             W/O (1B) */
+#define ETHAUTOTX  ETHBASE+1     /* AUTO TX start register           R/W (1B) */
+#define ETHPNR     ETHBASE+2     /* Packet number register           R/W (1B) */
+#define ETHARR     ETHBASE+3     /* Allocation result register       R/O (1B) */
+#define ETHFIFO    ETHBASE+4     /* FIFO ports register              R/O (2B) */
+#define ETHPTR     ETHBASE+6     /* Pointer register                 R/W (2B) */
+#define ETHDATA    ETHBASE+8     /* Data register                    R/W (4B) */
+#define ETHIST     ETHBASE+0x0c  /* Interrupt status register        R/O (1B) */
+#define ETHACK     ETHBASE+0x0c  /* Interrupt acknowledge register   W/O (1B) */
+#define ETHMSK     ETHBASE+0x0d  /* Interrupt mask register          R/W (1B) */
 
 /* Register bank 3 */
 
-#define ETHMT      ETHBASE       //Multicast table                  R/W (8B)
-#define ETHMGMT    ETHBASE+8     //Management interface             R/W (2B)
-#define ETHREV     ETHBASE+0x0a  //Revision register                R/W (2B)
-#define ETHERCV    ETHBASE+0x0c  //Early RCV register               R/W (2B)
+#define ETHMT      ETHBASE       /* Multicast table                  R/W (8B) */
+#define ETHMGMT    ETHBASE+8     /* Management interface             R/W (2B) */
+#define ETHREV     ETHBASE+0x0a  /* Revision register                R/W (2B) */
+#define ETHERCV    ETHBASE+0x0c  /* Early RCV register               R/W (2B) */
 
 #define BANK(num) asm("lda #%b",num); asm("sta %w",ETHBSR);
 
@@ -101,9 +101,8 @@ static void print_packet(u8_t *, u16_t);
 static u8_t packet_status;
 static u16_t packet_length;
 
-extern u16_t uip_len;
 
-
+/*-----------------------------------------------------------------------------------*/
 #pragma optimize(push, off)
 void lan91c96_init(void)
 {
@@ -112,13 +111,13 @@ void lan91c96_init(void)
   asm("cmp #$33");
   asm("beq @L1");
 
-  asm("inc $d021");              // Error
+  asm("inc $d021");              /* Error */
 
   asm("@L1:");
 
   /* Reset ETH card */
   BANK(0);
-  asm("lda #%%10000000");        //Software reset
+  asm("lda #%%10000000");        /* Software reset */
   asm("sta %w", ETHRCR+1);
 
   asm("lda #0");
@@ -128,24 +127,24 @@ void lan91c96_init(void)
   /* delay */
   asm("ldx #0");
   asm("@L2:");
-  asm("cmp ($ff,x)");            //6 cycles
-  asm("cmp ($ff,x)");            //6 cycles
-  asm("dex");                    //2 cycles
-  asm("bne @L2");                //3 cycles
-                                 //17*256=4352 => 4,4 ms
+  asm("cmp ($ff,x)");            /* 6 cycles */
+  asm("cmp ($ff,x)");            /* 6 cycles */
+  asm("dex");                    /* 2 cycles */
+  asm("bne @L2");                /* 3 cycles */
+                                 /* 17*256=4352 => 4,4 ms */
 
   /* Enable transmit and receive */
-  asm("lda #%%10000001");        //Enable transmit TXENA, PAD_EN
+  asm("lda #%%10000001");        /* Enable transmit TXENA, PAD_EN */
   asm("sta %w", ETHTCR);
-  asm("lda #%%00000011");        //Enable receive, strip CRC ???
+  asm("lda #%%00000011");        /* Enable receive, strip CRC ??? */
   asm("sta %w", ETHRCR+1);
 
   BANK(1);
   asm("lda %w", ETHCR+1);
-  asm("ora #%%00010000");        //No wait (IOCHRDY)
+  asm("ora #%%00010000");        /* No wait (IOCHRDY) */
   asm("sta %w", ETHCR+1);
 
-  asm("lda #%%00001001");        //Auto release
+  asm("lda #%%00001001");        /* Auto release */
   asm("sta %w", ETHCTR+1);
   
   /* Set MAC address */
@@ -163,23 +162,22 @@ void lan91c96_init(void)
   asm("sta %w", ETHIAR+5);
 
   BANK(2);
-  asm("lda #%%00001111");               //RCV INT, ALLOC INT, TX INT, TX EMPTY 
+  asm("lda #%%00001111");        /* RCV INT, ALLOC INT, TX INT, TX EMPTY */
   asm("sta %w", ETHMSK);
 }
 #pragma optimize(pop)
-
-
+/*-----------------------------------------------------------------------------------*/
 #pragma optimize(push, off)
 u16_t lan91c96_poll(void)
 {
-  // #######
-//  BANK(0);
-//  printf("RAM: %d ", ((*(unsigned int *)ETHMIR) & 0xff00));
-//  BANK(2);
-  // #######
+#ifdef DEBUG
+  BANK(0);
+  printf("RAM: %d ", ((*(unsigned int *)(ETHMIR)) & 0xff00));
+  BANK(2);
+#endif
 
   asm("lda %w", ETHIST);
-  asm("and #%%00000001");                //RCV INT
+  asm("and #%%00000001");        /* RCV INT */
   asm("bne @L1");
 
   /* No packet available */
@@ -187,20 +185,20 @@ u16_t lan91c96_poll(void)
 
   asm("@L1:");
 
-  #ifdef DEBUG
+#ifdef DEBUG
   printf("RCV: IRQ\n");
-  #endif
+#endif
 
   asm("lda #0");
   asm("sta %w", ETHPTR);
-  asm("lda #%%11100000");               //RCV,AUTO INCR.,READ
+  asm("lda #%%11100000");        /* RCV,AUTO INCR.,READ */
   asm("sta %w", ETHPTR+1);
 
-  asm("lda %w", ETHDATA);               //Status word
+  asm("lda %w", ETHDATA);        /* Status word */
   asm("lda %w", ETHDATA);
-  asm("sta _packet_status");            //High byte only
+  asm("sta _packet_status");     /* High byte only */
 
-  asm("lda %w", ETHDATA);               //Total number of bytes
+  asm("lda %w", ETHDATA);        /* Total number of bytes */
   asm("sta _packet_length");
   asm("lda %w", ETHDATA);
   asm("sta _packet_length+1");
@@ -208,7 +206,7 @@ u16_t lan91c96_poll(void)
   /* Last word contain 'last data byte' and 0x60 */
   /* or 'fill byte' and 0x40 */
 
-  packet_length -= 6;            //The packet contains 3 extra words
+  packet_length -= 6;            /* The packet contains 3 extra words */
 
   asm("lda _packet_status");
   asm("and #$10");
@@ -216,25 +214,25 @@ u16_t lan91c96_poll(void)
 
   packet_length++;
 
-  #ifdef DEBUG
+#ifdef DEBUG
   printf("RCV: odd number of bytes\n");
-  #endif
+#endif
 
   asm("@L2:");
                     
-  #ifdef DEBUG
+#ifdef DEBUG
   printf("RCV: L:%d ST-HIGH:0x%02x ",packet_length,packet_status);
-  #endif
+#endif
 
-  if (packet_length > UIP_BUFSIZE)
-  {
-    /* Remove and release RX packet from FIFO*/ 
+  if(packet_length > UIP_BUFSIZE) {
+
+    /* Remove and release RX packet from FIFO */ 
     asm("lda #%%10000000");
     asm("sta %w", ETHMMUCR);
 
-    #ifdef DEBUG
+#ifdef DEBUG
     printf("RCV: UIP_BUFSIZE exceeded - packet dropped!\n");
-    #endif
+#endif
 
     return 0;
   }
@@ -246,7 +244,7 @@ u16_t lan91c96_poll(void)
 
   asm("ldy #0");
   asm("ldx _packet_length+1");
-  asm("beq @RE1");               //packet_length < 256
+  asm("beq @RE1");               /* packet_length < 256 */
 
   asm("@RL1:");
   asm("lda %w", ETHDATA);
@@ -264,67 +262,67 @@ u16_t lan91c96_poll(void)
   asm("cpy _packet_length");
   asm("bne @RE1");
 
-  /* Remove and release RX packet from FIFO*/ 
+  /* Remove and release RX packet from FIFO */ 
   asm("lda #%%10000000");
   asm("sta %w", ETHMMUCR);
 
-  #ifdef DEBUG
-//  print_packet(uip_buf, packet_length);
-  #endif
+#ifdef DEBUG
+  print_packet(uip_buf, packet_length);
+#endif
 
   return packet_length;
 }
 #pragma optimize(pop)
-
-/* First 14+40 (IP and TCP header) is send from uip_buf */
-/* than data from uip_appdata                           */
-
+/*-----------------------------------------------------------------------------------*/
 #pragma optimize(push, off)
 void lan91c96_send(void)
 {
-  #ifdef DEBUG
+  /* First 14+40 (IP and TCP header) is send from uip_buf */
+  /* than data from uip_appdata */
+
+#ifdef DEBUG
   printf("SND: send packet\n");
-  #endif
+#endif
 
   asm("lda _uip_len+1");  
-  asm("ora #%%00100000");        //Allocate memory for TX
+  asm("ora #%%00100000");        /* Allocate memory for TX */
   asm("sta %w", ETHMMUCR);
 
-  asm("ldx #8");                 //Wait...
-  asm("@L1:");                   //Wait for allocation ready
+  asm("ldx #8");                 /* Wait... */
+  asm("@L1:");                   /* Wait for allocation ready */
   asm("lda %w", ETHIST);
-  asm("and #%%00001000");        //ALLOC INT
+  asm("and #%%00001000");        /* ALLOC INT */
   asm("bne @X1");
   asm("dex");
   asm("bne @L1");
 
-    #ifdef DEBUG
+#ifdef DEBUG
     printf("SND: ERR: memory alloc timeout\n");
-    #endif
+#endif
 
     return;
 
   asm("@X1:");
-  #ifdef DEBUG
+#ifdef DEBUG
   printf("SND: packet memory allocated\n");
-  #endif
+#endif
 
-  asm("lda #%%00001000");        //Acknowledge int, is it necessary ???
+  asm("lda #%%00001000");        /* Acknowledge int, is it necessary ??? */
   asm("sta %w", ETHACK);
 
   asm("lda %w", ETHARR);
-  asm("sta %w", ETHPNR);         //Set packet address
+  asm("sta %w", ETHPNR);         /* Set packet address */
 
   asm("lda #0");
   asm("sta %w", ETHPTR);
-  asm("lda #%%01000000");        //AUTO INCR.
+  asm("lda #%%01000000");        /* AUTO INCR. */
   asm("sta %w", ETHPTR+1);
 
-  #ifdef DEBUG
+#ifdef DEBUG
   printf("SND: L:%d ", uip_len);
-  #endif
+#endif
 
-  asm("lda #0");                 //Status written by CSMA
+  asm("lda #0");                 /* Status written by CSMA */
   asm("sta %w", ETHDATA);
   asm("sta %w", ETHDATA);
 
@@ -332,33 +330,35 @@ void lan91c96_send(void)
   asm("and #$01");
   asm("beq @SD1");
 
-    packet_length=uip_len+5;
-    asm("jmp @LC1");
+  packet_length=uip_len+5;
+  asm("jmp @LC1");
 
   asm("@SD1:");
 
-    packet_length=uip_len+6;       //+6 for status word, length and ctl byte
+  packet_length = uip_len+6;     /* +6 for status word, length and ctl byte */
 
   asm("@LC1:");
 
-//  printf("SND: L:%d ", packet_length);
+#ifdef DEBUG
+  printf("SND: L:%d ", packet_length);
+#endif
 
   asm("lda _packet_length");
   asm("sta %w", ETHDATA);
   asm("lda _packet_length+1");
   asm("sta %w", ETHDATA);
 
-  #ifdef DEBUG
-//  print_packet(uip_buf, uip_len);
-  #endif
+#ifdef DEBUG
+  print_packet(uip_buf, uip_len);
+#endif
 
   /* Send 14+40=54 bytes of header */
 
   if(uip_len <= UIP_LLH_LEN + UIP_TCPIP_HLEN) {
 
-    #ifdef DEBUG
+#ifdef DEBUG
     printf("SND: short packet sent.\n");
-    #endif
+#endif
 
     asm("ldx _uip_len");
     asm("ldy #0");
@@ -382,14 +382,14 @@ void lan91c96_send(void)
 
     uip_len -= UIP_LLH_LEN + UIP_TCPIP_HLEN;
 
-    asm("lda _uip_appdata");       //uip_appdata is pointer
+    asm("lda _uip_appdata");     /* uip_appdata is pointer */
     asm("sta ptr1");
     asm("lda _uip_appdata+1");
     asm("sta ptr1+1");
 
     asm("ldy #0");
     asm("ldx _uip_len+1");
-    asm("beq @RE1");               //packet_length < 256
+    asm("beq @RE1");             /* packet_length < 256 */
 
     asm("@RL1:");
     asm("lda (ptr1),y");
@@ -414,29 +414,33 @@ void lan91c96_send(void)
   asm("beq @R3");
 
   asm("lda #%%00100000");
-  asm("sta %w", ETHDATA);        //Control byte
+  asm("sta %w", ETHDATA);        /* Control byte */
 
-  asm("lda #%%11000000");        //ENQUEUE PACKET - transmit packet
+  asm("lda #%%11000000");        /* ENQUEUE PACKET - transmit packet */
   asm("sta %w", ETHMMUCR);
 
-//  printf("\n## %02x", *(unsigned char *)ETHIST);
+#ifdef DEBUG
+  printf("\n## %02x", *(unsigned char *)(ETHIST));
+#endif
 
   return;
 
   asm("@R3:");
 
   asm("lda #0");
-  asm("sta %w", ETHDATA);        //Fill byte
-  asm("sta %w", ETHDATA);        //Control byte
+  asm("sta %w", ETHDATA);        /* Fill byte */
+  asm("sta %w", ETHDATA);        /* Control byte */
 
-  asm("lda #%%11000000");        //ENQUEUE PACKET - transmit packet
+  asm("lda #%%11000000");        /* ENQUEUE PACKET - transmit packet */
   asm("sta %w", ETHMMUCR);
 
-//  printf("\n## %02x\n", *(unsigned char *)ETHIST);
+#ifdef DEBUG
+  printf("\n## %02x\n", *(unsigned char *)(ETHIST));
+#endif
   return;
 }
 #pragma optimize(pop)
-
+/*-----------------------------------------------------------------------------------*/
 #ifdef DEBUG
 static void print_packet(u8_t *buf, u16_t length)
 {
@@ -447,16 +451,16 @@ static void print_packet(u8_t *buf, u16_t length)
   int cur;
   int address=0;
 
-  printf("\nPacket of length %d \n", length );
+  printf("\nPacket of length %d \n", length);
 
   lines = length / 8;
   remainder = length % 8;
 
-  for ( i = 0; i < lines ; i ++ ) {
+  for(i = 0; i < lines; i++) {
     printf(":%04x ", address=i*8);
 
-    for ( cur = 0; cur < 8; cur ++ ) {
-      a = *(buf ++ );
+    for(cur = 0; cur < 8; cur++) {
+      a = *(buf++);
       printf("%02x ", a);
     }
     printf("\n");
@@ -464,11 +468,10 @@ static void print_packet(u8_t *buf, u16_t length)
 
   printf(":%04x ", address+8);
 
-  for ( i = 0; i < remainder ; i++ ) {
-    a = *(buf ++ );
+  for (i = 0; i < remainder; i++) {
+    a = *(buf++);
     printf("%02x ", a);
   }
   printf("\n");
 }
 #endif /* DEBUG */
-

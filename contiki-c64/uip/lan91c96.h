@@ -30,19 +30,16 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: lan91c96.h,v 1.4 2005/01/26 23:50:06 oliverschmidt Exp $
+ * $Id: lan91c96.h,v 1.5 2005/03/10 00:05:46 oliverschmidt Exp $
  */
 
-#ifndef _LAN91C96_H
-#define _LAN91C96_H
+#ifndef __LAN91C96_H__
+#define __LAN91C96_H__
 
 #include "uip_arch.h"
 
 void lan91c96_init(void);
-void lan91c96_done(void);
 void lan91c96_send(void);
 u16_t lan91c96_poll(void);
 
-/* End of lan91c96.h */
-#endif
-
+#endif /* __LAN91C96_H__ */
