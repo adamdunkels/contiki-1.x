@@ -32,16 +32,16 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.7 2003/08/24 22:37:37 adamdunkels Exp $
+ * $Id: ctk-conio.c,v 1.8 2004/03/25 09:50:13 adamdunkels Exp $
  *
  */
+
+#include <conio.h>
 
 #include "ctk.h"
 #include "ctk-draw.h"
 
 #include "ctk-conio-conf.h"
-
-#include <conio.h>
 #include <string.h>
 
 #ifndef NULL
@@ -80,17 +80,20 @@ draw_widget(struct ctk_widget *w,
   unsigned char xpos, ypos, xscroll;
   unsigned char i, j;
   char c, *text;
-  unsigned char len;
-  
+  unsigned char len, wfocus;
+
+  wfocus = 0;
   if(focus & CTK_FOCUS_WINDOW) {    
     textcolor(WIDGETCOLOR_FWIN);
     if(focus & CTK_FOCUS_WIDGET) {
       textcolor(WIDGETCOLOR_FOCUS);
+      wfocus = 1;
     }
   } else if(focus & CTK_FOCUS_DIALOG) {
     textcolor(WIDGETCOLOR_DIALOG);
     if(focus & CTK_FOCUS_WIDGET) {
       textcolor(WIDGETCOLOR_FOCUS);
+      wfocus = 1;
     }
   } else {
     textcolor(WIDGETCOLOR);
@@ -121,7 +124,7 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_BUTTON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      if(focus & CTK_FOCUS_WIDGET) {
+      if(wfocus != 0) {
 	revers(1);
       } else {
 	revers(0);
@@ -134,7 +137,7 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_HYPERLINK:
     if(ypos >= clipy1 && ypos < clipy2) {
-      if(focus & CTK_FOCUS_WIDGET) {
+      if(wfocus != 0) {
 	revers(0);
       } else {
 	revers(1);
@@ -147,7 +150,7 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_TEXTENTRY:
     text = w->widget.textentry.text;
-    if(focus & CTK_FOCUS_WIDGET) {
+    if(wfocus != 0) {
       revers(1);
     } else {
       revers(0);
