@@ -2,7 +2,8 @@ CC=cc65
 AS=ca65
 LD=ld65
 CL=cl65
-CFLAGSCOMMON=-I $(CONTIKICC65)/apps -I $(CONTIKICC65)/ctk -I $(CONTIKICC65)/uip \
+CFLAGSCOMMON=-I $(CONTIKICC65)/apps -I $(CONTIKICC65)/ctk \
+       -I $(CONTIKICC65)/lib -I $(CONTIKICC65)/uip \
        -I $(CONTIKICC65)/conf -I $(CONTIKICC65)/loader \
        -I apps -I ctk -I lib -I uip -I conf -I loader \
        -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
@@ -97,6 +98,9 @@ tfe-drv.o: uip/tfe-drv.c
 %.o: $(CONTIKICC65)/loader/%.S
 	$(AS) -o $@ $(AFLAGS) $<
 
+%.o: $(CONTIKICC65)/lib/%.S
+	$(AS) -o $@ $(AFLAGS) $<
+
 %.sav:  %.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
@@ -104,6 +108,9 @@ tfe-drv.o: uip/tfe-drv.c
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
 %.drv:  %-drv.o contiki-labels.o
+	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+
+%.drv:  %.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
 %.dsc:  %-dsc.o
@@ -128,8 +135,9 @@ clean:
 	rm -f *.o *~ *core contiki *.s *.dsc *.prg *.drv *.sav contiki-labels
 
 depend:
-	gcc $(CCDEPFLAGS) -MM -Iapps -Ictk -Iuip -Iconf -Iloader \
-        -I$(CONTIKICC65)/apps -I$(CONTIKICC65)/loader -I$(CONTIKICC65)/uip \
+	gcc $(CCDEPFLAGS) -MM -Iapps -Ictk -Iuip -Iconf -Iloader -Ilib \
+        -I$(CONTIKICC65)/apps -I$(CONTIKICC65)/loader \
+        -I$(CONTIKICC65)/lib -I$(CONTIKICC65)/uip \
 	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
 	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
 	*.c */*.c $(CONTIKI)/*/*.c $(CONTIKICC65)/*/*.c > Makefile.depend
@@ -140,7 +148,9 @@ codesize:
 d64:	
 	c1541 -format contiki,00 d64 contiki.d64
 	c1541 -attach contiki.d64 -write contiki
-	echo . > config.cfg
+	echo T CFS-CBM.DRV > config.cfg
+	echo T CTK-DEFAULT.DRV >> config.cfg
+	echo . >> config.cfg
 	c1541 -attach contiki.d64 -write config.cfg
 	c1541 -attach contiki.d64 $(foreach dsc, $(wildcard *.dsc), -write $(dsc))
 	c1541 -attach contiki.d64 $(foreach prg, $(wildcard *.prg), -write $(prg))
