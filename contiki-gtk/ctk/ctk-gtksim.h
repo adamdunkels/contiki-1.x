@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-gtksim.h,v 1.3 2003/08/11 22:20:23 adamdunkels Exp $
+ * $Id: ctk-gtksim.h,v 1.4 2004/07/04 21:04:13 adamdunkels Exp $
  *
  */
 
@@ -41,10 +38,11 @@
 
 #include <gdk/gdkkeysyms.h>
 #include <gdk/gdktypes.h>
+#include <gtk/gtk.h>
 
 typedef guint ctk_arch_key_t;
 
-char ctk_arch_keyavail(void);
+unsigned char ctk_arch_keyavail(void);
 guint ctk_arch_getkey(void);
 
 #define CH_CURS_RIGHT  GDK_Right
@@ -59,6 +57,14 @@ guint ctk_arch_getkey(void);
 #define CH_DEL         GDK_BackSpace
 #define CH_ESC         GDK_Escape
 
-void ctk_gtksim_init();
+void ctk_gtksim_init(int *argc, char **argv[]);
+
+void ctk_gtksim_redraw(void);
+
+extern GdkPixmap *ctk_gtksim_pixmap;
+extern GtkWidget *ctk_gtksim_drawing_area;
+
+#define CTK_GTKSIM_SCREEN_WIDTH 1024
+#define CTK_GTKSIM_SCREEN_HEIGHT 768
 
 #endif /* __CTK_GTKSIM_H__ */
