@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.2 2003/04/08 18:20:19 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.3 2003/04/15 21:19:47 adamdunkels Exp $
  *
  */
 
@@ -65,6 +65,7 @@ main(int argc, char **argv)
   tapdev_init();
   
   ek_init();
+  ctk_gtksim_init();
   ctk_init();
 
   program_handler_init();

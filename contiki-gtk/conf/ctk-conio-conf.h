@@ -32,31 +32,32 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-gtksim.h,v 1.2 2003/04/15 21:20:43 adamdunkels Exp $
+ * $Id: ctk-conio-conf.h,v 1.1 2003/04/15 21:20:42 adamdunkels Exp $
  *
  */
 
-#ifndef __CTK_GTKSIM_H__
-#define __CTK_GTKSIM_H__
+#ifndef __CTK_CONIO_CONF_H__
+#define __CTK_CONIO_CONF_H__
 
-#include <gdk/gdkkeysyms.h>
-#include <gdk/gdktypes.h>
+#define COLOR_BLACK 0
+#define COLOR_WHITE 1
 
-typedef guint ctk_arch_key_t;
+#define BORDERCOLOR         COLOR_BLACK
+#define SCREENCOLOR         COLOR_BLACK
 
-char ctk_arch_keyavail(void);
-guint ctk_arch_getkey(void);
+#define WINDOWCOLOR_FOCUS   COLOR_WHITE
+#define WINDOWCOLOR         COLOR_WHITE
 
-#define CH_CURS_RIGHT  GDK_Right
-#define CH_CURS_DOWN   GDK_Down
-#define CH_CURS_LEFT   GDK_Left
-#define CH_CURS_UP     GDK_Up
-#define CH_ENTER       GDK_Return
-#define CH_F1          GDK_F1
-#define CH_F3          GDK_F3
-#define CH_DEL         GDK_BackSpace
-#define CH_ESC         GDK_Escape
+#define DIALOGCOLOR         COLOR_WHITE
 
-void ctk_gtksim_init();
+#define WIDGETCOLOR_HLINK   COLOR_WHITE
+#define WIDGETCOLOR_FWIN    COLOR_WHITE
+#define WIDGETCOLOR         COLOR_WHITE
+#define WIDGETCOLOR_DIALOG  COLOR_WHITE
+#define WIDGETCOLOR_FOCUS   COLOR_WHITE
 
-#endif /* __CTK_GTKSIM_H__ */
+#define MENUCOLOR           COLOR_WHITE
+#define OPENMENUCOLOR       COLOR_WHITE
+#define ACTIVEMENUITEMCOLOR COLOR_WHITE
+
+#endif /* __CTK_CONIO_CONF_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -30,33 +30,16 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the "ctk" console GUI toolkit for cc65
+ * This file is part of the Contiki desktop OS
  *
- * $Id: ctk-gtksim.h,v 1.2 2003/04/15 21:20:43 adamdunkels Exp $
+ * $Id: libconio-conf.h,v 1.1 2003/04/15 21:20:42 adamdunkels Exp $
  *
  */
+#ifndef __LIBCONIO_CONF_H__
+#define __LIBCONIO_CONF_H__
 
-#ifndef __CTK_GTKSIM_H__
-#define __CTK_GTKSIM_H__
+#define LIBCONIO_CONF_SCREEN_WIDTH  40
+#define LIBCONIO_CONF_SCREEN_HEIGHT 25
 
-#include <gdk/gdkkeysyms.h>
-#include <gdk/gdktypes.h>
+#endif /* __LIBCONIO_CONF_H__ */
 
-typedef guint ctk_arch_key_t;
-
-char ctk_arch_keyavail(void);
-guint ctk_arch_getkey(void);
-
-#define CH_CURS_RIGHT  GDK_Right
-#define CH_CURS_DOWN   GDK_Down
-#define CH_CURS_LEFT   GDK_Left
-#define CH_CURS_UP     GDK_Up
-#define CH_ENTER       GDK_Return
-#define CH_F1          GDK_F1
-#define CH_F3          GDK_F3
-#define CH_DEL         GDK_BackSpace
-#define CH_ESC         GDK_Escape
-
-void ctk_gtksim_init();
-
-#endif /* __CTK_GTKSIM_H__ */

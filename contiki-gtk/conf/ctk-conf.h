@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.1 2003/04/02 09:17:19 adamdunkels Exp $
+ * $Id: ctk-conf.h,v 1.2 2003/04/15 21:20:41 adamdunkels Exp $
  *
  */
 
@@ -43,6 +43,10 @@
  * This file is used for setting various compile time settings for the
  * CTK GUI toolkit.
 */
+
+/* Toggles mouse support (must have support functions in the
+architecture specific files to work). */
+#define CTK_CONF_MOUSE_SUPPORT        1
 
 /* Defines which key that is to be used for activating the menus */
 #define CTK_CONF_MENU_KEY             CH_F1
