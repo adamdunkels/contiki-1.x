@@ -6,8 +6,7 @@
 
 	.export		_exit
 	.import	   	initlib, donelib
-	.import	   	zerobss
-       	.import	       	__STARTUP_RUN__			; Linker generated
+       	.import	       	__STARTUP_RUN__, __TEMP_SIZE__	; Linker generated
        	.import	       	__BSS_RUN__, __BSS_SIZE__	; Linker generated
        	.import	       	__CODE_RUN__, __CODE_SIZE__	; Linker generated
 	.import		callmain
@@ -18,8 +17,8 @@
 
 .segment	"EXEHDR"
 
-       	.word  	__STARTUP_RUN__					; Start address
-       	.word  	__BSS_RUN__ + __CODE_SIZE__ - __STARTUP_RUN__	; Size
+       	.word  	__STARTUP_RUN__							; Start address
+       	.word  	__BSS_RUN__ + __CODE_SIZE__ + __TEMP_SIZE__ - __STARTUP_RUN__	; Size
 
 ; ------------------------------------------------------------------------
 ; Place the startup code in a special segment.
@@ -33,12 +32,67 @@
 	ldx	#$FF
 	txs	       		; Init stack pointer
 
+; Call code in the "TEMP" segment
+
+	jsr	__BSS_RUN__ + __CODE_SIZE__
+
+; Switch in LC bank 2 for R/O
+
+	bit	$C080
+
+; Call module constructors
+
+	jsr	initlib
+
+; Push arguments and call main()
+
+	jsr	callmain
+
+; Avoid re-entrance of donelib. This is also the _exit entry
+
+_exit:	ldx	#$02
+:	lda	rvsave,x
+	sta	$03F2,x
+	dex
+	bpl	:-
+
+; Switch in LC bank 2 for R/O
+
+	bit	$C080
+
+; Call module destructors
+
+	jsr	donelib
+
+; ProDOS TechRefMan, chapter 5.2.1:
+; "System programs should set the stack pointer to $FF at the warm-start
+;  entry point."
+
+	ldx	#$FF
+	txs			; Re-init stack pointer
+
+; Back to DOS
+
+	jmp	$03D0
+
+; ------------------------------------------------------------------------
+; The linker doesn't calculate where this code runs so it has to be PIC
+
+.segment	"TEMP"
+
 ; Switch to 80 column mode
 
 	.ifdef __APPLE2ENH__
 	lda	#$0D
 	jsr	$C300
 	.endif
+
+; Setup the stack at HIMEM
+
+	lda    	$73
+	ldx	$73+1
+	sta	sp
+       	stx	sp+1
 
 ; Save the original RESET vector
 
@@ -85,60 +139,38 @@
 	sta	$42
 	stx	$43
 
-; Reset index and call MOVE
+; Reset index and call MOVE to relocate the CODE segment
 
 	ldy	#$00
 	jsr	$FE2C
 
-; Switch in LC bank 2 for R/O
+; Set source start
 
-	bit	$C080
+	lda	#<__BSS_RUN__
+	ldx	#>__BSS_RUN__
+	sta	$3C
+	stx	$3D
 
-; Clear the BSS data
+; Set source end
 
-	jsr	zerobss
+	lda	#<(__BSS_RUN__ + __BSS_SIZE__ - 1)
+	ldx	#>(__BSS_RUN__ + __BSS_SIZE__ - 1)
+	sta	$3E
+	stx	$3F
 
-; Setup the stack at HIMEM
+; Set destination
 
-	lda    	$73
-	ldx	$73+1
-	sta	sp
-       	stx	sp+1
+	lda	#<(__BSS_RUN__ + 1)
+	ldx	#>(__BSS_RUN__ + 1)
+	sta	$42
+	stx	$43
 
-; Call module constructors
+; Reset index, set source and goto MOVE to clear the BSS
 
-	jsr	initlib
-
-; Push arguments and call main()
-
-	jsr	callmain
-
-; Avoid re-entrance of donelib. This is also the _exit entry
-
-_exit:	ldx	#$02
-:	lda	rvsave,x
-	sta	$03F2,x
-	dex
-	bpl	:-
-
-; Switch in LC bank 2 for R/O
-
-	bit	$C080
-
-; Call module destructors
-
-	jsr	donelib
-
-; ProDOS TechRefMan, chapter 5.2.1:
-; "System programs should set the stack pointer to $FF at the warm-start
-;  entry point."
-
-	ldx	#$FF
-	txs			; Re-init stack pointer
-
-; Back to DOS
-
-	jmp	$03D0
+	ldy	#$00
+	tya
+	sta	($3C),y
+	jmp	$FE2C
 
 ; ------------------------------------------------------------------------
 ; Data
