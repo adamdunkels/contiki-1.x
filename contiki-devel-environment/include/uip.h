@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.1 2003/04/09 12:55:06 adamdunkels Exp $
+ * $Id: uip.h,v 1.2 2005/01/26 23:36:23 oliverschmidt Exp $
  *
  */
 
@@ -332,11 +332,7 @@ extern volatile u8_t *uip_urgdata;
  * output function is called, uip_len should contain the length of the
  * outgoing packet.
  */
-#if UIP_BUFSIZE > 255
 extern volatile u16_t uip_len, uip_slen;
-#else
-extern volatile u8_t uip_len, uip_slen;
-#endif 
 
 #if UIP_URGDATA > 0 
 extern volatile u8_t uip_urglen, uip_surglen;
