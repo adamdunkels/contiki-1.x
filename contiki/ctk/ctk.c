@@ -43,7 +43,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.37 2004/06/14 22:11:01 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.38 2004/06/27 15:04:01 oliverschmidt Exp $
  *
  */
 
@@ -574,7 +574,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
   /* Draw widgets in root window */
   for(widget = desktop_window.active;
       widget != NULL; widget = widget->next) {
-    ctk_draw_widget(widget, CTK_FOCUS_WINDOW, clipy1, clipy2);
+    ctk_draw_widget(widget, windows != NULL? 0: CTK_FOCUS_WINDOW, clipy1, clipy2);
   }
   
   /* Draw windows */
