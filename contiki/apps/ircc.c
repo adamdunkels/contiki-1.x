@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ircc.c,v 1.8 2005/02/07 23:13:01 oliverschmidt Exp $
+ * $Id: ircc.c,v 1.9 2005/02/22 22:23:08 adamdunkels Exp $
  */
 
 #include "contiki.h"
@@ -46,7 +46,7 @@
 
 #define PORT 6667
 
-#define SEND_STRING(s, str) SOCKET_SEND(s, str, strlen(str))
+#define SEND_STRING(s, str) PSOCK_SEND(s, str, strlen(str))
 
 #define ISO_space 0x20
 #define ISO_bang  0x21
@@ -94,7 +94,7 @@ PT_THREAD(setup_connection(struct ircc_state *s))
   char *ptr;
 
   
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
   
   ptr = s->outputbuf;
   ptr = copystr(ptr, ircc_strings_nick, sizeof(s->outputbuf));
@@ -107,13 +107,13 @@ PT_THREAD(setup_connection(struct ircc_state *s))
 
   SEND_STRING(&s->s, s->outputbuf);
 
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(join_channel(struct ircc_state *s))
 {
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
   
   SEND_STRING(&s->s, ircc_strings_join);
   SEND_STRING(&s->s, s->channel);
@@ -121,13 +121,13 @@ PT_THREAD(join_channel(struct ircc_state *s))
 
   ircc_sent(s);
   
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(part_channel(struct ircc_state *s))
 {
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
 
   SEND_STRING(&s->s, ircc_strings_part);
   SEND_STRING(&s->s, s->channel);
@@ -135,13 +135,13 @@ PT_THREAD(part_channel(struct ircc_state *s))
 
   ircc_sent(s);
   
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(list_channel(struct ircc_state *s))
 {
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
 
   SEND_STRING(&s->s, ircc_strings_list);
   SEND_STRING(&s->s, s->channel);
@@ -149,7 +149,7 @@ PT_THREAD(list_channel(struct ircc_state *s))
 
   ircc_sent(s);
   
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
@@ -157,7 +157,7 @@ PT_THREAD(send_message(struct ircc_state *s))
 {
   char *ptr;
   
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
 
   ptr = s->outputbuf;
   ptr = copystr(ptr, ircc_strings_privmsg, sizeof(s->outputbuf));
@@ -170,7 +170,7 @@ PT_THREAD(send_message(struct ircc_state *s))
 
   ircc_sent(s);
   
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
@@ -178,7 +178,7 @@ PT_THREAD(send_actionmessage(struct ircc_state *s))
 {
   char *ptr;
   
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
 
   ptr = s->outputbuf;
   ptr = copystr(ptr, ircc_strings_privmsg, sizeof(s->outputbuf));
@@ -193,7 +193,7 @@ PT_THREAD(send_actionmessage(struct ircc_state *s))
 
   ircc_sent(s);
   
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 struct parse_result {
@@ -325,13 +325,13 @@ PT_THREAD(handle_input(struct ircc_state *s))
   char *ptr;
   /*  struct parse_result r;*/
   
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
   
-  SOCKET_READTO(&s->s, ISO_nl);
+  PSOCK_READTO(&s->s, ISO_nl);
   
-  if(SOCKET_DATALEN(&s->s) > 0) {
+  if(PSOCK_DATALEN(&s->s) > 0) {
     
-    s->inputbuf[SOCKET_DATALEN(&s->s)] = 0;
+    s->inputbuf[PSOCK_DATALEN(&s->s)] = 0;
 
     if(strncmp(s->inputbuf, ircc_strings_ping, 5) == 0) {
       strncpy(s->outputbuf, s->inputbuf, sizeof(s->outputbuf));
@@ -389,17 +389,18 @@ PT_THREAD(handle_input(struct ircc_state *s))
     }
   }
 
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(data_or_command(struct ircc_state *s))
 {
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
 
-  SOCKET_WAIT_UNTIL(&s->s, s->command != COMMAND_NONE);
+  PSOCK_WAIT_UNTIL(&s->s, PSOCK_NEWDATA(&s->s) ||
+		    (s->command != COMMAND_NONE));
 
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
@@ -407,7 +408,7 @@ PT_THREAD(handle_connection(struct ircc_state *s))
 {
   PT_BEGIN(&s->pt);
 
-  SOCKET_INIT(&s->s, s->inputbuf, sizeof(s->inputbuf) - 1);
+  PSOCK_INIT(&s->s, s->inputbuf, sizeof(s->inputbuf) - 1);
   
   PT_WAIT_THREAD(&s->pt, setup_connection(s));
 
@@ -415,7 +416,7 @@ PT_THREAD(handle_connection(struct ircc_state *s))
 
     PT_WAIT_UNTIL(&s->pt, data_or_command(s));
 
-    if(SOCKET_NEWDATA(&s->s)) {
+    if(PSOCK_NEWDATA(&s->s)) {
       PT_WAIT_THREAD(&s->pt, handle_input(s));      
     } 
       
@@ -443,7 +444,7 @@ PT_THREAD(handle_connection(struct ircc_state *s))
     case COMMAND_QUIT:
       s->command = COMMAND_NONE;
       tcp_markconn(uip_conn, NULL);
-      SOCKET_CLOSE(&s->s);
+      PSOCK_CLOSE(&s->s);
       ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_REQUEST_EXIT, NULL);
       PT_EXIT(&s->pt);
       break;

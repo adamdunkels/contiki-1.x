@@ -30,17 +30,17 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ircc.h,v 1.4 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: ircc.h,v 1.5 2005/02/22 22:23:08 adamdunkels Exp $
  */
 #ifndef __IRCC_H__
 #define __IRCC_H__
 
-#include "socket.h"
+#include "psock.h"
 
 struct ircc_state {
   
   struct pt pt;
-  struct socket s;
+  struct psock s;
 
   struct uip_conn *conn;
   

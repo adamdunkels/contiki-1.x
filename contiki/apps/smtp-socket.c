@@ -30,12 +30,12 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: smtp-socket.c,v 1.2 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: smtp-socket.c,v 1.3 2005/02/22 22:23:08 adamdunkels Exp $
  */
 #include "smtp.h"
 
 #include "smtp-strings.h"
-#include "socket.h"
+#include "psock.h"
 
 #include <string.h>
 
@@ -43,7 +43,7 @@ struct smtp_state {
 
   char connected;
   
-  struct socket socket;
+  struct psock psock;
 
   char inputbuffer[4];
   
@@ -70,87 +70,87 @@ static u16_t smtpserver[2];
 #define ISO_5  0x35
 
 
-#define SEND_STRING(s, str) SOCKET_SEND(s, str, strlen(str))
+#define SEND_STRING(s, str) PSOCK_SEND(s, str, strlen(str))
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(smtp_thread(void))
 {
-  SOCKET_BEGIN(&s.socket);
+  PSOCK_BEGIN(&s.psock);
 
-  SOCKET_READTO(&s.socket, ISO_nl);
+  PSOCK_READTO(&s.psock, ISO_nl);
    
   if(strncmp(s.inputbuffer, smtp_220, 3) != 0) {
-    SOCKET_CLOSE(&s.socket);
-    SOCKET_EXIT(&s.socket);
+    PSOCK_CLOSE(&s.psock);
+    PSOCK_EXIT(&s.psock);
   }
   
-  SEND_STRING(&s.socket, (char *)smtp_helo);
-  SEND_STRING(&s.socket, localhostname);
-  SEND_STRING(&s.socket, (char *)smtp_crnl);
+  SEND_STRING(&s.psock, (char *)smtp_helo);
+  SEND_STRING(&s.psock, localhostname);
+  SEND_STRING(&s.psock, (char *)smtp_crnl);
 
-  SOCKET_READTO(&s.socket, ISO_nl);
+  PSOCK_READTO(&s.psock, ISO_nl);
   
   if(s.inputbuffer[0] != ISO_2) {
-    SOCKET_CLOSE(&s.socket);
-    SOCKET_EXIT(&s.socket);
+    PSOCK_CLOSE(&s.psock);
+    PSOCK_EXIT(&s.psock);
   }  
 
-  SEND_STRING(&s.socket, (char *)smtp_mail_from);
-  SEND_STRING(&s.socket, s.from);
-  SEND_STRING(&s.socket, (char *)smtp_crnl);
+  SEND_STRING(&s.psock, (char *)smtp_mail_from);
+  SEND_STRING(&s.psock, s.from);
+  SEND_STRING(&s.psock, (char *)smtp_crnl);
 
-  SOCKET_READTO(&s.socket, ISO_nl);
+  PSOCK_READTO(&s.psock, ISO_nl);
   
   if(s.inputbuffer[0] != ISO_2) {
-    SOCKET_CLOSE(&s.socket);
-    SOCKET_EXIT(&s.socket);
+    PSOCK_CLOSE(&s.psock);
+    PSOCK_EXIT(&s.psock);
   }
 
-  SEND_STRING(&s.socket, (char *)smtp_rcpt_to);
-  SEND_STRING(&s.socket, s.from);
-  SEND_STRING(&s.socket, (char *)smtp_crnl);
+  SEND_STRING(&s.psock, (char *)smtp_rcpt_to);
+  SEND_STRING(&s.psock, s.from);
+  SEND_STRING(&s.psock, (char *)smtp_crnl);
 
-  SOCKET_READTO(&s.socket, ISO_nl);
+  PSOCK_READTO(&s.psock, ISO_nl);
   
   if(s.inputbuffer[0] != ISO_2) {
-    SOCKET_CLOSE(&s.socket);
-    SOCKET_EXIT(&s.socket);
+    PSOCK_CLOSE(&s.psock);
+    PSOCK_EXIT(&s.psock);
   }
   
-  SEND_STRING(&s.socket, (char *)smtp_data);
+  SEND_STRING(&s.psock, (char *)smtp_data);
   
-  SOCKET_READTO(&s.socket, ISO_nl);
+  PSOCK_READTO(&s.psock, ISO_nl);
   
   if(s.inputbuffer[0] != ISO_3) {
-    SOCKET_CLOSE(&s.socket);
-    SOCKET_EXIT(&s.socket);
+    PSOCK_CLOSE(&s.psock);
+    PSOCK_EXIT(&s.psock);
   }
 
-  SEND_STRING(&s.socket, (char *)smtp_to);
-  SEND_STRING(&s.socket, s.to);
-  SEND_STRING(&s.socket, (char *)smtp_crnl);
+  SEND_STRING(&s.psock, (char *)smtp_to);
+  SEND_STRING(&s.psock, s.to);
+  SEND_STRING(&s.psock, (char *)smtp_crnl);
   
-  SEND_STRING(&s.socket, (char *)smtp_from);
-  SEND_STRING(&s.socket, s.from);
-  SEND_STRING(&s.socket, (char *)smtp_crnl);
+  SEND_STRING(&s.psock, (char *)smtp_from);
+  SEND_STRING(&s.psock, s.from);
+  SEND_STRING(&s.psock, (char *)smtp_crnl);
   
-  SEND_STRING(&s.socket, (char *)smtp_subject);
-  SEND_STRING(&s.socket, s.subject);
-  SEND_STRING(&s.socket, (char *)smtp_crnl);
+  SEND_STRING(&s.psock, (char *)smtp_subject);
+  SEND_STRING(&s.psock, s.subject);
+  SEND_STRING(&s.psock, (char *)smtp_crnl);
 
-  SOCKET_SEND(&s.socket, s.msg, s.msglen);
+  PSOCK_SEND(&s.psock, s.msg, s.msglen);
   
-  SEND_STRING(&s.socket, (char *)smtp_crnlperiodcrnl);
+  SEND_STRING(&s.psock, (char *)smtp_crnlperiodcrnl);
 
-  SOCKET_READTO(&s.socket, ISO_nl);
+  PSOCK_READTO(&s.psock, ISO_nl);
   if(s.inputbuffer[0] != ISO_2) {
-    SOCKET_CLOSE(&s.socket);
-    SOCKET_EXIT(&s.socket);
+    PSOCK_CLOSE(&s.psock);
+    PSOCK_EXIT(&s.psock);
   }
 
-  SEND_STRING(&s.socket, (char *)smtp_quit);
+  SEND_STRING(&s.psock, (char *)smtp_quit);
 
-  SOCKET_END(&s.socket);
+  PSOCK_END(&s.psock);
 }
 /*---------------------------------------------------------------------------*/
 void
@@ -189,7 +189,7 @@ smtp_send(char *to, char *from, char *subject,
   s.msg = msg;
   s.msglen = msglen;
 
-  SOCKET_INIT(&s.socket, s.inputbuffer, sizeof(s.inputbuffer));
+  PSOCK_INIT(&s.psock, s.inputbuffer, sizeof(s.inputbuffer));
   
   return 1;
 }

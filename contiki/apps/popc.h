@@ -30,17 +30,17 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: popc.h,v 1.2 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: popc.h,v 1.3 2005/02/22 22:23:08 adamdunkels Exp $
  */
 #ifndef __POPC_H__
 #define __POPC_H__
 
-#include "socket.h"
+#include "psock.h"
 
 
 struct popc_state {
   struct pt pt;
-  struct socket s;
+  struct psock s;
   struct uip_conn *conn;
 
   struct timer timer;

@@ -30,14 +30,14 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: popc.c,v 1.2 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: popc.c,v 1.3 2005/02/22 22:23:08 adamdunkels Exp $
  */
 
 #include "contiki.h"
 #include "popc.h"
 #include "popc-strings.h"
 
-#define SEND_STRING(s, str) SOCKET_SEND(s, str, strlen(str))
+#define SEND_STRING(s, str) PSOCK_SEND(s, str, strlen(str))
 
 enum {
   COMMAND_NONE,
@@ -50,34 +50,34 @@ enum {
 static
 PT_THREAD(init_connection(struct popc_state *s))
 {
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
 
-  SOCKET_READTO(&s->s, '\n');
+  PSOCK_READTO(&s->s, '\n');
   if(s->inputbuf[0] != '+') {
-    SOCKET_CLOSE_EXIT(&s->s);    
+    PSOCK_CLOSE_EXIT(&s->s);    
   }
 
   SEND_STRING(&s->s, popc_strings_user);
   SEND_STRING(&s->s, s->user);
   SEND_STRING(&s->s, popc_strings_crnl);
   
-  SOCKET_READTO(&s->s, '\n');
+  PSOCK_READTO(&s->s, '\n');
   if(s->inputbuf[0] != '+') {
-    SOCKET_CLOSE_EXIT(&s->s);    
+    PSOCK_CLOSE_EXIT(&s->s);    
   }
 
   SEND_STRING(&s->s, popc_strings_pass);
   SEND_STRING(&s->s, s->pass);
   SEND_STRING(&s->s, popc_strings_crnl);
   
-  SOCKET_READTO(&s->s, '\n');
+  PSOCK_READTO(&s->s, '\n');
   if(s->inputbuf[0] != '+') {
-    SOCKET_CLOSE_EXIT(&s->s);    
+    PSOCK_CLOSE_EXIT(&s->s);    
   }
 
   popc_connected(s);
 
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
@@ -87,13 +87,13 @@ PT_THREAD(stat(struct popc_state *s))
   unsigned long size;
   char *ptr;
   
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
   
   SEND_STRING(&s->s, popc_strings_stat);
   
-  SOCKET_READTO(&s->s, '\n');
+  PSOCK_READTO(&s->s, '\n');
   if(s->inputbuf[0] != '+') {
-    SOCKET_CLOSE_EXIT(&s->s);    
+    PSOCK_CLOSE_EXIT(&s->s);    
   }
 
   num = 0;
@@ -110,35 +110,35 @@ PT_THREAD(stat(struct popc_state *s))
 
   popc_messages(s, num, size);
 
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 }
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(retr(struct popc_state *s))
 {
-  SOCKET_BEGIN(&s->s);
+  PSOCK_BEGIN(&s->s);
 
   SEND_STRING(&s->s, popc_strings_retr);
   snprintf(s->outputbuf, sizeof(s->outputbuf), "%d", s->num);
   SEND_STRING(&s->s, s->outputbuf);
   SEND_STRING(&s->s, popc_strings_crnl);
   
-  SOCKET_READTO(&s->s, '\n');
+  PSOCK_READTO(&s->s, '\n');
   if(s->inputbuf[0] != '+') {
-    SOCKET_CLOSE_EXIT(&s->s);    
+    PSOCK_CLOSE_EXIT(&s->s);    
   }
 
   popc_msgbegin(s);
   while(s->inputbuf[0] != '.') {
-    SOCKET_READTO(&s->s, '\n');
+    PSOCK_READTO(&s->s, '\n');
     if(s->inputbuf[0] != '.') {
-      s->inputbuf[SOCKET_DATALEN(&s->s)] = 0;
-      popc_msgline(s, s->inputbuf, SOCKET_DATALEN(&s->s));
+      s->inputbuf[PSOCK_DATALEN(&s->s)] = 0;
+      popc_msgline(s, s->inputbuf, PSOCK_DATALEN(&s->s));
     }
   }
   popc_msgend(s);
   
-  SOCKET_END(&s->s);
+  PSOCK_END(&s->s);
 
 }
 /*---------------------------------------------------------------------------*/
@@ -147,7 +147,7 @@ PT_THREAD(handle_connection(struct popc_state *s))
 {
   PT_BEGIN(&s->pt);
 
-  SOCKET_INIT(&s->s, s->inputbuf, sizeof(s->inputbuf) - 1);
+  PSOCK_INIT(&s->s, s->inputbuf, sizeof(s->inputbuf) - 1);
 
   PT_WAIT_UNTIL(&s->pt, init_connection(s));
   PT_WAIT_UNTIL(&s->pt, stat(s));  
@@ -169,7 +169,7 @@ PT_THREAD(handle_connection(struct popc_state *s))
       break;
     case COMMAND_QUIT:
       tcp_markconn(uip_conn, NULL);
-      SOCKET_CLOSE(&s->s);
+      PSOCK_CLOSE(&s->s);
       PT_EXIT(&s->pt);
       break;
     default:
