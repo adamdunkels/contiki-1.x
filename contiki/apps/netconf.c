@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.6 2003/04/17 19:00:00 adamdunkels Exp $
+ * $Id: netconf.c,v 1.7 2003/04/24 17:16:41 adamdunkels Exp $
  *
  */
 
@@ -173,7 +173,8 @@ static void
 makestrings(void)
 {
   u16_t addr[2], *addrptr;
-  
+
+#ifdef WITH_UIP
   uip_gethostaddr(addr);
   makeaddr(addr, ipaddr);
   
@@ -190,7 +191,8 @@ makestrings(void)
     makeaddr(addrptr, dnsserver);
   }
   
-  
+#endif /* WITH_UIP */
+
 }
 /*-----------------------------------------------------------------------------------*/
 static void
