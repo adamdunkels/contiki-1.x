@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: smtp.c,v 1.2 2003/04/10 09:04:50 adamdunkels Exp $
+ * $Id: smtp.c,v 1.3 2003/08/11 22:23:54 adamdunkels Exp $
  *
  */
 
@@ -230,20 +230,22 @@ senddata(void)
   }
 
   textptr += s.sendptr;
-
-  /*  printf("Senidng '%s'\n", textptr);*/
   
   if(s.textlen - s.sendptr > uip_mss()) {
     s.sentlen = uip_mss();
   } else {
     s.sentlen = s.textlen - s.sendptr;
   }
+
+  /*  textptr[s.sentlen] = 0;
+      printf("Senidng '%s'\n", textptr);*/
+  
   uip_send(textptr, s.sentlen);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 acked(void)    
-{
+{  
   s.sendptr += s.sentlen;
   s.sentlen = 0;
 
@@ -251,12 +253,15 @@ acked(void)
     switch(s.state) {
     case STATE_SEND_DATA_HEADERS:
       s.state = STATE_SEND_DATA_MESSAGE;
+      s.sendptr = s.textlen = 0;
       break;
     case STATE_SEND_DATA_MESSAGE:
       s.state = STATE_SEND_DATA_END;
+      s.sendptr = s.textlen = 0;
       break;
     case STATE_SEND_DATA_END:
       s.state = STATE_SEND_QUIT;
+      s.sendptr = s.textlen = 0;
       break;
     case STATE_SEND_QUIT:
       s.state = STATE_SEND_DONE;
@@ -264,7 +269,6 @@ acked(void)
       uip_close();
       break;
     }
-    s.sendptr = s.textlen = 0;
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -281,19 +285,21 @@ newdata(void)
   switch(s.state) {
   case STATE_SEND_NONE:       
     if(strncmp((char *)uip_appdata, smtp_220, 3) == 0) {
-      /*      printf("Got 220\n");*/
+      /*      printf("Newdata(): SEND_NONE, got 220, towards SEND_HELO\n");*/
       s.state = STATE_SEND_HELO;
+      s.sendptr = 0;
     }
     break;
   case STATE_SEND_HELO:
     if(*(char *)uip_appdata == ISO_2) {
-      /*      printf("2\n");*/
+      /*      printf("Newdata(): SEND_HELO, got 2*, towards SEND_MAIL_FROM\n");*/
       s.state = STATE_SEND_MAIL_FROM;
       s.sendptr = 0;
     }    
     break;
   case STATE_SEND_MAIL_FROM:
     if(*(char *)uip_appdata == ISO_2) {
+      /*      printf("Newdata(): SEND_MAIL_FROM, got 2*, towards SEND_RCPT_TO\n");      */
       /*      printf("2\n");*/
       s.state = STATE_SEND_RCPT_TO;
       s.textlen = s.sendptr = 0;
@@ -333,7 +339,7 @@ DISPATCHER_UIPCALL(smtp_appcall, state)
   if(uip_acked()) {
     acked();
   }
-  if(uip_newdata()) {    
+  if(uip_newdata()) {
     newdata();
   }
   if(uip_rexmit() ||
