@@ -1,17 +1,5 @@
 /**
- * \file
- * Header file for the preemptive multitasking library for Contiki.
- * \author
- * Adam Dunkels <adam@sics.se>
- *
- */
-#ifndef __MT_H__
-#define __MT_H__
-
-#include "ek.h"
-
-/**
- * \defgroup mt Contiki preemptive multi-threading library
+ * \defgroup mt Peemptive multi-threading
  * @{
  *
  * The event driven Contiki kernel does not provide multi-threading
@@ -22,7 +10,6 @@
  * specific part, which must be implemented specifically for the
  * platform that the multi-threading library should run.
  */
-
 
 /**
  * \defgroup mtarch Architecture support for multi-threading
@@ -43,6 +30,19 @@
  * for correct operation of the architecture specific support funcions.
  *
  */
+
+/**
+ * \file
+ * Header file for the preemptive multitasking library for Contiki.
+ * \author
+ * Adam Dunkels <adam@sics.se>
+ *
+ */
+#ifndef __MT_H__
+#define __MT_H__
+
+#include "ek.h"
+
 
 /**
  * An opaque structure that is used for holding the state of a thread.
@@ -329,12 +329,10 @@ void mtp_start(struct mtp_thread *t,
 
 void mtp_exit(void);
 
-/** @} */
-/** @} */
 
 void mtp_eventhandler(ek_event_t ev, ek_data_t data);
 
-
+/** @} */
 /** @} */
 #endif /* __MT_H__ */
 
