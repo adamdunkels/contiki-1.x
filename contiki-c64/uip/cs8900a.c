@@ -28,7 +28,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.6 2004/09/12 14:07:32 adamdunkels Exp $
+ * $Id: cs8900a.c,v 1.7 2004/09/18 20:44:27 adamdunkels Exp $
  *
  */
 
@@ -39,12 +39,12 @@
 #include "uip.h"
 #include "uip_arp.h"
 
-#define UIP_ETHADDR0 0x00
+/*#define UIP_ETHADDR0 0x00
 #define UIP_ETHADDR1 0x00
 #define UIP_ETHADDR2 0x00
 #define UIP_ETHADDR3 0x64
 #define UIP_ETHADDR4 0x64
-#define UIP_ETHADDR5 0x64
+#define UIP_ETHADDR5 0x64*/
 
 extern u8_t *cs8900a_rxtxreg,
   *cs8900a_txcmd,
@@ -92,9 +92,9 @@ cs8900a_init(void)
   asm("sta %v", cs8900a_packetpp);
   asm("lda #$01");
   asm("sta %v+1", cs8900a_packetpp);
-  asm("lda #%b", UIP_ETHADDR0);
+  asm("lda %v", uip_ethaddr);
   asm("sta %v", cs8900a_ppdata);
-  asm("lda #%b", UIP_ETHADDR1);
+  asm("lda %v+1", uip_ethaddr);
   asm("sta %v+1", cs8900a_ppdata);
 
   /* PACKETPP = 0x015a;
@@ -103,9 +103,9 @@ cs8900a_init(void)
   asm("sta %v", cs8900a_packetpp);
   asm("lda #$01");
   asm("sta %v+1", cs8900a_packetpp);
-  asm("lda #%b", UIP_ETHADDR2);
+  asm("lda %v+2", uip_ethaddr);
   asm("sta %v", cs8900a_ppdata);
-  asm("lda #%b", UIP_ETHADDR3);
+  asm("lda %v+3", uip_ethaddr);
   asm("sta %v+1", cs8900a_ppdata);
 
   /* PACKETPP = 0x015c;
@@ -114,9 +114,9 @@ cs8900a_init(void)
   asm("sta %v", cs8900a_packetpp);
   asm("lda #$01");
   asm("sta %v+1", cs8900a_packetpp);
-  asm("lda #%b", UIP_ETHADDR4);
+  asm("lda %v+4", uip_ethaddr);
   asm("sta %v", cs8900a_ppdata);
-  asm("lda #%b", UIP_ETHADDR5);
+  asm("lda %v+5", uip_ethaddr);
   asm("sta %v+1", cs8900a_ppdata);
 
 }
