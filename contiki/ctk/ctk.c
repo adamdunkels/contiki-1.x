@@ -41,19 +41,21 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the "ctk" console GUI toolkit for cc65
+ * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.38 2004/06/27 15:04:01 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.39 2004/07/04 11:41:39 adamdunkels Exp $
  *
  */
 
-#include "cc.h"
 #include "ek.h"
-#include "dispatcher.h"
+#include "cc.h"
+
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-conf.h"
 #include "ctk-mouse.h"
+
+#include "timer.h"
 
 #include <string.h>
 
@@ -95,9 +97,16 @@ static unsigned char iconx, icony;
 #define ICONY_DELTA  5
 #define ICONY_MAX    (height - 5)
 
-static void ctk_idle(void);
-static struct dispatcher_proc p =
-  {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, NULL, NULL)};
+#ifndef ctk_arch_isprint
+unsigned char ctk_arch_isprint(char c);
+#endif /* ctk_arch_isprint */
+
+EK_POLLHANDLER(ctk_poll);
+EK_EVENTHANDLER(ctk_eventhandler, ev, data);
+EK_PROCESS(p, "CTK Contiki GUI", EK_PRIO_NORMAL, ctk_eventhandler,
+	   ctk_poll, NULL);
+/*static struct ek_proc p =
+  {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, NULL, NULL)};*/
 static ek_id_t ctkid;
 
 /** @} */
@@ -106,7 +115,7 @@ static ek_id_t ctkid;
  * \addtogroup signals System signals
  * @{
  */
-ek_signal_t
+ek_event_t
 
   /**
    * Emitted for every key being pressed.
@@ -155,7 +164,7 @@ ek_signal_t
 #if CTK_CONF_SCREENSAVER
 /** Emitted when the user has been idle long enough for the
     screensaver to start. */
-ek_signal_t ctk_signal_screensaver_stop,
+ek_event_t ctk_signal_screensaver_stop,
   /** Emitted when the user presses a key or moves the mouse when the
       screensaver is active. */
   ctk_signal_screensaver_start;
@@ -174,7 +183,8 @@ unsigned short mouse_x, mouse_y, mouse_button;
 
 static unsigned short screensaver_timer = 0;
 unsigned short ctk_screensaver_timeout = (5*60);
-static ek_clock_t start, current;
+/*static ek_clock_t start, current;*/
+static struct timer timer;
 
 #if CTK_CONF_MENUS
 /*-----------------------------------------------------------------------------------*/
@@ -213,7 +223,7 @@ make_desktopmenu(void)
 void
 ctk_init(void)
 {
-  ctkid = dispatcher_start(&p);
+  ctkid = ek_start(&p);
   
   windows = NULL;
   dialog = NULL;
@@ -235,28 +245,29 @@ ctk_init(void)
   width = ctk_draw_width();
   
   desktop_window.active = NULL;
+  desktop_window.owner = ctkid;
   
-  ctk_signal_keypress = dispatcher_sigalloc();
+  ctk_signal_keypress = ek_alloc_event();
   
   ctk_signal_button_activate =
-    ctk_signal_widget_activate = dispatcher_sigalloc();
+    ctk_signal_widget_activate = ek_alloc_event();
   
   ctk_signal_button_hover =
     ctk_signal_hyperlink_hover =
-    ctk_signal_widget_select = dispatcher_sigalloc();
+    ctk_signal_widget_select = ek_alloc_event();
   
-  ctk_signal_hyperlink_activate = dispatcher_sigalloc();
+  ctk_signal_hyperlink_activate = ek_alloc_event();
 
-  ctk_signal_menu_activate = dispatcher_sigalloc();
-  ctk_signal_window_close = dispatcher_sigalloc();
+  ctk_signal_menu_activate = ek_alloc_event();
+  ctk_signal_window_close = ek_alloc_event();
 
-  ctk_signal_pointer_move = dispatcher_sigalloc();
-  ctk_signal_pointer_button = dispatcher_sigalloc();
+  ctk_signal_pointer_move = ek_alloc_event();
+  ctk_signal_pointer_button = ek_alloc_event();
 
 
 #if CTK_CONF_SCREENSAVER
-  ctk_signal_screensaver_start = dispatcher_sigalloc();
-  ctk_signal_screensaver_stop = dispatcher_sigalloc();
+  ctk_signal_screensaver_start = ek_alloc_event();
+  ctk_signal_screensaver_stop = ek_alloc_event();
 #endif /* CTK_CONF_SCREENSAVER */
     
 
@@ -267,7 +278,8 @@ ctk_init(void)
 
   redraw = REDRAW_ALL;
 
-  start = ek_clock();
+  /*  start = ek_clock();*/
+  timer_set(&timer, CLOCK_SECOND);
 }
 
 /**
@@ -464,18 +476,29 @@ ctk_window_close(struct ctk_window *w)
 static void 
 make_windowbuttons(CC_REGISTER_ARG struct ctk_window *window)
 {
+  unsigned char placement;
+
+  if(ctk_draw_windowtitle_height >= 2) {
+    placement = -1 - ctk_draw_windowtitle_height/2;
+  } else {
+    placement = -1;
+  }
 #if CTK_CONF_WINDOWMOVE
-  CTK_BUTTON_NEW(&window->titlebutton, 0, -1, window->titlelen, window->title);
+  CTK_BUTTON_NEW(&window->titlebutton, 0, placement,
+		 window->titlelen, window->title);
 #else
-  CTK_LABEL_NEW(&window->titlebutton, 0, -1, window->titlelen, 1, window->title);
+  CTK_LABEL_NEW(&window->titlebutton, 0, placement,
+		window->titlelen, 1, window->title);
 #endif /* CTK_CONF_WINDOWMOVE */
   CTK_WIDGET_ADD(window, &window->titlebutton);
 
 
 #if CTK_CONF_WINDOWCLOSE
-  CTK_BUTTON_NEW(&window->closebutton, window->w - 3, -1, 1, "x");
+  CTK_BUTTON_NEW(&window->closebutton, window->w - 3, placement,
+		 1, "x");
 #else
-  CTK_LABEL_NEW(&window->closebutton, window->w - 4, -1, 3, 1, "   ");
+  CTK_LABEL_NEW(&window->closebutton, window->w - 4, placement,
+		3, 1, "   ");
 #endif /* CTK_CONF_WINDOWCLOSE */  
   CTK_WIDGET_ADD(window, &window->closebutton);
 }
@@ -615,7 +638,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
 void
 ctk_desktop_redraw(struct ctk_desktop *d)
 {
-  if(DISPATCHER_CURRENT() == ctkid) {
+  if(EK_CURRENT() == &p) {
     if(mode == CTK_MODE_NORMAL ||
        mode == CTK_MODE_WINDOWMOVE) {
       do_redraw_all(1, height);
@@ -678,7 +701,7 @@ window_new(CC_REGISTER_ARG struct ctk_window *window,
   if(h >= height - 3) {
     window->y = 0;
   } else {
-    window->y = (height - h - 1) / 2;
+    window->y = (height - h - ctk_draw_windowtitle_height) / 2;
   }
 
   window->w = w;
@@ -690,7 +713,8 @@ window_new(CC_REGISTER_ARG struct ctk_window *window,
     window->titlelen = 0;
   }
   window->next = window->prev = NULL;
-  window->owner = DISPATCHER_CURRENT();
+  /*  window->owner = DISPATCHER_CURRENT();*/
+  window->owner = EK_PROC_ID(EK_CURRENT());
   window->active = window->inactive = window->focused = NULL;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -969,17 +993,14 @@ select_widget(struct ctk_widget *focus)
        for those widgets that support it. */
     
     if(window->focused->type == CTK_WIDGET_HYPERLINK) {    
-      dispatcher_emit(ctk_signal_hyperlink_hover, window->focused,
-		      window->owner);
+      ek_post(window->owner, ctk_signal_hyperlink_hover, window->focused);
     } else if(window->focused->type == CTK_WIDGET_BUTTON) {    
-      dispatcher_emit(ctk_signal_button_hover, window->focused,
-		      window->owner);      
+      ek_post(window->owner, ctk_signal_button_hover, window->focused);      
     } 
     
     add_redrawwidget(window->focused);
 
-    dispatcher_emit(ctk_signal_widget_select, focus,
-		    focus->window->owner);
+    ek_post(focus->window->owner, ctk_signal_widget_select, focus);
 
   }
 
@@ -1119,7 +1140,7 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
   if(w->type == CTK_WIDGET_BUTTON) {
     if(w == (struct ctk_widget *)&windows->closebutton) {
 #if CTK_CONF_WINDOWCLOSE
-      dispatcher_emit(ctk_signal_window_close, windows, w->window->owner);
+      ek_post(w->window->owner, ctk_signal_window_close, windows);
       ctk_window_close(windows);
       return REDRAW_ALL;
 #endif /* CTK_CONF_WINDOWCLOSE */
@@ -1128,17 +1149,18 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
       mode = CTK_MODE_WINDOWMOVE;
 #endif /* CTK_CONF_WINDOWCLOSE */
     } else {
-      dispatcher_emit(ctk_signal_widget_activate, w,
-		      w->window->owner);
+      ek_post(w->window->owner, ctk_signal_widget_activate, w);
     }
 #if CTK_CONF_ICONS
   } else if(w->type == CTK_WIDGET_ICON) {
-    dispatcher_emit(ctk_signal_widget_activate, w,
-		    w->widget.icon.owner);
+    if(w->widget.icon.owner != EK_ID_NONE) {
+      ek_post(w->widget.icon.owner, ctk_signal_widget_activate, w);
+    } else {
+      ek_post(w->window->owner, ctk_signal_widget_activate, w);
+    }
 #endif /* CTK_CONF_ICONS */
   } else if(w->type == CTK_WIDGET_HYPERLINK) {    
-    dispatcher_emit(ctk_signal_hyperlink_activate, w,
-		    DISPATCHER_BROADCAST);
+    ek_post(EK_BROADCAST, ctk_signal_hyperlink_activate, w);
   } else if(w->type == CTK_WIDGET_TEXTENTRY) {
     if(w->widget.textentry.state == CTK_TEXTENTRY_NORMAL) {      
       w->widget.textentry.state = CTK_TEXTENTRY_EDIT;
@@ -1148,14 +1170,12 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
       }
     } else if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT) {
       w->widget.textentry.state = CTK_TEXTENTRY_NORMAL;
-      dispatcher_emit(ctk_signal_widget_activate, w,
-		      w->window->owner);      
+      ek_post(w->window->owner, ctk_signal_widget_activate, w);
     }
     add_redrawwidget(w);
     return REDRAW_WIDGETS;
   } else {
-    dispatcher_emit(ctk_signal_widget_activate, w,
-		    w->window->owner);
+    ek_post(w->window->owner, ctk_signal_widget_activate, w);
   }
   return REDRAW_NONE;
 }
@@ -1259,8 +1279,7 @@ activate_menu(void)
       }
     }
   } else {
-    dispatcher_emit(ctk_signal_menu_activate, menus.open,
-		    DISPATCHER_BROADCAST);
+    ek_post(EK_BROADCAST, ctk_signal_menu_activate, menus.open);
   }
   menus.open = NULL;
   return REDRAW_MENUPART;
@@ -1307,14 +1326,13 @@ menus_input(ctk_arch_key_t c)
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
 static void
-timer(void)
+handle_timer(void)
 {
   if(mode == CTK_MODE_NORMAL) {
     ++screensaver_timer;
     if(screensaver_timer >= ctk_screensaver_timeout) {
 #if CTK_CONF_SCREENSAVER
-      dispatcher_emit(ctk_signal_screensaver_start, NULL,
-		      DISPATCHER_BROADCAST);
+      ek_post(EK_BROADCAST, ctk_signal_screensaver_start, NULL);
 #ifdef CTK_SCREENSAVER_INIT
       CTK_SCREENSAVER_INIT();
 #endif /* CTK_SCREENSAVER_INIT */
@@ -1339,8 +1357,7 @@ unfocus_widget(CC_REGISTER_ARG struct ctk_widget *w)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-ctk_idle(void)     
+EK_POLLHANDLER(ctk_poll)
 {
   static ctk_arch_key_t c;
   static unsigned char i;
@@ -1356,12 +1373,16 @@ ctk_idle(void)
 #endif /* CTK_CONF_MOUSE_SUPPORT */
 
 
-  current = ek_clock();
+  /*  current = ek_clock();
   
   if((current - start) >= CLK_TCK) {
     timer();
     start = current;
-  }    
+    } */
+  if(timer_expired(&timer)) {
+    timer_reset(&timer);
+    handle_timer();
+  }
 
 #if CTK_CONF_MENUS
   if(menus.open != NULL) {
@@ -1403,8 +1424,7 @@ ctk_idle(void)
        || mouse_moved || mouse_button_changed
 #endif /* CTK_CONF_MOUSE_SUPPORT */
        ) {      
-      dispatcher_emit(ctk_signal_screensaver_stop, NULL,
-		      DISPATCHER_BROADCAST);
+      ek_post(EK_BROADCAST, ctk_signal_screensaver_stop, NULL);
       mode = CTK_MODE_NORMAL;
     }
   } else
@@ -1503,9 +1523,12 @@ ctk_idle(void)
 	      
 	      /* Check if the mouse is within the window. */
 	      if(mxc >= window->x &&
-		 mxc <= window->x + window->w &&
+		 mxc <= window->x + window->w +
+		        2 * ctk_draw_windowborder_width &&
 		 myc >= window->y &&
-		 myc <= window->y + window->h) {
+		 myc <= window->y + window->h +
+		 ctk_draw_windowtitle_height +
+		 ctk_draw_windowborder_height) {
 		break;       	
 	      }
 	    }
@@ -1547,8 +1570,8 @@ ctk_idle(void)
 	      /* Find out which widget currently is under the mouse
 		 pointer and give it focus, unless it already has
 		 focus. */
-	      mxc = mxc - window->x - 1;
-	      myc = myc - window->y - 1;      
+	      mxc = mxc - window->x - ctk_draw_windowborder_width;
+	      myc = myc - window->y - ctk_draw_windowtitle_height;
 	    
 	      /* See if the mouse pointer is on a widget. If so, it
 		 should be selected and, if the button is clicked,
@@ -1577,8 +1600,7 @@ ctk_idle(void)
 		 (window != &desktop_window ||
 		  windows == NULL)) {
 
-		dispatcher_emit(ctk_signal_pointer_move, NULL,
-				window->owner);
+		ek_post(window->owner, ctk_signal_pointer_move, NULL);
 
 		/* If there was a focused widget that is not below the
 		   mouse pointer, we remove focus from the widget and
@@ -1601,9 +1623,8 @@ ctk_idle(void)
 	      }
 	    
 	      if(mouse_button_changed) {
-		dispatcher_emit(ctk_signal_pointer_button,
-				(ek_data_t)mouse_button,
-				window->owner);
+		ek_post(window->owner, ctk_signal_pointer_button,
+			(ek_data_t)mouse_button);
 		if(mouse_clicked && widget != NULL) {
 		  select_widget(widget);
 		  redraw |= activate(widget);
@@ -1684,8 +1705,7 @@ ctk_idle(void)
 	    } else {
 	      /*	      window->focused = NULL;*/
 	      unfocus_widget(window->focused);
-	      dispatcher_post_synch(ctk_signal_keypress, (void *)c,
-				    window->owner);
+	      ek_post_synch(window->owner, ctk_signal_keypress, (void *)c);
 	    }
 	  }
 	  break;
@@ -1723,8 +1743,10 @@ ctk_idle(void)
 	window->x = mxc;
       }
 
-      if(window->h + myc + 2 >= height) {
-	window->y = height - 2 - window->h;
+      if(window->h + myc + ctk_draw_windowtitle_height +
+	 ctk_draw_windowborder_height >= height) {
+	window->y = height - window->h -
+	  ctk_draw_windowtitle_height - ctk_draw_windowborder_height;
       } else {
 	window->y = myc;
       }
@@ -1813,6 +1835,11 @@ ctk_idle(void)
   redraw = 0;
   redraw_widgetptr = 0;
   
+}
+/*-----------------------------------------------------------------------------------*/
+EK_EVENTHANDLER(ctk_eventhandler, ev, data)
+{
+
 }
 /*-----------------------------------------------------------------------------------*/
 /** @} */
