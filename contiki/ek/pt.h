@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: pt.h,v 1.7 2005/02/22 22:41:05 adamdunkels Exp $
+ * $Id: pt.h,v 1.8 2005/03/14 13:53:37 adamdunkels Exp $
  */
 
 /**
@@ -109,8 +109,7 @@ struct pt {
  *
  * \hideinitializer
  */
-#define PT_INIT(pt)				\
-  LC_INIT((pt)->lc)
+#define PT_INIT(pt)   LC_INIT((pt)->lc)
 
 /**
  * Declare the start of a protothread inside the C function
@@ -190,8 +189,7 @@ struct pt {
  *
  * \hideinitializer
  */
-#define PT_WAIT_WHILE(pt, cond)			\
-  PT_WAIT_UNTIL((pt), !(cond))
+#define PT_WAIT_WHILE(pt, cond)  PT_WAIT_UNTIL((pt), !(cond))
 
 
 /**
@@ -229,8 +227,7 @@ struct pt {
  *
  * \hideinitializer 
  */
-#define PT_WAIT_THREAD(pt, thread)		\
-  PT_WAIT_UNTIL((pt), (thread))
+#define PT_WAIT_THREAD(pt, thread) PT_WAIT_WHILE((pt), PT_SCHEDULE(thread))
 
 /**
  * Spawn a child protothread and wait until it exits.
@@ -239,13 +236,14 @@ struct pt {
  * macro can only be used within a protothread.
  *
  * \param pt A pointer to the protothread control structure.
+ * \param child A pointer to the child protothread's control structure.
  * \param thread The child protothread with arguments
  *
  * \hideinitializer
  */
-#define PT_SPAWN(pt, thread)			\
+#define PT_SPAWN(pt, child, thread)		\
   do {						\
-    PT_INIT((pt));				\
+    PT_INIT((child));				\
     PT_WAIT_THREAD((pt), (thread));		\
   } while(0)
 
@@ -321,6 +319,76 @@ struct pt {
  * \hideinitializer
  */
 #define PT_SCHEDULE(f) (f == PT_THREAD_WAITING)
+
+/**
+ * Declarare that a protothread can yield.
+ *
+ * If a protothread should be able to yield with the PT_YIELD()
+ * statement, this flag must be placed first in the protothread's
+ * function body.
+ *
+ * Example:
+ \code
+ static
+ PT_THREAD(loop_thread(struct pt *pt))
+ {
+   PT_YIELDING();
+   static int i;
+
+   PT_BEGIN(pt);
+   
+   for(i = 0; i < 200; ++i) {
+     handle_item(i);
+     PT_YIELD(pt);
+   }
+   
+   PT_END(pt);
+ }
+ \endcode
+ *
+ * \hideinitializer
+ */
+#define PT_YIELDING() char pt_yielded = 1
+
+/**
+ * Yield from the current protothread.
+ *
+ * This function will yield the protothread, thereby allowing other
+ * processing to take place in the system.
+ *
+ * \note The PT_YIELDING() flag must be placed first in the
+ * protothread's body if the PT_YIELD() function should be used.
+ *
+ * Example
+ \code
+static
+PT_THREAD(fade(struct pt *pt))
+{
+  PT_YIELDING();
+  static int delay;
+  
+  PT_BEGIN(pt);
+  
+  for(delay = 3980; delay > 20; delay -= 20) {
+    leds_red(LEDS_ON);
+    clock_delay(4000 - delay);
+    leds_red(LEDS_OFF);
+    clock_delay(delay);
+    PT_YIELD(pt);
+  }
+  
+  PT_END(pt);
+}
+ \endcode
+ * \param pt A pointer to the protothread control structure.
+ *
+ * \hideinitializer
+ */
+#define PT_YIELD(pt)				\
+  do {						\
+    pt_yielded = 0;				\
+    PT_WAIT_UNTIL(pt, pt_yielded);		\
+  } while(0)
 
 #endif /* __PT_H__ */
 
