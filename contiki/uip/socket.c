@@ -100,8 +100,7 @@ PT_THREAD(socket_readto(register struct socket *socket, unsigned char c))
     }
   } while((uipbuf_bufto(&socket->buf, c,
 			&socket->readptr,
-			&socket->readlen) & UIPBUF_FOUND) == 0 &&
-	  socket->readlen > 0);
+			&socket->readlen) & UIPBUF_FOUND) == 0);
 
   if(uipbuf_len(&socket->buf) == 0) {
     socket->state = SOCKET_STATE_NONE;
