@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.7 2004/09/13 21:48:42 adamdunkels Exp $
+ * $Id: httpd-cgi.c,v 1.8 2005/02/23 21:18:05 oliverschmidt Exp $
  *
  */
 
@@ -112,11 +112,11 @@ generate_file_stats(void *arg)
 static
 PT_THREAD(file_stats(struct httpd_state *s, char *ptr))
 {
-  SOCKET_BEGIN(&s->sout);
+  PSOCK_BEGIN(&s->sout);
 
-  SOCKET_GENERATOR_SEND(&s->sout, generate_file_stats, ptr);
+  PSOCK_GENERATOR_SEND(&s->sout, generate_file_stats, ptr);
   
-  SOCKET_END(&s->sout);
+  PSOCK_END(&s->sout);
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned short
@@ -145,15 +145,15 @@ static
 PT_THREAD(tcp_stats(struct httpd_state *s, char *ptr))
 {
   
-  SOCKET_BEGIN(&s->sout);
+  PSOCK_BEGIN(&s->sout);
 
   for(s->count = 0; s->count < UIP_CONNS; ++s->count) {   
     if((uip_conns[s->count].tcpstateflags & TS_MASK) != CLOSED) {
-      SOCKET_GENERATOR_SEND(&s->sout, make_tcp_stats, s);
+      PSOCK_GENERATOR_SEND(&s->sout, make_tcp_stats, s);
     }
   }
 
-  SOCKET_END(&s->sout);
+  PSOCK_END(&s->sout);
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned short
@@ -176,15 +176,15 @@ PT_THREAD(processes(struct httpd_state *s, char *ptr))
 {
   struct ek_proc *p;
   
-  SOCKET_BEGIN(&s->sout);
+  PSOCK_BEGIN(&s->sout);
 
   for(s->count = 0; s->count < EK_CONF_MAXPROCS; ++s->count) {
     p = ek_process(s->count);
     if(p != NULL) {
-      SOCKET_GENERATOR_SEND(&s->sout, make_processes, p);
+      PSOCK_GENERATOR_SEND(&s->sout, make_processes, p);
     }    
   }
   
-  SOCKET_END(&s->sout);
+  PSOCK_END(&s->sout);
 }
 /*-----------------------------------------------------------------------------------*/

@@ -30,21 +30,20 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd.c,v 1.7 2004/12/22 09:36:10 oliverschmidt Exp $
+ * $Id: httpd.c,v 1.8 2005/02/23 21:18:05 oliverschmidt Exp $
  */
 
 #include "contiki.h"
 #include "httpd.h"
 #include "httpd-fs.h"
 #include "httpd-cgi.h"
-#include "socket.h"
 
 #include <string.h>
 
 #define STATE_WAITING 0
 #define STATE_OUTPUT  1
 
-#define SEND_STRING(s, str) SOCKET_SEND(s, str, strlen(str)) 
+#define SEND_STRING(s, str) PSOCK_SEND(s, str, strlen(str)) 
 MEMB(conns, sizeof(struct httpd_state), 8);
 
 /*---------------------------------------------------------------------------*/
@@ -66,15 +65,15 @@ generate(void *state)
 static
 PT_THREAD(send_file(struct httpd_state *s))
 {
-  SOCKET_BEGIN(&s->sout);
+  PSOCK_BEGIN(&s->sout);
   
   do {
-    SOCKET_GENERATOR_SEND(&s->sout, generate, s);
+    PSOCK_GENERATOR_SEND(&s->sout, generate, s);
     s->file.len -= s->len;
     s->file.data += s->len;
   } while(s->file.len > 0);
       
-  SOCKET_END(&s->sout);  
+  PSOCK_END(&s->sout);  
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -134,7 +133,7 @@ PT_THREAD(send_headers(struct httpd_state *s, char *statushdr))
 {
   char *ptr;
 
-  SOCKET_BEGIN(&s->sout);
+  PSOCK_BEGIN(&s->sout);
 
   SEND_STRING(&s->sout, statushdr);
   SEND_STRING(&s->sout, "Server: Contiki/1.2-devel0\r\n");
@@ -153,14 +152,12 @@ PT_THREAD(send_headers(struct httpd_state *s, char *statushdr))
   } else {
     SEND_STRING(&s->sout, "Content-type: application/octet-stream\r\n\r\n");
   }
-  SOCKET_END(&s->sout);
+  PSOCK_END(&s->sout);
 }
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(handle_output(struct httpd_state *s))
 {
-  char *ptr;
-
   PT_BEGIN(&s->outputpt);
  
   if(!httpd_fs_open(s->filename, &s->file)) {
@@ -180,31 +177,31 @@ PT_THREAD(handle_output(struct httpd_state *s))
 		     send_file(s));
     }
   }
-  SOCKET_CLOSE(&s->sout);    
+  PSOCK_CLOSE(&s->sout);    
   PT_END(&s->outputpt);
 }
 /*---------------------------------------------------------------------------*/
 static
 PT_THREAD(handle_input(struct httpd_state *s))
 {
-  SOCKET_BEGIN(&s->sin);
+  PSOCK_BEGIN(&s->sin);
 
-  SOCKET_READTO(&s->sin, ' ');
+  PSOCK_READTO(&s->sin, ' ');
 
   
   if(strncmp(s->inputbuf, "GET ", 4) != 0) {
-    SOCKET_CLOSE_EXIT(&s->sin);
+    PSOCK_CLOSE_EXIT(&s->sin);
   }
-  SOCKET_READTO(&s->sin, ' ');
+  PSOCK_READTO(&s->sin, ' ');
 
   if(s->inputbuf[0] != '/') {
-    SOCKET_CLOSE_EXIT(&s->sin);
+    PSOCK_CLOSE_EXIT(&s->sin);
   }
 
   if(s->inputbuf[1] == ' ') {
     strncpy(s->filename, "/index.html", sizeof(s->filename));
   } else {
-    s->inputbuf[SOCKET_DATALEN(&s->sin) - 1] = 0;
+    s->inputbuf[PSOCK_DATALEN(&s->sin) - 1] = 0;
     strncpy(s->filename, &s->inputbuf[0], sizeof(s->filename));
   }
 
@@ -213,15 +210,15 @@ PT_THREAD(handle_input(struct httpd_state *s))
   s->state = STATE_OUTPUT;
 
   while(1) {
-    SOCKET_READTO(&s->sin, '\n');
+    PSOCK_READTO(&s->sin, '\n');
 
     if(strncmp(s->inputbuf, "Referer:", 8) == 0) {
-      s->inputbuf[SOCKET_DATALEN(&s->sin) - 2] = 0;
+      s->inputbuf[PSOCK_DATALEN(&s->sin) - 2] = 0;
       webserver_log(&s->inputbuf[9]);
     }
   }
   
-  SOCKET_END(&s->sin);
+  PSOCK_END(&s->sin);
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -249,9 +246,9 @@ httpd_appcall(void *state)
       return;
     }
     tcp_markconn(uip_conn, s);
-    SOCKET_INIT(&s->sin, s->inputbuf, sizeof(s->inputbuf) - 1);
-    SOCKET_INIT(&s->sout, s->inputbuf, sizeof(s->inputbuf) - 1);
-    /*    SOCKET_INIT(&s->scgi, s->inputbuf, sizeof(s->inputbuf) - 1);*/
+    PSOCK_INIT(&s->sin, s->inputbuf, sizeof(s->inputbuf) - 1);
+    PSOCK_INIT(&s->sout, s->inputbuf, sizeof(s->inputbuf) - 1);
+    /*    PSOCK_INIT(&s->scgi, s->inputbuf, sizeof(s->inputbuf) - 1);*/
     PT_INIT(&s->outputpt);
     s->state = STATE_WAITING;
     timer_set(&s->timer, CLOCK_SECOND * 10);

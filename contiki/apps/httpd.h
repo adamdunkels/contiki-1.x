@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.6 2004/09/12 07:15:00 adamdunkels Exp $
+ * $Id: httpd.h,v 1.7 2005/02/23 21:18:05 oliverschmidt Exp $
  *
  */
 
@@ -37,12 +37,12 @@
 
 #include "contiki.h"
 
-#include "socket.h"
+#include "psock.h"
 #include "httpd-fs.h"
 
 struct httpd_state {
   struct timer timer;
-  struct socket sin, sout;
+  struct psock sin, sout;
   struct pt outputpt, scriptpt;
   char inputbuf[50];
   char filename[20];
