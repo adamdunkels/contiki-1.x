@@ -32,11 +32,12 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: c64-fs.c,v 1.7 2003/08/20 19:56:16 adamdunkels Exp $
+ * $Id: c64-fs.c,v 1.8 2003/08/24 22:28:37 adamdunkels Exp $
  *
  */
 
 #include "c64-dio.h"
+#include "c64-dio-asm.h"
 #include "c64-fs.h"
 
 #include <string.h>
@@ -100,26 +101,85 @@ c64_fs_open(const char *name, register struct c64_fs_file *f)
 int __fastcall__
 c64_fs_read(register struct c64_fs_file *f, char *buf, int len)
 {
-  int i;
+  static int i;
 
   /* Check if current block is already in buffer, and if not read it
      from disk. */
-  if(_c64_fs_filebuftrack != f->track ||
+
+#if NOASM
+  if(f->track != _c64_fs_filebuftrack ||
      _c64_fs_filebufsect != f->sect) {
     _c64_fs_filebuftrack = f->track;
     _c64_fs_filebufsect = f->sect;
-    c64_dio_read_block(_c64_fs_filebuftrack, _c64_fs_filebufsect, _c64_fs_filebuf);
+    c64_dio_read_block(_c64_fs_filebuftrack, _c64_fs_filebufsect,
+		       _c64_fs_filebuf);
   }
+#else /* NOASM */
+  asm("ldy #%b", offsetof(struct c64_fs_file, track));
+  asm("lda (regbank+%b),y", 4);
+  asm("cmp %v", _c64_fs_filebuftrack);
+  asm("bne doblock");
+  
+  asm("ldy #%b", offsetof(struct c64_fs_file, sect));
+  asm("lda (regbank+%b),y", 4);
+  asm("cmp %v", _c64_fs_filebufsect);
+  asm("bne doblock");
+
+  asm("jmp noblock");
+
+  asm("doblock:");
+  
+  asm("ldy #%b", offsetof(struct c64_fs_file, track));
+  asm("lda (regbank+%b),y", 4);
+  asm("sta %v", _c64_fs_filebuftrack);
+  asm("sta %v", c64_dio_asm_track);
+  
+  asm("ldy #%b", offsetof(struct c64_fs_file, sect));
+  asm("lda (regbank+%b),y", 4);
+  asm("sta %v", _c64_fs_filebufsect);
+  asm("sta %v", c64_dio_asm_sector);
+
+  asm("lda #<(%v)", _c64_fs_filebuf);
+  asm("sta %v", c64_dio_asm_ptr);
+  asm("lda #>(%v)", _c64_fs_filebuf);
+  asm("sta %v+1", c64_dio_asm_ptr);
+
+  asm("jsr %v", c64_dio_asm_read_block);
+
+  asm("noblock:");
+
+#endif /* NOASM */
 
   if(_c64_fs_filebuf[0] == 0 &&
      f->ptr == _c64_fs_filebuf[1]) {
     return 0; /* EOF */
   }
-  
+
   for(i = 0; i < len; ++i) {
+#if NOASM    
     *buf = _c64_fs_filebuf[f->ptr];
-    
     ++f->ptr;
+#else /* NOASM */	
+    asm("ldy #%o+1", buf);
+    asm("jsr ldaxysp");
+    asm("sta ptr2");
+    asm("stx ptr2+1");
+
+    asm("ldy #%b", offsetof(struct c64_fs_file, ptr));
+    asm("lda (regbank+%b),y", 4);    
+    asm("tax");
+
+    asm("ldy #0");
+    asm("lda %v,x", _c64_fs_filebuf);
+    asm("sta (ptr2),y");
+
+    asm("inx");
+    asm("txa");
+    asm("ldy #%b", offsetof(struct c64_fs_file, ptr));
+    asm("sta (regbank+%b),y", 4);    
+#endif /* NOASM */
+
+    
     if(_c64_fs_filebuf[0] == 0) {
       if(f->ptr == _c64_fs_filebuf[1]) {
 	/* End of file reached, we return the amount of bytes read so
