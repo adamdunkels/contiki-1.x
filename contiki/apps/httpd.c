@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.c,v 1.1 2003/05/28 05:21:51 adamdunkels Exp $
+ * $Id: httpd.c,v 1.2 2003/06/30 20:42:49 adamdunkels Exp $
  *
  */
 
@@ -82,19 +82,25 @@ static void next_scriptstate(void);
 #define ISO_hash     0x23
 #define ISO_period   0x2e
 
-#define HTTPD_CONF_NUMCONNS 10
+#define HTTPD_CONF_NUMCONNS UIP_CONNS
 static struct httpd_state conns[HTTPD_CONF_NUMCONNS];
+static u8_t i;
 /*-----------------------------------------------------------------------------------*/
 static struct httpd_state *
 alloc_state(void)
 {
-  u8_t i;
-
+  
   for(i = 0; i < HTTPD_CONF_NUMCONNS; ++i) {
     if(conns[i].state == HTTP_DEALLOCATED) {
       return &conns[i];
     }
   }
+
+  /* We are overloaded! XXX: we'll just kick all other connections! */
+  for(i = 0; i < HTTPD_CONF_NUMCONNS; ++i) {
+    conns[i].state = HTTP_DEALLOCATED;
+  }
+  
   return NULL;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -111,6 +117,10 @@ httpd_init(void)
   
   /* Listen to port 80. */
   dispatcher_uiplisten(80);
+
+  for(i = 0; i < HTTPD_CONF_NUMCONNS; ++i) {
+    conns[i].state = HTTP_DEALLOCATED;
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 DISPATCHER_UIPCALL(httpd_appcall, state)
@@ -137,7 +147,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
     if(hs == NULL) {
       hs = alloc_state();
       if(hs == NULL) {
-	uip_abort();
+	uip_close();
 	return;
       }
       dispatcher_markconn(uip_conn, (void *)hs);
@@ -150,18 +160,30 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
        connection yet. */
     hs->state = HTTP_NOGET;
     hs->count = 0;
+    hs->poll = 0;
+  } else if(uip_closed() || uip_aborted()) {
+    if(hs != NULL) {
+      dealloc_state(hs);
+    }
     return;
-
   } else if(uip_poll()) {
     /* If we are polled ten times, we abort the connection. This is
        because we don't want connections lingering indefinately in
        the system. */
-    if(hs->count++ >= 10) {
-      uip_abort();
-      dealloc_state(hs);
+    if(hs != NULL) {
+      if(hs->state == HTTP_DEALLOCATED) {
+	uip_abort();
+      } else if(hs->poll++ >= 100) {
+	uip_abort();
+	dealloc_state(hs);
+      }
     }
     return;
-  } else if(uip_newdata() && hs->state == HTTP_NOGET) {
+  }
+
+
+  if(uip_newdata() && hs->state == HTTP_NOGET) {
+    hs->poll = 0;
     /* This is the first data we receive, and it should contain a
        GET. */
       
@@ -188,6 +210,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
 
     PRINT("request for file ");
     PRINTLN(&uip_appdata[4]);
+    webserver_log_file(uip_conn->ripaddr, &uip_appdata[4]);
     /* Check for a request for "/". */
     if(uip_appdata[4] == ISO_slash &&
        uip_appdata[5] == 0) {
@@ -229,7 +252,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
        into the file and send back more data. If we are out of data to
        send, we close the connection. */
     if(uip_acked()) {
-	
+      hs->poll = 0;	
       if(hs->count >= uip_mss()) {
 	hs->count -= uip_mss();
 	hs->dataptr += uip_mss();
@@ -260,6 +283,7 @@ DISPATCHER_UIPCALL(httpd_appcall, state)
   }
 
   if(hs->state != HTTP_FUNC && !uip_poll()) {
+    hs->poll = 0;
     /* Send a piece of data, but not more than the MSS of the
        connection. */
     uip_send(hs->dataptr,
