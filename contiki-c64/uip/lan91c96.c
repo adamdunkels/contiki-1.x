@@ -32,16 +32,9 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.10 2005/03/13 21:21:15 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.11 2005/03/14 23:01:36 oliverschmidt Exp $
  *
  */
-
-#define UIP_ETHADDR0 0x00
-#define UIP_ETHADDR1 0x0d
-#define UIP_ETHADDR2 0x60
-#define UIP_ETHADDR3 0x80
-#define UIP_ETHADDR4 0x3d
-#define UIP_ETHADDR5 0xb9
 
 #include "lan91c96.h"
 #include "uip.h"
@@ -147,17 +140,17 @@ L2:
   asm("sta %w", ETHCTR+1);
   
   /* Set MAC address */
-  asm("lda #%b", (unsigned)UIP_ETHADDR0);
+  asm("lda %v", uip_ethaddr);
   asm("sta %w", ETHIAR);
-  asm("lda #%b", (unsigned)UIP_ETHADDR1);
+  asm("lda %v+1", uip_ethaddr);
   asm("sta %w", ETHIAR+1);
-  asm("lda #%b", (unsigned)UIP_ETHADDR2);
+  asm("lda %v+2", uip_ethaddr);
   asm("sta %w", ETHIAR+2);
-  asm("lda #%b", (unsigned)UIP_ETHADDR3);
+  asm("lda %v+3", uip_ethaddr);
   asm("sta %w", ETHIAR+3);
-  asm("lda #%b", (unsigned)UIP_ETHADDR4);
+  asm("lda %v+4", uip_ethaddr);
   asm("sta %w", ETHIAR+4);
-  asm("lda #%b", (unsigned)UIP_ETHADDR5);
+  asm("lda %v+5", uip_ethaddr);
   asm("sta %w", ETHIAR+5);
 
   BANK(2);
