@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki VNC server
  *
- * $Id: ctk-vncfont.c,v 1.2 2003/08/12 21:11:09 adamdunkels Exp $
+ * $Id: ctk-vncfont.c,v 1.3 2003/09/01 22:23:57 adamdunkels Exp $
  *
  */
 
@@ -43,7 +43,7 @@
 #ifdef WITH_AVR
 #include <avr/pgmspace.h>
 #else
-#define prog_char unsigned char
+#define prog_char const unsigned char
 #endif
 
 prog_char ctk_vncfont[] = {
