@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.1 2003/03/19 14:16:07 adamdunkels Exp $
+ * $Id: uip.h,v 1.2 2003/03/28 12:11:18 adamdunkels Exp $
  *
  */
 
@@ -271,25 +271,26 @@ struct uip_udp_conn *uip_udp_new(u16_t *ripaddr, u16_t rport);
  * are used to represent IP addresses in uIP.
  */
 #define uip_ipaddr(addr, addr0,addr1,addr2,addr3) do { \
-                     (addr)[0] = htons(((addr0) << 8) | (addr1)); \
-                     (addr)[1] = htons(((addr2) << 8) | (addr3)); \
+                     (addr)[0] = HTONS(((addr0) << 8) | (addr1)); \
+                     (addr)[1] = HTONS(((addr2) << 8) | (addr3)); \
                   } while(0)
 
-/* htons(), ntohs():
+/* HTONS():
  *
  * Macros for converting 16-bit quantities between host and network
  * byte order.
  */
-#ifndef htons
+#ifndef HTONS
 #   if BYTE_ORDER == BIG_ENDIAN
-#      define htons(n) (n)
+#      define HTONS(n) (n)
 #   else /* BYTE_ORDER == BIG_ENDIAN */
-#      define htons(n) ((((u16_t)((n) & 0xff)) << 8) | (((n) & 0xff00) >> 8))
+#      define HTONS(n) ((((u16_t)((n) & 0xff)) << 8) | (((n) & 0xff00) >> 8))
 #   endif /* BYTE_ORDER == BIG_ENDIAN */
+#endif /* HTONS */
+
+#ifndef htons
+u16_t htons(u16_t val);
 #endif /* htons */
-
-#define ntohs(n) htons(n)
-
 
 /*-----------------------------------------------------------------------------------*/
 /* The following global variables are used for passing parameters

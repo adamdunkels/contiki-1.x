@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.1 2003/03/19 14:16:07 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.2 2003/03/28 12:11:18 adamdunkels Exp $
  *
  */
 
@@ -188,13 +188,13 @@ uip_arp_ipin(void)
 
   /* Only insert/update an entry if the source IP address of the
      incoming IP packet comes from a host on the local network. */
-  /*  if((IPBUF->srcipaddr[0] & htons((UIP_NETMASK0 << 8) | UIP_NETMASK1)) !=
+  /*  if((IPBUF->srcipaddr[0] & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)) !=
      (uip_hostaddr[0]
-      & htons((UIP_NETMASK0 << 8) | UIP_NETMASK1)))
+      & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)))
     return;
-  if((IPBUF->srcipaddr[1] & htons((UIP_NETMASK2 << 8) | UIP_NETMASK3)) !=
+  if((IPBUF->srcipaddr[1] & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)) !=
      (uip_hostaddr[1]
-      & htons((UIP_NETMASK2 << 8) | UIP_NETMASK3)))
+      & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)))
     return;
   */
   if((IPBUF->srcipaddr[0] & uip_arp_netmask[0]) !=
@@ -222,13 +222,13 @@ uip_arp_arpin(void)
   uip_len = 0;
   
   switch(BUF->opcode) {
-  case htons(ARP_REQUEST):
+  case HTONS(ARP_REQUEST):
     /* ARP request. If it asked for our address, we send out a
        reply. */
     if(BUF->dipaddr[0] == uip_hostaddr[0] &&
        BUF->dipaddr[1] == uip_hostaddr[1]) {
       /* The reply opcode is 2. */
-      BUF->opcode = htons(2);
+      BUF->opcode = HTONS(2);
 
       for(c = 0; c < 6; ++c) {
         BUF->dhwaddr.addr[c] = BUF->shwaddr.addr[c];
@@ -242,11 +242,11 @@ uip_arp_arpin(void)
       BUF->sipaddr[0] = uip_hostaddr[0];
       BUF->sipaddr[1] = uip_hostaddr[1];
 
-      BUF->ethhdr.type = htons(UIP_ETHTYPE_ARP);      
+      BUF->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);      
       uip_len = sizeof(struct arp_hdr);
     }      
     break;
-  case htons(ARP_REPLY):
+  case HTONS(ARP_REPLY):
     /* ARP reply. We insert or update the ARP table if it was meant
        for us. */
     if(BUF->dipaddr[0] == uip_hostaddr[0] &&
@@ -271,12 +271,12 @@ uip_arp_out(void)
      packet with an ARP request for the IP address. */
 
   /* Check if the destination address is on the local network. */
-  /*  if((IPBUF->destipaddr[0] & htons((UIP_NETMASK0 << 8) | UIP_NETMASK1)) !=
+  /*  if((IPBUF->destipaddr[0] & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)) !=
      (uip_hostaddr[0]
-      & htons((UIP_NETMASK0 << 8) | UIP_NETMASK1)) ||
-     (IPBUF->destipaddr[1] & htons((UIP_NETMASK2 << 8) | UIP_NETMASK3)) !=
+      & HTONS((UIP_NETMASK0 << 8) | UIP_NETMASK1)) ||
+     (IPBUF->destipaddr[1] & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3)) !=
      (uip_hostaddr[1]
-     & htons((UIP_NETMASK2 << 8) | UIP_NETMASK3))) {*/
+     & HTONS((UIP_NETMASK2 << 8) | UIP_NETMASK3))) {*/
   if((IPBUF->destipaddr[0] & uip_arp_netmask[0]) !=
      (uip_hostaddr[0] & uip_arp_netmask[0]) ||
      (IPBUF->destipaddr[1] & uip_arp_netmask[1]) !=
@@ -284,8 +284,8 @@ uip_arp_out(void)
     /* Destination address was not on the local network, so we need to
        use the default router's IP address instead of the destination
        address when determining the MAC address. */
-    /*    ipaddr[0] = htons((UIP_DRIPADDR0 << 8) | UIP_DRIPADDR1);
-	  ipaddr[1] = htons((UIP_DRIPADDR2 << 8) | UIP_DRIPADDR3);*/
+    /*    ipaddr[0] = HTONS((UIP_DRIPADDR0 << 8) | UIP_DRIPADDR1);
+	  ipaddr[1] = HTONS((UIP_DRIPADDR2 << 8) | UIP_DRIPADDR3);*/
     ipaddr[0] = uip_arp_draddr[0];
     ipaddr[1] = uip_arp_draddr[1];
   } else {
@@ -315,12 +315,12 @@ uip_arp_out(void)
     BUF->dipaddr[1] = ipaddr[1];
     BUF->sipaddr[0] = uip_hostaddr[0];
     BUF->sipaddr[1] = uip_hostaddr[1];
-    BUF->opcode = htons(ARP_REQUEST); /* ARP request. */
-    BUF->hwtype = htons(ARP_HWTYPE_ETH);
-    BUF->protocol = htons(UIP_ETHTYPE_IP);
+    BUF->opcode = HTONS(ARP_REQUEST); /* ARP request. */
+    BUF->hwtype = HTONS(ARP_HWTYPE_ETH);
+    BUF->protocol = HTONS(UIP_ETHTYPE_IP);
     BUF->hwlen = 6;
     BUF->protolen = 4;
-    BUF->ethhdr.type = htons(UIP_ETHTYPE_ARP);
+    BUF->ethhdr.type = HTONS(UIP_ETHTYPE_ARP);
 
     uip_appdata = &uip_buf[40 + UIP_LLH_LEN];
     
@@ -333,7 +333,7 @@ uip_arp_out(void)
     IPBUF->ethhdr.dest.addr[c] = arp_table[i].ethaddr.addr[c];
     IPBUF->ethhdr.src.addr[c] = ethaddr.addr[c];
   }
-  IPBUF->ethhdr.type = htons(UIP_ETHTYPE_IP);
+  IPBUF->ethhdr.type = HTONS(UIP_ETHTYPE_IP);
 
   uip_len += sizeof(struct uip_eth_hdr);
 }

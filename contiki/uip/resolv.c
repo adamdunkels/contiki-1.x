@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.1 2003/03/19 14:16:06 adamdunkels Exp $
+ * $Id: resolv.c,v 1.2 2003/03/28 12:11:17 adamdunkels Exp $
  *
  */
 
@@ -166,7 +166,7 @@ check_entries(void)
       hdr->id = htons(i);
       hdr->flags1 = DNS_FLAG1_RD;
       hdr->flags2 = 0;
-      hdr->numquestions = htons(1);
+      hdr->numquestions = HTONS(1);
       hdr->numanswers = hdr->numauthrr = hdr->numextrarr = 0;
       query = (char *)uip_appdata + 12;
       nameptr = names[i].name;
@@ -267,9 +267,9 @@ newdata(void)
 
       /* Check for IP address type and Internet class. Others are
 	 discarded. */
-      if(ans->type == htons(1) &&
-	 ans->class == htons(1) &&
-	 ans->len == htons(4)) {
+      if(ans->type == HTONS(1) &&
+	 ans->class == HTONS(1) &&
+	 ans->len == HTONS(4)) {
 	/*	printf("IP address %d.%d.%d.%d\n",
 	       htons(ans->ipaddr[0]) >> 8,
 	       htons(ans->ipaddr[0]) & 0xff,
@@ -297,7 +297,7 @@ newdata(void)
 void
 udp_appcall(void)
 {
-  if(uip_udp_conn->rport == htons(53)) {
+  if(uip_udp_conn->rport == HTONS(53)) {
     if(uip_poll()) {
       check_entries();
     }

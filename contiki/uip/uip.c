@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.1 2003/03/19 14:16:06 adamdunkels Exp $
+ * $Id: uip.c,v 1.2 2003/03/28 12:11:18 adamdunkels Exp $
  *
  */
 
@@ -73,8 +73,8 @@ const u16_t uip_hostaddr[8] =
    UIP_IP6ADDR6, UIP_IP6ADDR7};
 #else /* UIP_IPV6 */
 const u16_t uip_hostaddr[2] =
-  {htons((UIP_IPADDR0 << 8) | UIP_IPADDR1),
-   htons((UIP_IPADDR2 << 8) | UIP_IPADDR3)};
+  {HTONS((UIP_IPADDR0 << 8) | UIP_IPADDR1),
+   HTONS((UIP_IPADDR2 << 8) | UIP_IPADDR3)};
 #endif /* UIP_IPV6 */
 #else
 #if UIP_IPV6
@@ -260,8 +260,8 @@ uip_connect(u16_t *ripaddr, u16_t rport)
   conn->len = 1;   /* TCP length of the SYN is one. */
   conn->nrtx = 0;
   conn->timer = 1; /* Send the SYN next time around. */
-  conn->lport = htons(lastport);
-  conn->rport = htons(rport);
+  conn->lport = HTONS(lastport);
+  conn->rport = HTONS(rport);
 #if UIP_IPV6
   conn->ripaddr[0] = ripaddr[0];
   conn->ripaddr[1] = ripaddr[1];
@@ -312,8 +312,8 @@ uip_udp_new(u16_t *ripaddr, u16_t rport)
     return 0;
   }
   
-  conn->lport = htons(lastport);
-  conn->rport = htons(rport);
+  conn->lport = HTONS(lastport);
+  conn->rport = HTONS(rport);
 #if UIP_IPV6
   conn->ripaddr[0] = ripaddr[0];
   conn->ripaddr[1] = ripaddr[1];
@@ -337,7 +337,7 @@ uip_listen(u16_t port)
 {
   for(c = 0; c < UIP_LISTENPORTS; ++c) {
     if(uip_listenports[c] == 0) {
-      uip_listenports[c] = htons(port);
+      uip_listenports[c] = HTONS(port);
       break;
     }
   }
@@ -531,8 +531,9 @@ uip_process(u8_t flag)
 	  }
 
 	  /* Exponential backoff. */
-	  uip_connr->timer = UIP_RTO << (uip_connr->nrtx > 4? 4: uip_connr->nrtx);
-
+	  uip_connr->timer = UIP_RTO << (uip_connr->nrtx > 4?
+					 4:
+					 uip_connr->nrtx);
 	  ++(uip_connr->nrtx);
 	  
 	  /* Ok, so we need to retransmit. We do this differently
@@ -665,10 +666,10 @@ uip_process(u8_t flag)
 
   ICMPBUF->type = ICMP_ECHO_REPLY;
   
-  if(ICMPBUF->icmpchksum >= htons(0xffff - (ICMP_ECHO << 8))) {
-    ICMPBUF->icmpchksum += htons(ICMP_ECHO << 8) + 1;
+  if(ICMPBUF->icmpchksum >= HTONS(0xffff - (ICMP_ECHO << 8))) {
+    ICMPBUF->icmpchksum += HTONS(ICMP_ECHO << 8) + 1;
   } else {
-    ICMPBUF->icmpchksum += htons(ICMP_ECHO << 8);
+    ICMPBUF->icmpchksum += HTONS(ICMP_ECHO << 8);
   }
   
   /* Swap IP addresses. */
@@ -804,10 +805,10 @@ uip_process(u8_t flag)
   
   ICMPBUF->type = ICMP_ECHO_REPLY;
   
-  if(ICMPBUF->icmpchksum >= htons(0xffff - (ICMP_ECHO << 8))) {
-    ICMPBUF->icmpchksum += htons(ICMP_ECHO << 8) + 1;
+  if(ICMPBUF->icmpchksum >= HTONS(0xffff - (ICMP_ECHO << 8))) {
+    ICMPBUF->icmpchksum += HTONS(ICMP_ECHO << 8) + 1;
   } else {
-    ICMPBUF->icmpchksum += htons(ICMP_ECHO << 8);
+    ICMPBUF->icmpchksum += HTONS(ICMP_ECHO << 8);
   }
   
   /* Swap IP addresses. */
@@ -888,7 +889,7 @@ uip_process(u8_t flag)
 #endif /* UIP_BUFSIZE > 255 */  
   BUF->proto = UIP_PROTO_UDP;
 
-  UDPBUF->udplen = htons(uip_slen + 8);
+  UDPBUF->udplen = HTONS(uip_slen + 8);
   UDPBUF->udpchksum = 0;
 #if UIP_UDP_CHECKSUMS 
   /* Calculate UDP checksum. */
@@ -1166,16 +1167,7 @@ uip_process(u8_t flag)
     uip_flags = UIP_ABORT;
     UIP_APPCALL();
     goto drop;
-  }
-  /* All segments that are come thus far should have the ACK flag set,
-     otherwise we drop the packet. */
-  if(!(BUF->flags & TCP_ACK)) {
-    UIP_STAT(++uip_stat.tcp.drop);
-    UIP_STAT(++uip_stat.tcp.ackerr);
-    UIP_LOG("tcp: dropped non-ack segment.");
-    goto drop;
-  }
-      
+  }      
   /* Calculated the length of the data, if the application has sent
      any data to us. */
   c = (BUF->tcpoffset >> 4) << 2;
@@ -1199,7 +1191,7 @@ uip_process(u8_t flag)
      data. If so, we update the sequence number, reset the length of
      the outstanding data, calculate RTT estimations, and reset the
      retransmission timer. */
-  if(uip_outstanding(uip_connr)) {
+  if((BUF->flags & TCP_ACK) && uip_outstanding(uip_connr)) {
     uip_add32(uip_connr->snd_nxt, uip_connr->len);
     if(BUF->ackno[0] == uip_acc32[0] &&
        BUF->ackno[1] == uip_acc32[1] &&
@@ -1602,5 +1594,11 @@ uip_process(u8_t flag)
  drop:
   uip_len = 0;
   return;
+}
+/*-----------------------------------------------------------------------------------*/
+u16_t
+htons(u16_t val)
+{
+  return HTONS(val);
 }
 /*-----------------------------------------------------------------------------------*/
