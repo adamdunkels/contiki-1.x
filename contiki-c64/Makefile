@@ -30,10 +30,11 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.5 2003/04/18 00:14:13 adamdunkels Exp $
+# $Id: Makefile,v 1.6 2003/04/24 17:02:11 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
+CONTIKICC65=../contiki-cc65
 
 usage:
 	@echo "Make sure the Contiki sources is in the directory $(CONTIKI)"
@@ -47,28 +48,16 @@ usage:
 	@echo '(Also check the Makefile for more targets to try...)'
 
 programs:
-	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.programs
+	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.programs
 tfe:
-	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-tfe
+	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-tfe
 rs232:
-	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232
+	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-rs232
 rs232-conio:
-	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232-conio
+	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-rs232-conio
 
-depend:
-	gcc -MM -D_CBM__ -D__C64__ -DCTK_HIRES -v \
-        -Iapps -Ictk -Iuip -Iconf \
-	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
-        -I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
-        *.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
-size:
-	od65 --dump-segsize *.o
-codesize:
-	od65 --dump-segsize *.o | egrep '\.o|CODE'
-clean:
-	rm -f *.o *~ *core contiki *.s *.prg contiki-labels
-d64:
-	c1541 -format contiki,64 d64 contiki.d64
-	c1541 -attach contiki.d64 -write contiki
-	c1541 -attach contiki.d64 -write about.prg -write email.prg -write memstat.prg -write netconf.prg -write processes.prg -write simpletelnet.prg -write www.prg -write calc.prg -write default.prg -write blueround.prg -write about.dsc -write netconf.dsc -write www.dsc -write dirload.prg
-	c1541 -attach contiki.d64 -list
+
+CCDEPFLAGS=-D__CBM__ -D__C64__ -DCTK_HIRES
+
+include $(CONTIKICC65)/Makefile.common
+
