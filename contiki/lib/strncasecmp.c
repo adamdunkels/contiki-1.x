@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: strncasecmp.c,v 1.1 2003/03/19 14:16:06 adamdunkels Exp $
+ * $Id: strncasecmp.c,v 1.2 2003/03/28 12:12:00 adamdunkels Exp $
  *
  */
 
@@ -45,9 +45,10 @@
    compares them with strcasecmp.
 */
 
-#include <string.h>
-
 #define MAX_STRLEN 40
+
+
+int strncmp(const char *s1, const char *s2, int len);
 
 /*static char buf1[MAX_STRLEN],
   buf2[MAX_STRLEN];*/
