@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.2 2003/08/12 21:12:37 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.3 2003/08/24 22:38:44 adamdunkels Exp $
  *
  */
 
@@ -43,6 +43,8 @@
 #include "loader.h"
 #include "vnc-server.h"
 #include "vnc-out.h"
+
+#include "ctk-vncserver.h"
 
 static unsigned char sizex, sizey;
 
@@ -868,9 +870,11 @@ DISPATCHER_UIPCALL(ctk_vncserver_appcall, state)
   vnc_server_appcall(vs);
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(ctk_vncserver_init)
+LOADER_INIT_FUNC(ctk_vncserver_init, arg)
 {
   u8_t i;
+
+  arg_free(arg);
   
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
