@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.3 2003/08/24 22:35:23 adamdunkels Exp $
+ * $Id: shell.c,v 1.4 2003/08/24 22:59:28 adamdunkels Exp $
  *
  */
 
@@ -98,7 +98,7 @@ inttostr(register char *str, unsigned int i)
     str[0] = ' ';
   }
   str[1] = '0' + (i / 10) % 10;
-  if(str[1] == '0') {
+  if(str[0] == 0 && str[1] == '0') {
     str[1] = ' ';
   }
   str[2] = '0' + i % 10;
