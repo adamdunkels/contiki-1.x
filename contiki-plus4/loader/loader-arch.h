@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,18 +29,18 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.h,v 1.1 2003/04/11 20:30:18 adamdunkels Exp $
+ * $Id: loader-arch.h,v 1.2 2004/07/04 20:01:30 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_ARCH_H__
 #define __LOADER_ARCH_H__
 
-unsigned char loader_arch_load(const char *name);
+unsigned char loader_arch_load(const char *name, char *arg);
 void loader_arch_free(void *addr);
 
 extern void *loader_arch_loadaddr;
 
-#define LOADER_LOAD(name) loader_arch_load(name)
+#define LOADER_LOAD(name, arg) loader_arch_load(name, arg)
 #define LOADER_UNLOAD() loader_arch_free(&loader_arch_loadaddr)
 
 #endif /* __LOADER_ARCH_H__ */

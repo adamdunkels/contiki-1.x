@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arch.c,v 1.1 2003/04/11 20:30:19 adamdunkels Exp $
+ * $Id: uip_arch.c,v 1.2 2004/07/04 20:01:31 adamdunkels Exp $
  *
  */
 
@@ -73,39 +70,6 @@ uip_add32(u8_t *op32, u16_t op16)
   asm("sta _uip_acc32+0");  
 }
 /*-----------------------------------------------------------------------------------*/
-void
-uip_add_rcv_nxt(u16_t n) {
-  uip_add32(uip_conn->rcv_nxt, n);
-  uip_conn->rcv_nxt[0] = uip_acc32[0];
-  uip_conn->rcv_nxt[1] = uip_acc32[1];
-  uip_conn->rcv_nxt[2] = uip_acc32[2];
-  uip_conn->rcv_nxt[3] = uip_acc32[3];
-  /*  asm("pha");
-  asm("lda _uip_conn");
-  asm("sta ptr1");
-  asm("lda _uip_conn+1");
-  asm("sta ptr1+1");
-  asm("pla");
-  asm("clc");
-  asm("ldy #3");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
-  asm("dey");
-  asm("txa");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
-  asm("dey");
-  asm("lda #0");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
-  asm("dey");
-  asm("lda #0");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
-
-  n=n;*/
-}
-/*-----------------------------------------------------------------------------------*/
 #else /* UIP_BUFSIZE > 255 */
 /*-----------------------------------------------------------------------------------*/
 void
@@ -133,32 +97,6 @@ uip_add32(u8_t *op32, u8_t op8)
   asm("lda (ptr1),y");
   asm("adc #0");
   asm("sta _uip_acc32+0");  
-}
-/*-----------------------------------------------------------------------------------*/
-void 
-uip_add_rcv_nxt(u8_t n) {
-  asm("pha");
-  asm("lda _uip_conn");
-  asm("sta ptr1");
-  asm("lda _uip_conn+1");
-  asm("sta ptr1+1");
-  asm("pla");
-  asm("clc");
-  asm("ldy #3");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
-  asm("dey");
-  asm("lda #0");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
-  asm("dey");
-  asm("lda #0");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
-  asm("dey");
-  asm("lda #0");
-  asm("adc (ptr1),y");
-  asm("sta (ptr1),y");
 }
 /*-----------------------------------------------------------------------------------*/
 #endif /* UIP_BUFSIZE > 255 */

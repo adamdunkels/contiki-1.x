@@ -32,7 +32,11 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.2 2004/06/27 12:51:51 oliverschmidt Exp $
+<<<<<<< ctk-conf.h
+ * $Id: ctk-conf.h,v 1.3 2004/07/04 20:01:16 adamdunkels Exp $
+=======
+ * $Id: ctk-conf.h,v 1.3 2004/07/04 20:01:16 adamdunkels Exp $
+>>>>>>> 1.2
  *
  */
 
@@ -50,6 +54,13 @@
 /* Defines which key that is to be used for switching the frontmost
    window.  */
 #define CTK_CONF_WINDOWSWITCH_KEY     CH_F3
+
+#define CTK_CONF_WIDGETUP_KEY         CH_F5
+#define CTK_CONF_WIDGETDOWN_KEY       CH_F7
+
+/* Toggles mouse support (must have support functions in the
+architecture specific files to work). */
+#define CTK_CONF_MOUSE_SUPPORT        0
 
 /* Toggles support for icons. */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
@@ -73,5 +84,8 @@
 #define CTK_CONF_MENUWIDTH            16
 /* The maximum number of menu items in each menu. */
 #define CTK_CONF_MAXMENUITEMS         10
+
+/* Toggles support for screen savers. */
+#define CTK_CONF_SCREENSAVER          1
 
 #endif /* __CTK_CONF_H__ */

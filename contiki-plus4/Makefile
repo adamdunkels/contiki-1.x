@@ -9,10 +9,7 @@
 # 2. Redistributions in binary form must reproduce the above copyright 
 #    notice, this list of conditions and the following disclaimer in the 
 #    documentation and/or other materials provided with the distribution. 
-# 3. All advertising materials mentioning features or use of this software
-#    must display the following acknowledgement:
-#      This product includes software developed by Adam Dunkels.
-# 4. The name of the author may not be used to endorse or promote
+# 3. The name of the author may not be used to endorse or promote
 #    products derived from this software without specific prior
 #    written permission.  
 #
@@ -30,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/04/11 20:30:14 adamdunkels Exp $
+# $Id: Makefile,v 1.2 2004/07/04 20:01:15 adamdunkels Exp $
 #
 
 all: contiki loader-arch-module.o contiki-labels.o \
@@ -38,6 +35,7 @@ all: contiki loader-arch-module.o contiki-labels.o \
      www.prg email.prg simpletelnet.prg vnc.prg
 
 CONTIKI=../contiki
+CONTIKICC65=../contiki-cc65
 SYS=plus4
 
 CC=cc65
@@ -89,6 +87,10 @@ OPT=-Or
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
 
+%.o: $(CONTIKICC65)/apps/%.c
+	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
+	$(AS) -o $@ $(AFLAGS) $(*).s
+
 
 %.o: apps/%.S
 	$(AS) -o $@ $(AFLAGS) $<
@@ -105,8 +107,8 @@ OPT=-Or
 
 UIP=uip.o uip_arch.o uip_main.o resolv.o
 
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 
-EMAIL=email.o smtp.o smtp-strings.o
+WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o http-user-agent-string.o
+EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
 WEBSERVER=webserver.o http-strings.o 
 TELNET=simpletelnet.o telnet.o
 VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
@@ -119,11 +121,11 @@ vnc.prg: $(VNC)
 contiki-labels.o: contiki-labels.s
 	ca65 -o contiki-labels.o contiki-labels.s
 contiki-labels.s: contiki
-	./make-labels
+	$(CONTIKICC65)/make-labels
 
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
- ctk-conio.o ctk.o ek.o dispatcher.o \
- uip.o uip_arch.o resolv.o uip_main.o \
+ ctk-conio.o ctk.o ek.o ek-service.o arg.o timer.o \
+ uip.o uip_arch.o resolv.o uiplib.o tcpip.o \
  program-handler.o loader-arch.o
 	cl65 -Ln contiki-labels -o contiki -t $(SYS) $^
 

@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,12 +29,13 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.1 2003/04/11 20:30:18 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.2 2004/07/04 20:01:30 adamdunkels Exp $
  *
  */
 
 #include <modload.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "loader-arch.h"
 
 /*-----------------------------------------------------------------------------------*/
@@ -48,7 +46,7 @@
  */
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-loader_arch_load(const char *name)
+loader_arch_load(const char *name, char *arg)
 {
   static struct mod_ctrl ctrl = {
     read            /* Read from disk */

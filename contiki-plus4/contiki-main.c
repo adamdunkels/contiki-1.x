@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,16 +29,16 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.1 2003/04/11 20:30:14 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.2 2004/07/04 20:01:15 adamdunkels Exp $
  *
  */
 
+#include "contiki.h"
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "dispatcher.h"
 
 
-#include "uip_main.h"
+#include "tcpip.h"
 #include "uip.h"
 #include "uip_arp.h"
 #if WITH_TFE
@@ -53,13 +50,13 @@
 
 /*-----------------------------------------------------------------------------------*/
 int
-main(int argc, char **argv)
+main(void)
 {
-
+  ek_init();
+    
 #ifdef WITH_UIP
-  uip_init();
-  uip_main_init();
-  resolv_init();
+  tcpip_init(NULL);
+  resolv_init(NULL);
 
 #ifdef WITH_RS232
   rs232dev_init();
@@ -67,20 +64,30 @@ main(int argc, char **argv)
   
 #endif /* WITH_UIP */
   
-  ek_init();
-  dispatcher_init();
   ctk_init();
   
   program_handler_init();
   
-  ctk_redraw();
-  ek_run();
-
-  clrscr();
+  while(1) {
+    ek_run();
+  }
   
   return 0;
-
-  argv = argv;
-  argc = argc;
 }
 /*-----------------------------------------------------------------------------------*/
+clock_time_t
+clock_time(void)
+{
+  return clock();
+}
+
+int
+uip_fw_forward(void)
+{
+  return 0;
+}
+void
+uip_fw_periodic(void)
+{
+
+}
