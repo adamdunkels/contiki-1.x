@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.14 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.15 2003/08/29 20:37:26 adamdunkels Exp $
  *
  */
 
@@ -40,6 +40,8 @@
 #include "dispatcher.h"
 
 #include "uip.h"
+
+#include "uip-signal.h"
 
 /*#include <time.h>*/
 /*#include <conio.h>*/
@@ -162,6 +164,21 @@ ek_clock_t
 ek_clock(void)
 {
   return clock();
+}
+/*-----------------------------------------------------------------------------------*/
+struct uip_conn *
+dispatcher_connect(u16_t *ripaddr, u16_t port)
+{
+  struct uip_conn *c;
+
+  c = uip_connect(ripaddr, port);
+  if(c == NULL) {
+    return NULL;
+  }
+
+  dispatcher_emit(uip_signal_poll, c, DISPATCHER_BROADCAST);
+
+  return c;
 }
 /*-----------------------------------------------------------------------------------*/
 #ifdef WITH_UIP
@@ -289,11 +306,48 @@ dispatcher_init(void)
   arg_init();
 }
 /*-----------------------------------------------------------------------------------*/
-void
-dispatcher_signal(void)
+static void CC_FASTCALL
+deliver(ek_signal_t s, ek_data_t data,
+	ek_id_t id)
 {
   struct dispatcher_proc *p;
+  for(p = dispatcher_procs; p != NULL; p = p->next) {      
+    if((id == DISPATCHER_BROADCAST ||
+	p->id == id) &&
+       p->signals[s] != 0 &&
+       p->signalhandler != NULL) {
+      dispatcher_current = p->id;
+      curproc = p;
+#if CC_FUNCTION_POINTER_ARGS
+      p->signalhandler(s, data);
+#else /* CC_FUNCTION_POINTER_ARGS */
+      dispatcher_sighandler_s = s;
+      dispatcher_sighandler_data = data;
+      p->signalhandler();
+#endif /* CC_FUNCTION_POINTER_ARGS */      
+    }
+  }  
+}
+/*-----------------------------------------------------------------------------------*/
+void
+dispatcher_fastemit(ek_signal_t s, ek_data_t data,
+		    ek_id_t id)
+{
+  ek_id_t pid;
+  struct dispatcher_proc *p;
+
+  pid = dispatcher_current;
+  p = curproc;
+
+  deliver(s, data, id);
   
+  dispatcher_current = pid;
+  curproc = p;  
+}
+/*-----------------------------------------------------------------------------------*/
+void
+dispatcher_signal(void)
+{ 
   static ek_signal_t s;
   static ek_data_t data;
   static ek_id_t id;
@@ -316,22 +370,7 @@ dispatcher_signal(void)
     fsignal = (fsignal + 1) % EK_CONF_NUMSIGNALS;
     --nsignals;
 
-    for(p = dispatcher_procs; p != NULL; p = p->next) {      
-      if((id == DISPATCHER_BROADCAST ||
-	  p->id == id) &&
-	 p->signals[s] != 0 &&
-	 p->signalhandler != NULL) {
-	dispatcher_current = p->id;
-	curproc = p;
-#if CC_FUNCTION_POINTER_ARGS
-	p->signalhandler(s, data);
-#else /* CC_FUNCTION_POINTER_ARGS */
-	dispatcher_sighandler_s = s;
-	dispatcher_sighandler_data = data;
-	p->signalhandler();
-#endif /* CC_FUNCTION_POINTER_ARGS */      
-      }
-    }  
+    deliver(s, data, id);
   }
 
 }
