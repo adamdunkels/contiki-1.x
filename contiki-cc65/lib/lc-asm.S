@@ -2,7 +2,11 @@
 	.importzp ptr1
 	.export _lc_get
 	.export _lc_resume
+	.export _lc_tmp
+	
 ;---------------------------------------------------------------------
+.data
+_lc_tmp:	.byte 2		
 .code
 _lc_get:
 	pla
@@ -24,8 +28,7 @@ _lc_get:
 _lc_resume:	
 	sta ptr1
 	stx ptr1+1
-
-	ora ptr1+1		; Don't resume a NULL continuation
+	cpx #0
 	bne :+
 	rts
 :		

@@ -12,7 +12,9 @@ typedef void * lc_t;
 lc_t lc_get(void);
 void __fastcall__ lc_resume(lc_t s);
 
-#define LC_SET(s) s = lc_get()
+extern lc_t lc_tmp;
+
+#define LC_SET(s) lc_tmp = lc_get(); s = lc_tmp
 #define LC_RESUME(s) lc_resume(s)
 
 #define LC_INIT(s) s = NULL
