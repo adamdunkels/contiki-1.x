@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.10 2004/08/09 21:00:28 adamdunkels Exp $
+ * $Id: shell.c,v 1.11 2004/09/12 07:27:59 adamdunkels Exp $
  *
  */
 
@@ -38,8 +38,6 @@
 #include "uip.h"
 #include "uip_arp.h"
 #include "resolv.h"
-
-#include "uip-event.h"
 
 #include "shell.h"
 

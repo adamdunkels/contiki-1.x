@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.8 2004/08/09 21:00:28 adamdunkels Exp $
+ * $Id: config.c,v 1.9 2004/09/12 07:27:11 adamdunkels Exp $
  *
  */
 
@@ -40,7 +40,6 @@
 #include "uip_arp.h"
 #include "resolv.h"
 
-#include "uip-event.h"
 
 struct ptentry {
   char c;
@@ -130,9 +129,6 @@ loaddriver(char *str)
   char *nt;
 
   nt = nullterminate(str);
-
-  /* Uninstall old driver. */
-  ek_post(EK_BROADCAST, uip_event_uninstall, NULL);
   
   /* Call loader function. */
   program_handler_load(str, NULL);

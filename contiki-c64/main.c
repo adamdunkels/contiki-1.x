@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki operating system
  *
- * $Id: main.c,v 1.12 2004/08/09 21:42:43 adamdunkels Exp $
+ * $Id: main.c,v 1.13 2004/09/12 07:26:58 adamdunkels Exp $
  *
  */
 
@@ -42,7 +42,6 @@
 #include "program-handler.h"
 
 
-#include "uip-event.h"
 #include "uip.h"
 #include "uip_arp.h"
 
@@ -113,9 +112,7 @@ main(void)
     
   tcpip_init(NULL);
 
-  resolv_init(NULL);
-  
-  uip_event_init();
+  resolv_init(NULL); 
 
   log_message(": CTK GUI", "");
   ctk_init();
@@ -138,3 +135,11 @@ main(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+/*void
+reset(void)
+{
+  asm("lda #$36");
+  asm("sta $01");
+  asm("jmp $fce2");
+}*/
+
