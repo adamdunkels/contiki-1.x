@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.6 2003/04/28 23:20:23 adamdunkels Exp $
+ * $Id: about.c,v 1.7 2003/06/30 20:39:29 adamdunkels Exp $
  *
  */
 
@@ -107,7 +107,7 @@ LOADER_INIT_FUNC(about_init)
     dispatcher_listen(ctk_signal_hyperlink_activate);
   }
   ctk_dialog_open(&aboutdialog);
-  ctk_redraw();
+  /*  ctk_desktop_redraw(aboutdialog.desktop);*/
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -117,7 +117,7 @@ about_quit(void)
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
-  ctk_redraw();
+  /*  ctk_desktop_redraw(aboutdialog.desktop);*/
 }
 /*-----------------------------------------------------------------------------------*/
 static DISPATCHER_SIGHANDLER(about_sighandler, s, data)
