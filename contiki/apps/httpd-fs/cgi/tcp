@@ -1,0 +1,6 @@
+i /header.html
+t <h1>Current connections</h1><br><table width="100%">
+c b
+t </table>
+i /footer.plain
+.
