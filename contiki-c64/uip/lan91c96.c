@@ -32,7 +32,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.4 2004/07/18 13:20:38 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.5 2004/09/03 10:08:03 adamdunkels Exp $
  *
  */
 
@@ -101,11 +101,7 @@ static void print_packet(u8_t *, u16_t);
 static u8_t packet_status;
 static u16_t packet_length;
 
-#if UIP_BUFSIZE > 255
 extern u16_t uip_len;
-#else
-extern u8_t uip_len;
-#endif
 
 
 #pragma optimize(push, off)
