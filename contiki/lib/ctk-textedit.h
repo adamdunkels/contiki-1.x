@@ -36,7 +36,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-textedit.h,v 1.3 2004/07/04 15:12:57 adamdunkels Exp $
+ * $Id: ctk-textedit.h,v 1.4 2004/09/01 18:27:18 adamdunkels Exp $
  *
  */
 #ifndef __CTK_TEXTEDIT_H__
@@ -60,6 +60,8 @@ struct ctk_textedit {
   struct ctk_label label;
   unsigned char xpos, ypos;
 };
+
+void ctk_textedit_init(struct ctk_textedit *t);
 
 void ctk_textedit_add(struct ctk_window *w,
 		      struct ctk_textedit *t);
