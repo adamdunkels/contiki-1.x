@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.2 2005/01/26 21:33:29 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.3 2005/02/01 00:21:36 oliverschmidt Exp $
  *
  */
 
@@ -125,6 +125,7 @@ EK_EVENTHANDLER(config_eventhandler, ev, data);
 EK_PROCESS(p, "Configuration", EK_PRIO_NORMAL,
 	   config_eventhandler, NULL, NULL);
 static ek_id_t id = EK_ID_NONE;
+static ek_id_t driverid = EK_ID_NONE;
 
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(config_init, arg)
@@ -200,6 +201,7 @@ makestrings(void)
 
   for(p = EK_PROCS(); p != NULL; p = p->next) {
     if(makedriver(p->name, driver)) {
+      driverid = p->id;
       break;
     }
   }
@@ -298,6 +300,10 @@ config_apply(void)
   ctk_draw_setbackground(config.bkgnd);
 
 #endif /* __APPLE2ENH__ */
+
+  if(driverid != EK_ID_NONE) {
+    ek_post(driverid, EK_EVENT_REQUEST_EXIT, NULL);
+  }
 
   config_setlanslot(config.slot);
 
