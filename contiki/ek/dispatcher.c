@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.1 2003/03/19 14:16:05 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.2 2003/04/05 12:33:29 adamdunkels Exp $
  *
  */
 
@@ -153,7 +153,7 @@ dispatcher_uipcall(void)
 void
 dispatcher_uiplisten(u16_t port)
 {
-  listenports[listenportsptr].port = htons(port);
+  listenports[listenportsptr].port = HTONS(port);
   listenports[listenportsptr].id = dispatcher_current;
 
   ++listenportsptr;
