@@ -5,6 +5,7 @@
 #include "uip.h"
 #include "log.h"
 
+/*-----------------------------------------------------------------------------------*/
 void
 debug_printf(char *format, ...)
 {
@@ -17,15 +18,16 @@ debug_printf(char *format, ...)
 
   OutputDebugString(buffer);
 }
-
+/*-----------------------------------------------------------------------------------*/
 void
 uip_log(char *message)
 {
   debug_printf("%s\n", message);
 }
-
+/*-----------------------------------------------------------------------------------*/
 void
-log_message(char *part1, char *part2)
+log_message(const char *part1, const char *part2)
 {
   debug_printf("%s%s\n", part1, part2);
 }
+/*-----------------------------------------------------------------------------------*/
