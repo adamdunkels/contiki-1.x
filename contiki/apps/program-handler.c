@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.27 2005/01/24 23:20:50 oliverschmidt Exp $
+ * $Id: program-handler.c,v 1.28 2005/02/15 14:31:52 oliverschmidt Exp $
  *
  */
 
@@ -61,10 +61,16 @@
 
 #include "program-handler.h"
 
+#include "program-handler-conf.h"
+
 /* Menus */
 static struct ctk_menu contikimenu;
 
+#ifndef PROGRAM_HANDLER_CONF_MAX_NUMDSCS
 #define MAX_NUMDSCS 10
+#else /* PROGRAM_HANDLER_CONF_MAX_NUMDSCS */
+#define MAX_NUMDSCS PROGRAM_HANDLER_CONF_MAX_NUMDSCS
+#endif /* PROGRAM_HANDLER_CONF_MAX_NUMDSCS */
 
 static struct dsc *contikidsc[MAX_NUMDSCS];
 static unsigned char contikidsclast = 0;
