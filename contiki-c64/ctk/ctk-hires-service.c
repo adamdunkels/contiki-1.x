@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires-service.c,v 1.1 2004/08/09 20:54:07 adamdunkels Exp $
+ * $Id: ctk-hires-service.c,v 1.2 2004/09/12 13:30:39 adamdunkels Exp $
  *
  */
 
@@ -915,6 +915,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
+    s_ctk_draw_init();
     ctk_restore();
     break;
   case EK_EVENT_REQUEST_REPLACE:
