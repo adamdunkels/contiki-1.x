@@ -31,12 +31,10 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.4 2003/08/06 23:01:07 adamdunkels Exp $
+ * $Id: tfe-drv.c,v 1.5 2003/08/20 20:35:33 adamdunkels Exp $
  *
  */
 
-
-#define NULL (void *)0
 
 #include "uip.h"
 #include "uip_arp.h"
@@ -58,6 +56,7 @@ static struct dispatcher_proc p =
   {DISPATCHER_PROC("TCP/IP/TFE driver", tfe_drv_idle,
 		   tfe_drv_sighandler, NULL)};
 static ek_id_t id;
+
 
 
 
@@ -93,7 +92,7 @@ tfe_drv_idle(void)
   if(uip_len > 0) {
     /* A frame was avaliable (and is now read into the uip_buf), so
        we process it. */ 
-    if(BUF->type == htons(UIP_ETHTYPE_IP)) {
+    if(BUF->type == HTONS(UIP_ETHTYPE_IP)) {
       uip_arp_ipin();
       uip_len -= sizeof(struct uip_eth_hdr);
       uip_input();
@@ -104,7 +103,7 @@ tfe_drv_idle(void)
 	uip_arp_out();
 	cs8900a_send();
       }
-    } else if(BUF->type == htons(UIP_ETHTYPE_ARP)) {
+    } else if(BUF->type == HTONS(UIP_ETHTYPE_ARP)) {
       uip_arp_arpin();
       /* If the above function invocation resulted in data that
 	 should be sent out on the network, the global variable
@@ -134,6 +133,8 @@ LOADER_INIT_FUNC(tfe_drv_init)
 
     cs8900a_init();
     
+    dispatcher_listen(uip_signal_poll);
+    dispatcher_listen(uip_signal_poll_udp);
     dispatcher_listen(uip_signal_uninstall);
   }
 }
@@ -143,8 +144,20 @@ DISPATCHER_SIGHANDLER(tfe_drv_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == dispatcher_signal_quit ||
-     s == uip_signal_uninstall) {
+  if(s == uip_signal_poll) {
+    uip_periodic_conn(data);
+    if(uip_len > 0) {
+      uip_arp_out();
+      cs8900a_send();
+    }
+  } else if(s == uip_signal_poll_udp) {
+    uip_udp_periodic_conn(data);
+    if(uip_len > 0) {
+      uip_arp_out();
+      cs8900a_send();
+    }    
+  } else if(s == dispatcher_signal_quit ||
+	    s == uip_signal_uninstall) {
     dispatcher_exit(&p);
     id = EK_ID_NONE;
     LOADER_UNLOAD();   
