@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.3 2003/08/04 00:14:35 adamdunkels Exp $
+ * $Id: directory.c,v 1.4 2003/08/05 13:55:13 adamdunkels Exp $
  *
  */
 
@@ -54,7 +54,6 @@
 #define HEIGHT 22
 
 static struct dsc *dscs[MAX_NUMFILES];
-static char filenames[MAX_NUMFILES][16];
 static unsigned char numfiles, morestart;
 
 static struct ctk_window window;
@@ -101,7 +100,7 @@ show_statustext(char *text)
 static void
 loaddirectory(void)
 {
-  unsigned char i, j;
+  unsigned char i;
   
   if(c64_fs_opendir(&dir) != 0) {
     show_statustext("Cannot open directory");
@@ -109,24 +108,20 @@ loaddirectory(void)
     i = 0;
     while(c64_fs_readdir(&dir, &dirent) == 0) {
       if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {	
-	strncpy(filenames[i], dirent.name, 16);
-	++i;
-	if(i == MAX_NUMFILES) {
-	  break;
+	dscs[i] = LOADER_LOAD_DSC(dirent.name);
+	if(dscs[i] != NULL) {
+	  ++i;
+	  if(i == MAX_NUMFILES) {
+	    break;
+	  }
 	}
+
       }
     }
     c64_fs_closedir(&dir);
 
     numfiles = i;
 
-    j = 0;
-    for(i = 0; i < numfiles; ++i) {
-      dscs[j] = LOADER_LOAD_DSC(filenames[i]);
-      if(dscs[j] != NULL) {
-	++j;
-      }
-    }
     show_statustext("Directory loaded");
   }
 }
