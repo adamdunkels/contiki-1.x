@@ -29,7 +29,7 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: calc.c,v 1.6 2004/06/06 05:59:20 adamdunkels Exp $
+ * $Id: calc.c,v 1.7 2004/07/04 11:27:07 adamdunkels Exp $
  *
  */
 
@@ -38,8 +38,8 @@
    buttons; one which changes the message slightly and one which quits
    the application. */
 
+#include "ek.h"
 #include "ctk.h"
-#include "dispatcher.h"
 #include "loader.h"
 
 static struct ctk_window window;
@@ -49,45 +49,52 @@ static struct ctk_label inputlabel =
   {CTK_LABEL(0, 0, 12, 1, input)};
 
 static struct ctk_button button7 =
-  {CTK_BUTTON(0, 2, 1, "7")};
+  {CTK_BUTTON(0, 3, 1, "7")};
 static struct ctk_button button8 =
-  {CTK_BUTTON(3, 2, 1, "8")};
+  {CTK_BUTTON(3, 3, 1, "8")};
 static struct ctk_button button9 =
-  {CTK_BUTTON(6, 2, 1, "9")};
+  {CTK_BUTTON(6, 3, 1, "9")};
 static struct ctk_button button4 =
-  {CTK_BUTTON(0, 3, 1, "4")};
+  {CTK_BUTTON(0, 4, 1, "4")};
 static struct ctk_button button5 =
-  {CTK_BUTTON(3, 3, 1, "5")};
+  {CTK_BUTTON(3, 4, 1, "5")};
 static struct ctk_button button6 =
-  {CTK_BUTTON(6, 3, 1, "6")};
+  {CTK_BUTTON(6, 4, 1, "6")};
 static struct ctk_button button1 =
-  {CTK_BUTTON(0, 4, 1, "1")};
+  {CTK_BUTTON(0, 5, 1, "1")};
 static struct ctk_button button2 =
-  {CTK_BUTTON(3, 4, 1, "2")};
+  {CTK_BUTTON(3, 5, 1, "2")};
 static struct ctk_button button3 =
-  {CTK_BUTTON(6, 4, 1, "3")};
+  {CTK_BUTTON(6, 5, 1, "3")};
 static struct ctk_button button0 =
-  {CTK_BUTTON(0, 5, 3, " 0 ")};
+  {CTK_BUTTON(0, 6, 3, " 0 ")};
 
 static struct ctk_button cbutton =
-  {CTK_BUTTON(0, 1, 1, "C")};
+  {CTK_BUTTON(0, 2, 1, "C")};
 
 static struct ctk_button divbutton =
-  {CTK_BUTTON(9, 1, 1, "/")};
+  {CTK_BUTTON(9, 2, 1, "/")};
 static struct ctk_button mulbutton =
-  {CTK_BUTTON(9, 2, 1, "*")};
+  {CTK_BUTTON(9, 3, 1, "*")};
 
 static struct ctk_button subbutton =
-  {CTK_BUTTON(9, 3, 1, "-")};
+  {CTK_BUTTON(9, 4, 1, "-")};
 static struct ctk_button addbutton =
-  {CTK_BUTTON(9, 4, 1, "+")};
+  {CTK_BUTTON(9, 5, 1, "+")};
 static struct ctk_button calcbutton =
-  {CTK_BUTTON(9, 5, 1, "=")};
+  {CTK_BUTTON(9, 6, 1, "=")};
 
+EK_EVENTHANDLER(calc_eventhandler, ev, data);
+EK_PROCESS(p, "Calculator", EK_PRIO_NORMAL,
+	   calc_eventhandler, NULL, NULL);
+static ek_id_t id = EK_ID_NONE;
+
+/*
 static DISPATCHER_SIGHANDLER(calc_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Calculator", NULL, calc_sighandler, NULL)};
 static ek_id_t id;
+*/
 
 static unsigned long operand1, operand2;
 static unsigned char op;
@@ -104,60 +111,37 @@ LOADER_INIT_FUNC(calc_init, arg)
   arg_free(arg);
   
   if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    
-    ctk_window_new(&window, 12, 6, "Calc");
-
-    CTK_WIDGET_ADD(&window, &inputlabel);
-
-    CTK_WIDGET_ADD(&window, &cbutton);
-    
-    CTK_WIDGET_ADD(&window, &divbutton);
-	    
-    CTK_WIDGET_ADD(&window, &button7);
-    CTK_WIDGET_ADD(&window, &button8);
-    CTK_WIDGET_ADD(&window, &button9);
-
-    CTK_WIDGET_ADD(&window, &mulbutton);
-
-   
-
-    CTK_WIDGET_ADD(&window, &button4);
-    CTK_WIDGET_ADD(&window, &button5);
-    CTK_WIDGET_ADD(&window, &button6);
-
-    CTK_WIDGET_ADD(&window, &subbutton);
-
-    CTK_WIDGET_ADD(&window, &button1);
-    CTK_WIDGET_ADD(&window, &button2);
-    CTK_WIDGET_ADD(&window, &button3);
-    
-    CTK_WIDGET_ADD(&window, &addbutton);
-    
-    CTK_WIDGET_ADD(&window, &button0);
-
-    CTK_WIDGET_ADD(&window, &calcbutton);
-	
-
-
-        
-    dispatcher_listen(ctk_signal_button_activate);
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_keypress);
-
-    for(i = 0; i < sizeof(input); ++i) {
-      input[i] = ' ';
-    }
-  }
-  ctk_window_open(&window);
+    id = ek_start(&p);
+  }    
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 calc_quit(void)
 {
-  dispatcher_exit(&p);
+  ek_exit();
   id = EK_ID_NONE;
   LOADER_UNLOAD();
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+add_to_input(char c)
+{
+  unsigned char i;
+    
+  for(i = 0; i < 11; ++i) {
+    input[i] = input[i + 1];
+  }
+  input[11] = c;
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+clear_input(void)
+{
+  unsigned char i;
+  
+  for(i = 0; i < sizeof(input); ++i) {
+    input[i] = ' ';
+  }      
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -168,14 +152,13 @@ input_to_operand1(void)
 
   operand1 = 0;
   for(m = 1, i = 11;
-      i > 9; --i, m *= 10) {
+      i > 7; --i, m *= 10) {
     if(input[i] >= '0' &&
        input[i] <= '9') {
       operand1 += (input[i] - '0') * m;
     }
-    input[i] = ' ';
   }
-  input[11] = ' ';
+  clear_input();
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -220,23 +203,54 @@ calculate(void)
   operand2_to_input();      
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(calc_sighandler, s, data)
+EK_EVENTHANDLER(calc_eventhandler, ev, data)
 {
-  unsigned char i;
-  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  EK_EVENTHANDLER_ARGS(ev, data);
 
-  if(s == ctk_signal_keypress) {
+  if(ev == EK_EVENT_INIT) {
+    ctk_window_new(&window, 12, 7, "Calc");
+
+    CTK_WIDGET_ADD(&window, &inputlabel);
+    CTK_WIDGET_SET_FLAG(&inputlabel, CTK_WIDGET_FLAG_MONOSPACE);
+
+    CTK_WIDGET_ADD(&window, &cbutton);
+    
+    CTK_WIDGET_ADD(&window, &divbutton);
+	    
+    CTK_WIDGET_ADD(&window, &button7);
+    CTK_WIDGET_ADD(&window, &button8);
+    CTK_WIDGET_ADD(&window, &button9);
+
+    CTK_WIDGET_ADD(&window, &mulbutton);
+
+   
+
+    CTK_WIDGET_ADD(&window, &button4);
+    CTK_WIDGET_ADD(&window, &button5);
+    CTK_WIDGET_ADD(&window, &button6);
+
+    CTK_WIDGET_ADD(&window, &subbutton);
+
+    CTK_WIDGET_ADD(&window, &button1);
+    CTK_WIDGET_ADD(&window, &button2);
+    CTK_WIDGET_ADD(&window, &button3);
+    
+    CTK_WIDGET_ADD(&window, &addbutton);
+    
+    CTK_WIDGET_ADD(&window, &button0);
+
+    CTK_WIDGET_ADD(&window, &calcbutton);
+	
+    clear_input();
+    
+    ctk_window_open(&window);
+
+  } else if(ev == ctk_signal_keypress) {
     if((char)data >= '0' &&
        (char)data <= '9') {
-      for(i = 0; i < 11; ++i) {
-	input[i] = input[i + 1];
-      }
-      input[11] = (char)data;
+      add_to_input((char)data);
     } else if((char)data == ' ') {
-      for(i = 0; i < sizeof(input); ++i) {
-	input[i] = ' ';
-      }      
+      clear_input();
     } else if((char)data == '+') {
       input_to_operand1();
       op = OP_ADD;
@@ -249,13 +263,36 @@ DISPATCHER_SIGHANDLER(calc_sighandler, s, data)
     } else if((char)data == '/') {
       input_to_operand1();
       op = OP_DIV;
-    } else if((char)data == '=') {
+    } else if((char)data == '=' ||
+	      (char)data == CH_ENTER) {
       calculate();
     }
 
     CTK_WIDGET_REDRAW(&inputlabel);
-  } else if(s == ctk_signal_button_activate) {
-    if(data == (ek_data_t)&calcbutton) {
+  } else if(ev == ctk_signal_button_activate) {
+    if(data == (ek_data_t)&button0) {
+      add_to_input('0');
+    } else if(data == (ek_data_t)&button1) {
+      add_to_input('1');
+    } else if(data == (ek_data_t)&button2) {
+      add_to_input('2');
+    } else if(data == (ek_data_t)&button3) {
+      add_to_input('3');
+    } else if(data == (ek_data_t)&button4) {
+      add_to_input('4');
+    } else if(data == (ek_data_t)&button5) {
+      add_to_input('5');
+    } else if(data == (ek_data_t)&button6) {
+      add_to_input('6');
+    } else if(data == (ek_data_t)&button7) {
+      add_to_input('7');
+    } else if(data == (ek_data_t)&button8) {
+      add_to_input('8');
+    } else if(data == (ek_data_t)&button9) {
+      add_to_input('9');
+    } else if(data == (ek_data_t)&cbutton) {
+      clear_input();
+    } else if(data == (ek_data_t)&calcbutton) {
       calculate();
     } else if(data == (ek_data_t)&addbutton) {
       input_to_operand1();
@@ -271,7 +308,7 @@ DISPATCHER_SIGHANDLER(calc_sighandler, s, data)
       op = OP_DIV;
     }
     CTK_WIDGET_REDRAW(&inputlabel);
-  } else if(s == ctk_signal_window_close &&
+  } else if(ev == ctk_signal_window_close &&
 	    data == (ek_data_t)&window) {
     calc_quit();
   }
