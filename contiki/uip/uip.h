@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.10 2004/02/16 20:52:07 adamdunkels Exp $
+ * $Id: uip.h,v 1.11 2004/06/06 06:16:03 adamdunkels Exp $
  *
  */
 
@@ -79,8 +79,8 @@
  *
  * \hideinitializer
  */
-#define uip_sethostaddr(addr) do { uip_hostaddr[0] = addr[0]; \
-                              uip_hostaddr[1] = addr[1]; } while(0)
+#define uip_sethostaddr(addr) do { uip_hostaddr[0] = ((u16_t *)(addr))[0]; \
+                              uip_hostaddr[1] = ((u16_t *)(addr))[1]; } while(0)
 
 /**
  * Get the IP address of this host.
@@ -94,8 +94,53 @@
  *
  * \hideinitializer
  */
-#define uip_gethostaddr(addr) do { addr[0] = uip_hostaddr[0]; \
-                              addr[1] = uip_hostaddr[1]; } while(0)
+#define uip_gethostaddr(addr) do { ((u16_t *)(addr))[0] = uip_hostaddr[0]; \
+                              ((u16_t *)(addr))[1] = uip_hostaddr[1]; } while(0)
+
+/**
+ * Set the default router's IP address.
+ *
+ * \param addr A pointer to a 4-byte array containing the IP address
+ * of the default router.
+ *
+ * \hideinitializer
+ */
+#define uip_setdraddr(addr) do { uip_draddr[0] = ((u16_t *)(addr))[0]; \
+                                 uip_draddr[1] = ((u16_t *)(addr))[1]; } while(0)
+
+/**
+ * Set the netmask.
+ *
+ * \param addr A pointer to a 4-byte array containing the IP address
+ * of the netmask.
+ *
+ * \hideinitializer
+ */
+#define uip_setnetmask(addr) do { uip_netmask[0] = ((u16_t *)(addr))[0]; \
+                                  uip_netmask[1] = ((u16_t *)(addr))[1]; } while(0)
+
+
+/**
+ * Get the default router's IP address.
+ *
+ * \param addr A pointer to a 4-byte array that will be filled in with
+ * the IP address of the default router.
+ *
+ * \hideinitializer
+ */
+#define uip_getdraddr(addr) do { ((u16_t *)(addr))[0] = uip_draddr[0]; \
+                                 ((u16_t *)(addr))[1] = uip_draddr[1]; } while(0)
+
+/**
+ * Get the netmask.
+ *
+ * \param addr A pointer to a 4-byte array that will be filled in with
+ * the value of the netmask.
+ *
+ * \hideinitializer
+ */
+#define uip_getnetmask(addr) do { ((u16_t *)(addr))[0] = uip_netmask[0]; \
+                                  ((u16_t *)(addr))[1] = uip_netmask[1]; } while(0)
 
 /** @} */
 
@@ -430,7 +475,7 @@ struct uip_conn *uip_connect(u16_t *ripaddr, u16_t port);
  *
  * \hideinitializer
  */
-#define uip_send(data, len) do { uip_sappdata = (data); uip_slen = (len);} while(0)   
+#define uip_send(data, len) do { uip_sappdata = (void *)(data); uip_slen = (len);} while(0)   
 
 /**
  * The length of any incoming data that is currently avaliable (if avaliable)
@@ -508,6 +553,16 @@ struct uip_conn *uip_connect(u16_t *ripaddr, u16_t port);
 
 /* uIP tests that can be made to determine in what state the current
    connection is, and what the application function should do. */
+
+/**
+ * Is the current connection a UDP connection?
+ *
+ * This function checks whether the current connection is a UDP connection.
+ *
+ * \hideinitializer
+ *
+ */
+#define uip_udpconnection() (uip_conn == NULL)
 
 /**
  * Is new incoming data available?
@@ -688,9 +743,194 @@ struct uip_udp_conn *uip_udp_new(u16_t *ripaddr, u16_t rport);
  * \hideinitializer
  */
 #define uip_ipaddr(addr, addr0,addr1,addr2,addr3) do { \
-                     (addr)[0] = HTONS(((addr0) << 8) | (addr1)); \
-                     (addr)[1] = HTONS(((addr2) << 8) | (addr3)); \
+                     ((u16_t *)(addr))[0] = HTONS(((addr0) << 8) | (addr1)); \
+                     ((u16_t *)(addr))[1] = HTONS(((addr2) << 8) | (addr3)); \
                   } while(0)
+
+/**
+ * Copy an IP address to another IP address.
+ *
+ * Copies an IP address from one place to another.
+ *
+ * Example:
+ \code
+ u16_t ipaddr1[2], ipaddr2[2];
+
+ uip_ipaddr(ipaddr1, 192,16,1,2);
+ uip_ipaddr_copy(ipaddr2, ipaddr1);
+ \endcode
+ *
+ * \param dest The destination for the copy.
+ * \param src The source from where to copy.
+ *
+ * \hideinitializer
+ */
+#define uip_ipaddr_copy(dest, src) do { \
+                     ((u16_t *)dest)[0] = ((u16_t *)src)[0]; \
+                     ((u16_t *)dest)[1] = ((u16_t *)src)[1]; \
+                  } while(0)
+/**
+ * Compare two IP addresses
+ *
+ * Compares two IP addresses.
+ *
+ * Example:
+ \code
+ u16_t ipaddr1[2], ipaddr2[2];
+
+ uip_ipaddr(ipaddr1, 192,16,1,2);
+ if(uip_ipaddr_cmp(ipaddr2, ipaddr1)) {
+    printf("They are the same");
+ }
+ \endcode
+ *
+ * \param addr1 The first IP address.
+ * \param addr2 The second IP address.
+ *
+ * \hideinitializer
+ */
+#define uip_ipaddr_cmp(addr1, addr2) (((u16_t *)addr1)[0] == ((u16_t *)addr2)[0] && \
+				      ((u16_t *)addr1)[1] == ((u16_t *)addr2)[1])
+
+/**
+ * Compare two IP addresses with netmasks
+ *
+ * Compares two IP addresses with netmasks. The masks are used to mask
+ * out the bits that are to be compared.
+ *
+ * Example:
+ \code
+ u16_t ipaddr1[2], ipaddr2[2], mask[2];
+
+ uip_ipaddr(mask, 255,255,255,0);
+ uip_ipaddr(ipaddr1, 192,16,1,2);
+ uip_ipaddr(ipaddr2, 192,16,1,3); 
+ if(uip_ipaddr_maskcmp(ipaddr1, ipaddr2, mask)) {
+    printf("They are the same");
+ }
+ \endcode
+ * 
+ * \param addr1 The first IP address.
+ * \param addr2 The second IP address.
+ * \param mask The netmask.
+ *
+ * \hideinitializer
+ */
+#define uip_ipaddr_maskcmp(addr1, addr2, mask) \
+                          (((((u16_t *)addr1)[0] & ((u16_t *)mask)[0]) == \
+                            (((u16_t *)addr2)[0] & ((u16_t *)mask)[0])) && \
+                           ((((u16_t *)addr1)[1] & ((u16_t *)mask)[1]) == \
+                            (((u16_t *)addr2)[1] & ((u16_t *)mask)[1])))
+
+
+/**
+ * Mask out the network part of an IP address.
+ *
+ * Masks out the network part of an IP address, given the address and
+ * the netmask.
+ *
+ * Example:
+ \code
+ u16_t ipaddr1[2], ipaddr2[2], netmask[2];
+
+ uip_ipaddr(ipaddr1, 192,16,1,2);
+ uip_ipaddr(netmask, 255,255,255,0);
+ uip_ipaddr_mask(ipaddr2, ipaddr1, netmask);
+ \endcode
+ *
+ * In the example above, the variable "ipaddr2" will contain the IP
+ * address 192.168.1.0.
+ *
+ * \param dest Where the result is to be placed.
+ * \param src The IP address.
+ * \param mask The netmask.
+ *
+ * \hideinitializer
+ */  
+#define uip_ipaddr_mask(dest, src, mask) do { \
+                     ((u16_t *)dest)[0] = ((u16_t *)src)[0] & ((u16_t *)mask)[0]; \
+                     ((u16_t *)dest)[1] = ((u16_t *)src)[1] & ((u16_t *)mask)[1]; \
+                  } while(0)
+
+/**
+ * Pick the first octet of an IP address.
+ *
+ * Picks out the first octet of an IP address.
+ *
+ * Example:
+ \code
+ u16_t ipaddr[2];
+ u8_t octet;
+
+ uip_ipaddr(ipaddr, 1,2,3,4);
+ octet = uip_ipaddr1(ipaddr);
+ \endcode
+ *
+ * In the example above, the variable "octet" will contain the value 1.
+ *
+ * \hideinitializer
+ */
+#define uip_ipaddr1(addr) (htons(((u16_t *)(addr))[0]) >> 8)
+
+/**
+ * Pick the second octet of an IP address.
+ *
+ * Picks out the second octet of an IP address.
+ *
+ * Example:
+ \code
+ u16_t ipaddr[2];
+ u8_t octet;
+
+ uip_ipaddr(ipaddr, 1,2,3,4);
+ octet = uip_ipaddr2(ipaddr);
+ \endcode
+ *
+ * In the example above, the variable "octet" will contain the value 2.
+ *
+ * \hideinitializer
+ */
+#define uip_ipaddr2(addr) (htons(((u16_t *)(addr))[0]) & 0xff)
+
+/**
+ * Pick the third octet of an IP address.
+ *
+ * Picks out the third octet of an IP address.
+ *
+ * Example:
+ \code
+ u16_t ipaddr[2];
+ u8_t octet;
+
+ uip_ipaddr(ipaddr, 1,2,3,4);
+ octet = uip_ipaddr3(ipaddr);
+ \endcode
+ *
+ * In the example above, the variable "octet" will contain the value 3.
+ *
+ * \hideinitializer
+ */
+#define uip_ipaddr3(addr) (htons(((u16_t *)(addr))[1]) >> 8)
+
+/**
+ * Pick the fourth octet of an IP address.
+ *
+ * Picks out the fourth octet of an IP address.
+ *
+ * Example:
+ \code
+ u16_t ipaddr[2];
+ u8_t octet;
+
+ uip_ipaddr(ipaddr, 1,2,3,4);
+ octet = uip_ipaddr4(ipaddr);
+ \endcode
+ *
+ * In the example above, the variable "octet" will contain the value 4.
+ *
+ * \hideinitializer
+ */
+#define uip_ipaddr4(addr) (htons(((u16_t *)(addr))[1]) & 0xff)
 
 /**
  * Convert 16-bit quantity from host byte order to network byte order.
@@ -729,8 +969,8 @@ u16_t htons(u16_t val);
  * called. If the application wishes to send data, the application may
  * use this space to write the data into before calling uip_send().
  */
-extern volatile u8_t *uip_appdata;
-extern volatile u8_t *uip_sappdata; 
+extern u8_t *uip_appdata;
+extern u8_t *uip_sappdata; 
 
 #if UIP_URGDATA > 0 
 /* u8_t *uip_urgdata:
@@ -738,7 +978,7 @@ extern volatile u8_t *uip_sappdata;
  * This pointer points to any urgent data that has been received. Only
  * present if compiled with support for urgent data (UIP_URGDATA).
  */
-extern volatile u8_t *uip_urgdata; 
+extern u8_t *uip_urgdata; 
 #endif /* UIP_URGDATA > 0 */
 
 
@@ -751,10 +991,10 @@ extern volatile u8_t *uip_urgdata;
  * output function is called, uip_len should contain the length of the
  * outgoing packet.
  */
-extern volatile u16_t uip_len, uip_slen;
+extern u16_t uip_len, uip_slen;
 
 #if UIP_URGDATA > 0 
-extern volatile u8_t uip_urglen, uip_surglen;
+extern u8_t uip_urglen, uip_surglen;
 #endif /* UIP_URGDATA > 0 */
 
 
@@ -811,7 +1051,7 @@ extern struct uip_conn uip_conns[UIP_CONNS];
 /**
  * 4-byte array used for the 32-bit sequence number calculations.
  */
-extern volatile u8_t uip_acc32[4];
+extern u8_t uip_acc32[4];
 
 /** @} */
 
@@ -902,7 +1142,7 @@ extern struct uip_stats uip_stat;
  * that are defined in this file. Please read below for more
  * infomation.
  */
-extern volatile u8_t uip_flags;
+extern u8_t uip_flags;
 
 /* The following flags may be set in the global variable uip_flags
    before calling the application callback. The UIP_ACKDATA and
@@ -1050,11 +1290,15 @@ typedef struct {
 #define UIP_PROTO_TCP   6
 #define UIP_PROTO_UDP   17
 
+
+
 #if UIP_FIXEDADDR
-extern const u16_t uip_hostaddr[2];
+extern const u16_t uip_hostaddr[2], uip_netmask[2], uip_draddr[2];
 #else /* UIP_FIXEDADDR */
-extern u16_t uip_hostaddr[2];
+extern u16_t uip_hostaddr[2], uip_netmask[2], uip_draddr[2];
 #endif /* UIP_FIXEDADDR */
+
+
 
 #endif /* __UIP_H__ */
 
