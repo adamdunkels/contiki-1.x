@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-hires.c,v 1.8 2003/08/24 22:29:41 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.9 2004/02/16 20:57:36 adamdunkels Exp $
  *
  */
 
@@ -279,7 +279,15 @@ clear_line(unsigned char line)
   asm("iny");
   asm("cpy #$40");
   asm("bne clearlineloop3");
+
   
+  if(lineptr == 24) {
+#define CONTIKI_VERSION_STRING "Contiki 1.2-pre0"
+    hires_color(ctk_hires_theme.backgroundpatterncolors[24]);
+    hires_gotoxy(0, 24);
+    ctk_hires_cputsn(CONTIKI_VERSION_STRING,
+		     sizeof(CONTIKI_VERSION_STRING) - 1);
+  }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
