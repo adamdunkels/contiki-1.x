@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki operating system
  *
- * $Id: main.c,v 1.14 2004/09/12 07:34:49 adamdunkels Exp $
+ * $Id: main.c,v 1.15 2004/09/12 13:13:00 adamdunkels Exp $
  *
  */
 
@@ -101,9 +101,21 @@ clock_time(void)
   return clock();
 }
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
+static void
+setup_curunit(void)
+{
+  asm("lda $ba");
+  asm("sta %v", _curunit);
+}
+#pragma optimize(pop)
+/*-----------------------------------------------------------------------------------*/
 void
 main(void)
 {
+
+  setup_curunit();
+  
   log_message("Starting ", CONTIKI_VERSION_STRING);
   
   ek_init();
@@ -125,10 +137,18 @@ main(void)
   program_handler_add(&directory_dsc, "Directory", 1);
   program_handler_add(&configedit_dsc, "Configuration", 1);
   program_handler_add(&processes_dsc, "Processes", 1);  
-
+  
   ek_start(&init);
   
   log_message("Starting process scheduling", "");  
+
+  while(1) {
+    if(ek_run() == 0) {
+      program_handler_load("welcome.prg", NULL);
+      break;
+    }
+  }
+    
   
   while(1) {
     ek_run();
