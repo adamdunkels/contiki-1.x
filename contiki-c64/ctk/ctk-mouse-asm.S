@@ -26,7 +26,10 @@ SID_ADConv1     = $D419
 SID_ADConv2     = $D41A
 CIA1_PRA        = $DC00
 CIA1_PRB        = $DC01
-	
+CIA1_DDRB       = $DC03	
+
+mousebutton:	.res 1
+joybutton:	.res 1		
 ;---------------------------------------------------------------------
 .data
 XMin:           .word    0               ; X1 value of bounding box
@@ -60,7 +63,7 @@ nodex:
 noinx:
 	  and #1
 	  eor #1
-	  sta _ctk_mouse_firebutton
+	  sta joybutton
 
 	  cpy lastjoydy
 	  sty lastjoydy
@@ -69,8 +72,9 @@ noinx:
 	  pha
 	  inc joydycnt
 	  lda joydycnt
-	  bpl nostajoydycnt
-	  lda #$80
+          cmp #$1f
+          bmi nostajoydycnt
+          lda #$20
 	  sta joydycnt
 nostajoydycnt:
 	  lsr
@@ -112,8 +116,9 @@ ydy:
 	  pha
 	  inc joydxcnt
 	  lda joydxcnt
-	  bpl nostajoydxcnt
-	  lda #$80
+          cmp #$1f
+          bmi nostajoydxcnt
+          lda #$20
 	  sta joydxcnt
 nostajoydxcnt:
 	  lsr
@@ -145,7 +150,6 @@ xdx:
 nolda02:
 	  plp
 	  adc _ctk_mouse_joyx+1
-	  and #1
 	  sta _ctk_mouse_joyx+1
 	  rts	                                                                                       
 ;---------------------------------------------------------------------
@@ -244,19 +248,34 @@ mouse:
         stx     _ctk_mouse_joyy+1
 
 	;; Get mouse button
-	lda     #$7F
-        sta     CIA1_PRA
-        lda     CIA1_PRB                ; Read joystick #0
-        ldx     #0
-        and     #$1F
-        eor     #$1F
-	sta _ctk_mouse_firebutton	
+
+
+	lda	#$11
+	sta	CIA1_DDRB
+	ldx	#0
+	lda	CIA1_PRB
+	lsr
+	lsr
+	lsr
+	lsr
+	sta $d020
+	and	#$10
+	bne	@NOLEFTB
+	ldx	#1
+@NOLEFTB:	
+	stx	mousebutton
+	
+	lda	#0
+	sta	CIA1_DDRB	
 	rts	
 ;---------------------------------------------------------------------			
 _ctk_mouse_asm_irq:
 	jsr joystick
+	; 	jsr mouse	
 
-	jsr mouse
+	lda mousebutton
+	ora joybutton
+	sta _ctk_mouse_firebutton
 	
 	  lda _ctk_mouse_joyy
 	  clc

@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mouse.c,v 1.3 2003/04/11 20:24:35 adamdunkels Exp $
+ * $Id: ctk-mouse.c,v 1.4 2003/08/06 23:58:03 adamdunkels Exp $
  *
  */
 
@@ -68,7 +68,9 @@ ctk_mouse_init(void)
 unsigned short
 ctk_mouse_x(void)
 {
-  if(ctk_mouse_joyx >= 320) {
+  if(ctk_mouse_joyx >= 342) {
+    ctk_mouse_joyx = 0;
+  } else if(ctk_mouse_joyx >= 320) {
     ctk_mouse_joyx = 319;
   }
   return ctk_mouse_joyx;
