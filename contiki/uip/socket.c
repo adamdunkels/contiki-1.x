@@ -43,7 +43,7 @@ data_sent(struct socket *s)
 /*---------------------------------------------------------------------------*/
 PT_THREAD(socket_send(struct socket *s, char *buf, unsigned int len))
 {
-  PT_START(&s->socketpt);
+  PT_BEGIN(&s->socketpt);
 
   if(len == 0) {
     PT_EXIT(&s->socketpt);
@@ -51,28 +51,25 @@ PT_THREAD(socket_send(struct socket *s, char *buf, unsigned int len))
   
   s->sendptr = buf;
   s->sendlen = len;
+
+  s->state = SOCKET_STATE_NONE;
   
   while(s->sendlen > 0) {
-    PT_WAIT_UNTIL(&s->socketpt, data_sent(s) && send_data(s));
+    PT_WAIT_UNTIL(&s->socketpt,  data_sent(s) & send_data(s));
   }
 
-  PT_EXIT(&s->socketpt);
+  s->state = SOCKET_STATE_NONE;
+  
+  PT_END(&s->socketpt);
 }
 /*---------------------------------------------------------------------------*/
-/*PT_THREAD(socket_closew(struct socket *socket))
+char
+socket_newdata(struct socket *s)
 {
-  PT_START(&socket->socketpt);
-  uip_close();
-  socket->state = SOCKET_STATE_BLOCKED_CLOSE;  
-  PT_WAIT_UNTIL(&socket->socketpt,
-		uip_closed() || uip_timedout() || uip_aborted());
-  PT_EXIT(&socket->socketpt);
-}*/
-/*---------------------------------------------------------------------------*/
-static char
-newdata_available(struct socket *s)
-{
-  if(s->state == SOCKET_STATE_READ) {
+  if(s->readlen > 0) {
+    /* Data in uip_appdata buffer that has not yet been read. */
+    return 1;
+  } else if(s->state == SOCKET_STATE_READ) {
     /* Data in uip_appdata buffer already consumed. */
     s->state = SOCKET_STATE_BLOCKED_NEWDATA;
     return 0;
@@ -87,8 +84,7 @@ newdata_available(struct socket *s)
 /*---------------------------------------------------------------------------*/
 PT_THREAD(socket_readto(struct socket *socket, unsigned char c))
 {
-
-  PT_START(&socket->socketpt);
+  PT_BEGIN(&socket->socketpt);
 
   uipbuf_setup(&socket->buf, socket->bufptr, socket->bufsize);
   
@@ -97,7 +93,7 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c))
 
   do {
     if(socket->readlen == 0) {
-      PT_WAIT_UNTIL(&socket->socketpt, newdata_available(socket));  
+      PT_WAIT_UNTIL(&socket->socketpt, socket_newdata(socket));
       socket->state = SOCKET_STATE_READ;
       socket->readptr = (u8_t *)uip_appdata;
       socket->readlen = uip_datalen();
@@ -111,8 +107,9 @@ PT_THREAD(socket_readto(struct socket *socket, unsigned char c))
     socket->state = SOCKET_STATE_NONE;
     PT_RESTART(&socket->socketpt);
   }
+
   
-  PT_EXIT(&socket->socketpt);
+  PT_END(&socket->socketpt);
 }
 /*---------------------------------------------------------------------------*/
 void
