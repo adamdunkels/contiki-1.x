@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: processes.c,v 1.13 2004/09/09 21:10:16 adamdunkels Exp $
+ * $Id: processes.c,v 1.14 2005/03/13 22:14:43 oliverschmidt Exp $
  *
  */
 
@@ -47,15 +47,15 @@ static struct ctk_label processnamelabels[MAX_PROCESSLABELS];
 
 static struct ctk_label killlabel =
   {CTK_LABEL(0, 14, 12, 1, "Kill process")};
-static char killprocnum[5];
+static char killprocnum[4];
 static struct ctk_textentry killtextentry =
-  {CTK_TEXTENTRY(13, 14, 3, 1, killprocnum, 4)};
+  {CTK_TEXTENTRY(13, 14, 3, 1, killprocnum, 3)};
 static struct ctk_button killbutton =
-  {CTK_BUTTON(20, 14, 2, "Ok")};
+  {CTK_BUTTON(19, 14, 2, "Ok")};
 static struct ctk_button processupdatebutton =
   {CTK_BUTTON(0, 15, 6, "Update")};
 static struct ctk_button processclosebutton =
-  {CTK_BUTTON(17, 15, 5, "Close")};
+  {CTK_BUTTON(19, 15, 5, "Close")};
 
 /*static DISPATCHER_SIGHANDLER(processes_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -95,7 +95,7 @@ update_processwindow(void)
     CTK_WIDGET_ADD(&processwindow, &processidlabels[j]);
     
     CTK_LABEL_NEW(&processnamelabels[j],
-		  4, j + 1, 20, 1, (char *)p->name);
+		  4, j + 1, 22, 1, (char *)p->name);
     CTK_WIDGET_ADD(&processwindow, &processnamelabels[j]);
 
     ++j;
@@ -177,7 +177,7 @@ EK_EVENTHANDLER(processes_eventhandler, ev, data)
 
   
   if(ev == EK_EVENT_INIT) {
-    ctk_window_new(&processwindow, 24, 16, "Processes");
+    ctk_window_new(&processwindow, 26, 16, "Processes");
     update_processwindow();
     
     ctk_window_open(&processwindow);
