@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.13 2004/09/01 20:34:06 adamdunkels Exp $
+# $Id: Makefile,v 1.14 2004/09/01 20:43:19 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -89,8 +89,8 @@ contiki: contiki-main.o ek.o arg.o ek-service.o \
  shell-dsc.o shell.o shell-gui.o \
  calc-dsc.o calc.o \
  email.o email-dsc.o smtp-socket.o smtp-strings.o ctk-textedit.o \
- sock-httpd.o socket.o list.o filecache.o \
- ircc.o irc.o irc-dsc.o
+ ircc.o irc.o irc-dsc.o socket.o \
+# sock-httpd.o socket.o list.o filecache.o \
 # program-handler.o about.o netconf.o processes.o \
 # about-dsc.o netconf-dsc.o processes-dsc.o  \
 # $(CTKGTK) \
