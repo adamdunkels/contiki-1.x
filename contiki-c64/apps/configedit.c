@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.12 2004/09/12 07:27:33 adamdunkels Exp $
+ * $Id: configedit.c,v 1.13 2004/09/12 13:36:03 adamdunkels Exp $
  *
  */
 
@@ -59,50 +59,56 @@ static struct ctk_window window;
 
 #define LABELMAXWIDTH 12
 
+static struct ctk_label cfslabel =
+  {CTK_LABEL(0, 1, LABELMAXWIDTH, 1, "Disk driver")};
+static char cfs[25];
+static struct ctk_textentry cfstextentry =
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 1, 16, 1, cfs, 24)};
+
 static struct ctk_label themelabel =
-  {CTK_LABEL(0, 1, LABELMAXWIDTH, 1, "CTK theme")};
+  {CTK_LABEL(0, 3, LABELMAXWIDTH, 1, "CTK theme")};
 static char theme[25];
 static struct ctk_textentry themetextentry =
-  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 1, 16, 1, theme, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 3, 16, 1, theme, 24)};
 
 static struct ctk_label driverlabel =
-  {CTK_LABEL(0, 3, LABELMAXWIDTH, 1, "Net driver")};
+  {CTK_LABEL(0, 5, LABELMAXWIDTH, 1, "Net driver")};
 static char driver[25];
 static struct ctk_textentry drivertextentry =
-  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 3, 16, 1, driver, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 5, 16, 1, driver, 24)};
 
 static struct ctk_label screensaverlabel =
-  {CTK_LABEL(0, 5, LABELMAXWIDTH, 1, "Screensaver")};
+  {CTK_LABEL(0, 7, LABELMAXWIDTH, 1, "Screensaver")};
 static char screensaver[25];
 static struct ctk_textentry screensavertextentry =
-  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 5, 16, 1, screensaver, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 7, 16, 1, screensaver, 24)};
 
 
 static struct ctk_label ipaddrlabel =
-  {CTK_LABEL(0, 7, LABELMAXWIDTH, 1, "IP address")};
+  {CTK_LABEL(0, 9, LABELMAXWIDTH, 1, "IP address")};
 static char ipaddr[25];
 static struct ctk_textentry ipaddrtextentry =
-  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 7, 16, 1, ipaddr, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 9, 16, 1, ipaddr, 24)};
 static struct ctk_label netmasklabel =
-  {CTK_LABEL(0, 9, LABELMAXWIDTH, 1, "Netmask")};
+  {CTK_LABEL(0, 11, LABELMAXWIDTH, 1, "Netmask")};
 static char netmask[25];
 static struct ctk_textentry netmasktextentry =
-  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 9, 16, 1, netmask, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 11, 16, 1, netmask, 24)};
 static struct ctk_label gatewaylabel =
-  {CTK_LABEL(0, 11, LABELMAXWIDTH, 1, "Gateway")};
+  {CTK_LABEL(0, 13, LABELMAXWIDTH, 1, "Gateway")};
 static char gateway[25];
 static struct ctk_textentry gatewaytextentry =
-  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 11, 16, 1, gateway, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 13, 16, 1, gateway, 24)};
 static struct ctk_label dnsserverlabel =
-  {CTK_LABEL(0, 13, LABELMAXWIDTH, 1, "DNS server")};
+  {CTK_LABEL(0, 15, LABELMAXWIDTH, 1, "DNS server")};
 static char dnsserver[25];
 static struct ctk_textentry dnsservertextentry =
-  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 13, 16, 1, dnsserver, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 15, 16, 1, dnsserver, 24)};
 
 static struct ctk_button savebutton =
-  {CTK_BUTTON(0, 15, 12, "Save & close")};
+  {CTK_BUTTON(0, 17, 12, "Save & close")};
 static struct ctk_button cancelbutton =
-  {CTK_BUTTON(24, 15, 6, "Cancel")};
+  {CTK_BUTTON(24, 17, 6, "Cancel")};
 
 /*static DISPATCHER_SIGHANDLER(configedit_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -206,6 +212,12 @@ loadtheme(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
+loadcfs(char *str)
+{
+  return copystr(cfs, str, sizeof(cfs));
+}
+/*-----------------------------------------------------------------------------------*/
+static char *
 loadscreensaver(char *str)
 {
   return copystr(screensaver, str, sizeof(screensaver));
@@ -238,6 +250,7 @@ dnsconf(char *str)
 static struct ptentry initparsetab[] =
   {{'n', loaddriver},
    {'t', loadtheme},
+   {'c', loadcfs},
    {'s', loadscreensaver},
    {'i', ipaddrconf},
    {'m', netmaskconf},
@@ -359,6 +372,7 @@ configedit_quit(void)
 static void
 quit_services(void)
 {
+  cfs_init_init(NULL);
   ctk_draw_quit();  
 }
 /*-----------------------------------------------------------------------------------*/
@@ -368,11 +382,14 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 
   if(ev == EK_EVENT_INIT) {
     /* Create window. */
-    ctk_window_new(&window, 32, 16, "Config editor");
+    ctk_window_new(&window, 32, 18, "Config editor");
+
+    CTK_WIDGET_ADD(&window, &cfslabel);  
+    CTK_WIDGET_ADD(&window, &cfstextentry);
 
     CTK_WIDGET_ADD(&window, &themelabel);  
     CTK_WIDGET_ADD(&window, &themetextentry);
-
+    
     CTK_WIDGET_ADD(&window, &driverlabel);  
     CTK_WIDGET_ADD(&window, &drivertextentry);
 

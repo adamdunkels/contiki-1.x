@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.9 2004/09/12 07:27:11 adamdunkels Exp $
+ * $Id: config.c,v 1.10 2004/09/12 13:36:02 adamdunkels Exp $
  *
  */
 
@@ -124,19 +124,6 @@ loadfile(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
-loaddriver(char *str)
-{
-  char *nt;
-
-  nt = nullterminate(str);
-  
-  /* Call loader function. */
-  program_handler_load(str, NULL);
-
-  return nt + 1;
-}
-/*-----------------------------------------------------------------------------------*/
-static char *
 screensaverconf(char *str)
 {
   char *nt;
@@ -201,8 +188,9 @@ dnsconf(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static struct ptentry configparsetab[] =
-  {{'n', loaddriver},
+  {{'n', loadfile},
    {'t', loadfile},
+   {'c', loadfile},   
    {'s', screensaverconf},   
    {'i', ipaddrconf},
    {'m', netmaskconf},
