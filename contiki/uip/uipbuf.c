@@ -42,11 +42,24 @@ uipbuf_bufdata(struct uipbuf_buffer *buf, u16_t len,
 }
 /*---------------------------------------------------------------------------*/
 u8_t
-uipbuf_bufto(struct uipbuf_buffer *buf, u8_t endmarker,
-	     u8_t **dataptr, u16_t *datalen)
+uipbuf_bufto(register struct uipbuf_buffer *buf, u8_t endmarker,
+	     register u8_t **dataptr, register u16_t *datalen)
 {
   u8_t c;
-    
+  /*
+  int len;
+
+  ptr = memchr(*dataptr, endmarker, *datalen);
+  if(ptr != NULL) {
+    len = ptr - *dataptr;
+  } else {
+    len = *datalen;
+  }
+  memcpy(buf->ptr, *dataptr, len);
+  *dataptr += len;
+  *datalen -= len;
+  buf->ptr += len;
+  */
   while(buf->left > 0 && *datalen > 0) {
     c = *buf->ptr = **dataptr;
     ++*dataptr;
