@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.6 2003/04/24 17:02:11 adamdunkels Exp $
+# $Id: Makefile,v 1.7 2003/07/30 22:48:49 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -40,22 +40,19 @@ usage:
 	@echo "Make sure the Contiki sources is in the directory $(CONTIKI)"
 	@echo 'To compile Contiki, use "'$(MAKE)' target" where target'
 	@echo 'is one of the following:'
-	@echo tfe
-	@echo rs232 programs
-	@echo rs232-conio programs
+	@echo all
+	@echo c64
+	@echo programs
 	@echo d64
 	@echo programs
 	@echo '(Also check the Makefile for more targets to try...)'
 
+all: clean c64 programs
+
 programs:
 	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.programs
-tfe:
-	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-tfe
-rs232:
-	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-rs232
-rs232-conio:
-	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-rs232-conio
-
+c64:
+	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64
 
 CCDEPFLAGS=-D__CBM__ -D__C64__ -DCTK_HIRES
 
