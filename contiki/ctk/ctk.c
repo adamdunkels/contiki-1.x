@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.14 2003/04/16 18:29:19 adamdunkels Exp $
+ * $Id: ctk.c,v 1.15 2003/04/18 00:18:38 adamdunkels Exp $
  *
  */
 
@@ -92,7 +92,9 @@ static ek_id_t ctkid;
 ek_signal_t ctk_signal_keypress,
   ctk_signal_timer,
   ctk_signal_button_activate,
+  ctk_signal_widget_activate,
   ctk_signal_button_hover,
+  ctk_signal_widget_select,
   ctk_signal_hyperlink_activate,
   ctk_signal_hyperlink_hover,
   ctk_signal_menu_activate,
@@ -164,10 +166,16 @@ ctk_init(void)
   
   ctk_signal_keypress = dispatcher_sigalloc();
   ctk_signal_timer = dispatcher_sigalloc();
-  ctk_signal_button_activate = dispatcher_sigalloc();
-  ctk_signal_button_hover = dispatcher_sigalloc();
+  
+  ctk_signal_button_activate =
+    ctk_signal_widget_activate = dispatcher_sigalloc();
+  
+  ctk_signal_button_hover =
+    ctk_signal_hyperlink_hover =
+    ctk_signal_widget_select = dispatcher_sigalloc();
+  
   ctk_signal_hyperlink_activate = dispatcher_sigalloc();
-  ctk_signal_hyperlink_hover = dispatcher_sigalloc();
+
   ctk_signal_menu_activate = dispatcher_sigalloc();
   ctk_signal_window_close = dispatcher_sigalloc();
 
@@ -625,6 +633,10 @@ select_widget(struct ctk_widget *focus)
     } 
     
     add_redrawwidget(window->focused);
+
+    dispatcher_emit(ctk_signal_widget_select, focus,
+		    focus->window->owner);
+
   }
 
 }
@@ -764,12 +776,12 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
       mode = CTK_MODE_WINDOWMOVE;
 #endif /* CTK_CONF_WINDOWCLOSE */
     } else {
-      dispatcher_emit(ctk_signal_button_activate, w,
+      dispatcher_emit(ctk_signal_widget_activate, w,
 		      w->window->owner);
     }
 #if CTK_CONF_ICONS
   } else if(w->type == CTK_WIDGET_ICON) {
-    dispatcher_emit(ctk_signal_button_activate, w,
+    dispatcher_emit(ctk_signal_widget_activate, w,
 		    w->widget.icon.owner);
 #endif /* CTK_CONF_ICONS */
   } else if(w->type == CTK_WIDGET_HYPERLINK) {    
@@ -787,6 +799,9 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
     }
     add_redrawwidget(w);
     return REDRAW_WIDGETS;
+  } else {
+    dispatcher_emit(ctk_signal_widget_activate, w,
+		    w->window->owner);
   }
   return REDRAW_NONE;
 }
@@ -1107,8 +1122,7 @@ ctk_idle(void)
 	  /* If we didn't find any window, and there are no windows
 	     open, the mouse pointer will definately be within the
 	     background desktop window. */
-	  if(window == NULL &&
-	     windows == NULL) {
+	  if(window == NULL) {
 	    window = &desktop_window;
 	  }
 
@@ -1158,12 +1172,12 @@ ctk_idle(void)
 	      }
 	    
 	    
-	      if(mouse_moved) {
+	      if(mouse_moved &&
+		 (window != &desktop_window ||
+		  windows == NULL)) {
 		dispatcher_emit(ctk_signal_pointer_move, NULL,
 				window->owner);
-
-		
-
+	       
 		if(window->focused != NULL &&
 		   widget != window->focused) {
 		  add_redrawwidget(window->focused);

@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.7 2003/04/11 20:16:02 adamdunkels Exp $
+ * $Id: ctk.h,v 1.8 2003/04/18 00:18:39 adamdunkels Exp $
  *
  */
 
@@ -320,6 +320,8 @@ void ctk_widget_redraw(struct ctk_widget *w);
 
 #define ctk_button_set_text(b, t) (b)->text = (t)
 
+#define ctk_bitmap_set_bitmap(b, m) (b)->bitmap = (m)
+
 #define CTK_BUTTON_NEW(widg, xpos, ypos, width, buttontext) \
  (widg)->window = NULL; \
  (widg)->next = NULL; \
@@ -338,6 +340,16 @@ void ctk_widget_redraw(struct ctk_widget *w);
  (widg)->w = (width); \
  (widg)->h = (height); \
  (widg)->text = (labeltext)
+
+#define CTK_BITMAP_NEW(widg, xpos, ypos, width, height, bmap) \
+ (widg)->window = NULL; \
+ (widg)->next = NULL; \
+ (widg)->type = CTK_WIDGET_BITMAP; \
+ (widg)->x = (xpos); \
+ (widg)->y = (ypos); \
+ (widg)->w = (width); \
+ (widg)->h = (height); \
+ (widg)->bitmap = (bmap)
 
 #define CTK_TEXTENTRY_NEW(widg, xxpos, yypos, width, height, textptr, textlen) \
  (widg)->window = NULL; \
