@@ -33,29 +33,15 @@ _c64_dio_asm_sector: .byte 0
 _c64_dio_asm_ptr: .byte 0,0			
 
 .code
-_c64_dio_asm_init:	
-	;; lda #8
-         jsr init
-	 rts
-_c64_dio_asm_read_block:	
-	 ldx _c64_dio_asm_track
-	 ldy _c64_dio_asm_sector
-         jmp read_block
-_c64_dio_asm_write_block:	
-	 ldx _c64_dio_asm_track
-	 ldy _c64_dio_asm_sector
-         jmp write_block
 ;---------------------------------------
-read_block:
-         stx ptr1
-         sty ptr1+1
+_c64_dio_asm_read_block:		
 
- 	lda #blockread
+  	lda #blockread
          jsr send
 
-         lda ptr1
+         lda _c64_dio_asm_track
          jsr send
-         lda ptr1+1
+	 lda _c64_dio_asm_sector
          jsr send
 
 
@@ -82,16 +68,14 @@ readerr:
          sec
          rts
 ;---------------------------------------
-write_block:
-         stx ptr1
-         sty ptr1+1
+_c64_dio_asm_write_block:		
 
  	lda #blockwrite
          jsr send
 
-         lda ptr1
+         lda _c64_dio_asm_track
          jsr send
-         lda ptr1+1
+         lda _c64_dio_asm_sector
          jsr send
 
 
@@ -119,7 +103,7 @@ writeerr:
          sec
          rts
 ;---------------------------------------
-init:	
+_c64_dio_asm_init:		
          sta devnr
          lda #$00
          sta drvmem
