@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.42 2004/09/19 15:24:19 adamdunkels Exp $
+ * $Id: ctk.c,v 1.43 2004/12/22 22:52:53 oliverschmidt Exp $
  *
  */
 
@@ -735,10 +735,10 @@ window_new(CC_REGISTER_ARG struct ctk_window *window,
   } else {
     window->x = (width - w - 2) / 2;
   }
-  if(h >= height - 3) {
+  if(h >= height - 2 - ctk_draw_windowtitle_height) {
     window->y = 0;
   } else {
-    window->y = (height - h - ctk_draw_windowtitle_height) / 2;
+    window->y = (height - h - 2 - ctk_draw_windowtitle_height) / 2;
   }
 
   window->w = w;
