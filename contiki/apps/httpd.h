@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.h,v 1.2 2003/07/31 23:33:02 adamdunkels Exp $
+ * $Id: httpd.h,v 1.3 2003/08/09 13:30:48 adamdunkels Exp $
  *
  */
 
@@ -52,4 +52,7 @@ struct httpd_state {
 };
 
 extern struct httpd_state *hs;
+
+void webserver_log_file(u16_t *requester, char *file);
+
 #endif /* __HTTPD_H__ */
