@@ -124,13 +124,15 @@ nolda02:
 	                                                                                       
 	  lda _ctk_mouse_joyy
 	  clc
-	  adc #$30
+	  adc #$32
 	  sta $d001
+	  sta $d003	
 
 	  lda _ctk_mouse_joyx
 	  clc
 	  adc #$18
 	  sta $d000
+	  sta $d002	
 	  lda #0
 	  adc _ctk_mouse_joyx+1
 	  and #1

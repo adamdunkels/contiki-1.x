@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mouse.c,v 1.1 2003/04/09 00:31:14 adamdunkels Exp $
+ * $Id: ctk-mouse.c,v 1.2 2003/04/09 09:02:06 adamdunkels Exp $
  *
  */
 
@@ -51,7 +51,9 @@ extern void ctk_mouse_asm_irq(void);
 void
 ctk_mouse_init(void)
 {
-  ctk_mouse_joyx = ctk_mouse_joyy = 0;
+  /* Place mouse pointer at the middle of the screen. */
+  ctk_mouse_joyx = 160;
+  ctk_mouse_joyy = 100;
   
   /* Setup and start IRQ */
   asm("sei");
@@ -61,12 +63,10 @@ ctk_mouse_init(void)
   asm("sta $0315");   
   asm("cli");
 
-  /* Turn on sprite 0 */
-  asm("lda #1");
+  /* Turn on sprites 0 and 1 */
+  asm("lda #3");
   asm("sta $d015");
 
-  asm("lda #9");
-  asm("sta $d027");
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned short
