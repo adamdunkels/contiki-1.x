@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.6 2004/06/27 12:44:21 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.7 2004/08/09 21:02:55 adamdunkels Exp $
  *
  */
 
@@ -61,10 +61,10 @@
 
 /* Toggles mouse support (must have support functions in the
 architecture specific files to work). */
-#define CTK_CONF_MOUSE_SUPPORT        1 /* 1342 bytes */
+#define CTK_CONF_MOUSE_SUPPORT        0
 
 /* Toggles support for icons. */
-#define CTK_CONF_ICONS                1 /* 107 bytes */
+#define CTK_CONF_ICONS                1
 
 /* Toggles support for icon bitmaps. */
 #define CTK_CONF_ICON_BITMAPS         1
@@ -73,13 +73,13 @@ architecture specific files to work). */
 #define CTK_CONF_ICON_TEXTMAPS        1
 
 /* Toggles support for movable windows. */
-#define CTK_CONF_WINDOWMOVE           1 /* 333 bytes */
+#define CTK_CONF_WINDOWMOVE           1
 
 /* Toggles support for closable windows. */
-#define CTK_CONF_WINDOWCLOSE          1 /* 14 bytes */
+#define CTK_CONF_WINDOWCLOSE          1
 
 /* Toggles support for menus. */
-#define CTK_CONF_MENUS                1 /* 1384 bytes */
+#define CTK_CONF_MENUS                1
 
 /* Defines the default width of a menu. */
 #define CTK_CONF_MENUWIDTH            16
