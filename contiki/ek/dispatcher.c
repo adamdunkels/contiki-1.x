@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.25 2004/06/06 06:07:24 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.26 2004/06/06 06:33:50 adamdunkels Exp $
  *
  */
 
@@ -687,6 +687,7 @@ dispatcher_markconn(struct uip_conn *conn,
  * if no connection could be allocated.
  */
 /*-----------------------------------------------------------------------------------*/
+#ifdef WITH_UIP
 struct uip_udp_conn *
 dispatcher_udp_new(u16_t *ripaddr,
 		   u16_t port, void *appstate)
@@ -705,6 +706,7 @@ dispatcher_udp_new(u16_t *ripaddr,
 
   return c;
 }
+#endif /* WITH_UIP */
 
 /** @} */
 /** @} */
