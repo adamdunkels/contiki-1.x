@@ -27,12 +27,12 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.4 2005/03/13 21:34:24 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.5 2005/03/13 22:19:44 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o contiki-labels.o \
      lancegs.drv \
-     tfe.drv \
+     uther.drv \
      about.prg \
      calc.prg \
      config.prg \
@@ -57,7 +57,7 @@ CFLAGS:=$(CFLAGSCOMMON) \
 
 lancegs.drv: lancegs-drv.o lan91c96.o uip_arp.o
 
-tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o uip_arp.o
+uther.drv: uther-drv.o cs8900a.o uther-drv-asm.o uip_arp.o
 
 dhcp.prg: dhcp.o dhcpc.o lc-asm.o
 

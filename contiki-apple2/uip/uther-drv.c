@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: tfe-drv.c,v 1.2 2005/01/24 23:24:31 oliverschmidt Exp $
+ * $Id: uther-drv.c,v 1.1 2005/03/13 22:19:21 oliverschmidt Exp $
  *
  */
 
@@ -52,11 +52,11 @@ static const struct packet_service_state state =
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
-EK_PROCESS(proc, PACKET_SERVICE_NAME ": TFE", EK_PRIO_NORMAL,
+EK_PROCESS(proc, PACKET_SERVICE_NAME ": Uther", EK_PRIO_NORMAL,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(tfe_drv_init, arg)
+LOADER_INIT_FUNC(uther_drv_init, arg)
 {
   arg_free(arg);
   ek_service_start(PACKET_SERVICE_NAME, &proc);
