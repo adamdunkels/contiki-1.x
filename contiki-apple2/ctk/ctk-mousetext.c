@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.13 2005/03/15 15:55:06 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.14 2005/03/29 20:32:43 oliverschmidt Exp $
  *
  */
 
@@ -397,7 +397,6 @@ ctk_draw_menus(struct ctk_menus *menus)
   struct ctk_menu *m;
 
   /* Draw menus */
-  textcolor(MENUCOLOR);
   gotoxy(0, 0);
   revers(1);
   cputc(' ');
