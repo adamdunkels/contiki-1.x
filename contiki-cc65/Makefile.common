@@ -124,7 +124,7 @@ contiki-labels.o: contiki-labels.s
 contiki-labels.s: contiki
 	./$(CONTIKICC65)/make-labels
 
-UIP=uip.o uip_arch.o uiplib.o resolv.o uip-event.o tcpip.o
+UIP=uip.o uip_arch.o uiplib.o resolv.o tcpip.o
 WWW=www.o webclient.o http-strings.o http-user-agent-string.o htmlparser.o html-strings.o 
 EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o socket.o uipbuf.o lc-asm.o memb.o
 WEBSERVER=webserver.o httpd.o http-strings.o httpd-fs.o
