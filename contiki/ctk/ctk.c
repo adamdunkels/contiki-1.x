@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.13 2003/04/15 21:23:33 adamdunkels Exp $
+ * $Id: ctk.c,v 1.14 2003/04/16 18:29:19 adamdunkels Exp $
  *
  */
 
@@ -550,7 +550,7 @@ ctk_widget_redraw(struct ctk_widget *widget)
 {
   struct ctk_window *window;
 
-  if(mode != CTK_MODE_NORMAL) {
+  if(mode != CTK_MODE_NORMAL || widget == NULL) {
     return;
   }
 
@@ -1238,7 +1238,9 @@ ctk_idle(void)
 	  switch_focus_widget(UP);
 	  break;
 	case CH_ENTER:
-	  redraw |= activate(widget);
+	  if(widget != NULL) {
+	    redraw |= activate(widget);
+	  }
 	  break;
 #if CTK_CONF_MENUS
 	case CTK_CONF_MENU_KEY:
@@ -1277,7 +1279,7 @@ ctk_idle(void)
 
       if(redraw & REDRAW_WIDGETS) {
 	for(i = 0; i < redraw_widgetptr; ++i) {
-	  ctk_widget_redraw(redraw_widgets[i]);
+	  ctk_widget_redraw(redraw_widgets[i]);	  
 	}
 	redraw &= ~REDRAW_WIDGETS;
 	redraw_widgetptr = 0;
