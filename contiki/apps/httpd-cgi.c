@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.6 2004/09/12 20:52:37 adamdunkels Exp $
+ * $Id: httpd-cgi.c,v 1.7 2004/09/13 21:48:42 adamdunkels Exp $
  *
  */
 
@@ -103,8 +103,9 @@ static const char *states[] = {
 
 /*-----------------------------------------------------------------------------------*/
 static unsigned short
-generate_file_stats(char *f)
+generate_file_stats(void *arg)
 {
+  char *f = (char *)arg;
   return sprintf((char *)uip_appdata, "%5u", httpd_fs_count(f));
 }
 /*-----------------------------------------------------------------------------------*/
@@ -119,9 +120,11 @@ PT_THREAD(file_stats(struct httpd_state *s, char *ptr))
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned short
-make_tcp_stats(struct httpd_state *s)
+make_tcp_stats(void *arg)
 {
-  struct uip_conn *conn;  
+  struct uip_conn *conn;
+  struct httpd_state *s = (struct httpd_state *)arg;
+    
   conn = &uip_conns[s->count];
   return sprintf((char *)uip_appdata,
 		 "<tr><td>%d</td><td>%u.%u.%u.%u:%u</td><td>%s</td><td>%u</td><td>%u</td><td>%c %c</td></tr>\r\n",
@@ -154,15 +157,16 @@ PT_THREAD(tcp_stats(struct httpd_state *s, char *ptr))
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned short
-make_processes(struct ek_proc *p)
+make_processes(void *s)
 {
+  struct ek_proc *p = (struct ek_proc *)s;
   char name[40];
 
   strncpy(name, p->name, 40);
   petsciiconv_toascii(name, 40);
 
   return sprintf((char *)uip_appdata,
-		 "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%02x</td><td>0x%04x</td><td>0x%04x</td><td>0x%04x</td></tr>\r\n",
+		 "<tr align=\"center\"><td>%3d</td><td>%s</td><td>0x%02x</td><td>%p</td><td>%p</td><td>%p</td></tr>\r\n",
 		 p->id, name, p->prio,
 		 p->pollhandler, p->eventhandler, p->procstate);
 }
