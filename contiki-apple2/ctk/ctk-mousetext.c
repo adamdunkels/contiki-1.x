@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.2 2004/06/27 15:05:13 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.3 2004/06/27 18:32:39 oliverschmidt Exp $
  *
  */
 
@@ -185,6 +185,7 @@ draw_widget(struct ctk_widget *w,
     }
     revers(0);
     break;
+#if CTK_CONF_ICONS
   case CTK_WIDGET_ICON:
     if(ypos >= clipy1 && ypos < clipy2) {
       if(wfocus != 0) {
@@ -192,7 +193,7 @@ draw_widget(struct ctk_widget *w,
       } else {
 	revers(0);
       }
-      gotoxy(xpos, ypos);
+#if CTK_CONF_ICON_TEXTMAPS
       if(w->widget.icon.textmap != NULL) {
 	for(i = 0; i < 3; ++i) {
 	  gotoxy(xpos, ypos);
@@ -204,20 +205,21 @@ draw_widget(struct ctk_widget *w,
 	  ++ypos;
 	}
       }
-      x = xpos;
+#endif /* CTK_CONF_ICON_TEXTMAPS */
   
       len = strlen(w->widget.icon.title);
-      if(x + len >= sizex) {
-	x = sizex - len;
+      if(xpos + len >= sizex) {
+	xpos = sizex - len;
       }
 
-      gotoxy(x, ypos);
+      gotoxy(xpos, ypos);
       if(ypos >= clipy1 && ypos < clipy2) {
 	cputs(w->widget.icon.title);
       }
       revers(0);
     }
     break;
+#endif /* CTK_CONF_ICONS */
 
   default:
     break;
