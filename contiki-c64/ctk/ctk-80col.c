@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-80col.c,v 1.8 2004/09/12 20:30:03 adamdunkels Exp $
+ * $Id: ctk-80col.c,v 1.9 2004/09/14 07:33:36 adamdunkels Exp $
  */
 
 #include "contiki.h"
@@ -87,7 +87,7 @@ unsigned char ctk_80col_screencolors[25] =
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
-   COLOR(BGCOLOR4,BGCOLOR3)};
+   COLOR(BGCOLOR4,0)};
 
 unsigned char ctk_80col_screenpattern[25*8] =
   {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
