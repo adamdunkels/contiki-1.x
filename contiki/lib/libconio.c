@@ -29,10 +29,11 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: libconio.c,v 1.5 2004/07/04 15:15:19 adamdunkels Exp $
+ * $Id: libconio.c,v 1.6 2004/09/12 20:24:55 adamdunkels Exp $
  *
  */
 
+#include <string.h>
 #include "libconio.h"
 
 static unsigned char cursx, cursy;
@@ -81,10 +82,14 @@ cputc(char c)
 void
 cputs(char *str)
 {
-  int i;
+  while(*str != 0) {
+    cputc(*str++);
+  }
+  
+  /*  int i;
   for(i = 0; i < strlen(str); ++i) {
     cputc(str[i]);
-  }
+    }*/
 }
 /*-----------------------------------------------------------------------------------*/
 void

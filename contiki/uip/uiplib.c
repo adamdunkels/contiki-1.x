@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2004, Adam Dunkels and the Swedish Institute of Computer Science.
- * All rights reserved. 
+ * Copyright (c) 2004, Adam Dunkels and the Swedish Institute of
+ * Computer Science.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions 
@@ -28,7 +29,7 @@
  *
  * This file is part of the uIP TCP/IP stack and the Contiki operating system.
  *
- * $Id: uiplib.c,v 1.2 2004/06/06 06:17:16 adamdunkels Exp $
+ * $Id: uiplib.c,v 1.3 2004/09/12 20:24:56 adamdunkels Exp $
  *
  */
 

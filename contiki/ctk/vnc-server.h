@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-server.h,v 1.3 2004/06/06 05:52:21 adamdunkels Exp $
+ * $Id: vnc-server.h,v 1.4 2004/09/12 20:24:55 adamdunkels Exp $
  *
  */
 
