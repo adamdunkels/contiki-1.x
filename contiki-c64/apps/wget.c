@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.3 2003/08/06 23:15:31 adamdunkels Exp $
+ * $Id: wget.c,v 1.4 2003/08/15 18:45:10 adamdunkels Exp $
  *
  */
 
@@ -44,6 +44,8 @@
 #include "petsciiconv.h"
 #include "uip_main.h"
 #include "loader.h"
+
+#include "program-handler.h"
 
 #include <c64.h>
 #include <cbm.h>
@@ -313,10 +315,10 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
       ctk_dialog_close();
     } else if(data == (void *)&overwritebutton) {
       ctk_dialog_close();
-      /*      strncpy(host, hostedit, sizeof(host));
-      strncpy(file, fileedit, sizeof(file));
-      petsciiconv_toascii(host, sizeof(host));
-      petsciiconv_toascii(file, sizeof(file));*/
+
+      /* Turn of screensaver. */
+      program_handler_screensaver(NULL);
+      
       strncpy(url, urledit, sizeof(url));
       petsciiconv_toascii(url, sizeof(url));
       start_get();
