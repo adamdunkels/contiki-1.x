@@ -84,9 +84,6 @@ OPT=-Or
 %.prg:  %.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
-%.sav:  %.o contiki-labels.o
-	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
-
 %.drv:  %-drv.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
@@ -103,7 +100,7 @@ contiki-labels.s: contiki
 
 UIP=uip.o uip_arch.o uip_main.o resolv.o uip-signal.o
 WWW=www.o webclient.o http-strings.o http-user-agent-string.o htmlparser.o html-strings.o 
-EMAIL=email.o smtp.o smtp-strings.o
+EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
 WEBSERVER=webserver.o httpd.o httpd-cgi.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
 WGET=wget.o webclient.o http-strings.o http-user-agent-string.o 
@@ -121,7 +118,7 @@ depend:
 codesize:
 	od65 --dump-segsize *.o | egrep '\.o|CODE'
 
-d64:
+d64:	
 	c1541 -format contiki,00 d64 contiki.d64
 	c1541 -attach contiki.d64 -write contiki
 	echo . > config.cfg
