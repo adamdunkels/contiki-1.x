@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.9 2003/08/21 22:26:57 adamdunkels Exp $
+ * $Id: uip.c,v 1.10 2003/09/02 21:47:29 adamdunkels Exp $
  *
  */
 
@@ -201,11 +201,13 @@ uip_connect(u16_t *ripaddr, u16_t rport)
   if(lastport >= 32000) {
     lastport = 4096;
   }
-  
+
+  /* Check if this port is already in use, and if so try to find
+     another one. */
   for(c = 0; c < UIP_CONNS; ++c) {
     conn = &uip_conns[c];
     if(conn->tcpstateflags != CLOSED &&
-       conn->lport == lastport) {
+       conn->lport == htons(lastport)) {
       goto again;
     }
   }
@@ -242,8 +244,8 @@ uip_connect(u16_t *ripaddr, u16_t rport)
   conn->len = 1;   /* TCP length of the SYN is one. */
   conn->nrtx = 0;
   conn->timer = 1; /* Send the SYN next time around. */
-  conn->lport = HTONS(lastport);
-  conn->rport = HTONS(rport);
+  conn->lport = htons(lastport);
+  conn->rport = rport;
   conn->ripaddr[0] = ripaddr[0];
   conn->ripaddr[1] = ripaddr[1];
   
@@ -308,7 +310,7 @@ uip_listen(u16_t port)
 {
   for(c = 0; c < UIP_LISTENPORTS; ++c) {
     if(uip_listenports[c] == 0) {
-      uip_listenports[c] = htons(port);
+      uip_listenports[c] = port;
       return;
     }
   }

@@ -12,7 +12,7 @@
  * The Dispatcher is the initiator of all program execution in
  * Contiki. After the system has been initialized by the boot up code,
  * the dispatcher_run() function is called. This function never
- * returns, but will set in a loop in which it does two things.
+ * returns, but will sit in a loop in which it does two things.
  * 
  * - Pulls the first signal of the signal queue and dispatches this to
  *   all listening processes.
@@ -125,7 +125,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.16 2003/08/31 22:20:20 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.17 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 
@@ -333,18 +333,40 @@ ek_clock(void)
  * connection request to go out immediately instead of being delayed
  * for up to 0.5 seconds.
  *
+ * This function also registers a pointer to the allocated
+ * connection. This pointer will be passed as an argument to the
+ * process' uIP handler function for every uIP event.
+ *
+ * \note The port parameter must be given in network byte order, which
+ * requires either the HTONS() or the htons() functions to be used for
+ * converting from host byte order to network byte order as in the
+ * example below:
+ \code
+   u16_t ipaddr[2];
+   struct uip_conn *conn;
+
+   uip_ipaddr(ipaddr, 192,168,2,5);
+   conn = dispatcher_connect(ipaddr, HTONS(80), NULL);
+   if(conn == NULL) {
+      error("Could not allocate connection.");
+   }
+ \endcode
+ *
  * \param ripaddr A pointer to a packed repressentation of the IP
  * address of the host to which to connect.
  *
- * \param port The TCP port number on the remote host in host byte
+ * \param port The TCP port number on the remote host in network byte
  * order.
+ *
+ * \param appstate The generic pointer that is to be associated with
+ * the uIP connection.
  *
  * \return The connection identifier, or NULL if no connection
  * identifier could be allocated.
  */
 /*-----------------------------------------------------------------------------------*/
 struct uip_conn *
-dispatcher_connect(u16_t *ripaddr, u16_t port)
+dispatcher_connect(u16_t *ripaddr, u16_t port, void *appstate)
 {
   struct uip_conn *c;
 
@@ -423,7 +445,7 @@ dispatcher_uipcall(void)
  * 
  *
  * \param port The TCP port number that should be opened for
- * listening, in host byte order.
+ * listening, in network byte order.
  */
 /*-----------------------------------------------------------------------------------*/
 void
@@ -435,7 +457,7 @@ dispatcher_uiplisten(u16_t port)
   l = listenports;
   for(i = 0; i < UIP_LISTENPORTS; ++i) {
     if(l->port == 0) {
-      l->port = HTONS(port);
+      l->port = port;
       l->id = dispatcher_current;
 #ifdef WITH_UIP
       uip_listen(port);

@@ -1,3 +1,13 @@
+/**
+ * \file
+ * Default definitions of C compiler quirk work-arounds.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * This file is used for making use of extra functionality of some C
+ * compilers used for Contiki, and defining work-arounds for various
+ * quirks and problems with some other C compilers.
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +21,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: cc.h,v 1.2 2003/04/09 13:45:09 adamdunkels Exp $
+ * $Id: cc.h,v 1.3 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 #ifndef __CC_H__
@@ -40,24 +47,39 @@
 
 #include "cc-conf.h"
 
+/**
+ * Configure if the C compiler supports the "register" keyword for
+ * function arguments.
+ */
 #if CC_CONF_REGISTER_ARGS
 #define CC_REGISTER_ARG register
 #else /* CC_CONF_REGISTER_ARGS */
 #define CC_REGISTER_ARG
 #endif /* CC_CONF_REGISTER_ARGS */
 
+/**
+ * Configure if the C compiler supports the arguments for function
+ * pointers.
+ */
 #if CC_CONF_FUNCTION_POINTER_ARGS
 #define CC_FUNCTION_POINTER_ARGS 1
 #else /* CC_CONF_FUNCTION_POINTER_ARGS */
 #define CC_FUNCTION_POINTER_ARGS 0
 #endif /* CC_CONF_FUNCTION_POINTER_ARGS */
 
+/**
+ * Configure if the C compiler supports fastcall function
+ * declarations.
+ */
 #ifdef CC_CONF_FASTCALL
 #define CC_FASTCALL CC_CONF_FASTCALL
 #else /* CC_CONF_FASTCALL */
 #define CC_FASTCALL
 #endif /* CC_CONF_FASTCALL */
 
+/**
+ * Configure work-around for unsigned char bugs with sdcc.
+ */
 #if CC_CONF_UNSIGNED_CHAR_BUGS
 #define CC_UNSIGNED_CHAR_BUGS 1
 #else /* CC_CONF_UNSIGNED_CHAR_BUGS */

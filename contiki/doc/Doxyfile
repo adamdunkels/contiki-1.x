@@ -65,7 +65,19 @@ INPUT                  = ../ek/arg.c \
                          ../ctk/ctk.h \
                          ../ctk/ctk.c \
                          ../ctk/ctk-draw.h \
-                         ../ctk/ctk-vncserver.c
+                         ../ctk/ctk-vncserver.c \
+                         ../uip/uip.h \
+                         ../ek/loader.h \
+                         ../ek/dispatcher.h \
+                         ../lib/cc.h \
+                         ../lib/petsciiconv.h \
+                         ../uip/resolv.c \
+                         ../uip/uip-signal.h \
+                         ../lib/ctk-textedit.h \
+                         ../lib/ctk-textedit.c \
+                         ../ek/dsc.h \
+                         ../conf/uip-conf.h.example \
+                         ../conf/www-conf.h.example
 FILE_PATTERNS          = 
 RECURSIVE              = NO
 EXCLUDE                = 
@@ -170,8 +182,9 @@ EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = YES
 INCLUDE_PATH           = 
 INCLUDE_FILE_PATTERNS  = 
-PREDEFINED             = LOADER_ARCH \
-                         CC_FUNCTION_POINTER_ARGS
+PREDEFINED             = CC_FUNCTION_POINTER_ARGS \
+                         UIP_UDP \
+                         WITH_LOADER_ARCH
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = YES
 #---------------------------------------------------------------------------

@@ -1,3 +1,10 @@
+/**
+ * \file
+ * Header file for the experimental application level CTK textedit widget.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +18,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +36,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-textedit.h,v 1.1 2003/08/11 22:22:44 adamdunkels Exp $
+ * $Id: ctk-textedit.h,v 1.2 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 #ifndef __CTK_TEXTEDIT_H__
@@ -41,6 +45,16 @@
 #include "ctk.h"
 #include "dispatcher.h"
 
+/**
+ * Instantiating macro for the CTK textedit widget.
+ *
+ *
+ * \param tx The x position of the widget.
+ * \param ty The y position of the widget.
+ * \param tw The width of the widget.
+ * \param th The height of the widget.
+ * \param ttext The text buffer to be edited.
+ */
 #define CTK_TEXTEDIT(tx, ty, tw, th, ttext) \
   {CTK_LABEL(tx, ty, tw, th, ttext)}, 0, 0
 struct ctk_textedit {

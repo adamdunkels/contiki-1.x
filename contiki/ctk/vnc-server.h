@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-server.h,v 1.1 2003/07/02 21:34:00 adamdunkels Exp $
+ * $Id: vnc-server.h,v 1.2 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 
@@ -84,15 +84,6 @@ struct vnc_server_state {
 #define VNC_SERVER_MAX_UPDATES 8  
   struct vnc_server_update updates_pool[VNC_SERVER_MAX_UPDATES];
 
-#if 0
-  /* The current update type. */
-  u8_t updatetype;
- 
-  struct vnc_server_updatearea updates[VNC_SERVER_MAX_UPDATES];
-  u8_t updatesptr, updatesptr2;
-
-  u8_t updaterequest;
-#endif /* 0 */
 };
 
 struct vnc_server_update *

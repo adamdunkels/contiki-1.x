@@ -1,3 +1,17 @@
+/**
+ * \file
+ * An experimental CTK text edit widget.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * This module contains an experimental CTK widget which is
+ * implemented in the application process rather than in the CTK
+ * process. The widget is instantiated in a similar fashion as other
+ * CTK widgets, but is different from other widgets in that it
+ * requires a signal handler function to be called by the process
+ * signal handler function.
+ * 
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +25,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +43,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-textedit.c,v 1.1 2003/08/11 22:22:44 adamdunkels Exp $
+ * $Id: ctk-textedit.c,v 1.2 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 
@@ -40,12 +51,30 @@
 #include "ctk-textedit.h"
 
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Add a CTK textedit widget to a window.
+ *
+ * \param w A pointer to the window to which the entry is to be added.
+ * \param t A pointer to the CTK textentry structure.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_textedit_add(struct ctk_window *w,
 		 struct ctk_textedit *t)
 {
   CTK_WIDGET_ADD(w, t);
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * The CTK textedit signal handler.
+ *
+ * This function must be called as part of the normal signal handler
+ * of the process that contains the CTK textentry structure.
+ *
+ * \param t A pointer to the CTK textentry structure.
+ * \param s The signal number.
+ * \param data The signal data.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_textedit_sighandler(struct ctk_textedit *t,

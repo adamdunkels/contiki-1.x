@@ -1,5 +1,16 @@
+/**
+ * \file
+ * Header file for the uIP TCP/IP stack.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * The uIP TCP/IP stack header file contains definitions for a number
+ * of C macros that are used by uIP programs as well as internal uIP
+ * structures, TCP/IP header structures and function declarations.
+ *
+ */
+
 /*
- * Copyright (c) 2001-2002, Adam Dunkels.
+ * Copyright (c) 2001-2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -10,10 +21,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.6 2003/08/21 22:26:57 adamdunkels Exp $
+ * $Id: uip.h,v 1.7 2003/09/02 21:47:29 adamdunkels Exp $
  *
  */
 
@@ -40,63 +48,196 @@
 
 #include "uipopt.h"
 
-#ifndef UIP_IPV6
-#define UIP_IPV6 0
-#endif
-
 /*-----------------------------------------------------------------------------------*/
 /* First, the functions that should be called from the
  * system. Initialization, the periodic timer and incoming packets are
  * handled by the following three functions.
  */
 
-/* uip_init(void):
+/**
+ * Set the IP address of this host.
  *
- * Must be called at boot up to configure the uIP data structures.
- */
-void uip_init(void);
-
-/* uip_periodic(conn):
+ * The IP address is represented as a 4-byte array where the first
+ * octet of the IP address is put in the first member of the 4-byte
+ * array.
  *
- * Should be called when the periodic timer has fired. Should be
- * called once per connection (0 - UIP_CONNS).
- */
-#define uip_periodic(conn) do { uip_conn = &uip_conns[conn]; \
-                                uip_process(UIP_TIMER); } while (0)
-
-/* uip_periodic_conn(conn):
- *
- */
-#define uip_periodic_conn(conn) do { uip_conn = conn; \
-                                     uip_process(UIP_TIMER); } while (0)
-
-/* uip_input(void):
- *
- * Is called when the network device driver has received new data.
- */
-#define uip_input()        uip_process(UIP_DATA)
-
-/* uip_sethostaddr(addr):
- *
- * Is used to set the IP address.
+ * \param addr A pointer to a 4-byte representation of the IP address.
  */
 #define uip_sethostaddr(addr) do { uip_hostaddr[0] = addr[0]; \
                               uip_hostaddr[1] = addr[1]; } while(0)
 
-/* uip_gethostaddr(&addr):
+/**
+ * Get the IP address of this host.
  *
- * Obtains the IP address.
+ * The IP address is represented as a 4-byte array where the first
+ * octet of the IP address is put in the first member of the 4-byte
+ * array.
+ *
+ * \param addr A pointer to a 4-byte array that will be filled in with
+ * the currently configured IP address.
  */
 #define uip_gethostaddr(addr) do { addr[0] = uip_hostaddr[0]; \
                               addr[1] = uip_hostaddr[1]; } while(0)
 
+/**
+ * Process an incoming packet.
+ *
+ * This function should be called when the device driver has received
+ * a packet from the network. The packet from the device driver must
+ * be present in the uip_buf buffer, and the length of the packet
+ * should be placed in the uip_len variable.
+ *
+ * When the function returns, there may be an outbound packet placed
+ * in the uip_buf packet buffer. If so, the uip_len variable is set to
+ * the length of the packet. If no packet is to be sent out, the
+ * uip_len variable is set to 0.
+ *
+ * The usual way of calling the function is presented by the source
+ * code below.
+ \code
+  uip_len = devicedriver_poll();
+  if(uip_len > 0) {
+    uip_input();
+    if(uip_len > 0) {
+      devicedriver_send();
+    }
+  }
+ \endcode
+ *
+ * \note If you are writing a uIP device driver that needs ARP
+ * (Address Resolution Protocol), e.g., when running uIP over
+ * Ethernet, you will need to call the uIP ARP code before calling
+ * this function:
+ \code
+  #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+  uip_len = ethernet_devicedrver_poll();
+  if(uip_len > 0) {
+    if(BUF->type == HTONS(UIP_ETHTYPE_IP)) {
+      uip_arp_ipin();
+      uip_len -= sizeof(struct uip_eth_hdr);
+      uip_input();
+      if(uip_len > 0) {
+        uip_arp_out();
+	ethernet_devicedriver_send();
+      }
+    } else if(BUF->type == HTONS(UIP_ETHTYPE_ARP)) {
+      uip_arp_arpin();
+      if(uip_len > 0) {
+	ethernet_devicedriver_send();
+      }
+    }
+ \endcode
+ */
+#define uip_input()        uip_process(UIP_DATA)
+
+/**
+ * uIP initialization function.
+ *
+ * This function should be called at boot up to initilize the uIP
+ * TCP/IP stack.
+ */
+void uip_init(void);
+
+/**
+ * Periodic processing for a connection identified by its number.
+ * 
+ * This function does the necessary periodic processing (timers,
+ * polling) for a uIP TCP conneciton, and should be called when the
+ * periodic uIP timer goes off. It should be called for every
+ * connection, regardless of whether they are open of closed.
+ *
+ * When the function returns, it may have an outbound packet waiting
+ * for service in the uIP packet buffer, and if so the uip_len
+ * variable is set to a value larger than zero. The device driver
+ * should be called to send out the packet.
+ *
+ * The ususal way of calling the function is through a for() loop like
+ * this:
+ \code
+  for(i = 0; i < UIP_CONNS; ++i) {
+    uip_periodic(i);
+    if(uip_len > 0) {
+      devicedriver_send();
+    }
+  }
+ \endcode
+ *
+ * \note If you are writing a uIP device driver that needs ARP
+ * (Address Resolution Protocol), e.g., when running uIP over
+ * Ethernet, you will need to call the uip_arp_out() function before
+ * calling the device driver:
+ \code
+  for(i = 0; i < UIP_CONNS; ++i) {
+    uip_periodic(i);
+    if(uip_len > 0) {
+      uip_arp_out();
+      ethernet_devicedriver_send();
+    }
+  }
+ \endcode 
+ *
+ * \param conn The number of the connection which is to be periodically polled.
+ */
+#define uip_periodic(conn) do { uip_conn = &uip_conns[conn]; \
+                                uip_process(UIP_TIMER); } while (0)
+
+/**
+ * Periodic processing for a connection identified by a pointer to its structure.
+ *
+ * Same as uip_periodic() but takes a pointer to the actual uip_conn
+ * struct instead of an integer as its argument. This function can be
+ * used to force periodic processing of a specific connection.
+ *
+ * \param conn A pointer to the uip_conn struct for the connection to
+ * be processed.
+ */
+#define uip_periodic_conn(conn) do { uip_conn = conn; \
+                                     uip_process(UIP_TIMER); } while (0)
+
 #if UIP_UDP
-/* uip_udp_periodic(conn):
+/**
+ * Periodic processing for a UDP connection identified by its number.
+ *
+ * This function is essentially the same as uip_prerioic(), but for
+ * UDP connections. It is called in a similar fashion as the
+ * uip_periodic() function:
+ \code
+  for(i = 0; i < UIP_UDP_CONNS; i++) {
+    uip_udp_periodic(i);
+    if(uip_len > 0) {
+      devicedriver_send();
+    }
+  }   
+ \endcode
+ *
+ * \note As for the uip_periodic() function, special care has to be
+ * taken when using uIP together with ARP and Ethernet:
+ \code
+  for(i = 0; i < UIP_UDP_CONNS; i++) {
+    uip_udp_periodic(i);
+    if(uip_len > 0) {
+      uip_arp_out();
+      ethernet_devicedriver_send();
+    }
+  }   
+ \endcode
+ *
+ * \param conn The number of the UDP connection to be processed.
  */
 #define uip_udp_periodic(conn) do { uip_udp_conn = &uip_udp_conns[conn]; \
                                 uip_process(UIP_UDP_TIMER); } while (0)
 
-/* uip_udp_periodic(conn):
+/**
+ * Periodic processing for a UDP connection identified by a pointer to
+ * its structure.
+ *
+ * Same as uip_udp_periodic() but takes a pointer to the actual
+ * uip_conn struct instead of an integer as its argument. This
+ * function can be used to force periodic processing of a specific
+ * connection.
+ *
+ * \param conn A pointer to the uip_udp_conn struct for the connection
+ * to be processed.
  */
 #define uip_udp_periodic_conn(conn) do { uip_udp_conn = conn; \
                                          uip_process(UIP_UDP_TIMER); } while (0)
@@ -107,25 +248,66 @@ void uip_init(void);
  * handled by the functions below.
 */
 
-/* uip_listen(port):
+/**
+ * Start listening to the specified port.
  *
- * Starts listening to the specified port.
+ * \note Since this function expects the port number in network byte
+ * order, a conversion using HTONS() or htons() is necessary.
+ *
+ \code
+ uip_listen(HTONS(80)); 
+ \endcode
+ *
+ * \param port A 16-bit port number in network byte order.
  */
 void uip_listen(u16_t port);
 
-/* uip_unlisten(port):
+/**
+ * Stop listening to the specified port.
  *
- * Stops listening to the specified port.
+ * \note Since this function expects the port number in network byte
+ * order, a conversion using HTONS() or htons() is necessary.
+ *
+ \code
+ uip_unlisten(HTONS(80)); 
+ \endcode
+ *
+ * \param port A 16-bit port number in network byte order.
  */
 void uip_unlisten(u16_t port);
 
-/* uip_connect(ripaddr, port):
+/**
+ * Connect to a remote host using TCP.
  *
- * Returns a connection identifier that connects to a port on the
- * specified host (given in ripaddr). If no connections are avaliable,
- * the function returns NULL. This function is avaliable only if
- * support for active open has been configured (#define
- * UIP_ACTIVE_OPEN 1 in uipopt.h)
+ * This function is used to start a new connection to the specified
+ * port on the specied host. It allocates a new connection identifier,
+ * sets the connection to the SYN_SENT state and sets the
+ * retransmission timer to 0. This will cause a TCP SYN segment to be
+ * sent out the next time this connection is periodically processed,
+ * which usually is done within 0.5 seconds after the call to
+ * uip_connect().
+ *
+ * \note This function is avaliable only if support for active open
+ * has been configured by defining UIP_ACTIVE_OPEN to 1 in uipopt.h.
+ *
+ * \note Since this function requires the port number to be in network
+ * byte order, a convertion using HTONS() or htons() is necessary.
+ *
+ \code
+ u16_t ipaddr[2];
+
+ uip_ipaddr(ipaddr, 192,168,1,2);
+ uip_connect(ipaddr, HTONS(80)); 
+ \endcode
+ * 
+ * \param ripaddr A pointer to a 4-byte array representing the IP
+ * address of the remote hot.
+ *
+ * \param port A 16-bit port number in network byte order.
+ *
+ * \return A pointer to the uIP connection identifier for the new connection,
+ * or NULL if no connection could be allocated.   
+ *
  */
 struct uip_conn *uip_connect(u16_t *ripaddr, u16_t port);
 
@@ -378,11 +560,7 @@ extern volatile u8_t uip_acc32[4];
  * configured in the "uipopt.h" header file.
  */
 struct uip_conn {
-#if UIP_IPV6
-  u16_t ripaddr[8];   /* The IP address of the remote peer. */
-#else /* UIP_IPV6 */
   u16_t ripaddr[2];   /* The IP address of the remote peer. */
-#endif /* UIP_IPV6 */
   
   u16_t lport, rport; /* The local and the remote port. */
   
@@ -417,17 +595,11 @@ extern struct uip_conn *uip_conn;
 extern struct uip_conn uip_conns[UIP_CONNS];
 
 #if UIP_UDP
-/* struct uip_udp_conn:
- *
- * The uip_udp_conn structure is used for identifying UDP
- * "connections".
+/**
+ * Representation of a uIP UDP connection.
  */
 struct uip_udp_conn {
-#if UIP_IPV6
-  u16_t ripaddr[8];   /* The IP address of the remote peer. */
-#else /* UIP_IPV6 */
   u16_t ripaddr[2];   /* The IP address of the remote peer. */
-#endif /* UIP_IPV6 */
   u16_t lport, rport;
 };
 
@@ -565,24 +737,11 @@ void uip_process(u8_t flag);
   
 #define UIP_STOPPED      16
 
-#if UIP_IPV6
-#define UIP_TCPIP_HLEN 60
-#else /* UIP_IPV6 */
 #define UIP_TCPIP_HLEN 40
-#endif /* UIP_IPV6 */
 
 /* The TCP and IP headers. */
 typedef struct {
   /* IP header. */
-#if UIP_IPV6
-  u8_t vtc,
-    tcfl;
-  u16_t fl;
-  u8_t len[2];
-  u8_t nxthdr, hoplim;
-  u16_t srcipaddr[8],
-    destipaddr[8];
-#else /* UIP_IPV6 */
   u8_t vhl,
     tos,          
     len[2],       
@@ -593,7 +752,6 @@ typedef struct {
   u16_t ipchksum;
   u16_t srcipaddr[2], 
     destipaddr[2];
-#endif /* UIP_IPV6 */
   
   /* TCP header. */
   u16_t srcport,
@@ -611,14 +769,6 @@ typedef struct {
 /* The ICMP and IP headers. */
 typedef struct {
   /* IP header. */
-#if UIP_IPV6
-  u16_t vtcfl;
-  u16_t fl;
-  u8_t len[2];
-  u8_t nxthdr, hoplim;
-  u16_t srcipaddr[8],
-    destipaddr[8];
-#else /* UIP_IPV6 */
   u8_t vhl,
     tos,          
     len[2],       
@@ -629,7 +779,6 @@ typedef struct {
   u16_t ipchksum;
   u16_t srcipaddr[2], 
     destipaddr[2];
-#endif /* UIP_IPV6 */
   /* ICMP (echo) header. */
   u8_t type, icode;
   u16_t icmpchksum;
@@ -640,15 +789,6 @@ typedef struct {
 /* The UDP and IP headers. */
 typedef struct {
   /* IP header. */
-#if UIP_IPV6
-  u8_t vtc,
-    tcfl;
-  u16_t fl;
-  u8_t len[2];
-  u8_t nxthdr, hoplim;
-  u16_t srcipaddr[8],
-    destipaddr[8];
-#else /* UIP_IPV6 */
   u8_t vhl,
     tos,          
     len[2],       
@@ -659,7 +799,6 @@ typedef struct {
   u16_t ipchksum;
   u16_t srcipaddr[2], 
     destipaddr[2];
-#endif /* UIP_IPV6 */
   
   /* UDP header. */
   u16_t srcport,
@@ -673,17 +812,9 @@ typedef struct {
 #define UIP_PROTO_UDP   17
 
 #if UIP_FIXEDADDR
-#if UIP_IPV6
-extern const u16_t uip_hostaddr[8];
-#else /* UIP_IPV6 */
 extern const u16_t uip_hostaddr[2];
-#endif /* UIP_IPV6 */
 #else /* UIP_FIXEDADDR */
-#if UIP_IPV6
-extern u16_t uip_hostaddr[8];
-#else /* UIP_IPV6 */
 extern u16_t uip_hostaddr[2];
-#endif /* UIP_IPV6 */
 #endif /* UIP_FIXEDADDR */
 
 #endif /* __UIP_H__ */

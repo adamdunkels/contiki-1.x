@@ -1,3 +1,18 @@
+/**
+ * \file
+ * PETSCII/ASCII conversion functions.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * The Commodore based Contiki targets all have a special character
+ * encoding called PETSCII which differs from the ASCII encoding that
+ * normally is used for representing characters.
+ *
+ * \note For targets that do not use PETSCII encoding the C compiler
+ * define WITH_ASCII should be used to avoid the PETSCII converting
+ * functions.
+ *
+ */
+
 /*
  * Copyright (c) 2002, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +26,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +44,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: petsciiconv.h,v 1.1 2003/03/19 14:16:06 adamdunkels Exp $
+ * $Id: petsciiconv.h,v 1.2 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 #ifndef __PETSCIICONV_H__
@@ -45,7 +57,19 @@
 
 #else /* WITH_ASCII */
 
+/**
+ * Convert a text buffer from PETSCII to ASCII.
+ *
+ * \param buf A pointer to the buffer which is to be converted.
+ * \param len The length of the buffer to be converted.
+ */
 void petsciiconv_toascii(char *buf, unsigned int len);
+/**
+ * Convert a text buffer from ASCII to PETSCII.
+ *
+ * \param buf A pointer to the buffer which is to be converted.
+ * \param len The length of the buffer to be converted.
+ */
 void petsciiconv_topetscii(char *buf, unsigned int len);
 
 #endif /* WITH_ASCII */

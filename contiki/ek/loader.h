@@ -1,3 +1,10 @@
+/**
+ * \file
+ * Default definitions and error values for the Contiki program loader.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +18,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +36,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader.h,v 1.6 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: loader.h,v 1.7 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_H__
@@ -40,17 +44,16 @@
 
 /* Errors that the LOADER_LOAD() function may return: */
 
-#define LOADER_OK                0
-#define LOADER_ERR_READ          1       /* Read error */
-#define LOADER_ERR_HDR           2       /* Header error */
-#define LOADER_ERR_OS            3       /* Wrong OS */
-#define LOADER_ERR_FMT           4       /* Data format error */
-#define LOADER_ERR_MEM           5       /* Not enough memory */
-#define LOADER_ERR_OPEN          6       /* Could not open file */
-#define LOADER_ERR_ARCH          7       /* Wrong architecture */
-#define LOADER_ERR_VERSION       8       /* Wrong version */
-
-
+#define LOADER_OK                0       /**< No error. */
+#define LOADER_ERR_READ          1       /**< Read error. */
+#define LOADER_ERR_HDR           2       /**< Header error. */
+#define LOADER_ERR_OS            3       /**< Wrong OS. */
+#define LOADER_ERR_FMT           4       /**< Data format error. */
+#define LOADER_ERR_MEM           5       /**< Not enough memory. */
+#define LOADER_ERR_OPEN          6       /**< Could not open file. */
+#define LOADER_ERR_ARCH          7       /**< Wrong architecture. */
+#define LOADER_ERR_VERSION       8       /**< Wrong OS version. */
+#define LOADER_ERR_NOLOADER      9       /**< Program loading not supported. */
 
 #ifdef WITH_LOADER_ARCH
 #include "loader-arch.h"
@@ -59,18 +62,56 @@
 #define LOADER_INIT_FUNC(name, arg) void name(char *arg)
 #endif /* WITH_LOADER_ARCH */
 
+/**
+ * Load and execute a program.
+ *
+ * This macro is used for loading and executing a program, and
+ * requires support from the architecture dependant code. The actual
+ * program loading is made by architecture specific functions.
+ *
+ * \note A program loaded with LOADER_LOAD() must call the
+ * LOADER_UNLOAD() function to unload itself.
+ *
+ * \param name The name of the program to be loaded.
+ *
+ * \param arg A pointer argument that is passed to the program.
+ *
+ * \return A loader error, or LOADER_OK if loading was successful.
+ */
 #ifndef LOADER_LOAD
-#define LOADER_LOAD(name, arg) LOADER_OK
+#define LOADER_LOAD(name, arg) LOADER_ERR_NOLOADER
 #endif /* LOADER_LOAD */
 
-#ifndef LOADER_LOAD_DSC
-#define LOADER_LOAD_DSC(name) NULL
-#endif /* LOADER_LOAD_DSC */
-
+/**
+ * Unload a program from memory.
+ *
+ * This macro is used for unloading a program and deallocating any
+ * memory that was allocated during the loading of the program. This
+ * function must be called by the program itself.
+ *
+ */
 #ifndef LOADER_UNLOAD
 #define LOADER_UNLOAD()
 #endif /* LOADER_UNLOAD */
 
+/**
+ * Load a DSC (program description).
+ *
+ * Loads a DSC (program description) into memory and returns a pointer
+ * to the dsc.
+ *
+ * \return A pointer to the DSC or NULL if it could not be loaded.
+ */
+#ifndef LOADER_LOAD_DSC
+#define LOADER_LOAD_DSC(name) NULL
+#endif /* LOADER_LOAD_DSC */
+
+/**
+ * Unload a DSC (program description).
+ *
+ * Unload a DSC from memory and deallocate any memory that was
+ * allocated when it was loaded.
+ */
 #ifndef LOADER_UNLOAD_DSC
 #define LOADER_UNLOAD_DSC(dsc)
 #endif /* LOADER_UNLOAD */

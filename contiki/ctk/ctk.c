@@ -1,10 +1,12 @@
 /**
  * \file
- * The Contiki Toolkit, CTK, the Contiki GUI.
+ * The Contiki Toolkit CTK, the Contiki GUI.
  * \author Adam Dunkels <adam@dunkels.com>
  *
  * The Contiki Toolkit (CTK) provides the graphical user interface for
  * the Contiki system.
+ *
+ *
  *
  * 
  */
@@ -40,7 +42,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.31 2003/08/31 22:17:09 adamdunkels Exp $
+ * $Id: ctk.c,v 1.32 2003/09/02 21:47:27 adamdunkels Exp $
  *
  */
 
@@ -106,20 +108,22 @@ ek_signal_t
   /** Emitted when a widget is activated (pressed). A pointer to the
       widget is passed as signal data. */
   ctk_signal_widget_activate,
-  /** Same as ctk_signal_widget_activate. */
+  
+  /** \deprecated Same as ctk_signal_widget_activate. */
   ctk_signal_button_activate,
 
   /** Emitted when a widget is selected. A pointer to the widget is
       passed as signal data. */
   ctk_signal_widget_select,
-  /** Same as ctk_signal_widget_select. */  
+  
+  /** \deprecated Same as ctk_signal_widget_select. */  
   ctk_signal_button_hover,
 
   /** Emitted when a hyperlink is activated. The signal is broadcast
       to all listeners. */
   ctk_signal_hyperlink_activate,
 
-  /** Same as ctk_signal_widget_select.. */  
+  /** \deprecated Same as ctk_signal_widget_select.. */  
   ctk_signal_hyperlink_hover,
 
   /** Emitted when a menu item is activated. The number of the menu

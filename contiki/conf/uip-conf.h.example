@@ -1,3 +1,14 @@
+/**
+ * \file
+ * uIP configuration file.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * This file contains configuration options for the uIP TCP/IP
+ * stack. Each Contiki port will contain its own uip-conf.h file
+ * containing architecture specific configuration options.
+ *
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +22,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,15 +40,44 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h.example,v 1.1 2003/06/30 20:38:14 adamdunkels Exp $
+ * $Id: uip-conf.h.example,v 1.2 2003/09/02 21:47:27 adamdunkels Exp $
  *
  */
 #ifndef __UIP_CONF_H__
 
+/**
+ * The maximum number of TCP connections.
+ *
+ * Since the TCP connections are statically allocated, turning this
+ * configuration knob down results in less RAM used. Each TCP
+ * connection requires approximatly 30 bytes of memory.
+ */
 #define UIP_CONF_MAX_CONNECTIONS 40
+
+/**
+ * The maximum number of listening TCP ports.
+ *
+ * Each listening TCP port requires 2 bytes of memory.
+ */
 #define UIP_CONF_MAX_LISTENPORTS 40
+
+/**
+ * The size of the uIP packet buffer.
+ *
+ * The uIP packet buffer should not be smaller than 60 bytes, and does
+ * not need to be larger than 1500 bytes. Lower size results in lower
+ * TCP throughput, larger size results in higher TCP throughput.
+ */
 #define UIP_CONF_BUFFER_SIZE     400
 
+/**
+ * The host byte order.
+ *
+ * Used for telling uIP if the architecture has LITTLE_ENDIAN or
+ * BIG_ENDIAN byte order. x86 CPUs have LITTLE_ENDIAN byte order,
+ * whereas Motorola CPUs have BIG_ENDIAN. Check the documentation of
+ * the CPU to find out the byte order.
+ */
 #define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
 
 #endif /* __UIP_CONF_H__ */

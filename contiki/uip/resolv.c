@@ -1,5 +1,22 @@
+/**
+ * \file
+ * DNS host name to IP address resolver.
+ * \author Adam Dunkels <adam@dunkels.com>
+ * 
+ * This file implements a DNS host name to IP address resolver. It
+ * maintains a list of resolved hostnames that can be queried with the
+ * resolv_lookup() function. New hostnames can be resolved using the
+ * resolv_query() function.
+ *
+ * The signal resolv_signal_found is emitted when a hostname has been
+ * resolved. The signal is emitted to all processes listening for the
+ * signal, and it is up to the receiving process to determine if the
+ * correct hostname has been found by calling the resolv_lookup()
+ * function with the hostname.
+ */
+
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2002-2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -10,10 +27,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.6 2003/08/24 22:40:32 adamdunkels Exp $
+ * $Id: resolv.c,v 1.7 2003/09/02 21:47:28 adamdunkels Exp $
  *
  */
 
@@ -42,8 +56,10 @@
 #define NULL (void *)0
 #endif /* NULL */
 
+/** \internal The maximum number of retries when asking for a name. */
 #define MAX_RETRIES 8
 
+/** \internal The DNS message header. */
 struct dns_hdr {
   u16_t id;
   u8_t flags1, flags2;
@@ -64,6 +80,7 @@ struct dns_hdr {
   u16_t numextrarr;
 };
 
+/** \internal The DNS answer message structure. */
 struct dns_answer {
   /* DNS answer record starts with either a domain name or a pointer
      to a name already present somewhere in the packet. */
@@ -74,13 +91,12 @@ struct dns_answer {
   u16_t ipaddr[2];
 };
 
-
+struct namemap {
 #define STATE_UNUSED 0
 #define STATE_NEW    1
 #define STATE_ASKING 2
 #define STATE_DONE   3
 #define STATE_ERROR  4
-struct namemap {
   u8_t state;
   u8_t tmr;
   u8_t retries;
@@ -98,13 +114,18 @@ static u8_t seqno;
 
 static struct uip_udp_conn *resolv_conn = NULL;
 
+/**
+ * Signal that is sent when a name has been resolved.
+ */
 ek_signal_t resolv_signal_found = EK_SIGNAL_NONE;
 
 /*-----------------------------------------------------------------------------------*/
-/* parse_name(name):
+/** \internal
+ * Walk through a compact encoded DNS name and return the end of it.
  *
- * Returns the end of the name.
+ * \return The end of the name.
  */
+/*-----------------------------------------------------------------------------------*/
 static unsigned char *
 parse_name(unsigned char *query)
 {
@@ -124,11 +145,11 @@ parse_name(unsigned char *query)
   return query + 1;
 }
 /*-----------------------------------------------------------------------------------*/
-/* check_entries(void):
- *
+/** \internal
  * Runs through the list of names to see if there are any that have
- * not been queried yet. If so, a query is sent out.
+ * not yet been queried and, if so, sends out a query.
  */
+/*-----------------------------------------------------------------------------------*/
 static void
 check_entries(void)
 {
@@ -191,6 +212,10 @@ check_entries(void)
     }
   }
 }
+/*-----------------------------------------------------------------------------------*/
+/** \internal
+ * Called when new UDP data arrives.
+ */
 /*-----------------------------------------------------------------------------------*/
 static void
 newdata(void)
@@ -284,10 +309,10 @@ newdata(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-/* udp_appcall():
- *
+/** \internal
  * The main UDP function.
  */
+/*-----------------------------------------------------------------------------------*/
 void
 udp_appcall(void)
 {
@@ -301,11 +326,12 @@ udp_appcall(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-/* resolv_query(name):
+/**
+ * Queues a name so that a question for the name will be sent out.
  *
- * Queues a name so that a question for the name will be sent out the
- * next time the udp_appcall is polled.
+ * \param name The hostname that is to be queried.
  */
+/*-----------------------------------------------------------------------------------*/
 void
 resolv_query(char *name)
 {
@@ -338,7 +364,23 @@ resolv_query(char *name)
   nameptr->seqno = seqno;
   ++seqno;
 
+  if(resolv_conn != NULL) {
+    dispatcher_emit(uip_signal_poll_udp, resolv_conn);
+  }
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Look up a hostname in the array of known hostnames.
+ *
+ * \note This function only looks in the internal array of known
+ * hostnames, it does not send out a query for the hostname if none
+ * was found. The function resolv_query() can be used to send a query
+ * for a hostname.
+ *
+ * \return A pointer to a 4-byte representation of the hostname's IP
+ * address, or NULL if the hostname was not found in the array of
+ * hostnames.
+ */
 /*-----------------------------------------------------------------------------------*/
 u16_t *
 resolv_lookup(char *name)
@@ -358,6 +400,14 @@ resolv_lookup(char *name)
   return NULL;
 }  
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Obtain the currently configured DNS server.
+ *
+ * \return A pointer to a 4-byte representation of the IP address of
+ * the currently configured DNS server or NULL if no DNS server has
+ * been configured.
+ */
+/*-----------------------------------------------------------------------------------*/
 u16_t *
 resolv_getserver(void)
 {
@@ -367,6 +417,13 @@ resolv_getserver(void)
   return resolv_conn->ripaddr;
 }
 /*-----------------------------------------------------------------------------------*/
+/**
+ * Configure a DNS server.
+ *
+ * \param dnsserver A pointer to a 4-byte representation of the IP
+ * address of the DNS server to be configured.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 resolv_conf(u16_t *dnsserver)
 {
@@ -375,8 +432,11 @@ resolv_conf(u16_t *dnsserver)
   }
   
   resolv_conn = uip_udp_new(dnsserver, 53);
-
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Initalize the resolver.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 resolv_init(void)
@@ -389,6 +449,11 @@ resolv_init(void)
 
   resolv_signal_found = dispatcher_sigalloc();
 }
+/*-----------------------------------------------------------------------------------*/
+/** \internal
+ * Callback function which is called when a hostname is found.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 resolv_found(char *name, u16_t *ipaddr)

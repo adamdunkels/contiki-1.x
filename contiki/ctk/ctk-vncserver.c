@@ -37,7 +37,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.4 2003/09/01 22:24:24 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.5 2003/09/02 21:47:27 adamdunkels Exp $
  *
  */
 
@@ -1050,7 +1050,7 @@ LOADER_INIT_FUNC(ctk_vncserver_init, arg)
   
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
-    dispatcher_uiplisten(5900);
+    dispatcher_uiplisten(HTONS(5900));
 
     for(i = 0; i < CTK_VNCSERVER_CONF_NUMCONNS; ++i) {
       conns[i].state = VNC_DEALLOCATED;

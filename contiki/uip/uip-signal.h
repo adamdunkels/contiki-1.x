@@ -1,3 +1,22 @@
+/**
+ * \file
+ * uIP TCP/IP stack signals.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * The signals defined in this module usually is not used by
+ * application programmers, but knowledge of these signals are useful
+ * for developers of network device drivers.
+ *
+ * These signals can be used to force a poll of a specific uIP
+ * connection. This usually is used after doing e.g. a TCP connect
+ * that normally would not take place until next time the connection
+ * was periodically polled (normally up to 0.5 seconds afterwards). By
+ * emitting the signals defined by this module, the poll will take
+ * place at once the signal is delivered.
+ *
+ */
+
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -11,10 +30,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +48,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: uip-signal.h,v 1.4 2003/08/20 20:49:59 adamdunkels Exp $
+ * $Id: uip-signal.h,v 1.5 2003/09/02 21:47:29 adamdunkels Exp $
  *
  */
 
@@ -41,9 +57,22 @@
 
 #include "ek.h"
 
-extern ek_signal_t uip_signal_uninstall,
-  uip_signal_poll, uip_signal_poll_udp;
+extern ek_signal_t
+ uip_signal_uninstall,  /**< Cause a network device driver to unload itself. */
+  
+ uip_signal_poll,       /**< Cause a poll of a TCP connection to take
+			   place. A pointer to the uip_conn struct
+			   must be passed as signal data with the
+			   signal. */
+  
+ uip_signal_poll_udp;   /**< Cause a poll of a UDP connection to take
+			   place. A pointer to the uip_udp_conn struct
+			   must be passed as signal data with the
+			   signal. */
 
+/**
+ * Initialize the uIP signal module.
+ */
 void uip_signal_init(void);
 
 #endif /* __UIP_SIGNAL_H__ */
