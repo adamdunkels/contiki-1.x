@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-out.c,v 1.4 2003/09/04 19:37:13 adamdunkels Exp $
+ * $Id: vnc-out.c,v 1.5 2004/06/06 05:54:13 adamdunkels Exp $
  *
  */
 
@@ -67,47 +64,57 @@
 #define SCREEN_WIDTH  (CHARS_WIDTH * FONT_WIDTH + 2 * SCREEN_X) /*420*/
 #define SCREEN_HEIGHT (CHARS_HEIGHT * FONT_HEIGHT + 2 * SCREEN_Y) /*300*/
 #define BORDER_COLOR 0x00
-#define TEXT_COLOR   0x38 /*0xe0*/
 #define SCREEN_COLOR 0x00 /*0xc0*/
 
 #define BGR(b,g,r) (((b) << 6) | (g) << 3 | (r))
 
-#define BGCOLOR BGR(1,0,1)
 
 static const u8_t menucolor[] = {
-  BGR(0,7,7), /* Background. */           
-  BGR(0,5,5), /* Anti-alias font color. */ 
+  BGR(3,7,7), /* Background. */           
+  BGR(2,5,5), /* Anti-alias font color. */ 
   BGR(0,0,0), /* Font color. */            
 };
 
 
 static const u8_t activemenucolor[] = {
-  BGR(3,7,7), /* Background. */           
-  BGR(3,6,6), /* Anti-alias font color. */ 
-  BGR(0,0,0), /* Font color. */            
+  BGR(0,0,0), /* Background. */           
+  BGR(2,5,5), /* Anti-alias font color. */ 
+  BGR(3,7,7), /* Font color. */            
 };
 
+#define W  BGR(3,7,7)
+#define B  BGR(0,0,0)
+#define G0 BGR(0,2,2)
+#define G1 BGR(1,2,2)
+#define G2 BGR(1,3,3)
+#define G3 BGR(2,4,4)
+#define G4 BGR(2,5,5)
+#define G5 BGR(2,6,6)
 
-static const unsigned char backgroundcolor[] = {BGR(1,0,1)};
+#define BG BGR(1,2,2)
+
+static const unsigned char backgroundcolor[] = {BG};
 
 static const unsigned char wincol[] =
- {BGR(2,5,5),BGR(2,2,2),BGR(0,1,1),BGR(1,0,0),BGR(2,0,0),BGR(2,1,1)};
+  {BGR(2,5,5),BGR(2,2,2),BGR(0,1,1),G2,G3,G4};
+  /*  {BGR(2,5,5),BGR(2,2,2),BGR(0,1,1),BGR(1,0,0),BGR(2,0,0),BGR(2,1,1)}; */
 static const unsigned char wincol_f[] =
- {BGR(3,6,6),BGR(1,2,2),BGR(0,1,1),BGR(2,0,0),BGR(3,2,2),BGR(3,4,4)};
+  {BGR(3,7,7),BGR(1,2,2),BGR(0,1,1),G4,G5,W};
+  /*  {BGR(3,7,7),BGR(1,2,2),BGR(0,1,1),BGR(2,0,0),BGR(3,2,2),BGR(3,4,4)}; */
 static const unsigned char wincol_d[] =
- {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0),BGR(2,0,0),BGR(3,2,2),BGR(3,4,4)};
+  {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0),BGR(2,0,0),BGR(3,2,2),BGR(3,4,4)};
 
 static const unsigned char sepcol[] =
  {BGR(2,5,5),BGR(2,6,6),BGR(3,6,6)};
 static const unsigned char sepcol_f[] =
- {BGR(3,6,6),BGR(3,5,5),BGR(2,5,5)};
+ {BGR(3,7,7),BGR(3,5,5),BGR(2,5,5)};
 static const unsigned char sepcol_d[] =
  {BGR(3,7,7),BGR(1,5,7),BGR(0,0,0)};
 
 static const unsigned char labcol[] =
  {BGR(2,5,5),BGR(1,3,3),BGR(0,1,1)};
 static const unsigned char labcol_f[] =
- {BGR(3,6,6),BGR(3,5,5),BGR(0,0,0)};
+ {BGR(3,7,7),BGR(3,5,5),BGR(0,0,0)};
 static const unsigned char labcol_d[] =
  {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0)};
 
@@ -119,11 +126,11 @@ static const unsigned char butcol_w[] =
  {BGR(2,4,4),BGR(1,3,3),BGR(0,1,1),BGR(2,4,4),BGR(2,4,4),BGR(2,4,4),
   BGR(2,5,5),BGR(2,5,5)};
 static const unsigned char butcol_f[] =
- {BGR(2,3,3),BGR(3,5,5),BGR(3,6,6),BGR(3,5,5),BGR(3,6,6),BGR(3,7,7),
+ {G5,G4,B,BGR(3,5,5),BGR(3,6,6),BGR(3,7,7),
   BGR(3,6,6),BGR(2,5,5)};
 static const unsigned char butcol_fw[] =
- {BGR(3,7,7),BGR(3,6,6),BGR(0,0,0),BGR(1,7,7),BGR(2,7,7),BGR(3,7,7),
-  BGR(3,6,6),BGR(3,7,6)};
+ {BGR(3,7,7),BGR(3,6,6),BGR(0,0,0),BGR(1,3,3),BGR(2,7,7),BGR(3,7,7),
+  BGR(3,6,6),BGR(3,7,7)};
 static const unsigned char butcol_d[] =
  {BGR(2,3,3),BGR(2,5,5),BGR(3,6,6),BGR(1,3,4),BGR(1,5,6),BGR(2,6,7),
   BGR(3,7,7),BGR(2,5,5)};
@@ -146,7 +153,7 @@ static const unsigned char hlcol_dw[] =
  {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0)};
 
 static const unsigned char iconcol[] =
- {BGR(0,1,1),BGR(2,3,3),BGR(2,5,5)};
+  {BG,G5,W};
 static const unsigned char iconcol_w[] =
  {BGR(0,1,1),BGR(2,5,5),BGR(3,7,7)};
 
