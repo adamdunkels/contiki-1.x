@@ -29,7 +29,7 @@
  *
  * This an example program for the Contiki desktop OS
  *
- * $Id: calc.c,v 1.7 2004/07/04 11:27:07 adamdunkels Exp $
+ * $Id: calc.c,v 1.8 2005/02/07 23:13:00 oliverschmidt Exp $
  *
  */
 
@@ -106,8 +106,6 @@ static unsigned char op;
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(calc_init, arg)
 {
-  unsigned char i;
-
   arg_free(arg);
   
   if(id == EK_ID_NONE) {

@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ircc.c,v 1.7 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: ircc.c,v 1.8 2005/02/07 23:13:01 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -322,7 +322,6 @@ parse(char *msg, struct parse_result *dummy)
 static
 PT_THREAD(handle_input(struct ircc_state *s))
 {
-  int i;
   char *ptr;
   /*  struct parse_result r;*/
   

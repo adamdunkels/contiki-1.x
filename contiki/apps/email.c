@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.17 2004/12/23 10:33:24 oliverschmidt Exp $
+ * $Id: email.c,v 1.18 2005/02/07 23:13:00 oliverschmidt Exp $
  *
  */
 
@@ -220,7 +220,6 @@ prepare_message(void)
 EK_EVENTHANDLER(email_eventhandler, ev, data)
 {
   struct ctk_widget *w;
-  unsigned char i;
   EK_EVENTHANDLER_ARGS(ev, data);
 
   ctk_textedit_eventhandler(&mailtextedit, ev, data);

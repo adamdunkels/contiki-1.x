@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.27 2005/01/30 20:22:17 oliverschmidt Exp $
+ * $Id: www.c,v 1.28 2005/02/07 23:13:01 oliverschmidt Exp $
  *
  */
 
@@ -114,7 +114,7 @@ static struct ctk_button wgetyesbutton =
 
 /* The char arrays that hold the history of visited URLs. */
 static char history[WWW_CONF_HISTORY_SIZE][WWW_CONF_MAX_URLLEN];
-static char history_last, history_first;
+static char history_last;
 
 
 /* The CTK widget definitions for the hyperlinks and the char arrays
@@ -278,7 +278,6 @@ open_url(void)
   static char host[32];
   char *file;
   register char *urlptr;
-  unsigned short port;
   static u16_t addr[2];
 
   /* Trim off any spaces in the end of the url. */
