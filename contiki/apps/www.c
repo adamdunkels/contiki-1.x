@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.12 2003/08/05 13:50:02 adamdunkels Exp $
+ * $Id: www.c,v 1.13 2003/08/09 13:33:25 adamdunkels Exp $
  *
  */
 
@@ -63,7 +63,8 @@ static char url[WWW_CONF_MAX_URLLEN + 1];
 static char tmpurl[WWW_CONF_MAX_URLLEN + 1];
 
 /* The array that holds the web page text. */
-static char webpage[WWW_CONF_WEBPAGE_WIDTH * WWW_CONF_WEBPAGE_HEIGHT + 1];
+static char webpage[WWW_CONF_WEBPAGE_WIDTH *
+		    WWW_CONF_WEBPAGE_HEIGHT + 1];
 
 /* The CTK widgets for the main window. */
 static struct ctk_window mainwindow;
@@ -73,24 +74,28 @@ static struct ctk_button backbutton =
 static struct ctk_button downbutton =
   {CTK_BUTTON(10, 0, 4, "Down")};
 static struct ctk_button stopbutton =
-  {CTK_BUTTON(20, 0, 4, "Stop")};
+  {CTK_BUTTON(WWW_CONF_WEBPAGE_WIDTH - 16, 0, 4, "Stop")};
 static struct ctk_button gobutton =
-  {CTK_BUTTON(32, 0, 2, "Go")};
+  {CTK_BUTTON(WWW_CONF_WEBPAGE_WIDTH - 4, 0, 2, "Go")};
 
 static struct ctk_separator sep1 =
-  {CTK_SEPARATOR(0, 2, 36)};
+  {CTK_SEPARATOR(0, 2, WWW_CONF_WEBPAGE_WIDTH)};
 
 static char editurl[WWW_CONF_MAX_URLLEN + 1];
 static struct ctk_textentry urlentry =
-  {CTK_TEXTENTRY(0, 1, 34, 1, editurl, WWW_CONF_MAX_URLLEN)};
+  {CTK_TEXTENTRY(0, 1, WWW_CONF_WEBPAGE_WIDTH - 2,
+		 1, editurl, WWW_CONF_MAX_URLLEN)};
 static struct ctk_label webpagelabel =
-  {CTK_LABEL(0, 3, WWW_CONF_WEBPAGE_WIDTH, WWW_CONF_WEBPAGE_HEIGHT, webpage)};
+  {CTK_LABEL(0, 3, WWW_CONF_WEBPAGE_WIDTH,
+	     WWW_CONF_WEBPAGE_HEIGHT, webpage)};
 
-static char statustexturl[36];
+static char statustexturl[WWW_CONF_WEBPAGE_WIDTH];
 static struct ctk_label statustext =
-  {CTK_LABEL(0, 21, 36, 1, "")};
+  {CTK_LABEL(0, WWW_CONF_WEBPAGE_HEIGHT + 4,
+	     WWW_CONF_WEBPAGE_WIDTH, 1, "")};
 static struct ctk_separator sep2 =
-  {CTK_SEPARATOR(0, 20, 36)};
+  {CTK_SEPARATOR(0, WWW_CONF_WEBPAGE_HEIGHT + 3,
+		 WWW_CONF_WEBPAGE_WIDTH)};
 
 /* The char arrays that hold the history of visited URLs. */
 static char history[WWW_CONF_HISTORY_SIZE][WWW_CONF_MAX_URLLEN];
@@ -213,7 +218,8 @@ LOADER_INIT_FUNC(www_init)
     
     /* Create the main window. */
     memset(webpage, 0, sizeof(webpage));
-    ctk_window_new(&mainwindow, 36, 22, "Web browser");
+    ctk_window_new(&mainwindow, WWW_CONF_WEBPAGE_WIDTH, 
+                   WWW_CONF_WEBPAGE_HEIGHT+5, "Web browser");
     make_window();
     CTK_WIDGET_FOCUS(&mainwindow, &urlentry);
     
@@ -395,10 +401,12 @@ open_link(char *link)
 static void
 log_back(void)
 {
-  memcpy(history[(int)history_last], url, WWW_CONF_MAX_URLLEN);
-  ++history_last;
-  if(history_last >= WWW_CONF_HISTORY_SIZE) {
-    history_last = 0;
+  if(strncmp(url, history[(int)history_last], WWW_CONF_MAX_URLLEN) != 0) {
+    memcpy(history[(int)history_last], url, WWW_CONF_MAX_URLLEN);
+    ++history_last;
+    if(history_last >= WWW_CONF_HISTORY_SIZE) {
+      history_last = 0;
+    }
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -467,7 +475,8 @@ DISPATCHER_SIGHANDLER(www_sighandler, s, data)
     ctk_window_open(&mainwindow);
     run = 1;
   } else if(s == ctk_signal_hyperlink_hover) {
-    if(CTK_WIDGET_TYPE((struct ctk_widget *)data) == CTK_WIDGET_HYPERLINK) {
+    if(CTK_WIDGET_TYPE((struct ctk_widget *)data) ==
+       CTK_WIDGET_HYPERLINK) {
       strncpy(statustexturl, w->widget.hyperlink.url,
 	      sizeof(statustexturl));
       petsciiconv_topetscii(statustexturl, sizeof(statustexturl));
@@ -667,6 +676,7 @@ scroll(void)
       ++linksptr;
     }
   }
+  ctk_window_redraw(&mainwindow);
 }
 /*-----------------------------------------------------------------------------------*/
 static char tmpcenterline[WWW_CONF_WEBPAGE_WIDTH];
@@ -1039,6 +1049,7 @@ formsubmit(struct formattribs *attribs)
   --urlptr;
   *urlptr = 0;
   /*  PRINTF(("formsubmit: URL '%s'\n", tmpurl));*/
+  log_back();
   open_link(tmpurl);
 }
 /*-----------------------------------------------------------------------------------*/
