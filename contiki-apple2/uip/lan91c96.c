@@ -28,7 +28,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.3 2005/03/16 22:38:54 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.4 2005/03/31 22:03:41 oliverschmidt Exp $
  *
  */
 
@@ -97,8 +97,13 @@ void lan91c96_init(void)
   asm("asl");
   asm("asl");
   asm("asl");
-  asm("sta %v", slot_index);
   asm("tax");
+
+  /* Check if high byte is 0x33 */
+  asm("lda %w,x", ETHBSR+1);
+  asm("cmp #$33");
+  asm("bne %g", L1);
+  asm("stx %v", slot_index);
 
   /* Reset ETH card */
   BANK(0);
@@ -140,6 +145,8 @@ void lan91c96_init(void)
   BANK(2);
   asm("lda #%%00000000");        /* No interrupts */
   asm("sta %w,x", ETHMSK);
+
+L1:
 }
 #pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
@@ -346,6 +353,5 @@ L9:
 
   asm("lda #%%11000000");        /* ENQUEUE PACKET - transmit packet */
   asm("sta %w,x", ETHMMUCR);
-  return;
 }
 #pragma optimize(pop)
