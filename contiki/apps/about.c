@@ -32,11 +32,12 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: about.c,v 1.4 2003/04/11 20:10:28 adamdunkels Exp $
+ * $Id: about.c,v 1.5 2003/04/24 17:21:59 adamdunkels Exp $
  *
  */
 
 #include "ctk.h"
+#include "ctk-draw.h"
 #include "dispatcher.h"
 
 #include "petsciiconv.h"
@@ -70,18 +71,35 @@ static ek_id_t id;
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(about_init)
 {
+  unsigned char width;
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
+
+    width = ctk_draw_width();
     
     strcpy(abouturl_ascii, abouturl_petscii);
     petsciiconv_toascii(abouturl_ascii, sizeof(abouturl_ascii));
-    
-    ctk_dialog_new(&aboutdialog, 32, 9);
+
+    if(width > 34) {
+      ctk_dialog_new(&aboutdialog, 32, 9);
+    } else {
+      ctk_dialog_new(&aboutdialog, width - 2, 9);
+    }
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel1);
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel2);
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel3);
     CTK_WIDGET_ADD(&aboutdialog, &aboutlabel4);
-    CTK_WIDGET_ADD(&aboutdialog, &abouturl);
+    if(width > 34) {
+      CTK_WIDGET_ADD(&aboutdialog, &abouturl);
+    } else {
+      CTK_WIDGET_SET_XPOS(&aboutlabel1, 0);
+      CTK_WIDGET_SET_XPOS(&aboutlabel2, 0);
+      CTK_WIDGET_SET_XPOS(&aboutlabel3, 0);
+      CTK_WIDGET_SET_XPOS(&aboutlabel4, 0);
+
+      CTK_WIDGET_SET_XPOS(&aboutclose, 0);
+    }
     CTK_WIDGET_ADD(&aboutdialog, &aboutclose);
     CTK_WIDGET_FOCUS(&aboutdialog, &aboutclose);
     
