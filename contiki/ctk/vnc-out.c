@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-out.c,v 1.6 2004/08/09 20:31:37 adamdunkels Exp $
+ * $Id: vnc-out.c,v 1.7 2004/09/01 18:18:39 adamdunkels Exp $
  *
  */
 
@@ -458,56 +458,59 @@ makechar(CC_REGISTER_ARG char *ptr, u8_t x, u8_t y)
     if(icons[c % MAX_ICONS] == NULL) {
       c = 0;
     }
-    bitmap = icons[c % MAX_ICONS]->bitmap + ymove * 8*3;
- 
-    colorscheme = (u8_t *)colortheme[VNC_OUT_ICONCOLOR + (c >> 6)];
-    switch(xmove) {
-    case 0:
-      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
-	b = bitmap[i];
-	*ptr++ = colorscheme[((b >> 7) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 6) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 5) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 4) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 2) & 0x01) << 2];		
+    bitmap = icons[c % MAX_ICONS]->bitmap;
+
+    if(bitmap != NULL) {
+      bitmap = bitmap + ymove * 8*3;
+      colorscheme = (u8_t *)colortheme[VNC_OUT_ICONCOLOR + (c >> 6)];
+      switch(xmove) {
+      case 0:
+	for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
+	  b = bitmap[i];
+	  *ptr++ = colorscheme[((b >> 7) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 6) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 5) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 4) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 2) & 0x01) << 2];		
+	}
+	break;
+      case 1:
+	for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
+	  b = bitmap[i];
+	  b2 = bitmap[i + 8];
+	  *ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 0) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b2 >> 7) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b2 >> 6) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b2 >> 5) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b2 >> 4) & 0x01) << 2];		
+	}
+	break;
+      case 2:
+	for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
+	  b = bitmap[i + 8];
+	  b2 = bitmap[i + 16];
+	  *ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 2) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 0) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b2 >> 7) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b2 >> 6) & 0x01) << 2];		
+	}
+	break;
+      case 3:
+	for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
+	  b = bitmap[i + 16];
+	  *ptr++ = colorscheme[((b >> 5) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 4) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 2) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
+	  *ptr++ = colorscheme[((b >> 0) & 0x01) << 2];		
+	}
+	break;
       }
-      break;
-    case 1:
-      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
-	b = bitmap[i];
-	b2 = bitmap[i + 8];
-	*ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 0) & 0x01) << 2];
-	*ptr++ = colorscheme[((b2 >> 7) & 0x01) << 2];
-	*ptr++ = colorscheme[((b2 >> 6) & 0x01) << 2];
-	*ptr++ = colorscheme[((b2 >> 5) & 0x01) << 2];
-	*ptr++ = colorscheme[((b2 >> 4) & 0x01) << 2];		
-      }
-      break;
-    case 2:
-      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
-	b = bitmap[i + 8];
-	b2 = bitmap[i + 16];
-	*ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 2) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 0) & 0x01) << 2];
-	*ptr++ = colorscheme[((b2 >> 7) & 0x01) << 2];
-	*ptr++ = colorscheme[((b2 >> 6) & 0x01) << 2];		
-      }
-      break;
-    case 3:
-      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
-	b = bitmap[i + 16];
-	*ptr++ = colorscheme[((b >> 5) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 4) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 2) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
-	*ptr++ = colorscheme[((b >> 0) & 0x01) << 2];		
-      }
-      break;
     }
   } else {
     memcpy_P(tmp, &ctk_vncfont[c * (CTK_VNCFONT_WIDTH * CTK_VNCFONT_HEIGHT)],
