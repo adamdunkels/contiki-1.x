@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.5 2003/04/08 11:50:20 adamdunkels Exp $
+ * $Id: www.c,v 1.6 2003/04/08 19:26:13 adamdunkels Exp $
  *
  */
 
@@ -199,8 +199,7 @@ redraw_window(void)
  * Initializes and starts the web browser. Called either at startup or
  * to open the browser window.
  */
-void
-www_init(void)
+LOADER_INIT_FUNC(www_init)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);

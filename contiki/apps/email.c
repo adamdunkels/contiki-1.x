@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.2 2003/04/08 11:50:20 adamdunkels Exp $
+ * $Id: email.c,v 1.3 2003/04/08 19:24:55 adamdunkels Exp $
  *
  */
 
@@ -150,6 +150,17 @@ static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
 static void
+quit(void)
+{
+  ctk_window_close(&setupwindow);
+  ctk_window_close(&mainwindow);
+  ctk_menu_remove(&menu);
+  dispatcher_exit(&p);
+  id = EK_ID_NONE;
+  LOADER_UNLOAD();
+}
+/*-----------------------------------------------------------------------------------*/
+static void
 make_window(void)
 {
   unsigned char i;
@@ -216,8 +227,7 @@ make_read(void)
   CTK_WIDGET_ADD(&mainwindow, &erasebutton);
 }
 /*-----------------------------------------------------------------------------------*/
-void
-email_init(void)     
+LOADER_INIT_FUNC(email_init)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
@@ -365,17 +375,13 @@ sighandler(ek_signal_t s, ek_data_t data)
       } else if(menu.active == menuitem_setup) {
 	ctk_window_open(&setupwindow);
       } else if(menu.active == menuitem_quit) {
-	dispatcher_exit(&p);
-	id = 0;
-	LOADER_UNLOAD();
+	quit();
       }
       ctk_redraw();
     }
   } else if(s == ctk_signal_window_close &&
 	    data == (ek_data_t)&mainwindow) {
-    dispatcher_exit(&p);
-    id = 0;
-    LOADER_UNLOAD();
+    quit();
   }
 }
 /*-----------------------------------------------------------------------------------*/

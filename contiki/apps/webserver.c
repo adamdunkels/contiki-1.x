@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.2 2003/03/28 12:08:35 adamdunkels Exp $
+ * $Id: webserver.c,v 1.3 2003/04/08 19:26:14 adamdunkels Exp $
  *
  */
 
@@ -42,6 +42,8 @@
 #include "http-strings.h"
 #include "uip_main.h"
 #include "petsciiconv.h"
+
+#include "loader.h"
 
 #ifdef __C64__
 #include <c64.h>
@@ -111,8 +113,7 @@ struct drv_state {
 static struct drv_state ds;
 
 /*-----------------------------------------------------------------------------------*/
-void
-webserver_init(void)     
+LOADER_INIT_FUNC(webserver_init)
 {
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
