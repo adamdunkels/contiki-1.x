@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.14 2003/08/09 23:27:33 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.15 2003/08/12 20:13:50 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -50,6 +50,7 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      enabler.prg enabler.dsc \
      springlight.prg springlight.dsc \
      default.prg default.dsc \
+     ravenpine.prg ravenpine.dsc \
      ssfire.prg ssfire.dsc \
      rrnet.drv rrnet.dsc \
      slip.drv slip.dsc \
@@ -100,4 +101,8 @@ enabler.prg: themeloader.o ctk-hires-theme-enabler.o contiki-labels.o
 
 springlight.prg: themeloader.o ctk-hires-theme-springlight.o contiki-labels.o
 	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+ravenpine.prg: themeloader.o ctk-hires-theme-ravenpine.o contiki-labels.o
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
 
