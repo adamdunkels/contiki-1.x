@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: telnet-dsc.c,v 1.3 2003/04/24 17:16:55 adamdunkels Exp $
+ * $Id: telnet-dsc.c,v 1.4 2003/08/05 13:49:10 adamdunkels Exp $
  *
  */
 
@@ -40,7 +40,7 @@ extern struct ctk_icon telnet_icon;
 DSC(telnet_dsc,
     "A simple Telnet client",
     "simpletelnet.prg",
-    telnet_init,
+    simpletelnet_init,
     &telnet_icon);
 /*-----------------------------------------------------------------------------------*/
 static unsigned char telneticon_bitmap[3*3*8] = {
