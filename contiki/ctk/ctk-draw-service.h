@@ -5,7 +5,7 @@
 
 #include "ctk.h"
 
-#define CTK_DRAW_SERVICE_NAME "CTK device driver"
+#define CTK_DRAW_SERVICE_NAME "CTK driver"
 #define CTK_DRAW_SERVICE_VERSION 0x0001
 struct ctk_draw_service_interface {
   unsigned char version;
