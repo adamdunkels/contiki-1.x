@@ -41,7 +41,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: pap.c,v 1.2 2004/08/22 21:10:02 oliverschmidt Exp $
+ * $Id: pap.c,v 1.3 2004/08/29 15:11:46 oliverschmidt Exp $
  *
  */
 
@@ -54,7 +54,12 @@
 #include	"pap.h"
 #include	"lcp.h"
 
+#if 1
+#define DEBUG1(x)
+#else
+#include <stdio.h>
 #define DEBUG1(x) printf x
+#endif
 
 /*#include	"time.h"*/
 /*#include	"utils.h" */

@@ -44,7 +44,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: lcp.c,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: lcp.c,v 1.2 2004/08/29 15:11:46 oliverschmidt Exp $
  *
  */
 
@@ -59,8 +59,14 @@
 #include "ahdlc.h"
 #include "lcp.h"
 
+#if 1
+#define DEBUG1(x)
+#define DEBUG2(x)
+#else
+#include <stdio.h>
 #define DEBUG1(x) printf x
 #define DEBUG2(x) printf x
+#endif
 
 #define TIMER_expire()
 #define TIMER_set()

@@ -47,7 +47,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ipcp.c,v 1.1 2004/08/20 12:29:54 oliverschmidt Exp $
+ * $Id: ipcp.c,v 1.2 2004/08/29 15:11:45 oliverschmidt Exp $
  *
  */
 
@@ -55,7 +55,12 @@
 /* include files 	*/
 /*			*/ 
 
+#if 1
+#define DEBUG1(x)
+#else
+#include <stdio.h>
 #define DEBUG1(x) printf x
+#endif
 
 #include "uip.h"
 /*#include "time.h"*/

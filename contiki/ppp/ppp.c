@@ -43,7 +43,7 @@
  *
  * This file is part of the Mycal Modified uIP TCP/IP stack.
  *
- * $Id: ppp.c,v 1.2 2004/08/22 21:10:02 oliverschmidt Exp $
+ * $Id: ppp.c,v 1.3 2004/08/29 15:11:46 oliverschmidt Exp $
  *
  */
 
@@ -58,7 +58,12 @@
 /*#include "time.h"*/
 /*#include "mip.h"*/
 
+#if 1
+#define DEBUG1(x)
+#else
+#include <stdio.h>
 #define DEBUG1(x) printf x
+#endif
 
 /*
   Set the debug message level
