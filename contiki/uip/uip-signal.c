@@ -32,19 +32,19 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: uip-signal.c,v 1.2 2003/07/31 23:20:24 adamdunkels Exp $
+ * $Id: uip-signal.c,v 1.3 2003/08/06 23:16:42 adamdunkels Exp $
  *
  */
 
 #include "uip-signal.h"
 #include "dispatcher.h"
 
-/*ek_signal_t uip_signal_uninstall;*/
+ek_signal_t uip_signal_uninstall;
 
 /*-----------------------------------------------------------------------------------*/
 void
 uip_signal_init(void)
 {
-  /*  uip_signal_uninstall = dispatcher_sigalloc();*/
+  uip_signal_uninstall = dispatcher_sigalloc();
 }
 /*-----------------------------------------------------------------------------------*/
