@@ -28,9 +28,9 @@
  *
  * This file is part of the Contiki operating system.
  * 
- * Author: Adam Dunkels <adam@sics.se>, Oliver Schmidt <ol.sc0web.de>
+ * Author: Adam Dunkels <adam@sics.se>, Oliver Schmidt <ol.sc@web.de>
  *
- * $Id: lc.h,v 1.5 2004/09/12 20:28:47 adamdunkels Exp $
+ * $Id: lc.h,v 1.6 2005/02/15 00:26:47 oliverschmidt Exp $
  */
 /* Local continuations: a form of continuation that only works locally
    within a function.
