@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-out.c,v 1.5 2004/06/06 05:54:13 adamdunkels Exp $
+ * $Id: vnc-out.c,v 1.6 2004/08/09 20:31:37 adamdunkels Exp $
  *
  */
 
@@ -58,20 +58,26 @@
 #define SCREEN_X       10
 #define SCREEN_Y       8
 
-#define FONT_WIDTH 6
-#define FONT_HEIGHT 8
-
-#define SCREEN_WIDTH  (CHARS_WIDTH * FONT_WIDTH + 2 * SCREEN_X) /*420*/
-#define SCREEN_HEIGHT (CHARS_HEIGHT * FONT_HEIGHT + 2 * SCREEN_Y) /*300*/
+#define SCREEN_WIDTH  (CHARS_WIDTH * CTK_VNCFONT_WIDTH + 2 * SCREEN_X) /*420*/
+#define SCREEN_HEIGHT (CHARS_HEIGHT * CTK_VNCFONT_HEIGHT + 2 * SCREEN_Y) /*300*/
 #define BORDER_COLOR 0x00
 #define SCREEN_COLOR 0x00 /*0xc0*/
+
+#ifndef CH_HOME
+#define CH_HOME 0x50
+#endif 
+
+#ifndef CH_TAB
+#define CH_TAB  0x09
+#endif
+
 
 #define BGR(b,g,r) (((b) << 6) | (g) << 3 | (r))
 
 
 static const u8_t menucolor[] = {
   BGR(3,7,7), /* Background. */           
-  BGR(2,5,5), /* Anti-alias font color. */ 
+  BGR(2,6,6), /* Anti-alias font color. */ 
   BGR(0,0,0), /* Font color. */            
 };
 
@@ -91,7 +97,7 @@ static const u8_t activemenucolor[] = {
 #define G4 BGR(2,5,5)
 #define G5 BGR(2,6,6)
 
-#define BG BGR(1,2,2)
+#define BG BGR(3,4,4)
 
 static const unsigned char backgroundcolor[] = {BG};
 
@@ -114,9 +120,9 @@ static const unsigned char sepcol_d[] =
 static const unsigned char labcol[] =
  {BGR(2,5,5),BGR(1,3,3),BGR(0,1,1)};
 static const unsigned char labcol_f[] =
- {BGR(3,7,7),BGR(3,5,5),BGR(0,0,0)};
+ {BGR(3,7,7),BGR(3,6,6),BGR(0,0,0)};
 static const unsigned char labcol_d[] =
- {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0)};
+ {BGR(3,7,7),BGR(3,6,6),BGR(0,0,0)};
 
 
 static const unsigned char butcol[] =
@@ -144,18 +150,18 @@ static const unsigned char hlcol[] =
 static const unsigned char hlcol_w[] =
  {BGR(2,5,5),BGR(1,3,3),BGR(1,0,0)};
 static const unsigned char hlcol_f[] =
- {BGR(3,6,6),BGR(3,5,5),BGR(3,0,0)};
+ {BGR(3,7,7),BGR(3,5,5),BGR(3,0,0)};
 static const unsigned char hlcol_fw[] =
- {BGR(3,6,6),BGR(3,6,7),BGR(3,7,7)};
+ {BGR(3,7,7),BGR(3,6,7),BGR(3,7,7)};
 static const unsigned char hlcol_d[] =
  {BGR(3,7,7),BGR(3,5,5),BGR(2,0,0)};
 static const unsigned char hlcol_dw[] =
  {BGR(3,7,7),BGR(1,5,5),BGR(0,0,0)};
 
 static const unsigned char iconcol[] =
-  {BG,G5,W};
+  {BG,G4,W,B,G1};
 static const unsigned char iconcol_w[] =
- {BGR(0,1,1),BGR(2,5,5),BGR(3,7,7)};
+ {BGR(0,1,1),BGR(1,3,3),BGR(3,7,7), B,W};
 
 
 
@@ -191,8 +197,17 @@ static const u8_t * const colortheme[] =
 
 static int mouse_x, mouse_y, mouse_button;
 
-static u8_t screen[CHARS_WIDTH * CHARS_HEIGHT],
-  colorscreen[CHARS_WIDTH * CHARS_HEIGHT];
+#ifdef CTK_VNCSERVER_CONF_SCREEN
+static u8_t *screen = CTK_VNCSERVER_CONF_SCREEN;
+#else
+static u8_t screen[CHARS_WIDTH * CHARS_HEIGHT];
+#endif
+
+#ifdef CTK_VNCSERVER_CONF_COLORSCREEN
+staitc u8_t *colorscreen = CTK_VNCSERVER_CONF_COLORSCREEN;
+#else
+static u8_t colorscreen[CHARS_WIDTH * CHARS_HEIGHT];
+#endif
 
 
 #define PRINTF(x)
@@ -246,7 +261,7 @@ vnc_out_update_area(struct vnc_server_state *vs,
 		    u8_t x, u8_t y, u8_t w, u8_t h)
 {
   u8_t x2, y2, ax2, ay2;
-  struct vnc_server_update *a, *b;
+  register struct vnc_server_update *a, *b;
 
   PRINTF(("update_area_connection: should update (%d:%d) (%d:%d)\n",
 	 x, y, w, h));
@@ -366,7 +381,7 @@ vnc_out_update_area(struct vnc_server_state *vs,
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-init_send_screen(struct vnc_server_state *vs)
+init_send_screen(register struct vnc_server_state *vs)
 {
   vs->sendmsg = SEND_SCREEN;
   vs->x = vs->y = 0;
@@ -377,7 +392,7 @@ init_send_screen(struct vnc_server_state *vs)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-check_updates(struct vnc_server_state *vs)
+check_updates(register struct vnc_server_state *vs)
 {
   
   if(vs->state == VNC_RUNNING &&
@@ -410,7 +425,7 @@ check_updates(struct vnc_server_state *vs)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-static u8_t tmp[FONT_WIDTH * FONT_HEIGHT];
+static u8_t tmp[CTK_VNCFONT_WIDTH * CTK_VNCFONT_HEIGHT];
 static void
 makechar(CC_REGISTER_ARG char *ptr, u8_t x, u8_t y)
 {
@@ -424,12 +439,12 @@ makechar(CC_REGISTER_ARG char *ptr, u8_t x, u8_t y)
   color = colorscreen[x + y * CHARS_WIDTH];
   c = screen[x + y * CHARS_WIDTH];
 
-  colorscheme = colortheme[color];
+  colorscheme = (u8_t *)colortheme[color];
       
   /* First check if the character is a special icon character. These
      are to be interpreted in a special manner: the first character of
      the icon (the top left corner) has the highest bit set, but not
-     but 6. All other characters have bit 6 set, and also count the
+     bit 6. All other characters have bit 6 set, and also count the
      number of positions away from the top left corner. Only the top
      left corner contains enough information to identify the icon, all
      other chars only contain the number of steps to reach the
@@ -439,75 +454,76 @@ makechar(CC_REGISTER_ARG char *ptr, u8_t x, u8_t y)
     ymove = (c & 0x30) >> 4;
     
     c = colorscreen[x + y * CHARS_WIDTH];
+
     if(icons[c % MAX_ICONS] == NULL) {
       c = 0;
     }
     bitmap = icons[c % MAX_ICONS]->bitmap + ymove * 8*3;
  
-    colorscheme = colortheme[VNC_OUT_ICONCOLOR + (c >> 6)];
+    colorscheme = (u8_t *)colortheme[VNC_OUT_ICONCOLOR + (c >> 6)];
     switch(xmove) {
     case 0:
-      for(i = 0; i < FONT_HEIGHT; ++i) {
+      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
 	b = bitmap[i];
-	*ptr++ = colorscheme[(b >> 7) & 0x01];
-	*ptr++ = colorscheme[(b >> 6) & 0x01];
-	*ptr++ = colorscheme[(b >> 5) & 0x01];
-	*ptr++ = colorscheme[(b >> 4) & 0x01];
-	*ptr++ = colorscheme[(b >> 3) & 0x01];
-	*ptr++ = colorscheme[(b >> 2) & 0x01];		
+	*ptr++ = colorscheme[((b >> 7) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 6) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 5) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 4) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 2) & 0x01) << 2];		
       }
       break;
     case 1:
-      for(i = 0; i < FONT_HEIGHT; ++i) {
+      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
 	b = bitmap[i];
 	b2 = bitmap[i + 8];
-	*ptr++ = colorscheme[(b >> 1) & 0x01];
-	*ptr++ = colorscheme[(b >> 0) & 0x01];
-	*ptr++ = colorscheme[(b2 >> 7) & 0x01];
-	*ptr++ = colorscheme[(b2 >> 6) & 0x01];
-	*ptr++ = colorscheme[(b2 >> 5) & 0x01];
-	*ptr++ = colorscheme[(b2 >> 4) & 0x01];		
+	*ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 0) & 0x01) << 2];
+	*ptr++ = colorscheme[((b2 >> 7) & 0x01) << 2];
+	*ptr++ = colorscheme[((b2 >> 6) & 0x01) << 2];
+	*ptr++ = colorscheme[((b2 >> 5) & 0x01) << 2];
+	*ptr++ = colorscheme[((b2 >> 4) & 0x01) << 2];		
       }
       break;
     case 2:
-      for(i = 0; i < FONT_HEIGHT; ++i) {
-	b = bitmap[i+8];
-	b2 = bitmap[i+16];
-	*ptr++ = colorscheme[(b >> 3) & 0x01];
-	*ptr++ = colorscheme[(b >> 2) & 0x01];
-	*ptr++ = colorscheme[(b >> 1) & 0x01];
-	*ptr++ = colorscheme[(b >> 0) & 0x01];
-	*ptr++ = colorscheme[(b2 >> 7) & 0x01];
-	*ptr++ = colorscheme[(b2 >> 6) & 0x01];		
+      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
+	b = bitmap[i + 8];
+	b2 = bitmap[i + 16];
+	*ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 2) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 0) & 0x01) << 2];
+	*ptr++ = colorscheme[((b2 >> 7) & 0x01) << 2];
+	*ptr++ = colorscheme[((b2 >> 6) & 0x01) << 2];		
       }
       break;
     case 3:
-      for(i = 0; i < FONT_HEIGHT; ++i) {
-	b = bitmap[i+16];
-	*ptr++ = colorscheme[(b >> 5) & 0x01];
-	*ptr++ = colorscheme[(b >> 4) & 0x01];
-	*ptr++ = colorscheme[(b >> 3) & 0x01];
-	*ptr++ = colorscheme[(b >> 2) & 0x01];
-	*ptr++ = colorscheme[(b >> 1) & 0x01];
-	*ptr++ = colorscheme[(b >> 0) & 0x01];		
+      for(i = 0; i < CTK_VNCFONT_HEIGHT; ++i) {
+	b = bitmap[i + 16];
+	*ptr++ = colorscheme[((b >> 5) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 4) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 3) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 2) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 1) & 0x01) << 2];
+	*ptr++ = colorscheme[((b >> 0) & 0x01) << 2];		
       }
       break;
     }
   } else {
-    memcpy_P(tmp, &ctk_vncfont[c * (FONT_WIDTH * FONT_HEIGHT)],
-	     FONT_WIDTH * FONT_HEIGHT);
+    memcpy_P(tmp, &ctk_vncfont[c * (CTK_VNCFONT_WIDTH * CTK_VNCFONT_HEIGHT)],
+	     CTK_VNCFONT_WIDTH * CTK_VNCFONT_HEIGHT);
     
     tmpptr = tmp;
 
     
-    for(i = 0; i < FONT_HEIGHT * FONT_WIDTH; ++i) {
+    for(i = 0; i < CTK_VNCFONT_HEIGHT * CTK_VNCFONT_WIDTH; ++i) {
       *ptr++ = colorscheme[*tmpptr++];
     }
   }
 }
 /*-----------------------------------------------------------------------------------*/
 void
-vnc_out_new(struct vnc_server_state *vs)
+vnc_out_new(register struct vnc_server_state *vs)
 {
   u8_t i;
   
@@ -528,9 +544,9 @@ vnc_out_new(struct vnc_server_state *vs)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-vnc_out_send_blank(struct vnc_server_state *vs)
+vnc_out_send_blank(register struct vnc_server_state *vs)
 {
-  struct rfb_fb_update *umsg;
+  register struct rfb_fb_update *umsg;
   u8_t *ptr;
   u16_t len;
   u8_t msglen;
@@ -574,14 +590,14 @@ vnc_out_send_screen(struct vnc_server_state *vs)
 /*-----------------------------------------------------------------------------------*/
 static short tmpbuf[30];
 void
-vnc_out_send_update(struct vnc_server_state *vs)
+vnc_out_send_update(register struct vnc_server_state *vs)
 {
   u8_t x, y, x0;
   u8_t msglen;
   u16_t len, n;
   u8_t *ptr;
   struct rfb_fb_update *umsg;
-  struct rfb_fb_update_rect_hdr *recthdr;
+  register struct rfb_fb_update_rect_hdr *recthdr;
   struct rfb_rre_hdr *rrehdr;
   u8_t c, color, lastcolor;
   u8_t numblanks;
@@ -672,15 +688,15 @@ vnc_out_send_update(struct vnc_server_state *vs)
 		 sizeof(struct rfb_fb_update_rect_hdr));
 
 	/*	PRINTF(("Blankign (%d:%d) to (%d:%d)\n",
-	       (x - numblanks) * FONT_WIDTH,
-	       y * FONT_HEIGHT,
-	       FONT_WIDTH * numblanks,
-	       FONT_HEIGHT));*/
+	       (x - numblanks) * CTK_VNCFONT_WIDTH,
+	       y * CTK_VNCFONT_HEIGHT,
+	       CTK_VNCFONT_WIDTH * numblanks,
+	       CTK_VNCFONT_HEIGHT));*/
 	recthdr->rect.x = htons(SCREEN_X + (x - numblanks) *
-				FONT_WIDTH);
-	recthdr->rect.y = htons(SCREEN_Y + y * FONT_HEIGHT);
-	recthdr->rect.w = htons(FONT_WIDTH * numblanks);
-	recthdr->rect.h = HTONS(FONT_HEIGHT);
+				CTK_VNCFONT_WIDTH);
+	recthdr->rect.y = htons(SCREEN_Y + y * CTK_VNCFONT_HEIGHT);
+	recthdr->rect.w = htons(CTK_VNCFONT_WIDTH * numblanks);
+	recthdr->rect.h = HTONS(CTK_VNCFONT_HEIGHT);
 	recthdr->encoding[0] =
 	  recthdr->encoding[1] =
 	  recthdr->encoding[2] = 0;
@@ -700,7 +716,7 @@ vnc_out_send_update(struct vnc_server_state *vs)
 	   outgoing TCP segment. */
 
 	msglen = sizeof(struct rfb_fb_update_rect_hdr) +
-	  FONT_HEIGHT * FONT_WIDTH;
+	  CTK_VNCFONT_HEIGHT * CTK_VNCFONT_WIDTH;
 	if(msglen >= uip_mss() - len) {
 	  /*	  PRINTF(("Not enouch space for char (%d, left %d)\n",
 		  msglen, uip_mss() - len));*/
@@ -718,10 +734,10 @@ vnc_out_send_update(struct vnc_server_state *vs)
 	/*	recthdr = (struct rfb_fb_update_rect_hdr *)ptr;*/
 	recthdr = (struct rfb_fb_update_rect_hdr *)tmpbuf;
 
-	recthdr->rect.x = htons(SCREEN_X + x * FONT_WIDTH);
-	recthdr->rect.y = htons(SCREEN_Y + y * FONT_HEIGHT);
-	recthdr->rect.w = HTONS(FONT_WIDTH);
-	recthdr->rect.h = HTONS(FONT_HEIGHT);
+	recthdr->rect.x = htons(SCREEN_X + x * CTK_VNCFONT_WIDTH);
+	recthdr->rect.y = htons(SCREEN_Y + y * CTK_VNCFONT_HEIGHT);
+	recthdr->rect.w = HTONS(CTK_VNCFONT_WIDTH);
+	recthdr->rect.h = HTONS(CTK_VNCFONT_HEIGHT);
 	recthdr->encoding[0] =
 	  recthdr->encoding[1] =
 	  recthdr->encoding[2] = 0;
@@ -786,7 +802,7 @@ vnc_out_getkey(void)
 void
 vnc_out_key_event(struct vnc_server_state *vs)
 {
-  struct rfb_key_event *ev;
+  register struct rfb_key_event *ev;
   
   ev = (struct rfb_key_event *)uip_appdata;
 
@@ -843,7 +859,7 @@ vnc_out_pointer_event(struct vnc_server_state *vs)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-vnc_out_acked(struct vnc_server_state *vs)
+vnc_out_acked(register struct vnc_server_state *vs)
 {
   if(vs->state != VNC_RUNNING) {
     return;
@@ -926,6 +942,7 @@ vnc_out_poll(struct vnc_server_state *vs)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_MOUSE_SUPPORT
 void
 ctk_mouse_init(void)
 {
@@ -945,18 +962,6 @@ ctk_mouse_y(void)
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-ctk_mouse_xtoc(unsigned short x)
-{
-  return x / FONT_WIDTH;
-}
-/*-----------------------------------------------------------------------------------*/
-unsigned char
-ctk_mouse_ytoc(unsigned short y)
-{
-  return y / FONT_HEIGHT;
-}
-/*-----------------------------------------------------------------------------------*/
-unsigned char
 ctk_mouse_button(void)
 {
   return mouse_button;
@@ -972,3 +977,4 @@ ctk_mouse_show(void)
 {
 }
 /*-----------------------------------------------------------------------------------*/
+#endif /* CTK_CONF_MOUSE_SUPPORT */
