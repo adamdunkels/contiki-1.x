@@ -34,7 +34,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd-fs.c,v 1.1 2003/05/28 05:21:51 adamdunkels Exp $
+ * $Id: httpd-fs.c,v 1.2 2003/08/20 20:52:02 adamdunkels Exp $
  */
 
 #include "uip.h"
@@ -44,10 +44,8 @@
 
 #include "httpd-fsdata.c"
 
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#if HTTPD_FS_STATISTICS
 static u16_t count[HTTPD_FS_NUMFILES];
-#endif /* HTTPD_FS_STATISTICS */
 #endif /* HTTPD_FS_STATISTICS */
 
 /*-----------------------------------------------------------------------------------*/
@@ -76,10 +74,8 @@ httpd_fs_strcmp(const char *str1, const char *str2)
 int
 httpd_fs_open(const char *name, struct httpd_fs_file *file)
 {
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#if HTTPD_FS_STATISTICS
   u16_t i = 0;
-#endif /* HTTPD_FS_STATISTICS */
 #endif /* HTTPD_FS_STATISTICS */
   struct httpd_fsdata_file_noconst *f;
 
@@ -90,17 +86,13 @@ httpd_fs_open(const char *name, struct httpd_fs_file *file)
     if(httpd_fs_strcmp(name, f->name) == 0) {
       file->data = f->data;
       file->len = f->len;
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#if HTTPD_FS_STATISTICS
       ++count[i];
-#endif /* HTTPD_FS_STATISTICS */
 #endif /* HTTPD_FS_STATISTICS */
       return 1;
     }
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#if HTTPD_FS_STATISTICS
     ++i;
-#endif /* HTTPD_FS_STATISTICS */
 #endif /* HTTPD_FS_STATISTICS */
 
   }
@@ -110,18 +102,15 @@ httpd_fs_open(const char *name, struct httpd_fs_file *file)
 void
 httpd_fs_init(void)
 {
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1
+#if HTTPD_FS_STATISTICS
   u16_t i;
   for(i = 0; i < HTTPD_FS_NUMFILES; i++) {
     count[i] = 0;
   }
 #endif /* HTTPD_FS_STATISTICS */
-#endif /* HTTPD_FS_STATISTICS */
 }
 /*-----------------------------------------------------------------------------------*/
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1  
+#if HTTPD_FS_STATISTICS
 u16_t httpd_fs_count
 (char *name)
 {
@@ -140,6 +129,5 @@ u16_t httpd_fs_count
   }
   return 0;
 }
-#endif /* HTTPD_FS_STATISTICS */
 #endif /* HTTPD_FS_STATISTICS */
 /*-----------------------------------------------------------------------------------*/
