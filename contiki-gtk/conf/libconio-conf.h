@@ -32,14 +32,14 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: libconio-conf.h,v 1.1 2003/04/15 21:20:42 adamdunkels Exp $
+ * $Id: libconio-conf.h,v 1.2 2003/09/04 19:18:24 adamdunkels Exp $
  *
  */
 #ifndef __LIBCONIO_CONF_H__
 #define __LIBCONIO_CONF_H__
 
-#define LIBCONIO_CONF_SCREEN_WIDTH  40
-#define LIBCONIO_CONF_SCREEN_HEIGHT 25
+#define LIBCONIO_CONF_SCREEN_WIDTH  100
+#define LIBCONIO_CONF_SCREEN_HEIGHT 75
 
 #endif /* __LIBCONIO_CONF_H__ */
 
