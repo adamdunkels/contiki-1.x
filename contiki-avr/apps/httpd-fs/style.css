@@ -1,0 +1,184 @@
+h1 
+{
+  text-align: center;
+  font-size:14pt;
+  font-family:arial,helvetica;
+  font-weight:bold;
+  padding:10px; 
+}
+
+body
+{
+
+  background-color: #fffeec;
+  color:TEXTCOLOR;
+
+  font-size:8pt;
+  font-family:arial,helvetica;
+}
+
+.menublock
+{
+  position:absolute;
+  top:10px;
+  left:0%;
+  width:14%;
+  float:left;
+
+  padding:10px;
+  margin:4px;
+	
+  border: solid 1px;
+  background-color: #fffcd2;
+  text-align:left;
+  
+  font-size:10pt;
+}
+
+.contentblock
+{  
+  position:absolute;
+  top:10px;
+  left:17%;
+  width:52%;
+  float:left;
+
+  padding:10px;
+  margin:4px;
+  margin-bottom:30px;
+
+  border: 1px dotted;
+  background-color: white;
+
+  font-size:8pt;
+  font-family:arial,helvetica;  
+
+}
+
+.newsblock
+{
+  position:absolute;
+  top:10px;
+  left:72%;
+  width:24%;
+  float:left;
+
+  padding:10px;
+  margin:4px;
+
+  border: solid 1px;
+  background-color: #fffcd2;
+  text-align:left;
+  font-size:8pt;
+
+}
+
+
+
+p.intro
+{
+  margin-left:20px;
+  margin-right:20px;
+
+  font-size:10pt;
+  font-weight:bold;
+  font-family:arial,helvetica;  
+}
+
+p.clink
+{
+  font-size:12pt;
+  font-family:courier,monospace;  
+  text-align:center;
+}
+
+p.related
+{
+  font-size:10pt;
+  font-family:arial,helvetica;  
+  text-align:center;
+}
+
+
+
+img.right
+{
+  float:right;
+  margin:10px;
+}
+
+img.left
+{
+  float:left;
+  margin:10px;
+}
+
+p.fig
+{
+  border: solid 1px; 
+
+  text-align: center;
+
+  padding: 10px;
+  margin:10px;
+
+  font-size:7pt;
+}
+
+p.rfig
+{
+  border: solid 1px; 
+
+  text-align: center;
+
+  padding: 10px;
+  margin:10px;
+
+  font-size:7pt;
+
+  float:right;
+}
+
+p.lfig
+{
+  border: solid 1px; 
+
+  text-align: center;
+
+  padding: 10px;
+  margin:10px;
+
+  font-size:7pt;
+
+  float:left;
+}
+
+p
+{
+  padding-left:10px;
+}
+
+p.right
+{
+  text-align:right; 
+}
+
+p.border-title
+{
+  text-align:center;
+
+  font-size:14pt;
+
+  padding:0px;
+  margin:4px;
+  margin-bottom:10px;
+
+  color: TITLECOLOR;
+  background-color: #fffcba;
+  border: solid 1px;
+
+} 
+
+
+
+
