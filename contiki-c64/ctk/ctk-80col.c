@@ -334,7 +334,6 @@ void
 ctk_80col_init(void)
 {
   int i;
-
   
   setup_nmi();
   
@@ -548,14 +547,14 @@ cputcxy(unsigned char x, unsigned char y, char c)
   cputc(c);
 }
 /*-----------------------------------------------------------------------------------*/
-void CC_FASTCALL
+/*void CC_FASTCALL
 screensize(unsigned char *x, unsigned char *y)
 {
   *x = SCREEN_WIDTH;
   *y = SCREEN_HEIGHT;
-}
+}*/
 /*-----------------------------------------------------------------------------------*/
-static unsigned char sizex, sizey;
+/*static unsigned char sizex, sizey;*/
 /*-----------------------------------------------------------------------------------*/
 static void
 _cputsn(char *str, unsigned char len)
@@ -577,9 +576,11 @@ _cputsn(char *str, unsigned char len)
 static void
 s_ctk_draw_init(void)
 {
-  ctk_80col_init();      
-  screensize(&sizex, &sizey);
-  ctk_draw_clear(0, sizey);
+  ctk_80col_init();
+
+  /*  screensize(&sizex, &sizey);*/
+  
+  ctk_draw_clear(0, SCREEN_HEIGHT);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -734,8 +735,8 @@ draw_widget(struct ctk_widget *w,
       x = xpos;
   
       len = strlen(w->widget.icon.title);
-      if(x + len >= sizex) {
-	x = sizex - len;
+      if(x + len >= SCREEN_WIDTH) {
+	x = SCREEN_WIDTH - len;
       }
 
       if(ypos >= clipy1 && ypos < clipy2) {
@@ -789,7 +790,7 @@ s_ctk_draw_clear_window(struct ctk_window *window,
 {
   unsigned char i;
   unsigned char h;
-
+  
   if(focus & CTK_FOCUS_WINDOW) {
     color(COLOR_FOCUS_WINDOW);
   } else {
@@ -848,6 +849,7 @@ s_ctk_draw_window(struct ctk_window *window, unsigned char focus,
   unsigned char h;
   unsigned char x1, y1, x2, y2;
 
+  
   if(window->y + 1 >= clipy2) {
     return;
   }
@@ -934,7 +936,7 @@ s_ctk_draw_dialog(struct ctk_window *dialog)
   unsigned char i;
   unsigned char x1, y1, x2, y2;
   
-
+  
   x = dialog->x & 0xfe;
   y = dialog->y + 1;
 
@@ -981,7 +983,7 @@ s_ctk_draw_dialog(struct ctk_window *dialog)
     /*    cclearxy(x1, i, dialog->w);*/
   }
 
-  draw_window_contents(dialog, CTK_FOCUS_DIALOG, 0, sizey,
+  draw_window_contents(dialog, CTK_FOCUS_DIALOG, 0, SCREEN_HEIGHT,
 		       x1, x2, y1, y2);
 }
 /*-----------------------------------------------------------------------------------*/
@@ -989,7 +991,8 @@ static void
 s_ctk_draw_clear(unsigned char y1, unsigned char y2)
 {
   unsigned char i;
- 
+
+  
   for(i = y1; i < y2; ++i) {
     
     ctk_80col_clear_line(i);
@@ -1008,8 +1011,8 @@ draw_menu(struct ctk_menu *m)
   _cputs(m->title);
   cputc(' ');
   x2 = wherex();
-  if(x + CTK_CONF_MENUWIDTH > sizex) {
-    x = sizex - CTK_CONF_MENUWIDTH - 2;
+  if(x + CTK_CONF_MENUWIDTH > SCREEN_WIDTH) {
+    x = SCREEN_WIDTH - CTK_CONF_MENUWIDTH - 2;
   }
     
   for(y = 0; y < m->nitems; ++y) {
@@ -1041,8 +1044,8 @@ static void
 s_ctk_draw_menus(struct ctk_menus *menus)
 {
   struct ctk_menu *m;  
-
-  memcpy(0xe000, ctk_80col_theme.menuleftpattern, 8);
+  
+  memcpy((char *)0xe000, ctk_80col_theme.menuleftpattern, 8);
   /* Draw menus */
   gotoxy(2, 0);
   revers(1);
@@ -1056,10 +1059,10 @@ s_ctk_draw_menus(struct ctk_menus *menus)
   }
 
 
-  if(wherex() + strlen(menus->desktopmenu->title) + 2 >= sizex) {
-    gotoxy(sizex - strlen(menus->desktopmenu->title) - 2, 0);
+  if(wherex() + strlen(menus->desktopmenu->title) + 2 >= SCREEN_WIDTH) {
+    gotoxy(SCREEN_WIDTH - strlen(menus->desktopmenu->title) - 2, 0);
   } else {
-    cclear(sizex - wherex() -
+    cclear(SCREEN_WIDTH - wherex() -
 	   strlen(menus->desktopmenu->title) - 2);
   }
   
@@ -1079,13 +1082,13 @@ s_ctk_draw_menus(struct ctk_menus *menus)
 static unsigned char
 s_ctk_draw_height(void)
 {
-  return sizey;
+  return SCREEN_HEIGHT;
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned char
 s_ctk_draw_width(void)
 {
-  return sizex;
+  return SCREEN_WIDTH;
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned short
