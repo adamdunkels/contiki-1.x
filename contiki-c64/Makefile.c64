@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64,v 1.5 2003/08/06 23:15:10 adamdunkels Exp $
+# $Id: Makefile.c64,v 1.6 2003/08/09 13:13:36 adamdunkels Exp $
 #
 
 all: contiki contiki-labels.o
@@ -45,9 +45,10 @@ CFLAGS:=$(CFLAGSCOMMON) \
 contiki:  main.o petsciiconv.o \
  ctk.o ek.o dispatcher.o loader-arch.o \
  configedit-dsc.o processes-dsc.o directory-dsc.o \
- ctk-mouse.o ctk-mouse-asm.o \
+ ctk-mouse.o ctk-mouse-joy.o ctk-mouse-asm.o \
  ctk-hires.o ctk-hires-asm.o ctk-hires-theme-default.o \
+ c64-dio.o c64-dio-asm.o c64-fs.o \
  $(UIP) uip_arp.o \
- program-handler.o c64-dio.o c64-dio-asm.o c64-fs.o
+ program-handler.o 
 	cl65 -Ln contiki-labels -o contiki -t $(SYS) $^
 
