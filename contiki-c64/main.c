@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.6 2003/04/25 08:46:00 adamdunkels Exp $
+ * $Id: main.c,v 1.1 2003/07/30 23:11:47 adamdunkels Exp $
  *
  */
 
@@ -46,15 +46,8 @@
 #include "uip-signal.h"
 #include "uip.h"
 #include "uip_arp.h"
-#if WITH_TFE
-#include "cs8900a.h"
-#endif /* WITH_TFE */
-#include "resolv.h"
-#include "rs232dev.h"
 
-#include "about-dsc.h"
 #include "netconf-dsc.h"
-#include "processes-dsc.h"
 #include "directory-dsc.h"
 
 /*-----------------------------------------------------------------------------------*/
@@ -62,44 +55,17 @@ int
 main(int argc, char **argv)
 {
 
-#ifdef WITH_UIP
-  uip_init();
-  /*  uip_main_init();*/
-  uip_signal_init();
-  resolv_init();
-
-#ifdef WITH_TFE
-  cs8900a_init();
-#endif /* WITH_TFE */
-
-  
-#ifdef WITH_RS232
-  /*  rs232dev_init();*/
-#endif /* WITH_RS232 */
-  
-#ifdef WITH_TAPDEV
-  tapdev_init();
-#endif /* WITH_TAPDEV */
-
-
-#endif /* WITH_UIP */
-	    
   ek_init();
   dispatcher_init();
   ctk_init();
-
+	    
   program_handler_init();
-
+   
   program_handler_add(&directory_dsc, "Directory", 1);
   program_handler_add(&netconf_dsc, "Network setup", 1);  
-  program_handler_add(&processes_dsc, "Processes", 0);
-  program_handler_add(&about_dsc, "About", 0);
-  
-  ctk_redraw();
+
   ek_run();
 
-  clrscr();
-  
   return 0;
 
   argv = argv;
