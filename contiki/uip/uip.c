@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.22 2005/02/27 09:44:33 adamdunkels Exp $
+ * $Id: uip.c,v 1.23 2005/03/09 10:21:56 adamdunkels Exp $
  *
  */
 
@@ -739,8 +739,10 @@ uip_process(u8_t flag)
     UIP_LOG("ip: neither tcp nor icmp.");        
     goto drop;
   }
-  
+
+#if UIP_PINGADDRCONF  
  icmp_input:
+#endif /* UIP_PINGADDRCONF */
   UIP_STAT(++uip_stat.icmp.recv);
   
   /* ICMP echo (i.e., ping) processing. This is simple, we only change
