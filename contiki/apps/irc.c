@@ -5,9 +5,11 @@
 #include "ctk.h"
 #include "ctk-textedit.h"
 
+#include "petsciiconv.h"
+
 #include <string.h>
 
-#define LOG_WIDTH 38
+#define LOG_WIDTH 78
 #define LOG_HEIGHT 21
 
 EK_EVENTHANDLER(eventhandler, ev, data);
@@ -17,11 +19,11 @@ static ek_id_t id = EK_ID_NONE;
 
 static struct ctk_window window;
 static char log[LOG_WIDTH * LOG_HEIGHT];
-static char line[LOG_WIDTH];
+static char line[LOG_WIDTH*2];
 static struct ctk_label loglabel =
   {CTK_LABEL(0, 0, LOG_WIDTH, LOG_HEIGHT, log)};
-static struct ctk_textedit lineedit =
-  {CTK_TEXTEDIT(0, LOG_HEIGHT, LOG_WIDTH, 1, line)};
+static struct ctk_textentry lineedit =
+  {CTK_TEXTENTRY(0, LOG_HEIGHT, LOG_WIDTH - 2, 1, line, sizeof(line) - 1)};
 
 static struct ctk_window setupwindow;
 #define SETUPWINDOW_WIDTH 18
@@ -29,17 +31,17 @@ static struct ctk_window setupwindow;
 #define MAX_SERVERLEN 32
 #define MAX_NICKLEN 16
 static u16_t serveraddr[2];
-static char server[MAX_SERVERLEN];
-static char nick[MAX_NICKLEN];
+static char server[MAX_SERVERLEN + 1];
+static char nick[MAX_NICKLEN + 1];
 static struct ctk_label serverlabel =
   {CTK_LABEL(1, 1, 11, 1, "IRC server: ")};
 static struct ctk_textentry serverentry =
-  {CTK_TEXTENTRY(0, 2, 16, 1, server, sizeof(server))};
+  {CTK_TEXTENTRY(0, 2, 16, 1, server, MAX_SERVERLEN)};
 
 static struct ctk_label nicklabel =
   {CTK_LABEL(1, 4, 13, 1, "IRC nickname: ")};
 static struct ctk_textentry nickentry =
-  {CTK_TEXTENTRY(0, 5, 16, 1, nick, sizeof(nick))};
+  {CTK_TEXTENTRY(0, 5, 16, 1, nick, MAX_NICKLEN)};
 
 static struct ctk_button connectbutton =
   {CTK_BUTTON(0, 7, 7, "Connect")};
@@ -75,7 +77,7 @@ void
 ircc_text_output(struct ircc_state *s, char *text1, char *text2)
 {
   char *ptr;
-  int len, len2;
+  int len;
   
   if(text1 == NULL) {
     text1 = "";
@@ -93,18 +95,21 @@ ircc_text_output(struct ircc_state *s, char *text1, char *text2)
 
   memset(ptr, 0, LOG_WIDTH);
   strncpy(ptr, text1, LOG_WIDTH);
-  ptr += len;
-  *ptr = ':';
-  *(ptr + 1) = ' ';
-  if(LOG_WIDTH - len - 2 > 0) {
-    strncpy(ptr + 2, text2, LOG_WIDTH - len - 2);
+  if(len < LOG_WIDTH) {
+    ptr += len;
+    *ptr = ':';
+    ++len;
+    if(LOG_WIDTH - len > 0) {
+      strncpy(ptr + 1, text2, LOG_WIDTH - len);
+    }
+  } else {
+    len = 0;
   }
 
-  len2 = strlen(text2);
-  if(len2 > LOG_WIDTH - len - 2) {
+  if(strlen(text2) > LOG_WIDTH - len) {
     memcpy(log, &log[LOG_WIDTH], LOG_WIDTH * (LOG_HEIGHT - 1));
     strncpy(&log[LOG_WIDTH * (LOG_HEIGHT - 1)],
-	    text2 + LOG_WIDTH - 2 - len, LOG_WIDTH);
+	    text2 + LOG_WIDTH - len, LOG_WIDTH);
   }
   CTK_WIDGET_REDRAW(&loglabel);
   
@@ -136,7 +141,7 @@ parse_line(void)
       ircc_sent(&s);
     }
   } else {
-    petsciiconv_toascii(line, sizeof(line));
+    petsciiconv_toascii(line, sizeof(line) - 1);
     ircc_msg(&s, &line[0]);
     ircc_text_output(&s, nick, line);
   }
@@ -147,7 +152,8 @@ void
 ircc_sent(struct ircc_state *s)
 {
   memset(line, 0, sizeof(line));
-  ctk_textedit_init(&lineedit);
+  /*  ctk_textedit_init(&lineedit);*/
+  CTK_TEXTENTRY_CLEAR(&lineedit);
   CTK_WIDGET_REDRAW(&lineedit);
 }
 /*---------------------------------------------------------------------------*/
@@ -157,13 +163,15 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   u16_t *ipaddr;
   
   if(ev == EK_EVENT_INIT) {
-    ctk_textedit_init(&lineedit);
+    /*    ctk_textedit_init(&lineedit);*/
+    CTK_TEXTENTRY_CLEAR(&lineedit);
     memset(line, 0, sizeof(line));
     memset(log, 0, sizeof(log));
     ctk_window_new(&window, LOG_WIDTH, LOG_HEIGHT + 1, "IRC");
     CTK_WIDGET_ADD(&window, &loglabel);
-    ctk_textedit_add(&window, &lineedit);    
-
+    /*    ctk_textedit_add(&window, &lineedit);    */
+    CTK_WIDGET_ADD(&window, &lineedit);
+    CTK_WIDGET_FOCUS(&window, &lineedit);
 
     ctk_window_new(&setupwindow, SETUPWINDOW_WIDTH, SETUPWINDOW_HEIGHT,
 		   "IRC setup");
@@ -177,8 +185,9 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 
     ctk_window_open(&setupwindow);
 
-  } else if(ev == EK_EVENT_REQUEST_EXIT ||
-	    ev == ctk_signal_window_close) {
+  } else if(ev == EK_EVENT_REQUEST_EXIT) {
+    quit();
+  } else if(ev == ctk_signal_window_close) {
     quit();
   } else if(ev == tcpip_event) {
     ircc_appcall(data);
@@ -219,7 +228,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     if(c == CH_ENTER) {
       parse_line();
     } else {
-      ctk_textedit_eventhandler(&lineedit, ev, data);
+      /*      ctk_textedit_eventhandler(&lineedit, ev, data);*/
+      CTK_WIDGET_FOCUS(&window, &lineedit);
     }
   }
 }
