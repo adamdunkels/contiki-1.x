@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.c,v 1.5 2004/07/04 11:54:10 adamdunkels Exp $
+ * $Id: ek.c,v 1.6 2004/08/09 20:36:39 adamdunkels Exp $
  *
  */
 
@@ -46,18 +46,14 @@
 
 #include <string.h> /* for strncmp() */
 
-/*#include "uip.h"
-
-#include "uip-event.h"*/
-
 /**
  * \internal Pointer to the currently running process structure.
  *
  */
-struct ek_proc *ek_procs;
+struct ek_proc *ek_procs = NULL;
 struct ek_proc *ek_proclist[EK_CONF_MAXPROCS];
-struct ek_proc *ek_current;
-
+struct ek_proc *ek_current = NULL;
+ 
 /**
  * \defgroup events System events
  * @{
@@ -111,12 +107,10 @@ ek_event_t ek_event_msg;
 static ek_event_t lastevent;
 
 #if CC_FUNCTION_POINTER_ARGS
+
 #else /* CC_FUNCTION_POINTER_ARGS */
 ek_event_t ek_eventhandler_s;
 ek_data_t ek_eventhandler_data;
-
-void *ek_uipcall_state;
-
 #endif /* CC_FUNCTION_POINTER_ARGS */      
 
 
@@ -312,11 +306,7 @@ ek_start(CC_REGISTER_ARG struct ek_proc *p)
 
   /* Post an asynchronous event to the process. */
   ek_post(id, EK_EVENT_INIT, p);
-  
-  /* Make sure we know which processes we are running at the
-     moment. */
-  /*  ek_current = p;*/
-  
+
   return id;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -332,7 +322,7 @@ ek_start(CC_REGISTER_ARG struct ek_proc *p)
 void
 ek_exit(void)
 {
-  struct ek_proc *q, *p;
+  register struct ek_proc *q, *p;
   
   p = ek_current;
 
@@ -361,8 +351,6 @@ ek_exit(void)
       }
     }
   }
-
-
   
   ek_current = NULL;
 }
@@ -408,6 +396,8 @@ ek_init(void)
   lastevent = EK_EVENT_MAX;
 
   nevents = fevent = 0;
+
+  ek_current = ek_procs = NULL;
 
   arg_init();
 
@@ -469,7 +459,7 @@ ek_process_event(void)
 	ek_poll_request = 0;
 	ek_process_poll();
       }
-
+      
       p = ek_proclist[id];
       if(p != NULL &&
 	 p->eventhandler != NULL) {
@@ -570,7 +560,8 @@ ek_post(ek_id_t id, ek_event_t s, ek_data_t data)
 void
 ek_post_synch(ek_id_t id, ek_event_t ev, ek_data_t data)
 {
-  struct ek_proc *p = ek_current; 
+  struct ek_proc *p = ek_current;
+  
   ek_current = ek_proclist[id]; 
   ek_current->eventhandler(ev, data); 
   ek_current = p;
@@ -597,8 +588,8 @@ ek_find(const char *prefix)
 void
 ek_replace(struct ek_proc *newp, void *arg)
 {
-  struct ek_proc *p = ek_current;
-  
+  register struct ek_proc *p = ek_current;
+
   /* Remove the currently executing process. */
   ek_exit();
 
@@ -610,7 +601,7 @@ ek_replace(struct ek_proc *newp, void *arg)
   newp->id = p->id;
 
   /* Post an asynchronous event to the process. */
-  ek_post(p->id, EK_EVENT_REPLACE, arg);  
+  ek_post(p->id, EK_EVENT_REPLACE, arg);
 }
 /*-----------------------------------------------------------------------------------*/
 void *
