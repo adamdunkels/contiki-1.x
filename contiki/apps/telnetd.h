@@ -29,40 +29,19 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: telnetd-dsc.c,v 1.2 2003/10/14 11:23:04 adamdunkels Exp $
+ * $Id: telnetd.h,v 1.1 2003/10/14 11:23:04 adamdunkels Exp $
  *
  */
+#ifndef __TELNETD_H__
+#define __TELNETD_H__
 
-#include "dsc.h"
+#include "dispatcher.h"
 
-extern struct ctk_icon telnetd_icon;
-/*-----------------------------------------------------------------------------------*/
-DSC(telnetd_dsc,
-    "Telnet shell server",
-    "telnetd.prg",
-    telnetd_init,
-    &telnetd_icon);
-/*-----------------------------------------------------------------------------------*/
-static unsigned char telnetdicon_bitmap[3*3*8] = {
-  0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
-  0x00, 0xff, 0x00, 0x7e, 0x00, 0xff, 0x00, 0xff,
-  0x00, 0xfe, 0xc2, 0x32, 0x1a, 0xca, 0x06, 0xf6,
+LOADER_INIT_FUNC(telnetd_init, arg);
+DISPATCHER_UIPCALL(telnetd_appcall, s);
+DISPATCHER_SIGHANDLER(telnetd_gui_sighandler, s, data);
+void telnetd_gui_output(char *str1, char *str2);
+void telnetd_gui_quit(void);
+void telnetd_quit(void);
 
-  0x40, 0x5f, 0x40, 0x5f, 0x40, 0x5f, 0x40, 0x4f,
-  0x00, 0xff, 0x00, 0xff, 0x00, 0xfc, 0x01, 0xf3,
-  0x02, 0xfa, 0x02, 0x82, 0x3e, 0xfe, 0xfe, 0xfe,
-
-  0x60, 0x67, 0x50, 0x59, 0x4c, 0x43, 0x7f, 0x00,
-  0x07, 0xe7, 0x0f, 0xef, 0x0f, 0x0f, 0xff, 0x00,
-  0x8e, 0x06, 0x06, 0x06, 0x8e, 0xfe, 0xfe, 0x00
-};
-
-static char telnetdicon_textmap[9] = {
-  't', 'e', 'l',
-  'n', 'e', 't',
-  's', 'r', 'v'
-};
-
-static struct ctk_icon telnetd_icon =
-  {CTK_ICON("Shell server", telnetdicon_bitmap, telnetdicon_textmap)};
-/*-----------------------------------------------------------------------------------*/
+#endif /* __TELNETD_H__ */

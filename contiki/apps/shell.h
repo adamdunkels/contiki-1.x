@@ -1,3 +1,14 @@
+/**
+ * \file
+ * Interface for the Contiki shell.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ * Some of the functions declared in this file must be implemented as
+ * a shell back-end in the architecture specific files of a Contiki
+ * port.
+ */
+
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -28,18 +39,69 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.h,v 1.1 2003/08/21 22:24:29 adamdunkels Exp $
+ * $Id: shell.h,v 1.2 2003/10/14 11:23:04 adamdunkels Exp $
  *
  */
 #ifndef __SHELL_H__
 #define __SHELL_H__
 
+/**
+ * Initialize the shell back-end.
+ *
+ * Called by the front-end when a new shell is started.
+ */
+void shell_init(void);
+
+/**
+ * The "idle" call of the shell.
+ *
+ * This function will be called repeatedly as part of the normal
+ * "idle" dispatcher processing.
+ */
 void shell_idle(void);
+
+/**
+ * Process a shell command.
+ *
+ * This function will be called by the shell GUI / telnet server whan
+ * a command has been entered that should be processed by the shell
+ * back-end.
+ *
+ * \param command The command to be processed.
+ */
 void shell_input(char *command);
 
-
+/**
+ * Quit the shell.
+ *
+ */
 void shell_quit(char *);
+
+
+/**
+ * Print a string to the shell window.
+ *
+ * This function is implemented by the shell GUI / telnet server and
+ * can be called by the shell back-end to output a string in the
+ * shell window. The string is automatically appended with a linebreak.
+ *
+ * \param str1 The first half of the string to be output.
+ * \param str2 The second half of the string to be output.
+ */
 void shell_output(char *str1, char *str2);
 
+/**
+ * Print a prompt to the shell window.
+ *
+ * This function can be used by the shell back-end to print out a
+ * prompt to the shell window.
+ *
+ * \param prompt The prompt to be printed.
+ *
+ */
+void shell_prompt(char *prompt);
 
 #endif /* __SHELL_H__ */
+
+
+

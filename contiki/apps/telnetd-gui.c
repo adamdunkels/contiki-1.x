@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,23 +28,30 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.5 2003/10/14 11:23:04 adamdunkels Exp $
+ * $Id: telnetd-gui.c,v 1.1 2003/10/14 11:23:04 adamdunkels Exp $
  *
  */
 
 #include "program-handler.h"
 #include "loader.h"
-
 #include "uip.h"
 #include "uip_main.h"
+#include "petsciiconv.h"
 #include "uip_arp.h"
 #include "resolv.h"
+#include "telnetd.h"
+#include "memb.h"
 
 #include "shell.h"
 
 #include "uip-signal.h"
 
+#include "telnetd.h"
+
 #include <string.h>
+
+#define ISO_nl       0x0a
+#define ISO_cr       0x0d
 
 #define XSIZE 36
 #define YSIZE 12
@@ -56,30 +60,12 @@ static struct ctk_window window;
 static char log[XSIZE * YSIZE];
 static struct ctk_label loglabel =
   {CTK_LABEL(0, 0, XSIZE, YSIZE, log)};
-static char command[XSIZE + 1];
-static struct ctk_textentry commandentry =
-  {CTK_TEXTENTRY(0, YSIZE, XSIZE - 2, 1, command, XSIZE)};
-
-static DISPATCHER_SIGHANDLER(sighandler, s, data);
-static struct dispatcher_proc p =
-  {DISPATCHER_PROC("Command shell", shell_idle, sighandler,
-		   NULL)};
-static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
 void
-shell_quit(char *str)
+telnetd_gui_output(char *str1, char *str2)
 {
-  ctk_window_close(&window);
-  dispatcher_exit(&p);
-  id = EK_ID_NONE;
-  LOADER_UNLOAD();
-}
-/*-----------------------------------------------------------------------------------*/
-void
-shell_output(char *str1, char *str2)
-{
-  static unsigned char i, len;
+  static unsigned int len, i;
   
   for(i = 1; i < YSIZE; ++i) {
     memcpy(&log[(i - 1) * XSIZE], &log[i * XSIZE], XSIZE);
@@ -92,51 +78,34 @@ shell_output(char *str1, char *str2)
   if(len < XSIZE) {
     strncpy(&log[(YSIZE - 1) * XSIZE] + len, str2, XSIZE - len);
   }
-
+  
   CTK_WIDGET_REDRAW(&loglabel);
 }
 /*-----------------------------------------------------------------------------------*/
 void
-shell_prompt(char *str)
+telnetd_gui_quit(void)
 {
-  
+  ctk_window_close(&window);
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(config_init, arg)
+void
+telnetd_gui_init(void)
 {
-  arg_free(arg);
+  dispatcher_listen(ctk_signal_window_close);
+  dispatcher_listen(ctk_signal_widget_activate);    
   
-  if(id == EK_ID_NONE) {
-    id = dispatcher_start(&p);
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_widget_activate);    
-
-    ctk_window_new(&window, XSIZE, YSIZE+1, "Command shell");
-    CTK_WIDGET_ADD(&window, &loglabel);
-    CTK_WIDGET_ADD(&window, &commandentry);
-    CTK_WIDGET_FOCUS(&window, &commandentry);
-    memset(log, ' ', sizeof(log));
-
-    shell_init();
-  }
+  ctk_window_new(&window, XSIZE, YSIZE, "Shell server");
+  CTK_WIDGET_ADD(&window, &loglabel);
+  memset(log, ' ', sizeof(log));
   ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_SIGHANDLER(sighandler, s, data)
+DISPATCHER_SIGHANDLER(telnetd_gui_sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == ctk_signal_widget_activate &&
-     data == (ek_data_t)&commandentry) {
-    shell_output("> ", command);
-    shell_input(command);
-    CTK_TEXTENTRY_CLEAR(&commandentry);
-    CTK_WIDGET_FOCUS(&window, &commandentry);
-    CTK_WIDGET_REDRAW(&commandentry);
-  } else if(s == ctk_signal_window_close ||
-	    s == dispatcher_signal_quit) {
-    shell_quit(NULL);
+  if(s == ctk_signal_window_close) {
+    telnetd_quit();
   }
 }
 /*-----------------------------------------------------------------------------------*/

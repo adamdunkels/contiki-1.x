@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.5 2003/10/08 10:29:04 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.6 2003/10/14 11:23:04 adamdunkels Exp $
  *
  */
 
@@ -46,6 +46,10 @@
 
 #include "uip-signal.h"
 
+#include "telnetd.h"
+
+#include "telnetd-conf.h"
+
 #include <string.h>
 
 #define ISO_nl       0x0a
@@ -54,30 +58,22 @@
 #define XSIZE 36
 #define YSIZE 12
 
-static struct ctk_window window;
-static char log[XSIZE * YSIZE];
-static struct ctk_label loglabel =
-  {CTK_LABEL(0, 0, XSIZE, YSIZE, log)};
-
 static DISPATCHER_SIGHANDLER(sighandler, s, data);
-static DISPATCHER_UIPCALL(telnetd_app, ts);
 
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Shell server", shell_idle, sighandler,
-		   telnetd_app)};
+		   telnetd_appcall)};
 static ek_id_t id;
 
-#define LINELEN 36
-#define NUMLINES 24
-/*static char lines[NUMLINES][LINELEN];*/
-MEMB(linemem, LINELEN, NUMLINES);
+MEMB(linemem, TELNETD_CONF_LINELEN, TELNETD_CONF_NUMLINES);
 
 static u8_t i;
 
 struct telnetd_state {
-  char *lines[NUMLINES];
-  char buf[LINELEN];
+  char *lines[TELNETD_CONF_NUMLINES];
+  char buf[TELNETD_CONF_LINELEN];
   char bufptr;
+  u8_t numsent;
   u8_t state;
 #define STATE_NORMAL 0
 #define STATE_IAC    1
@@ -99,19 +95,12 @@ static struct telnetd_state s;
 static char *
 alloc_line(void)
 {  
-  /*  for(i = 0; i < NUMLINES; ++i) {
-    if(*(lines[i]) == 0) {
-      return lines[i];
-    }
-  }
-  return NULL;*/
   return memb_alloc(&linemem);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 dealloc_line(char *line)
 {
-  /*  *line = 0;*/
   memb_free(&linemem, line);
 }
 /*-----------------------------------------------------------------------------------*/
@@ -122,9 +111,11 @@ shell_quit(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-quit(char *str)
+telnetd_quit(void)
 {
-  ctk_window_close(&window);
+#if TELNETD_CONF_GUI
+  telnetd_gui_quit();
+#endif /* TELNETD_CONF_GUI */
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
@@ -134,13 +125,14 @@ static void
 sendline(char *line)
 {
   static unsigned int i;
-  for(i = 0; i < NUMLINES; ++i) {
+  
+  for(i = 0; i < TELNETD_CONF_NUMLINES; ++i) {
     if(s.lines[i] == NULL) {
       s.lines[i] = line;
       break;
     }
   }
-  if(i == NUMLINES) {
+  if(i == TELNETD_CONF_NUMLINES) {
     dealloc_line(line);
   }
 }
@@ -151,8 +143,8 @@ shell_prompt(char *str)
   char *line;
   line = alloc_line();
   if(line != NULL) {
-    strncpy(line, str, LINELEN);
-    petsciiconv_toascii(line, LINELEN);
+    strncpy(line, str, TELNETD_CONF_LINELEN);
+    petsciiconv_toascii(line, TELNETD_CONF_LINELEN);
     sendline(line);
   }         
 }
@@ -162,61 +154,34 @@ shell_output(char *str1, char *str2)
 {
   static unsigned len;
   char *line;
-  
-  for(i = 1; i < YSIZE; ++i) {
-    memcpy(&log[(i - 1) * XSIZE], &log[i * XSIZE], XSIZE);
-  }
-  memset(&log[(YSIZE - 1) * XSIZE], 0, XSIZE);
-
-  len = strlen(str1);
-
-  strncpy(&log[(YSIZE - 1) * XSIZE], str1, XSIZE);
-  if(len < XSIZE) {
-    strncpy(&log[(YSIZE - 1) * XSIZE] + len, str2, XSIZE - len);
-  }
 
   line = alloc_line();
   if(line != NULL) {
     len = strlen(str1);
-    strncpy(line, str1, LINELEN);
-    if(len < LINELEN) {
-      strncpy(line + len, str2, LINELEN - len);
+    strncpy(line, str1, TELNETD_CONF_LINELEN);
+    if(len < TELNETD_CONF_LINELEN) {
+      strncpy(line + len, str2, TELNETD_CONF_LINELEN - len);
     }
     len = strlen(line);
-    if(len < LINELEN - 2) {
+    if(len < TELNETD_CONF_LINELEN - 2) {
       line[len] = ISO_cr;
       line[len+1] = ISO_nl;
       line[len+2] = 0;
     }
-    petsciiconv_toascii(line, LINELEN);
+    petsciiconv_toascii(line, TELNETD_CONF_LINELEN);
     sendline(line);
-    /*  } else {
-	for(i = 1; i < YSIZE; ++i) {
-	memcpy(&log[(i - 1) * XSIZE], &log[i * XSIZE], XSIZE);
-	}
-	memset(&log[(YSIZE - 1) * XSIZE], 0, XSIZE);
-	strncpy(&log[(YSIZE - 1) * XSIZE], "Could not alloc line", XSIZE);*/
   }
-
-  CTK_WIDGET_REDRAW(&loglabel);
 }
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(telnetd_init, arg)
 {
   arg_free(arg);
   
-  if(id == EK_ID_NONE) {
+  if(id == EK_ID_NONE) {    
     id = dispatcher_start(&p);
-    dispatcher_listen(ctk_signal_window_close);
-    dispatcher_listen(ctk_signal_widget_activate);    
-
-    ctk_window_new(&window, XSIZE, YSIZE, "Shell server");
-    CTK_WIDGET_ADD(&window, &loglabel);
-    memset(log, ' ', sizeof(log));
-
     dispatcher_uiplisten(HTONS(23));
+    memb_init(&linemem);
   }
-  ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/
 static
@@ -224,26 +189,61 @@ DISPATCHER_SIGHANDLER(sighandler, s, data)
 {
   DISPATCHER_SIGHANDLER_ARGS(s, data);
 
-  if(s == ctk_signal_window_close ||
-     s == dispatcher_signal_quit) {
-    quit(NULL);
+  if(s == dispatcher_signal_quit) {
+    telnetd_quit();
+#if TELNETD_CONF_GUI    
+  } else {
+    telnetd_gui_sighandler(s, data);
+#endif /* TELNETD_CONF_GUI */
   }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 acked(void)     
 {
-  dealloc_line(s.lines[0]);
-  for(i = 1; i < NUMLINES; ++i) {
-    s.lines[i - 1] = s.lines[i];
+  while(s.numsent > 0) {
+    dealloc_line(s.lines[0]);
+    for(i = 1; i < TELNETD_CONF_NUMLINES; ++i) {
+      s.lines[i - 1] = s.lines[i];    
+    }
+    s.lines[TELNETD_CONF_NUMLINES - 1] = NULL;
+    --s.numsent;
   }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 senddata(void)    
 {
-  if(s.lines[0] != NULL) {
-    uip_send(s.lines[0], strlen(s.lines[0]));
+  static char *bufptr, *lineptr;
+  static int buflen, linelen;
+  
+  bufptr = uip_appdata;
+  buflen = 0;
+  for(s.numsent = 0; s.numsent < TELNETD_CONF_NUMLINES &&
+	s.lines[s.numsent] != NULL ; ++s.numsent) {
+    lineptr = s.lines[s.numsent];
+    linelen = strlen(lineptr);
+    if(linelen > TELNETD_CONF_LINELEN) {
+      linelen = TELNETD_CONF_LINELEN;
+    }
+    if(buflen + linelen < uip_mss()) {
+      strncpy(bufptr, lineptr, TELNETD_CONF_LINELEN);
+      bufptr += linelen;
+      buflen += linelen;
+    } else {
+      break;
+    }
+  }
+  uip_send(uip_appdata, buflen);
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+closed(void)
+{
+  for(i = 0; i < TELNETD_CONF_NUMLINES; ++i) {
+    if(s.lines[i] != NULL) {
+      dealloc_line(s.lines[i]);
+    }
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -254,12 +254,12 @@ getchar(u8_t c)
     return;
   }
   
-  s.buf[s.bufptr] = c;  
-  if( s.buf[s.bufptr] == ISO_nl ||
+  s.buf[(int)s.bufptr] = c;  
+  if(s.buf[(int)s.bufptr] == ISO_nl ||
      s.bufptr == sizeof(s.buf) - 1) {    
     if(s.bufptr > 0) {
-      s.buf[s.bufptr] = 0;
-      petsciiconv_topetscii(s.buf, LINELEN);
+      s.buf[(int)s.bufptr] = 0;
+      petsciiconv_topetscii(s.buf, TELNETD_CONF_LINELEN);
     }
     shell_input(s.buf);
     s.bufptr = 0;
@@ -355,21 +355,17 @@ newdata(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
-static
-DISPATCHER_UIPCALL(telnetd_app, ts)
+DISPATCHER_UIPCALL(telnetd_appcall, ts)
 {
   if(uip_connected()) {
-    memb_init(&linemem);
     dispatcher_markconn(uip_conn, &s);
-    for(i = 0; i < NUMLINES; ++i) {
+    for(i = 0; i < TELNETD_CONF_NUMLINES; ++i) {
       s.lines[i] = NULL;
     }
     s.bufptr = 0;
     s.state = STATE_NORMAL;
 
     shell_init();
-    senddata();
-    return;
   }
 
   if(s.state == STATE_CLOSE) {
@@ -378,19 +374,11 @@ DISPATCHER_UIPCALL(telnetd_app, ts)
     return;
   }
   
-  if(uip_closed()) {
-    shell_output("Connection closed", "");
-  }
-
-  
-  if(uip_aborted()) {
-    shell_output("Connection reset", "");
-    /*    aborted();*/
-  }
-  
-  if(uip_timedout()) {
-    shell_output("Connection timed out", "");
-  }
+  if(uip_closed() ||
+     uip_aborted() ||
+     uip_timedout()) {
+    closed();
+  }  
   
   if(uip_acked()) {
     acked();
@@ -402,9 +390,9 @@ DISPATCHER_UIPCALL(telnetd_app, ts)
   
   if(uip_rexmit() ||
      uip_newdata() ||
-     uip_acked()) {
-    senddata();
-  } else if(uip_poll()) {    
+     uip_acked() ||
+     uip_connected() ||
+     uip_poll()) {
     senddata();
   }
 }
