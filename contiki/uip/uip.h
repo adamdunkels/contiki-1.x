@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.4 2003/08/13 22:52:48 adamdunkels Exp $
+ * $Id: uip.h,v 1.5 2003/08/20 20:58:08 adamdunkels Exp $
  *
  */
 
@@ -64,6 +64,12 @@ void uip_init(void);
 #define uip_periodic(conn) do { uip_conn = &uip_conns[conn]; \
                                 uip_process(UIP_TIMER); } while (0)
 
+/* uip_periodic_conn(conn):
+ *
+ */
+#define uip_periodic_conn(conn) do { uip_conn = conn; \
+                                     uip_process(UIP_TIMER); } while (0)
+
 /* uip_input(void):
  *
  * Is called when the network device driver has received new data.
@@ -89,6 +95,11 @@ void uip_init(void);
  */
 #define uip_udp_periodic(conn) do { uip_udp_conn = &uip_udp_conns[conn]; \
                                 uip_process(UIP_UDP_TIMER); } while (0)
+
+/* uip_udp_periodic(conn):
+ */
+#define uip_udp_periodic_conn(conn) do { uip_udp_conn = conn; \
+                                         uip_process(UIP_UDP_TIMER); } while (0)
 #endif /* UIP_UDP */
 /*-----------------------------------------------------------------------------------*/
 /* Functions that are used by the uIP application program. Opening and
