@@ -20,8 +20,8 @@
  *
  */
 #define MEMB(name, size, num) \
-        static char memb_mem[(size + 1) * num]; \
-        static struct memb_blocks name = {size, num, memb_mem}
+        static char name##_memb_mem[(size + 1) * num]; \
+        static struct memb_blocks name = {size, num, name##_memb_mem}
 
 struct memb_blocks {
   unsigned short size;
