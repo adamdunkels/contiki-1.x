@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.9 2004/07/04 21:48:20 adamdunkels Exp $
+ * $Id: shell-gui.c,v 1.10 2004/08/20 21:37:39 adamdunkels Exp $
  *
  */
 
@@ -144,6 +144,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   } else if(ev == ctk_signal_window_close ||
 	    ev == EK_EVENT_REQUEST_EXIT) {
     shell_quit(NULL);
+  } else {
+    shell_eventhandler(ev, data);
   }
 }
 /*-----------------------------------------------------------------------------------*/

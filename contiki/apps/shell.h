@@ -39,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.h,v 1.3 2003/11/27 15:51:51 adamdunkels Exp $
+ * $Id: shell.h,v 1.4 2004/08/20 21:37:39 adamdunkels Exp $
  *
  */
 #ifndef __SHELL_H__
@@ -61,12 +61,11 @@ void shell_init(void);
 void shell_start(void);
 
 /**
- * The "idle" call of the shell.
+ * The shell event handler.
  *
- * This function will be called repeatedly as part of the normal
- * "idle" dispatcher processing.
+ * This function will be called when an event is received.
  */
-void shell_idle(void);
+void shell_eventhandler(ek_event_t ev, ek_data_t data);
 
 /**
  * Process a shell command.
