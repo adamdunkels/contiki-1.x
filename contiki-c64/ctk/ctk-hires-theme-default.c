@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS for the C64
  *
- * $Id: ctk-hires-theme-default.c,v 1.2 2003/04/24 17:08:31 adamdunkels Exp $
+ * $Id: ctk-hires-theme-default.c,v 1.3 2004/08/09 21:27:58 adamdunkels Exp $
  *
  */
 
@@ -38,10 +38,10 @@
 
 #define COLOR(bg, fg) ((fg << 4) | (bg))
 
-#define BGCOLOR1 6
-#define BGCOLOR2 4
-#define BGCOLOR3 10
-#define BGCOLOR4 7
+#define BGCOLOR1 7
+#define BGCOLOR2 10
+#define BGCOLOR3 4
+#define BGCOLOR4 6
 
 struct ctk_hires_theme ctk_hires_theme =
   {
