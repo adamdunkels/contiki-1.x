@@ -1,5 +1,6 @@
 /**
- * \defgroup protothreads Protothreads 
+ * \defgroup pt Protothreads 
+ * @{ 
  *
  * Protothreads are lightweight stackless threads that can be used to
  * provide blocking contexts in event-driven systems. This is useful
@@ -28,13 +29,12 @@
  * particular place in the program, but does not provide any call
  * history or local variables.
  *
- * The protothreads API consists of four basic functions:
+ * The protothreads API consists of four basic operations:
  * initialization: PT_INIT(), execution: PT_START(), blocking:
  * PT_WAIT_UNTIL() and exit: PT_EXIT(). On top of these, two
  * convenience functions are built: reversed condition blocking:
  * PT_WAIT_WHILE() and protothread blocking: PT_WAIT_THREAD().
  *
- * @{
  */
 
 /**
@@ -193,12 +193,13 @@ struct pt {
  * Block and wait until a child protothread completes.
  *
  * This macro schedules a child protothread. The current protothread
- * will block until the child protothread completes. The child
- * protothread must be manually initialized with the PT_INIT()
- * function before this function is used.
+ * will block until the child protothread completes.
+ *
+ * \note The child protothread must be manually initialized with the
+ * PT_INIT() function before this function is used.
  *
  * \param pt A pointer to the protothread control structure.
- * \param condition The condition.
+ * \param thread The child protothread with arguments
  *
  * Example:
  \code
