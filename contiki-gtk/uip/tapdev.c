@@ -31,7 +31,7 @@
  *
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tapdev.c,v 1.3 2004/06/06 07:07:15 adamdunkels Exp $
+ * $Id: tapdev.c,v 1.4 2004/07/04 21:15:54 adamdunkels Exp $
  */
 
 
@@ -62,6 +62,7 @@
 #include "uip_arp.h"
 
 
+#include "tcpip.h"
 
 #define DROP 0
 
@@ -82,23 +83,22 @@ read_callback(gpointer data, gint source, GdkInputCondition condition)
 {
   int ret;
   
-  ret = read(fd, uip_buf, UIP_BUFSIZE);  
+  ret = read(fd, uip_buf, UIP_BUFSIZE);
+  
   if(ret == -1) {
     perror("tap_dev: tapdev_read: read");
   }
-
+  
   uip_len = ret;
   
   if(BUF->type == htons(UIP_ETHTYPE_IP)) {
     uip_arp_ipin();
     uip_len -= sizeof(struct uip_eth_hdr);
-    uip_input();
+    /*    uip_input();*/
+    tcpip_input();
     /* If the above function invocation resulted in data that
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
-    if(uip_len > 0) {
-      uip_split_output();
-    }
   } else if(BUF->type == htons(UIP_ETHTYPE_ARP)) {
     uip_arp_arpin();
     /* If the above function invocation resulted in data that
@@ -122,7 +122,9 @@ timeout_callback(gpointer data)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
     if(uip_len > 0) {
-      uip_split_output();
+      tcpip_output();
+      /*      uip_split_output();*/
+      /*      tapdev_send();*/
     }
   }
 
@@ -132,7 +134,9 @@ timeout_callback(gpointer data)
        should be sent out on the network, the global variable
        uip_len is set to a value > 0. */
     if(uip_len > 0) {
-      uip_split_output();
+      /*      uip_split_output(); */
+      /*      tapdev_send();*/
+      tcpip_output();
       }
     }
 
@@ -171,6 +175,7 @@ tapdev_init(void)
 
   snprintf(buf, sizeof(buf), "ifconfig tap0 inet 192.168.2.1");
   system(buf);
+  printf("%s\n", buf); 
 
   lasttime = 0;
 

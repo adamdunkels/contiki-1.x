@@ -10,11 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by the Swedish Institute
- *      of Computer Science and its contributors.
- * 4. Neither the name of the Institute nor the names of its contributors 
+ * 3. Neither the name of the Institute nor the names of its contributors 
  *    may be used to endorse or promote products derived from this software 
  *    without specific prior written permission. 
  *
@@ -34,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd-fsdata.h,v 1.1 2004/02/16 21:18:14 adamdunkels Exp $
+ * $Id: httpd-fsdata.h,v 1.2 2004/07/04 21:15:53 adamdunkels Exp $
  */
 #ifndef __HTTPD_FSDATA_H__
 #define __HTTPD_FSDATA_H__

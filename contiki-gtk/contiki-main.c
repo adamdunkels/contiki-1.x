@@ -29,63 +29,30 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.11 2004/06/06 07:05:40 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.12 2004/07/04 21:15:53 adamdunkels Exp $
  *
  */
 
-
-#include "ctk.h"
-#include "ctk-draw.h"
-/*#include "ek-x.h"*/
-#include "dispatcher.h"
-
-#include "program-handler.h"
-
-#include "tapdev-drv.h"
-
-#include "uip-fw.h"
-
-#include "uip.h"
-#include "uip_arp.h"
-
-#include "about-dsc.h"
-#include "netconf-dsc.h"
-#include "processes-dsc.h"
-#include "calc-dsc.h"
-
-#include "telnet-dsc.h"
-#include "www-dsc.h"
-#include "webserver-dsc.h"
-
-/*#include "presenter-dsc.h"*/
-
-#include "wget-dsc.h"
-
-#include "email-dsc.h"
-/*#include "maze-dsc.h"*/
-
-#include "telnetd-dsc.h"
-
-#include "resolv.h"
-#include "ctk-vncserver.h"
+#include "ek.h"
+#include "clock.h"
 
 #include <gdk/gdktypes.h>
 #include <gtk/gtk.h>
 
-#include "mt.h"
-#include "mtp.h"
+#include "uip.h"
+#include "ctk.h"
 
-#include "mailget.h"
+#include "uip-fw.h"
 
-#include "newslog.h"
+#include "about-dsc.h"
+#include "calc-dsc.h"
+#include "email-dsc.h"
+#include "netconf-dsc.h"
+#include "processes-dsc.h"
+#include "shell-dsc.h"
+#include "www-dsc.h"
 
-/*
-MTP(thread1, "Test thread", p1, t1, t1_idle);
-static void test1(void *data) { while(1) { printf("Test\n"); mt_yield(); } }
 
-MTP(thread2, "Test thread 2", p2, t2, t2_idle);
-static void test2(void *data) { while(1) { printf("Test 2\n"); mt_yield(); } }
-*/
 
 void tapdev_send(void);
 static struct uip_fw_netif tapif =
@@ -95,13 +62,10 @@ static struct uip_fw_netif tapif =
 static gint
 idle_callback(gpointer data)
 {
-  /*  ek_run();*/
-      /* Process one signal */
-    dispatcher_process_signal();
 
-    /* Run "idle" handlers */
-    dispatcher_process_idle();
+  ek_run();
 
+  ctk_gtksim_redraw();
   return TRUE;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -110,10 +74,49 @@ main(int argc, char **argv)
 {
   u16_t addr[2];
 
-  /*  ek_init();*/
-  dispatcher_init();  
+  ek_init();
+
+  tcpip_init(NULL);
   
+  ctk_gtksim_init(&argc, &argv);
+  ctk_gtksim_service_init(NULL);
+  ctk_init();
+
+  uip_init();
+  uip_ipaddr(addr, 192,168,2,2);
+  uip_sethostaddr(addr);
+
+  uip_ipaddr(addr, 192,168,2,1);
+  uip_setdraddr(addr);
+
+  uip_ipaddr(addr, 255,255,255,0);
+  uip_setnetmask(addr);  
+
+
+  resolv_init(NULL);
   
+  tapdev_init();
+  uip_fw_service_init();
+  uip_fw_init();
+  uip_fw_default(&tapif);
+
+  /*  tapdev_service_init(NULL);*/
+
+
+  program_handler_init();
+  program_handler_add(&about_dsc, "About", 1);
+  program_handler_add(&netconf_dsc, "Network setup", 1);
+  program_handler_add(&www_dsc, "Web browser", 1);
+  program_handler_add(&processes_dsc, "Processes", 1);
+  program_handler_add(&shell_dsc, "Command shell", 1);
+  program_handler_add(&calc_dsc, "Calculator", 1);
+  program_handler_add(&email_dsc, "E-mail", 1);
+  
+  gtk_timeout_add(20, idle_callback, NULL);
+  
+  gtk_main();
+  
+#if 0  
   uip_init();
   resolv_init(NULL);
 
@@ -146,10 +149,11 @@ main(int argc, char **argv)
   ctk_init();
 #endif
   
+#endif /* 0 */
 
-  gtk_timeout_add(20, idle_callback, NULL);
   
-#if 1
+  
+#if 0
   program_handler_init();
   
 
@@ -185,7 +189,8 @@ main(int argc, char **argv)
   
   /*  newslog_init(NULL);*/
   
-  webserver_init();
+
+  /*webserver_init();*/
     
   gtk_main();
     
@@ -197,8 +202,8 @@ main(int argc, char **argv)
 /*-----------------------------------------------------------------------------------*/
 #include <sys/time.h>
  
-ek_clock_t
-ek_clock(void)
+clock_time_t
+clock_time(void)
 {
   struct timeval tv;
   struct timezone tz;

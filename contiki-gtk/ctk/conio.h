@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: conio.h,v 1.1 2003/04/15 21:20:43 adamdunkels Exp $
+ * $Id: conio.h,v 1.2 2004/07/04 21:15:54 adamdunkels Exp $
  *
  */
 #ifndef __CONIO_H__

@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek-conf.h,v 1.1 2003/04/02 09:17:24 adamdunkels Exp $
+ * $Id: ek-conf.h,v 1.2 2004/07/04 21:15:53 adamdunkels Exp $
  *
  */
 
@@ -45,6 +42,7 @@
 typedef void *ek_data_t;
 
 typedef unsigned char ek_signal_t;
+typedef unsigned char ek_event_t;
 typedef unsigned char ek_id_t;
 
 /* ek_ticks_t: should be defined to be the largest type that fits the
@@ -58,15 +56,12 @@ typedef unsigned short ek_ticks_t;
    used by the underlying system. (Look for time_t or similar.) */
 typedef unsigned long ek_clock_t; 
 
-#define EK_CONF_NUMSIGNALS   32    /* Must be 2^n */
-typedef unsigned char ek_num_signals_t;
-
-#define EK_CONF_NUMTIMERS    4    /* Must be 2^n */
-typedef unsigned char ek_num_timers_t;
-
 #define EK_CONF_NUMLISTENERS  32    /* Must be 2^n */
 typedef unsigned char ek_num_listeners_t;
 
-#define EK_CONF_UNLISTEN 0
+#define EK_CONF_MAXPROCS 32
+
+#define EK_CONF_NUMEVENTS 32
+typedef unsigned char ek_num_events_t;
 
 #endif /* __EK_CONF_H__ */

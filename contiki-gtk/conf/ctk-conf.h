@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.4 2004/06/27 12:49:32 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.5 2004/07/04 21:15:53 adamdunkels Exp $
  *
  */
 
@@ -85,5 +82,7 @@ architecture specific files to work). */
 #define CTK_CONF_MENUWIDTH            16
 /* The maximum number of menu items in each menu. */
 #define CTK_CONF_MAXMENUITEMS         10
+
+#define CTK_CONF_WIDGET_FLAGS         1
 
 #endif /* __CTK_CONF_H__ */

@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,25 +29,25 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h,v 1.3 2003/09/04 19:18:40 adamdunkels Exp $
+ * $Id: www-conf.h,v 1.4 2004/07/04 21:15:53 adamdunkels Exp $
  *
  */
 #ifndef __WWW_CONF_H__
 #define __WWW_CONF_H__
 
 /* The size of the HTML viewing area. */
-#define WWW_CONF_WEBPAGE_WIDTH 56
-#define WWW_CONF_WEBPAGE_HEIGHT 37
+#define WWW_CONF_WEBPAGE_WIDTH 76
+#define WWW_CONF_WEBPAGE_HEIGHT 30
 
 /* The size of the "Back" history. */
-#define WWW_CONF_HISTORY_SIZE 4
+#define WWW_CONF_HISTORY_SIZE 40
 
 /* Defines the maximum length of an URL */
-#define WWW_CONF_MAX_URLLEN 100
+#define WWW_CONF_MAX_URLLEN 200
 
 /* The maxiumum number of widgets (i.e., hyperlinks, form elements) on
    a page. */
-#define WWW_CONF_MAX_NUMPAGEWIDGETS 20
+#define WWW_CONF_MAX_NUMPAGEWIDGETS 80
 
 /* Turns <center> support on or off; must be on for forms to work. */
 #define WWW_CONF_RENDERSTATE 1
@@ -59,10 +56,10 @@
 #define WWW_CONF_FORMS       1
 
 /* Maximum lengths for various HTML form parameters. */
-#define WWW_CONF_MAX_FORMACTIONLEN  40
-#define WWW_CONF_MAX_FORMNAMELEN    20
-#define WWW_CONF_MAX_INPUTNAMELEN   20
-#define WWW_CONF_MAX_INPUTVALUELEN  34
+#define WWW_CONF_MAX_FORMACTIONLEN  400
+#define WWW_CONF_MAX_FORMNAMELEN    200
+#define WWW_CONF_MAX_INPUTNAMELEN   200
+#define WWW_CONF_MAX_INPUTVALUELEN  340
 
 #define WWW_CONF_PAGEVIEW 1
 

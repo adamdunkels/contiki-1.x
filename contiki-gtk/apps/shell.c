@@ -28,14 +28,13 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.2 2004/02/16 21:44:24 adamdunkels Exp $
+ * $Id: shell.c,v 1.3 2004/07/04 21:15:53 adamdunkels Exp $
  *
  */
 
 #include "program-handler.h"
 #include "loader.h"
 #include "uip.h"
-#include "uip_main.h"
 #include "uip_arp.h"
 #include "resolv.h"
 
@@ -107,12 +106,12 @@ static void
 processes(char *str)
 {
   static char idstr[5];
-  struct dispatcher_proc *p;
+  struct ek_proc *p;
 
   shell_output("Processes:", "");
   /* Step through each possible process ID and see if there is a
      matching process. */
-  for(p = DISPATCHER_PROCS(); p != NULL; p = p->next) {
+  for(p = EK_PROCS(); p != NULL; p = p->next) {
     inttostr(idstr, p->id);
     shell_output(idstr, p->name);
   }
@@ -179,7 +178,7 @@ killproc(char *str)
   if(procnum != 0) {
     inttostr(procstr, procnum);
     shell_output("Killing process ", procstr);
-    dispatcher_emit(dispatcher_signal_quit, NULL, procnum);
+    ek_post(procnum, EK_EVENT_REQUEST_EXIT, NULL);
   } else {
     shell_output("Could not parse process number", "");
   }

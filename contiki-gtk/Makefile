@@ -27,13 +27,13 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.10 2004/06/06 07:02:44 adamdunkels Exp $
+# $Id: Makefile,v 1.11 2004/07/04 21:15:53 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
 CC=gcc
 CFLAGS=-Wall -Wstrict-prototypes -Wmissing-prototypes \
-	-g  \
+	-g  -Os \
        -Iapps -Ictk -Iuip -Iconf -Ilib \
        -I$(CONTIKI)/apps -I$(CONTIKI)/ctk -I$(CONTIKI)/ek \
        -I$(CONTIKI)/lib -I$(CONTIKI)/uip \
@@ -70,16 +70,29 @@ EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
 WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o http-strings.o
 TELNET=simpletelnet.o telnet.o
 
-CTKGTK=ctk-gtksim.o ctk-conio.o libconio.o
+CTKGTK=ctk-gtksim.o ctk-draw.o ctk-gtksim-service.o libconio.o ctk-gtksim-draw.o
 CTKVNC=ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o 
 
-contiki: contiki-main.o \
- program-handler.o about.o netconf.o processes.o \
- about-dsc.o netconf-dsc.o processes-dsc.o  \
- $(CTKGTK) \
- ctk.o dispatcher.o arg.o \
- uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o uipbuf.o uip-split.o uip-fw.o\
- uiplib.o tapdev.o tapdev-drv.o $(WEBSERVER) $(WWW) \
+contiki: contiki-main.o ek.o arg.o ek-service.o \
+ tcpip.o uip.o uip_arch.o uip-fw.o \
+ timer.o uiplib.o resolv.o uip-event.o resolv.o \
+ cfs.o \
+ tapdev-service.o tapdev.o uip_arp.o uip-fw.o uip-fw-service.o \
+ ctk.o $(CTKGTK) \
+ about.o \
+ simpletelnet.o telnet.o netconf.o program-handler.o \
+ about-dsc.o netconf-dsc.o www-dsc.o \
+ www.o webclient.o htmlparser.o html-strings.o http-strings.o http-user-agent-string.o \
+ processes-dsc.o processes.o \
+ shell-dsc.o shell.o shell-gui.o \
+ calc-dsc.o calc.o \
+ email.o email-dsc.o smtp.o smtp-strings.o ctk-textedit.o #ctk-conio-service.o
+# program-handler.o about.o netconf.o processes.o \
+# about-dsc.o netconf-dsc.o processes-dsc.o  \
+# $(CTKGTK) \
+# ctk.o dispatcher.o arg.o \
+# uip.o uip_arch.o uip_arp.o uip-signal.o resolv.o uipbuf.o uip-split.o uip-fw.o\
+# uiplib.o tapdev.o tapdev-drv.o $(WEBSERVER) $(WWW) \
 # mailget.o popclient.o nntpc.o nntpc-strings.o \
 # newslog.o nntpd.o nntpd-strings.o\
 # $(EMAIL) email-dsc.o $(WEBSERVER) $(TELNET) telnet-dsc.o \

@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd.c,v 1.1 2004/02/16 21:18:14 adamdunkels Exp $
+ * $Id: httpd.c,v 1.2 2004/07/04 21:15:53 adamdunkels Exp $
  *
  */
 
@@ -79,7 +79,7 @@ struct http_filetype {
   unsigned char typelen;
 };
 
-static struct http_filetype filetypes[] = {
+static const struct http_filetype filetypes[] = {
   {http_html, sizeof(http_html) - 1,
    http_content_type_html, sizeof(http_content_type_html) - 1},
   {http_htm, sizeof(http_htm) - 1,
