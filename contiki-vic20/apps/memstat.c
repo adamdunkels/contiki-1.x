@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.1 2003/04/08 20:10:13 adamdunkels Exp $
+ * $Id: memstat.c,v 1.2 2004/06/06 06:46:43 adamdunkels Exp $
  *
  */
 
@@ -41,6 +41,8 @@
 #include "ctk.h"
 #include "dispatcher.h"
 #include "loader.h"
+
+#include "arg.h"
 
 static struct ctk_window window;
 static struct ctk_label freemsg =
@@ -87,8 +89,10 @@ update(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(processes_init)
+LOADER_INIT_FUNC(processes_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     
@@ -120,7 +124,6 @@ quit(void)
   dispatcher_exit(&p);
   id = EK_ID_NONE;
   LOADER_UNLOAD();
-  ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
 static void
