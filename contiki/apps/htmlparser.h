@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.h,v 1.2 2004/06/06 05:59:21 adamdunkels Exp $
+ * $Id: htmlparser.h,v 1.3 2004/09/03 09:55:22 adamdunkels Exp $
  *
  */
 #ifndef __HTMLPARSER_H__
@@ -38,8 +38,7 @@
 #include "uip.h"
 
 /* Callbacks. */
-void htmlparser_char(char c);
-void htmlparser_link(char *text, char *url);
+void htmlparser_link(char *text, unsigned char textlen, char *url);
 void htmlparser_submitbutton(char *value,
 			     char *name,
 			     char *formname,
@@ -48,7 +47,8 @@ void htmlparser_inputfield(char *value,
 			   char *name,
 			   char *formname,
 			   char *formaction);
-
+void htmlparser_newline(void);
+void htmlparser_word(char *word, unsigned char wordlen);
 
 void htmlparser_renderstate(unsigned char state);
 #define HTMLPARSER_RENDERSTATE_STATUSMASK 0x80

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.c,v 1.6 2004/06/13 09:48:32 oliverschmidt Exp $
+ * $Id: htmlparser.c,v 1.7 2004/09/03 09:55:22 adamdunkels Exp $
  *
  */
 
@@ -144,6 +144,7 @@ G * (<br>, <p>, <h>), the <li> tag (but does not even try to
 
 
 struct htmlparser_state {
+
   unsigned char minorstate;
   char tag[20];
   unsigned char tagptr;
@@ -154,8 +155,12 @@ struct htmlparser_state {
   unsigned char lastchar, quotechar;
   unsigned char majorstate, lastmajorstate;
   char linkurl[WWW_CONF_MAX_URLLEN];
-  char linktext[40];
-  unsigned char linktextptr;
+
+#define MAX_WORDLEN 40
+  char word[MAX_WORDLEN];
+  unsigned char wordlen;
+  
+  
 #if WWW_CONF_FORMS
   char formaction[WWW_CONF_MAX_FORMACTIONLEN];
   char formname[WWW_CONF_MAX_FORMNAMELEN];
@@ -237,13 +242,90 @@ iswhitespace(char c)
 	  c == ISO_ht);
 }
 /*-----------------------------------------------------------------------------------*/
+void
+htmlparser_init(void)
+{
+  s.majorstate = s.lastmajorstate = MAJORSTATE_DISCARD;
+  s.minorstate = MINORSTATE_TEXT;
+  s.lastchar = 0;
+}
+/*-----------------------------------------------------------------------------------*/
+static char CC_FASTCALL
+lowercase(char c)
+{
+  /* XXX: This is a *brute force* approach to lower-case
+     converting and should *not* be used anywhere else! It
+     works for our purposes, however (i.e., HTML tags). */
+  if(c > 0x40) {
+    return (c & 0x1f) | 0x60;
+  } else {
+    return c;
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void 
+endtagfound(void)
+{
+  s.tag[s.tagptr] = 0;
+  s.tagattr[s.tagattrptr] = 0;
+  s.tagattrparam[s.tagattrparamptr] = 0;
+}
+/*-----------------------------------------------------------------------------------*/
+static void CC_FASTCALL
+switch_majorstate(unsigned char newstate)
+{
+  if(s.majorstate != newstate) {
+    PRINTF(("Switching state from %d to %d (%d)\n", s.majorstate, newstate, s.lastmajorstate));
+    s.lastmajorstate = s.majorstate;
+    s.majorstate = newstate;
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void CC_FASTCALL
+add_char(unsigned char c)
+{
+  if(s.wordlen < MAX_WORDLEN &&
+     c < 0x80) {
+    s.word[s.wordlen] = c;
+    ++s.wordlen;
+    if(s.wordlen == MAX_WORDLEN) {
+      s.wordlen = MAX_WORDLEN - 1;
+    }
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+do_word(void)
+{
+  if(s.wordlen > 0) {
+    if(s.majorstate == MAJORSTATE_LINK) {
+      if(s.word[s.wordlen] != ISO_space) {
+	add_char(ISO_space);
+      }
+    } else if(s.majorstate == MAJORSTATE_DISCARD) {
+      s.wordlen = 0;
+    } else {
+      s.word[s.wordlen] = '\0';
+      htmlparser_word(s.word, s.wordlen);
+      s.wordlen = 0;
+    }
+  }
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+newline(void)
+{
+  do_word();
+  htmlparser_newline();
+}
+/*-----------------------------------------------------------------------------------*/
 static unsigned char CC_FASTCALL
 find_tag(char *tag)
 {
   static unsigned char first, last, i, tabi;
   static char tagc;
   
-  tabi = first = TAG_FIRST;
+  first = TAG_FIRST;
   last = TAG_LAST;
   i = 0;
   
@@ -254,6 +336,8 @@ find_tag(char *tag)
        tags[first][i] == 0) {
       return first;
     }
+
+    tabi = first;
     
     /* First, find first matching tag from table. */
     while(tagc > (tags[tabi])[i] &&
@@ -269,40 +353,12 @@ find_tag(char *tag)
     }
     last = tabi;
     
-    /* If first and last matching tags are equal, we have a match and
-       return. Else we continue with the next character. */
+    /* If first and last matching tags are equal, we have a non-match
+       and return. Else we continue with the next character. */
     ++i;
-    tabi = first;
+
   } while(last != first);
   return TAG_LAST;
-}
-/*-----------------------------------------------------------------------------------*/
-static void CC_FASTCALL
-parse_char(unsigned char c)
-{
-  if(c < 0x80) {
-    if(s.majorstate == MAJORSTATE_LINK) {
-      if(s.linktextptr < sizeof(s.linktext)) {
-	if(iswhitespace(c)) {
-	  c = ISO_space;
-	}
-	s.linktext[s.linktextptr] = c;
-	++s.linktextptr;
-      }
-    } else if(s.majorstate != MAJORSTATE_DISCARD) {
-      htmlparser_char(c);
-    } 
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static void CC_FASTCALL
-switch_majorstate(unsigned char newstate)
-{
-  if(s.majorstate != newstate) {
-    PRINTF(("Switching state from %d to %d (%d)\n", s.majorstate, newstate, s.lastmajorstate));
-    s.lastmajorstate = s.majorstate;
-    s.majorstate = newstate;
-  }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -310,6 +366,8 @@ parse_tag(void)
 {
   static char *tagattrparam;
   static unsigned char size, i;
+
+  static char dummy;
   
   PRINTF(("Parsing tag '%s' '%s' '%s'\n",
 	  s.tag, s.tagattr, s.tagattrparam));
@@ -320,17 +378,20 @@ parse_tag(void)
   case TAG_H2:
   case TAG_H3:
   case TAG_H4:
-    parse_char(ISO_nl);
+    /*    parse_char(ISO_nl);*/
+    newline();
     /* FALLTHROUGH */
   case TAG_BR:
   case TAG_TR:
   case TAG_SLASHH:
-    parse_char(ISO_nl);
+    /*    parse_char(ISO_nl);*/
+    dummy = 0;
+    newline();
     break;
   case TAG_LI:
-    parse_char(ISO_nl);
-    parse_char(ISO_asterisk);
-    parse_char(ISO_space);
+    newline();
+    add_char(ISO_asterisk);
+    add_char(ISO_space);
     break;
   case TAG_SCRIPT:
   case TAG_STYLE:
@@ -349,26 +410,29 @@ parse_tag(void)
     if(strncmp(s.tagattr, html_src, sizeof(html_src)) == 0 &&
        s.tagattrparam[0] != 0) {
       switch_majorstate(MAJORSTATE_BODY);
-      parse_char(ISO_nl);
-      parse_char(ISO_rbrack);
-      parse_char(ISO_space);
-      htmlparser_link((char *)html_frame, s.tagattrparam);
+      newline();
+      add_char(ISO_rbrack);
+      do_word();
+      htmlparser_link((char *)html_frame, strlen(html_frame), s.tagattrparam);
       PRINTF(("Frame [%s]\n", s.tagattrparam));
-      parse_char(ISO_space);
-      parse_char(ISO_lbrack);
-      parse_char(ISO_nl);
+      add_char(ISO_lbrack);
+      newline();
     }
     break;
   case TAG_IMG:
     if(strncmp(s.tagattr, html_alt, sizeof(html_alt)) == 0 &&
        s.tagattrparam[0] != 0) {
-      parse_char(ISO_lt);
+      /*      parse_char(ISO_lt);*/
+      add_char(ISO_lt);
       tagattrparam = &s.tagattrparam[0];
       while(*tagattrparam) {
-	parse_char(*tagattrparam);
+	/*	parse_char(*tagattrparam);*/
+	add_char(*tagattrparam);
 	++tagattrparam;
       }
-      parse_char(ISO_gt);
+      /*      parse_char(ISO_gt);*/
+      add_char(ISO_gt);
+      do_word();
     }
     break;
   case TAG_A:
@@ -376,16 +440,16 @@ parse_tag(void)
     if(strncmp(s.tagattr, html_href, sizeof(html_href)) == 0 &&
        s.tagattrparam[0] != 0) {
       strcpy(s.linkurl, s.tagattrparam);
+      do_word();
       switch_majorstate(MAJORSTATE_LINK);
-      s.linktextptr = 0;
     }
     break;
   case TAG_SLASHA:
     if(s.majorstate == MAJORSTATE_LINK) {
       switch_majorstate(s.lastmajorstate);
-      s.linktext[s.linktextptr] = 0;
-      htmlparser_link(s.linktext, s.linkurl);
-      PRINTF(("Link '%s' [%s]\n", s.linktext, s.linkurl));
+      s.word[s.wordlen] = 0;
+      htmlparser_link(s.word, s.wordlen, s.linkurl);
+      s.wordlen = 0;
     }
     break;
 #if WWW_CONF_FORMS
@@ -485,12 +549,14 @@ parse_tag(void)
 #endif /* WWW_CONF_FORMS */    
 #if WWW_CONF_RENDERSTATE
   case TAG_CENTER:
-    parse_char(ISO_nl);    
+    /*    parse_char(ISO_nl);    */
+    newline();
     htmlparser_renderstate(HTMLPARSER_RENDERSTATE_BEGIN |
 			   HTMLPARSER_RENDERSTATE_CENTER);
     break;
   case TAG_SLASHCENTER:
-    parse_char(ISO_nl);
+    /*    parse_char(ISO_nl);*/
+    newline();
     htmlparser_renderstate(HTMLPARSER_RENDERSTATE_END |
 			   HTMLPARSER_RENDERSTATE_CENTER);
     break;
@@ -498,124 +564,84 @@ parse_tag(void)
   }
 }
 /*-----------------------------------------------------------------------------------*/
-void
-htmlparser_init(void)
+static u16_t
+parse_word(char *data, u8_t dlen)
 {
-  s.majorstate = s.lastmajorstate = MAJORSTATE_DISCARD;
-  s.minorstate = MINORSTATE_TEXT;
-  s.lastchar = 0;
-}
-/*-----------------------------------------------------------------------------------*/
-static char CC_FASTCALL
-lowercase(char c)
-{
-  /* XXX: This is a *brute force* approach to lower-case
-     converting and should *not* be used anywhere else! It
-     works for our purposes, however (i.e., HTML tags). */
-  if(c > 0x40) {
-    return (c & 0x1f) | 0x60;
-  } else {
-    return c;
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-static void 
-endtagfound(void)
-{
-  s.tag[s.tagptr] = 0;
-  s.tagattr[s.tagattrptr] = 0;
-  s.tagattrparam[s.tagattrparamptr] = 0;
-}
-/*-----------------------------------------------------------------------------------*/
-/* htmlparser_parse():
- *
- * This is the main function in the HTML parser module and it parses
- * the HTML data in the input buffer. The htmlparser_state is updated
- * as the buffer is parsed character by character. The functions
- * parse_char() and parse_tag() (defined earlier in this file) are
- * called to process regular characters and HTML tags,
- * respectively.
- *
- * Note that the input buffer does not have to contain full HTML tags;
- * the parser is state machine driven in order to be able to work with
- * buffers that have been divided in any way.
- */
-void
-htmlparser_parse(char *data, u16_t len)
-{
-  static char c;
-  
-  while(len > 0) {
-    c = *data;
-    --len;
-    ++data;
-    
-    switch(s.minorstate) {
-    case MINORSTATE_NONE:
-      break;
-    case MINORSTATE_TEXT:
-      /* We are currently parsing some text, so we look for signs of
-	 an HTML tag starting (i.e., a '<' character). We also
-	 compress any whitespace character to one single space
-	 character (' '). */
-      if(c == ISO_lt) {
+  static u8_t i;
+  static u8_t len;
+  unsigned char c;
+
+  len = dlen;
+
+  switch(s.minorstate) {
+  case MINORSTATE_TEXT:
+    for(i = 0; i < len; ++i) {
+      c = data[i];
+      if(iswhitespace(c)) {
+	do_word();
+      } else if(c == ISO_lt) {
 	s.minorstate = MINORSTATE_TAG;
 	s.tagptr = 0;
-	endtagfound();
+	/*	do_word();*/
+	break;
       } else if(c == ISO_ampersand) {
 	s.minorstate = MINORSTATE_EXTCHAR;
+	break;
       } else {
-	if(iswhitespace(c)) {
-	  if(s.lastchar != ISO_space) {
-	    parse_char(' ');
-	    s.lastchar = ISO_space;
-	    c = ISO_space;
-	  }
-	} else {
-	  parse_char(c);
-	}
+	add_char(c);
       }
-      break;
-    case MINORSTATE_EXTCHAR:
+    }
+    break;
+  case MINORSTATE_EXTCHAR:
+    for(i = 0; i < len; ++i) {
+      c = data[i];
       if(c == ISO_semicolon) {	
 	s.minorstate = MINORSTATE_TEXT;
-	parse_char(' ');
+	add_char(' ');
+	break;
       } else if(iswhitespace(c)) {	
 	s.minorstate = MINORSTATE_TEXT;
-	parse_char('&');
-	parse_char(' ');
+	add_char('&');
+	add_char(' ');
+	break;
       }
-      break;
-    case MINORSTATE_TAG:
-      /* We are currently parsing within the name of a tag. We check
-	 for the end of a tag (the '>' character) or whitespace (which
-	 indicates that we should parse a tag attr argument
-	 instead). */
+    }
+    break;
+  case MINORSTATE_TAG:
+    /* We are currently parsing within the name of a tag. We check
+       for the end of a tag (the '>' character) or whitespace (which
+       indicates that we should parse a tag attr argument
+       instead). */
+    for(i = 0; i < len; ++i) {
+      c = data[i];
       if(c == ISO_gt) {
 	/* Full tag found. We continue parsing regular text. */
 	s.minorstate = MINORSTATE_TEXT;
 	s.tagattrptr = s.tagattrparamptr = 0;
 	endtagfound();	  
 	parse_tag();
+	break;
       } else if(iswhitespace(c)) {
 	/* The name of the tag found. We continue parsing the tag
 	   attr.*/
 	s.minorstate = MINORSTATE_TAGATTR;
 	s.tagattrptr = 0;
 	endtagfound();
+	break;
       } else {
 	/* Keep track of the name of the tag, but convert it to
 	   lower case. */
-
+	  
 	s.tag[s.tagptr] = lowercase(c);
 	++s.tagptr;
 	/* Check if the ->tag field is full. If so, we just eat up
 	   any data left in the tag. */
 	if(s.tagptr == sizeof(s.tag)) {
 	  s.minorstate = MINORSTATE_TAGEND;
+	  break;
 	}
       }
-
+	
       /* Check for HTML comment, indicated by <!-- */
       if(s.tagptr == 3 &&
 	 s.tag[0] == ISO_bang &&
@@ -625,11 +651,15 @@ htmlparser_parse(char *data, u16_t len)
 	s.minorstate = MINORSTATE_HTMLCOMMENT;
 	s.tagptr = 0;
 	endtagfound();
-      }	         
-      break;
-    case MINORSTATE_TAGATTR:
-      /* We parse the "tag attr", i.e., the "href" in <a
-	 href="...">. */
+	break;
+      }
+    }
+    break;
+  case MINORSTATE_TAGATTR:
+    /* We parse the "tag attr", i.e., the "href" in <a
+       href="...">. */
+    for(i = 0; i < len; ++i) {
+      c = data[i];
       if(c == ISO_gt) {
 	/* Full tag found. */
 	s.minorstate = MINORSTATE_TEXT;
@@ -639,7 +669,7 @@ htmlparser_parse(char *data, u16_t len)
 	parse_tag();
 	s.tagptr = 0;
 	endtagfound();
-	
+	break;
       } else if(iswhitespace(c)) {
 	if(s.tagattrptr == 0) {
 	  /* Discard leading spaces. */
@@ -649,6 +679,7 @@ htmlparser_parse(char *data, u16_t len)
 	  endtagfound();
 	  parse_tag();
 	  s.minorstate = MINORSTATE_TAGATTRSPACE;
+	  break;
 	  /*	    s.tagattrptr = 0;
 		    endtagfound();*/
 	}
@@ -656,6 +687,7 @@ htmlparser_parse(char *data, u16_t len)
 	s.minorstate = MINORSTATE_TAGATTRPARAMNQ;
 	s.tagattrparamptr = 0;
 	endtagfound();
+	break;
       } else {
 	s.tagattr[s.tagattrptr] = lowercase(c);
 	++s.tagattrptr;
@@ -663,10 +695,14 @@ htmlparser_parse(char *data, u16_t len)
 	   up any data left in the tag. */
 	if(s.tagattrptr == sizeof(s.tagattr)) {
 	  s.minorstate = MINORSTATE_TAGEND;
+	  break;
 	}
       }
-      break;
-    case MINORSTATE_TAGATTRSPACE:
+    }
+    break;
+  case MINORSTATE_TAGATTRSPACE:
+    for(i = 0; i < len; ++i) {
+      c = data[i];
       if(iswhitespace(c)) {
 	/* Discard spaces. */
       } else if(c == ISO_eq) {
@@ -674,15 +710,20 @@ htmlparser_parse(char *data, u16_t len)
 	s.tagattrparamptr = 0;
 	endtagfound();
 	parse_tag();
+	break;
       } else {
 	s.tagattr[0] = lowercase(c);
 	s.tagattrptr = 1;
 	s.minorstate = MINORSTATE_TAGATTR;
+	break;
       }
-      break;
-    case MINORSTATE_TAGATTRPARAMNQ:
-      /* We are parsing the "tag attr parameter", i.e., the link part
-	 in <a href="link">. */
+    }
+    break;
+  case MINORSTATE_TAGATTRPARAMNQ:
+    /* We are parsing the "tag attr parameter", i.e., the link part
+       in <a href="link">. */
+    for(i = 0; i < len; ++i) {
+      c = data[i];
       if(c == ISO_gt) {
 	/* Full tag found. */
 	endtagfound();
@@ -690,9 +731,10 @@ htmlparser_parse(char *data, u16_t len)
 	s.minorstate = MINORSTATE_TEXT;
 	s.tagattrptr = 0;       
 	endtagfound();
-      	parse_tag();
+	parse_tag();
 	s.tagptr = 0;       
 	endtagfound();
+	break;
       } else if(iswhitespace(c) &&
 		s.tagattrparamptr == 0) {
 	/* Discard leading spaces. */	  
@@ -702,6 +744,7 @@ htmlparser_parse(char *data, u16_t len)
 	s.minorstate = MINORSTATE_TAGATTRPARAM;
 	s.quotechar = c;
 	PRINTF(("tag attr param q found\n"));
+	break;
       } else if(iswhitespace(c)) {
 	PRINTF(("Non-leading space found at %d\n",
 		s.tagattrparamptr));
@@ -712,6 +755,7 @@ htmlparser_parse(char *data, u16_t len)
 	s.minorstate = MINORSTATE_TAGATTR;
 	s.tagattrptr = 0;
 	endtagfound();
+	break;
       } else {
 	s.tagattrparam[s.tagattrparamptr] = c;
 	++s.tagattrparamptr;
@@ -719,57 +763,91 @@ htmlparser_parse(char *data, u16_t len)
 	   up any data left in the tag. */
 	if(s.tagattrparamptr >= sizeof(s.tagattrparam) - 1) {
 	  s.minorstate = MINORSTATE_TAGEND;
+	  break;
 	}
       }
-
-      break;
-    case MINORSTATE_TAGATTRPARAM:
-      /* We are parsing the "tag attr parameter", i.e., the link
-	 part in <a href="link">. */
+    }
+    break;
+  case MINORSTATE_TAGATTRPARAM:
+    /* We are parsing the "tag attr parameter", i.e., the link
+       part in <a href="link">. */
+    for(i = 0; i < len; ++i) {
+      c = data[i];
       if(c == s.quotechar) {
 	/* Found end of tag attr parameter. */
 	endtagfound();
 	parse_tag();
-	
+	  
 	s.minorstate = MINORSTATE_TAGATTR;
 	s.tagattrptr = 0;
 	endtagfound();
+	break;
       } else {
 	if(iswhitespace(c)) {
-	  c = ISO_space;
+	  s.tagattrparam[s.tagattrparamptr] = ISO_space;
+	} else {
+	  s.tagattrparam[s.tagattrparamptr] = c;
 	}
-	s.tagattrparam[s.tagattrparamptr] = c;
+	  
 	++s.tagattrparamptr;
 	/* Check if the "tagattr" field is full. If so, we just eat
 	   up any data left in the tag. */
 	if(s.tagattrparamptr >= sizeof(s.tagattrparam) - 1) {
 	  s.minorstate = MINORSTATE_TAGEND;
+	  break;
 	}
       }
-
-      break;
-    case MINORSTATE_HTMLCOMMENT:
+    }
+    break;
+  case MINORSTATE_HTMLCOMMENT:
+    for(i = 0; i < len; ++i) {
+      c = data[i];
       if(c == ISO_dash) {
 	++s.tagptr;
       } else if(c == ISO_gt && s.tagptr > 0) {
 	PRINTF(("Comment done.\n"));
 	s.minorstate = MINORSTATE_TEXT;
+	break;
       } else {
 	s.tagptr = 0;
       }
-      break;
-    case MINORSTATE_TAGEND:
-      /* Discard characters until a '>' is seen. */
-      if(c == ISO_gt) {
+    }
+    break;
+  case MINORSTATE_TAGEND:
+    /* Discard characters until a '>' is seen. */
+    for(i = 0; i < len; ++i) {
+      if(data[i] == ISO_gt) {
 	s.minorstate = MINORSTATE_TEXT;
 	s.tagattrptr = 0;
 	endtagfound();
 	parse_tag();
+	break;
       }
-      break;
     }
-  
-    s.lastchar = c;
+    break;
+  default:
+    i = 0;
+    break;
   }
+  if(i >= len) {
+    return len;
+  }
+  return i + 1;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+htmlparser_parse(char *data, u16_t datalen)
+{
+  u16_t plen;
+  
+  while(datalen > 0) {
+    if(datalen > 255) {
+      plen = parse_word(data, 255);
+    } else {
+      plen = parse_word(data, datalen);
+    }
+    datalen -= plen;
+    data += plen;
+  }  
 }
 /*-----------------------------------------------------------------------------------*/
