@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-out.c,v 1.3 2003/09/02 21:46:41 adamdunkels Exp $
+ * $Id: vnc-out.c,v 1.4 2003/09/04 19:37:13 adamdunkels Exp $
  *
  */
 
@@ -40,6 +40,8 @@
 #include "vnc-out.h"
 
 #include "libconio.h"
+
+#include "ctk-vncserver-conf.h"
 
 #include "ctk-vncfont.h"
 
@@ -150,7 +152,7 @@ static const unsigned char iconcol_w[] =
 
 
 
-static const u8_t *colortheme[] =
+static const u8_t * const colortheme[] =
   {
     backgroundcolor,
     
@@ -189,7 +191,7 @@ static u8_t screen[CHARS_WIDTH * CHARS_HEIGHT],
 #define PRINTF(x)
 
 /*-----------------------------------------------------------------------------------*/
-#define MAX_ICONS 16
+#define MAX_ICONS CTK_VNCSERVER_CONF_MAX_ICONS
 struct ctk_icon *icons[MAX_ICONS];
 
 unsigned char
@@ -563,7 +565,7 @@ vnc_out_send_screen(struct vnc_server_state *vs)
   vnc_out_send_update(vs);
 }
 /*-----------------------------------------------------------------------------------*/
-
+static short tmpbuf[30];
 void
 vnc_out_send_update(struct vnc_server_state *vs)
 {
@@ -642,7 +644,7 @@ vnc_out_send_update(struct vnc_server_state *vs)
 	   to update this area instead. */	
 
 	msglen = sizeof(struct rfb_fb_update_rect_hdr) +
-	  sizeof(struct rfb_rre_hdr);
+	  /*sizeof(struct rfb_rre_hdr)*/5;
 
 	if(msglen >= uip_mss() - len) {
 	  /*	  PRINTF(("Not enouch space for blanks (%d, left %d)\n",
@@ -657,8 +659,9 @@ vnc_out_send_update(struct vnc_server_state *vs)
 	}
 
 	/* We construct a rectangle with the right width and color. */
-	recthdr = (struct rfb_fb_update_rect_hdr *)ptr;
-	rrehdr = (struct rfb_rre_hdr *)(ptr +
+	/*	recthdr = (struct rfb_fb_update_rect_hdr *)ptr;*/
+	recthdr = (struct rfb_fb_update_rect_hdr *)tmpbuf;
+	rrehdr = (struct rfb_rre_hdr *)((char *)recthdr +
 		 sizeof(struct rfb_fb_update_rect_hdr));
 
 	/*	PRINTF(("Blankign (%d:%d) to (%d:%d)\n",
@@ -705,7 +708,8 @@ vnc_out_send_update(struct vnc_server_state *vs)
 	}
 
 	/*	PRINTF(("ptr %p\n",ptr);*/
-	recthdr = (struct rfb_fb_update_rect_hdr *)ptr;
+	/*	recthdr = (struct rfb_fb_update_rect_hdr *)ptr;*/
+	recthdr = (struct rfb_fb_update_rect_hdr *)tmpbuf;
 
 	recthdr->rect.x = htons(SCREEN_X + x * FONT_WIDTH);
 	recthdr->rect.y = htons(SCREEN_Y + y * FONT_HEIGHT);
@@ -719,13 +723,9 @@ vnc_out_send_update(struct vnc_server_state *vs)
 	makechar((u8_t *)recthdr +
 		 sizeof(struct rfb_fb_update_rect_hdr),
 		 x, y);
-#if 0
-		 c,
-		 /*		 &ctk_vncfont[c * (FONT_WIDTH * FONT_HEIGHT)]*/
-		 color);
-#endif /* 0 */
-	/*	PRINTF(("Msglen %d (%d:%d)\n", msglen, x, y);*/
       }
+      memcpy(ptr, tmpbuf, msglen);
+      PRINTF(("Msglen %d (%d:%d)\n", msglen, x, y));
       len += msglen;
       ptr += msglen;
       ++n;
@@ -749,7 +749,7 @@ vnc_out_send_update(struct vnc_server_state *vs)
 
 }
 /*-----------------------------------------------------------------------------------*/
-#define NUMKEYS 100
+#define NUMKEYS 20
 static char keys[NUMKEYS];
 static int firstkey, lastkey;
 
