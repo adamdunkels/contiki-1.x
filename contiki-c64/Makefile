@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.9 2004/08/09 20:54:54 adamdunkels Exp $
+# $Id: Makefile,v 1.10 2004/09/12 13:22:52 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -50,6 +50,9 @@ programs:
 	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.programs
 c64:
 	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64
+
+c64-exo:
+	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64 contiki-exo
 
 wget:
 	$(MAKE) CONTIKI=$(CONTIKI) CONTIKICC65=$(CONTIKICC65) -f Makefile.c64-wget
