@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.16 2005/02/23 22:40:40 oliverschmidt Exp $
+ * $Id: uip.h,v 1.17 2005/02/27 09:44:33 adamdunkels Exp $
  *
  */
 
@@ -267,7 +267,8 @@ void uip_init(void);
                                 uip_process(UIP_TIMER); } while (0)
 
 /**
- * Periodic processing for a connection identified by a pointer to its structure.
+ * Perform eriodic processing for a connection identified by a pointer
+ * to its structure.
  *
  * Same as uip_periodic() but takes a pointer to the actual uip_conn
  * struct instead of an integer as its argument. This function can be
@@ -280,6 +281,21 @@ void uip_init(void);
  */
 #define uip_periodic_conn(conn) do { uip_conn = conn; \
                                      uip_process(UIP_TIMER); } while (0)
+
+/**
+ * Reuqest that a particular connection should be polled.
+ *
+ * Similar to uip_periodic_conn() but does not perform any timer
+ * processing. The application is polled for new data.
+ *
+ * \param conn A pointer to the uip_conn struct for the connection to
+ * be processed.
+ *
+ * \hideinitializer
+ */
+#define uip_poll_conn(conn) do { uip_conn = conn; \
+                                 uip_process(UIP_POLL_REQUEST); } while (0)
+
 
 #if UIP_UDP
 /**
@@ -1206,16 +1222,19 @@ void uip_process(u8_t flag);
    function. They are used to distinguish between the two cases where
    uip_process() is called. It can be called either because we have
    incoming data that should be processed, or because the periodic
-   timer has fired. */
-
-#define UIP_DATA    1     /* Tells uIP that there is incoming data in
-                             the uip_buf buffer. The length of the
-                             data is stored in the global variable
-                             uip_len. */
-#define UIP_TIMER   2     /* Tells uIP that the periodic timer has
-                             fired. */
+   timer has fired. These values are never used directly, but only in
+   the macrose defined in this file. */
+ 
+#define UIP_DATA          1     /* Tells uIP that there is incoming
+				   data in the uip_buf buffer. The
+				   length of the data is stored in the
+				   global variable uip_len. */
+#define UIP_TIMER         2     /* Tells uIP that the periodic timer
+				   has fired. */
+#define UIP_POLL_REQUEST  3     /* Tells uIP that a connection should
+				   be polled. */
 #if UIP_UDP
-#define UIP_UDP_TIMER 3
+#define UIP_UDP_TIMER     4
 #endif /* UIP_UDP */
 
 /* The TCP states used in the uip_conn->tcpstateflags. */

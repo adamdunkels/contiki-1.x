@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: tcpip.c,v 1.5 2005/02/22 22:34:46 adamdunkels Exp $
+ * $Id: tcpip.c,v 1.6 2005/02/27 09:44:33 adamdunkels Exp $
  */
 #include "tcpip.h"
 
@@ -306,7 +306,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     break;
   case TCP_POLL:
     if(data != NULL) {
-      uip_periodic_conn(data);
+      uip_poll_conn(data);
       if(uip_len > 0) {
 	tcpip_output();
       }

@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.21 2005/02/23 17:30:27 oliverschmidt Exp $
+ * $Id: uip.c,v 1.22 2005/02/27 09:44:33 adamdunkels Exp $
  *
  */
 
@@ -107,9 +107,9 @@ struct uip_eth_addr uip_ethaddr = {{0,0,0,0,0,0}};
 u8_t uip_buf[UIP_BUFSIZE + 2];   /* The packet buffer that contains
 				    incoming packets. */
 #endif /* UIP_CONF_EXTERNAL_BUFFER */
+
 u8_t *uip_appdata;               /* The uip_appdata pointer points to
 				    application data. */
-
 u8_t *uip_sappdata;              /* The uip_appdata pointer points to
 				    the application data which is to
 				    be sent. */
@@ -120,14 +120,14 @@ u8_t *uip_urgdata;               /* The uip_urgdata pointer points to
 u16_t uip_urglen, uip_surglen;
 #endif /* UIP_URGDATA > 0 */
 
-u16_t uip_len, uip_slen;     /* The uip_len is either 8 or 16 bits,
+u16_t uip_len, uip_slen;
+                             /* The uip_len is either 8 or 16 bits,
 				depending on the maximum packet
 				size. */
 
-u8_t uip_flags;              /* The uip_flags variable is used for
+u8_t uip_flags;     /* The uip_flags variable is used for
 				communication between the TCP/IP stack
 				and the application program. */
-
 struct uip_conn *uip_conn;   /* uip_conn always points to the current
 				connection. */
 
@@ -148,6 +148,7 @@ static u16_t ipid;           /* Ths ipid variable is an increasing
 
 static u8_t iss[4];          /* The iss variable is used for the TCP
 				initial sequence number. */
+
 #if UIP_ACTIVE_OPEN
 static u16_t lastport;       /* Keeps track of the last port used for
 				a new connection. */
@@ -176,11 +177,13 @@ static u16_t tmp16;
 #define ICMP_ECHO_REPLY 0
 #define ICMP_ECHO       8     
 
+
 /* Macros. */
 #define BUF ((uip_tcpip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define FBUF ((uip_tcpip_hdr *)&uip_reassbuf[0])
 #define ICMPBUF ((uip_icmpip_hdr *)&uip_buf[UIP_LLH_LEN])
 #define UDPBUF ((uip_udpip_hdr *)&uip_buf[UIP_LLH_LEN])
+
 
 #if UIP_STATISTICS == 1
 struct uip_stats uip_stat;
@@ -504,9 +507,18 @@ uip_process(u8_t flag)
   register struct uip_conn *uip_connr = uip_conn;
   
   uip_appdata = &uip_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN];
-  
-  /* Check if we were invoked because of the perodic timer fireing. */
-  if(flag == UIP_TIMER) {
+
+  /* Check if we were invoked because of a poll request for a
+     particular connection. */
+  if(flag == UIP_POLL_REQUEST) {
+    if((uip_connr->tcpstateflags & TS_MASK) == ESTABLISHED &&
+       !uip_outstanding(uip_connr)) {
+	uip_flags = UIP_POLL;
+	UIP_APPCALL();
+	goto appsend;      
+    }
+    /* Check if we were invoked because of the perodic timer fireing. */
+  } else if(flag == UIP_TIMER) {
 #if UIP_REASSEMBLY
     if(uip_reasstmr != 0) {
       --uip_reasstmr;
@@ -521,6 +533,7 @@ uip_process(u8_t flag)
       }
     }    
     uip_len = 0;
+    uip_slen = 0;
     if(uip_connr->tcpstateflags == TIME_WAIT ||
        uip_connr->tcpstateflags == FIN_WAIT_2) {
       ++(uip_connr->timer);
@@ -581,8 +594,6 @@ uip_process(u8_t flag)
                to do the actual retransmit after which we jump into
                the code for sending out the packet (the apprexmit
                label). */
-	    uip_len = 0;
-	    uip_slen = 0;
 	    uip_flags = UIP_REXMIT;
 	    UIP_APPCALL();
 	    goto apprexmit;
@@ -598,8 +609,6 @@ uip_process(u8_t flag)
       } else if((uip_connr->tcpstateflags & TS_MASK) == ESTABLISHED) {
 	/* If there was no need for a retransmission, we poll the
            application for new data. */
-	uip_len = 0;
-	uip_slen = 0;
 	uip_flags = UIP_POLL;
 	UIP_APPCALL();
 	goto appsend;
