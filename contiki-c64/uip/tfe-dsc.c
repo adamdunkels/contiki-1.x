@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: tfe-dsc.c,v 1.1 2003/04/25 08:46:07 adamdunkels Exp $
+ * $Id: tfe-dsc.c,v 1.2 2004/06/27 12:44:51 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(tfe_dsc,
     tfe_init,
     &tfe_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char tfeicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -56,12 +57,15 @@ static unsigned char tfeicon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char tfeicon_textmap[9] = {
   'T', 'C', 'P',
   '/', 'I', 'P',
   'T', 'F', 'E'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon tfe_icon =
   {CTK_ICON("TFE", tfeicon_bitmap, tfeicon_textmap)};

@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: rrnet-dsc.c,v 1.1 2003/07/30 22:40:36 adamdunkels Exp $
+ * $Id: rrnet-dsc.c,v 1.2 2004/06/27 12:44:51 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(rrnet_dsc,
     rrnet_init,
     &rrnet_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static unsigned char rrneticon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -56,12 +57,15 @@ static unsigned char rrneticon_bitmap[3*3*8] = {
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static char rrneticon_textmap[9] = {
   'R', 'R', '-',
   'N', 'e', 't',
   'D', 'R', 'V'
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon rrnet_icon =
   {CTK_ICON("RR-Net", rrneticon_bitmap, rrneticon_textmap)};
