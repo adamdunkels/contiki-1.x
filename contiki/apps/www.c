@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.13 2003/08/09 13:33:25 adamdunkels Exp $
+ * $Id: www.c,v 1.14 2003/08/11 22:25:07 adamdunkels Exp $
  *
  */
 
@@ -676,7 +676,6 @@ scroll(void)
       ++linksptr;
     }
   }
-  ctk_window_redraw(&mainwindow);
 }
 /*-----------------------------------------------------------------------------------*/
 static char tmpcenterline[WWW_CONF_WEBPAGE_WIDTH];
@@ -741,6 +740,8 @@ inc_y(void)
       run = 0;
       webclient_close();
     }
+#else /* WWW_CONF_PAGEVIEW */
+    redraw_window();
 #endif /* WWW_CONF_PAGEVIEW */
   }
 }
