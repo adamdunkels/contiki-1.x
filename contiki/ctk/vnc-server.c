@@ -10,10 +10,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright 
  *    notice, this list of conditions and the following disclaimer in the 
  *    documentation and/or other materials provided with the distribution. 
- * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *      This product includes software developed by Adam Dunkels.
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -31,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: vnc-server.c,v 1.2 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: vnc-server.c,v 1.3 2004/06/06 05:54:47 adamdunkels Exp $
  *
  */
 
@@ -62,6 +59,7 @@
 #include "vnc-server.h"
 #include "vnc-out.h"
 
+#include <string.h>
 
 /* RFB server initial handshaking string. */
 #define RFB_SERVER_VERSION_STRING rfb_server_version_string
@@ -183,7 +181,7 @@ vnc_server_send_data(struct vnc_server_state *vs)
     initmsg->namelength[1] = 0;
     initmsg->namelength[2] = 0;	    
     initmsg->namelength[3] = 4;
-    bcopy(uvnc_name, &uip_appdata[sizeof(struct rfb_server_init)], 4);
+    memcpy(&uip_appdata[sizeof(struct rfb_server_init)], uvnc_name, 4);
     /*    uip_appdata[sizeof(struct rfb_server_init)+0] = 'u';
     uip_appdata[sizeof(struct rfb_server_init)+1] = 'V';
     uip_appdata[sizeof(struct rfb_server_init)+2] = 'N';
