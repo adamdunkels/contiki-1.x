@@ -131,6 +131,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 	    ev == ctk_signal_window_close) {
     ctk_window_close(&window);
     ek_exit();
+    id = EK_ID_NONE;
     LOADER_UNLOAD();
   } else if(ev == SHOWCONFIG) {
     makestrings();
