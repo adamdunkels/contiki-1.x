@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: vnc-dsc.c,v 1.1 2003/07/31 23:48:29 adamdunkels Exp $
+ * $Id: vnc-dsc.c,v 1.2 2003/08/05 13:49:27 adamdunkels Exp $
  *
  */
 
@@ -38,7 +38,7 @@
 extern struct ctk_icon icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(vnc_dsc,
-    "Downloads files or D64 disks from the web",
+    "Remote control your PC using Contiki",
     "vnc.prg",
     vnc_init,
     &icon);
