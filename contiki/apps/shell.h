@@ -39,18 +39,26 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.h,v 1.2 2003/10/14 11:23:04 adamdunkels Exp $
+ * $Id: shell.h,v 1.3 2003/11/27 15:51:51 adamdunkels Exp $
  *
  */
 #ifndef __SHELL_H__
 #define __SHELL_H__
 
 /**
- * Initialize the shell back-end.
+ * Initialize the shell.
+ *
+ * Called when the shell front-end process starts. This function may
+ * be used to start listening for signals.
+ */
+void shell_init(void);
+
+/**
+ * Start the shell back-end.
  *
  * Called by the front-end when a new shell is started.
  */
-void shell_init(void);
+void shell_start(void);
 
 /**
  * The "idle" call of the shell.
