@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS for the C64
  *
- * $Id: ctk-hires-theme-springlight.c,v 1.1 2003/04/24 17:07:40 adamdunkels Exp $
+ * $Id: ctk-hires-theme-springlight.c,v 1.2 2003/08/09 13:25:56 adamdunkels Exp $
  *
  */
 
@@ -99,8 +99,8 @@ struct ctk_hires_theme ctk_hires_theme =
     /* separatorcolors[6], */
     {COLOR(COLOR_GRAY1, COLOR_GRAY2),
      COLOR(COLOR_GRAY1, COLOR_GRAY2),
-     COLOR(COLOR_GRAY2, COLOR_GRAY3),
-     COLOR(COLOR_GRAY2, COLOR_GRAY3),
+     COLOR(COLOR_GREEN, COLOR_LIGHTGREEN),
+     COLOR(COLOR_GREEN, COLOR_LIGHTGREEN),
      COLOR(COLOR_LIGHTGREEN, COLOR_GRAY1),
      COLOR(COLOR_LIGHTGREEN, COLOR_GRAY1)},
     
@@ -123,8 +123,8 @@ struct ctk_hires_theme ctk_hires_theme =
     /* hyperlinkcolors[6], */
     {COLOR(COLOR_GRAY2, COLOR_LIGHTBLUE),
      COLOR(COLOR_GRAY2, COLOR_LIGHTBLUE),
-     COLOR(COLOR_GRAY2, COLOR_BLUE),
-     COLOR(COLOR_BLUE, COLOR_GRAY2),
+     COLOR(COLOR_GREEN, COLOR_CYAN),
+     COLOR(COLOR_GREEN, COLOR_BLUE),
      COLOR(COLOR_LIGHTGREEN, COLOR_BLUE),
      COLOR(COLOR_BLUE, COLOR_LIGHTGREEN)},
     
