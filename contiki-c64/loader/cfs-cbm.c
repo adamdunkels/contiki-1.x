@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs-cbm.c,v 1.2 2004/09/12 20:30:04 adamdunkels Exp $
+ * $Id: cfs-cbm.c,v 1.3 2004/09/14 07:32:06 adamdunkels Exp $
  */
 #include "contiki.h"
 
@@ -91,7 +91,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 static int
 s_open(const char *n, int f)
 {
-  if(cbm_open(2, 8, CBM_READ, n) == 0) {
+  if(cbm_open(2, 8, f, n) == 0) {
     return 2;
   }
   return -1;
