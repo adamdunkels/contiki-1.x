@@ -34,7 +34,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd-fs.h,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: httpd-fs.h,v 1.2 2004/09/13 23:21:03 adamdunkels Exp $
  */
 #ifndef __HTTPD_FS_H__
 #define __HTTPD_FS_H__
@@ -52,12 +52,10 @@ struct httpd_fs_file {
    by the function. */
 int httpd_fs_open(const char *name, struct httpd_fs_file *file);
 
-#ifdef HTTPD_FS_STATISTICS
-#if HTTPD_FS_STATISTICS == 1  
-u32_t httpd_fs_count(char *name);
-u32_t httpd_fs_total(void);
+#if HTTPD_FS_STATISTICS
+unsigned long httpd_fs_count(char *name);
+unsigned long httpd_fs_total(void);
 void httpd_fs_inc(void);
-#endif /* HTTPD_FS_STATISTICS */
 #endif /* HTTPD_FS_STATISTICS */
 
 void httpd_fs_init(void);
