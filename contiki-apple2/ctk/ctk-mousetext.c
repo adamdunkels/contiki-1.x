@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.12 2005/03/15 14:20:18 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.13 2005/03/15 15:55:06 oliverschmidt Exp $
  *
  */
 
@@ -283,21 +283,24 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_window(struct ctk_window *window, unsigned char focus,
-		unsigned char clipy1, unsigned char clipy2)
+		unsigned char clipy1, unsigned char clipy2,
+		unsigned char draw_borders)
 {
   unsigned char x, y;
   unsigned char x1, y1, x2, y2;
 
   x = window->x;
   y = window->y + 1;
-  
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + window->w;
   y2 = y1 + window->h;
 
-  /* Draw window frame. */  
-  _textframexy(x, y, window->w + 2, window->h + 2, _TEXTFRAME_TALL);
+  if(draw_borders) {
+
+    /* Draw window frame. */  
+    _textframexy(x, y, window->w + 2, window->h + 2, _TEXTFRAME_TALL);
+  }
 
   draw_window_contents(window, focus, x1, x2, y1, y2);
 }
@@ -311,7 +314,6 @@ ctk_draw_dialog(struct ctk_window *dialog)
   
   x = dialog->x;
   y = dialog->y + 1;
-
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + dialog->w;
