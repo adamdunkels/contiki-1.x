@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: dispatcher.h,v 1.14 2003/11/27 15:53:33 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.15 2004/03/18 21:09:37 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -122,9 +122,18 @@ struct dispatcher_proc {
 #define DISPATCHER_PROCS()   dispatcher_procs
 
 /**
- * Obtain a pointer to the currently running process.
+ * Obtain the process ID of the currently running process.
+ *
+ * \hideinitializer
  */
 #define DISPATCHER_CURRENT() dispatcher_current
+
+/**
+ * Obtain a pointer to the currently running process.
+ *
+ * \hideinitializer
+ */
+#define DISPATCHER_CURPROC() dispatcher_curproc
 
 ek_signal_t dispatcher_sigalloc(void);
 
@@ -281,6 +290,7 @@ struct uip_udp_conn *dispatcher_udp_new(u16_t *ripaddr, u16_t port, void *appsta
 
 extern ek_id_t dispatcher_current;
 extern struct dispatcher_proc *dispatcher_procs;
+extern struct dispatcher_proc *dispatcher_curproc;
 extern ek_signal_t dispatcher_signal_quit, dispatcher_signal_msg;
 
 void dispatcher_process_signal(void);

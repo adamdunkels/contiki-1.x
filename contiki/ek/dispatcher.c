@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.22 2004/02/24 09:55:33 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.23 2004/03/18 21:09:37 adamdunkels Exp $
  *
  */
 
@@ -61,7 +61,7 @@ ek_id_t dispatcher_current;
  */
 struct dispatcher_proc *dispatcher_procs;
 
-static struct dispatcher_proc *curproc;
+struct dispatcher_proc *dispatcher_curproc;
 static ek_id_t ids = 1;
 
 /**
@@ -345,7 +345,7 @@ dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
   /* Make sure we know which processes we are running at the
      moment. */
   dispatcher_current = id;
-  curproc = p;
+  dispatcher_curproc = p;
   
   /* All processes must listen to the dispatcher_signal_quit
      signal. */
@@ -401,7 +401,7 @@ dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
   }
 
   dispatcher_current = EK_ID_NONE;
-  curproc = NULL;
+  dispatcher_curproc = NULL;
 }
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -444,8 +444,8 @@ ek_clock(void)
  *
  */
 /**
- * Starts to connect to a remote host using the TCP realiable byte
- * stream protocol.
+ * Connect to a remote host using the TCP realiable byte stream
+ * protocol.
  *
  * This function should be called to connect to a remote host using
  * the reliable TCP protocol. It is a wrapper to the uIP function
@@ -454,9 +454,11 @@ ek_clock(void)
  * connection request to go out immediately instead of being delayed
  * for up to 0.5 seconds.
  *
- * This function also registers a pointer to the allocated
+ * This function registers an application pointer to the allocated
  * connection. This pointer will be passed as an argument to the
- * process' uIP handler function for every uIP event.
+ * process' uIP handler function for every uIP event. Typically, this
+ * pointer is used to associate some application state with the
+ * connection.
  *
  * \note The port parameter must be given in network byte order, which
  * requires either the HTONS() or the htons() functions to be used for
@@ -550,7 +552,7 @@ dispatcher_uipcall(void)
     if(p->id == s->id &&
        p->uiphandler != NULL) {
       dispatcher_current = p->id;
-      curproc = p;
+      dispatcher_curproc = p;
 #if CC_FUNCTION_POINTER_ARGS
       p->uiphandler(s->state);
 #else /* CC_FUNCTION_POINTER_ARGS */
@@ -569,7 +571,29 @@ dispatcher_uipcall(void)
 /**
  * Opens a TCP port for incoming requests.
  *
- * 
+ * This function opens a TCP port for incoming requests and associates
+ * the listening port with the currently running process. When a new
+ * TCP connection arrives on the listening port, the uIP handler
+ * function of the current process will be invoked. The regular uIP
+ * flag functions can then be used to check for the connection request
+ * condition (i.e., uip_connected() returns true). The function
+ * dispatcher_markconn() can be used to associate application state
+ * with the newly created connection.
+ *
+ * \note The port argument must be given in network byte order. The
+ * helper function HTONS() can be used to convert from host byte order
+ * to network byte order.
+ *
+ * The following example starts a new process and opens TCP port 25
+ * for incoming requests:
+ \code
+LOADER_INIT_FUNC(prog_init, arg)
+{
+   arg_free(arg);
+   dispatcher_start(&p);
+   dispatcher_uiplisten(HTONS(25));
+}
+ \endcode
  *
  * \param port The TCP port number that should be opened for
  * listening, in network byte order.
@@ -606,6 +630,26 @@ dispatcher_uiplisten(u16_t port)
  * connection. This pointer will be passed as an argument to the
  * process' uIP handler function for every uIP event.
  *
+ * This function is typically used to associate an application state
+ * pointer with a connection that has been opened by a connection
+ * request from the outside. The typical usage is to use the function
+ * dispatcher_uiplisten() to open a TCP port for incoming connection
+ * requests and to mark the new connection with this function when a
+ * request arrives.
+ *
+ * Example:
+ \code
+  struct app_state *s;
+  
+  if(uip_connected()) {
+    s = (struct app_state *)memb_alloc(&conn);
+    if(s == NULL) {
+      uip_abort();
+      return;
+    }
+    dispatcher_markconn(uip_conn, s);    
+  } 
+ \endcode
  * \param conn The uIP connection to which the pointer is to be
  * associated.
  *
@@ -680,8 +724,8 @@ dispatcher_udp_new(u16_t *ripaddr,
 void
 dispatcher_listen(ek_signal_t s)
 {
-  if(curproc != NULL) {
-    curproc->signals[s] = 1;
+  if(dispatcher_curproc != NULL) {
+    dispatcher_curproc->signals[s] = 1;
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -750,7 +794,7 @@ deliver(ek_signal_t s, ek_data_t data,
        p->signals[s] != 0 &&
        p->signalhandler != NULL) {
       dispatcher_current = p->id;
-      curproc = p;
+      dispatcher_curproc = p;
 #if CC_FUNCTION_POINTER_ARGS
       p->signalhandler(s, data);
 #else /* CC_FUNCTION_POINTER_ARGS */
@@ -792,12 +836,12 @@ dispatcher_fastemit(ek_signal_t s, ek_data_t data,
   struct dispatcher_proc *p;
 
   pid = dispatcher_current;
-  p = curproc;
+  p = dispatcher_curproc;
 
   deliver(s, data, id);
   
   dispatcher_current = pid;
-  curproc = p;  
+  dispatcher_curproc = p;  
 }
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -849,7 +893,7 @@ dispatcher_process_idle(void)
   for(p = dispatcher_procs; p != NULL; p = p->next) {
     if(p->idle != NULL) {
       dispatcher_current = p->id;
-      curproc = p;
+      dispatcher_curproc = p;
       p->idle();
     }
   }
