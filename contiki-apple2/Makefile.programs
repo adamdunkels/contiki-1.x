@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.2 2005/01/22 03:00:27 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.3 2005/02/23 17:32:07 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o contiki-labels.o \
@@ -60,7 +60,7 @@ dhcp.prg: dhcp.o dhcpc.o lc-asm.o
 
 email.prg: $(EMAIL) 
 
-irc.prg: irc.o ircc.o socket.o uipbuf.o lc-asm.o ircc-strings.o
+irc.prg: irc.o ircc.o psock.o uipbuf.o lc-asm.o ircc-strings.o
 
 telnet.prg: $(TELNET)
 
