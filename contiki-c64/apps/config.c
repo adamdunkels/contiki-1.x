@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.1 2003/08/06 22:54:39 adamdunkels Exp $
+ * $Id: config.c,v 1.2 2003/08/09 23:27:57 adamdunkels Exp $
  *
  */
 
@@ -119,6 +119,17 @@ loadfile(char *str)
   return nt + 1;
 }
 /*-----------------------------------------------------------------------------------*/
+static char *
+screensaverconf(char *str)
+{
+  char *nt;
+  
+  nt = nullterminate(str);
+  program_handler_screensaver(str);
+
+  return nt + 1;
+}
+/*-----------------------------------------------------------------------------------*/
 static u16_t addr[2];
 static char *
 ipaddrconf(char *str)
@@ -174,17 +185,13 @@ dnsconf(char *str)
 /*-----------------------------------------------------------------------------------*/
 static struct ptentry configparsetab[] =
   {{'l', loadfile},
-   {'L', loadfile},
+   {'m', loadfile},   
    {'t', loadfile},
-   {'T', loadfile},
+   {'s', screensaverconf},   
    {'i', ipaddrconf},
-   {'I', ipaddrconf},
    {'n', netmaskconf},
-   {'N', netmaskconf},
    {'r', drconf},
-   {'R', drconf},
    {'d', dnsconf},
-   {'D', dnsconf},
    {'#', skipnewline},
 
    /* Default action */

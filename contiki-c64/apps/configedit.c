@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.2 2003/08/06 23:14:20 adamdunkels Exp $
+ * $Id: configedit.c,v 1.3 2003/08/09 23:27:57 adamdunkels Exp $
  *
  */
 
@@ -52,49 +52,59 @@
 
 #include "loader.h"
 
+#include <stdio.h>
+
 /* TCP/IP configuration window. */
 static struct ctk_window window;
 
+#define LABELMAXWIDTH 12
+
 static struct ctk_label themelabel =
-  {CTK_LABEL(0, 1, 9, 1, "CTK theme")};
+  {CTK_LABEL(0, 1, LABELMAXWIDTH, 1, "CTK theme")};
 static char theme[25];
 static struct ctk_textentry themetextentry =
-  {CTK_TEXTENTRY(11, 1, 16, 1, theme, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 1, 16, 1, theme, 24)};
 
 static struct ctk_label driverlabel =
-  {CTK_LABEL(0, 3, 10, 1, "Net driver")};
+  {CTK_LABEL(0, 3, LABELMAXWIDTH, 1, "Net driver")};
 static char driver[25];
 static struct ctk_textentry drivertextentry =
-  {CTK_TEXTENTRY(11, 3, 16, 1, driver, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 3, 16, 1, driver, 24)};
+
+static struct ctk_label screensaverlabel =
+  {CTK_LABEL(0, 5, LABELMAXWIDTH, 1, "Screensaver")};
+static char screensaver[25];
+static struct ctk_textentry screensavertextentry =
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 5, 16, 1, screensaver, 24)};
 
 
 static struct ctk_label ipaddrlabel =
-  {CTK_LABEL(0, 5, 10, 1, "IP address")};
+  {CTK_LABEL(0, 7, LABELMAXWIDTH, 1, "IP address")};
 static char ipaddr[25];
 static struct ctk_textentry ipaddrtextentry =
-  {CTK_TEXTENTRY(11, 5, 16, 1, ipaddr, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 7, 16, 1, ipaddr, 24)};
 static struct ctk_label netmasklabel =
-  {CTK_LABEL(0, 7, 10, 1, "Netmask")};
+  {CTK_LABEL(0, 9, LABELMAXWIDTH, 1, "Netmask")};
 static char netmask[25];
 static struct ctk_textentry netmasktextentry =
-  {CTK_TEXTENTRY(11, 7, 16, 1, netmask, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 9, 16, 1, netmask, 24)};
 static struct ctk_label gatewaylabel =
-  {CTK_LABEL(0, 9, 10, 1, "Gateway")};
+  {CTK_LABEL(0, 11, LABELMAXWIDTH, 1, "Gateway")};
 static char gateway[25];
 static struct ctk_textentry gatewaytextentry =
-  {CTK_TEXTENTRY(11, 9, 16, 1, gateway, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 11, 16, 1, gateway, 24)};
 static struct ctk_label dnsserverlabel =
-  {CTK_LABEL(0, 11, 10, 1, "DNS server")};
+  {CTK_LABEL(0, 13, LABELMAXWIDTH, 1, "DNS server")};
 static char dnsserver[25];
 static struct ctk_textentry dnsservertextentry =
-  {CTK_TEXTENTRY(11, 11, 16, 1, dnsserver, 24)};
+  {CTK_TEXTENTRY(LABELMAXWIDTH + 1, 13, 16, 1, dnsserver, 24)};
 
 static struct ctk_button savebutton =
-  {CTK_BUTTON(0, 13, 12, "Save & close")};
+  {CTK_BUTTON(0, 15, 12, "Save & close")};
 
 
 static struct ctk_button applybutton =
-  {CTK_BUTTON(15, 13, 13, "Apply & close")};
+  {CTK_BUTTON(17, 15, 13, "Apply & close")};
 
 static DISPATCHER_SIGHANDLER(configedit_sighandler, s, data);
 static struct dispatcher_proc p =
@@ -168,67 +178,57 @@ nullterminate(char *str)
   return nt;
 }
 /*-----------------------------------------------------------------------------------*/
+static char * __fastcall__
+copystr(char *dst, char *src, int len)
+{
+  char *nt = nullterminate(src);
+  strncpy(dst, src, len);
+  return nt + 1;
+}
+/*-----------------------------------------------------------------------------------*/
 static char *
 loaddriver(char *str)
 {
-  char *nt = nullterminate(str);
-  strncpy(driver, str, sizeof(driver));
-  return nt + 1;
+  return copystr(driver, str, sizeof(driver));
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 loadtheme(char *str)
 {
-  char *nt = nullterminate(str);
-  strncpy(theme, str, sizeof(theme));
-  return nt + 1;
+  return copystr(theme, str, sizeof(theme));
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 ipaddrconf(char *str)
 {
-  char *nt = nullterminate(str);
-  strncpy(ipaddr, str, sizeof(ipaddr));
-  return nt + 1;
+  return copystr(ipaddr, str, sizeof(ipaddr));
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 netmaskconf(char *str)
 {
-  char *nt = nullterminate(str);
-  strncpy(netmask, str, sizeof(netmask));
-  return nt + 1;
+  return copystr(netmask, str, sizeof(netmask));
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 drconf(char *str)
 {
-  char *nt = nullterminate(str);
-  strncpy(gateway, str, sizeof(gateway));
-  return nt + 1;
+  return copystr(gateway, str, sizeof(gateway));
 }
 /*-----------------------------------------------------------------------------------*/
 static char *
 dnsconf(char *str)
 {
-  char *nt = nullterminate(str);
-  strncpy(dnsserver, str, sizeof(dnsserver));
-  return nt + 1;
+  return copystr(dnsserver, str, sizeof(dnsserver));
 }
 /*-----------------------------------------------------------------------------------*/
 static struct ptentry initparsetab[] =
   {{'l', loaddriver},
-   {'L', loaddriver},
    {'t', loadtheme},
-   {'T', loadtheme},
    {'i', ipaddrconf},
-   {'I', ipaddrconf},
    {'n', netmaskconf},
-   {'N', netmaskconf},
    {'r', drconf},
-   {'R', drconf},
    {'d', dnsconf},
-   {'D', dnsconf},
    {'#', skipnewline},
 
    /* Default action */
@@ -272,45 +272,42 @@ savescript(void)
 {
   char line[40];
   struct c64_fs_file f;
-  int len;
 
   if(c64_fs_open("config.cfg", &f) == -1) {
     return;
   }
   if(theme[0] != 0) {
     sprintf(line, "t %s\n", theme);
-    len = strlen(line);
-    c64_fs_write(&f, line, len);
+    c64_fs_write(&f, line, strlen(line));
   }
   if(driver[0] != 0) {
     sprintf(line, "l %s\n", driver);
-    len = strlen(line);
-    c64_fs_write(&f, line, len);
+    c64_fs_write(&f, line, strlen(line));
   }
   if(ipaddr[0] != 0) {
     sprintf(line, "i %s\n", ipaddr);
-    len = strlen(line);
-    c64_fs_write(&f, line, len);
+    c64_fs_write(&f, line, strlen(line));
   }
   if(netmask[0] != 0) {
     sprintf(line, "n %s\n", netmask);
-    len = strlen(line);
-    c64_fs_write(&f, line, len);
+    c64_fs_write(&f, line, strlen(line));
   }
   if(gateway[0] != 0) {
     sprintf(line, "r %s\n", gateway);
-    len = strlen(line);
-    c64_fs_write(&f, line, len);
+    c64_fs_write(&f, line, strlen(line));
   }
   if(dnsserver[0] != 0) {
     sprintf(line, "d %s\n", dnsserver);
-    len = strlen(line);
-    c64_fs_write(&f, line, len);
+    c64_fs_write(&f, line, strlen(line));
+  }
+  
+  if(screensaver[0] != 0) {
+    sprintf(line, "s %s\n", screensaver);
+    c64_fs_write(&f, line, strlen(line));
   }
   
   sprintf(line, ".\n\0\n\n\n");
-  len = strlen(line);
-  c64_fs_write(&f, line, len);
+  c64_fs_write(&f, line, strlen(line));
   
   c64_fs_close(&f);
   
@@ -322,13 +319,16 @@ LOADER_INIT_FUNC(configedit_init)
     id = dispatcher_start(&p);
     
     /* Create window. */
-    ctk_window_new(&window, 30, 14, "Config editor");
+    ctk_window_new(&window, 32, 16, "Config editor");
 
     CTK_WIDGET_ADD(&window, &themelabel);  
     CTK_WIDGET_ADD(&window, &themetextentry);
 
     CTK_WIDGET_ADD(&window, &driverlabel);  
     CTK_WIDGET_ADD(&window, &drivertextentry);
+
+    CTK_WIDGET_ADD(&window, &screensaverlabel);  
+    CTK_WIDGET_ADD(&window, &screensavertextentry);
 
     CTK_WIDGET_ADD(&window, &ipaddrlabel);  
     CTK_WIDGET_ADD(&window, &ipaddrtextentry);
