@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.2 2003/03/28 12:10:09 adamdunkels Exp $
+ * $Id: ctk.c,v 1.3 2003/04/02 09:53:59 adamdunkels Exp $
  *
  */
 
@@ -378,9 +378,11 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
 
     /* Draw the windows from back to front. */
     for(; w != windows; w = w->prev) {
+      ctk_draw_clear_window(w, 0, clipy1, clipy2);
       ctk_draw_window(w, 0, clipy1, clipy2);
     }
     /* Draw focused window */
+    ctk_draw_clear_window(windows, CTK_FOCUS_WINDOW, clipy1, clipy2);
     ctk_draw_window(windows, CTK_FOCUS_WINDOW, clipy1, clipy2);
   }
 
@@ -548,7 +550,7 @@ ctk_widget_redraw(struct ctk_widget *widget)
 	if(window == dialog) {
 	  ctk_draw_widget(widget, CTK_FOCUS_DIALOG, 0, height);
 	} else if(window == windows) {
-	  ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);
+	  ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);	      
 	} else if(window == &desktop_window) {
 	  ctk_draw_widget(widget, 0, 0, height);
 	}

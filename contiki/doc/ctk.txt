@@ -3,7 +3,7 @@ Contiki toolkit (CTK) and the architecture specific parts of CTK (the
 so-called ctk-draw and ctk-arch layers).
 
 Author: Adam Dunkels <adam@dunkels.com>
-Version: $Id: ctk.txt,v 1.1 2003/03/28 12:21:52 adamdunkels Exp $
+Version: $Id: ctk.txt,v 1.2 2003/04/02 09:54:00 adamdunkels Exp $
 
 
 * Introduction *
@@ -77,6 +77,9 @@ convenience:
    unsigned char ctk_draw_height(void);
    void ctk_draw_clear(unsigned char clipy1, unsigned char clipy2);
    void ctk_draw_menus(struct ctk_menus *menus);
+   void ctk_draw_clear_window(struct ctk_window *window,
+                              unsigned char focus,
+                              unsigned char clipy1, unsigned char clipy2);
    void ctk_draw_window(struct ctk_window *window,
                         unsigned char focus,
                         unsigned char clipy1,
@@ -196,6 +199,22 @@ Where the "title" field is the title of the menu item and the
 "titlelen" the length of the title in characters.
 
 
+* Drawing window background *
+-----------------------------
+
+The ctk-draw layer must implement a function for "clearing" the
+window, i.e., draw the window background. This function will be called
+by the CTK before a window will be completely redrawn, and looks like:
+
+   void ctk_draw_clear_window(struct ctk_window *window,
+                              unsigned char focus,
+                              unsigned char clipy1, unsigned char clipy2);
+
+The function is supposed to draw the window background, excluding
+window borders as these should be drawn by the function that actually
+draws the window, between "clipy1" and "clipy2".
+
+
 * Drawing windows *
 -------------------
 
@@ -272,7 +291,6 @@ A pseudo-code implementation of a ctk_draw_window() function might
 look like this:
 
    ctk_draw_window(window, focus, clipy1, clipy2) {
-      draw_window_background(window, focus, clipy1, clipy2);
       draw_window_borders(window, focus, clipy1, clipy2);
       foreach(widget, window->inactive) {
          draw_widget(widget, focus, clipy1, clipy2);
@@ -287,11 +305,10 @@ look like this:
       }
    }
 
-Where draw_window_background() draws the window background (between
-clipy1 and clipy2) and draw_window_borders() draws the window borders
-(also between clipy1 and clipy2). The draw_widget() function used may
-the same function as ctk_draw_widget() explained later. Notice how the
-clipy1 and clipy2 parameters are passed to all other functions; every
+Where draw_window_borders() draws the window borders (also between
+clipy1 and clipy2). The draw_widget() function used may the same
+function as ctk_draw_widget() explained later. Notice how the clipy1
+and clipy2 parameters are passed to all other functions; every
 function needs to know the boundaries within which they are allowed to
 draw.
 
