@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: lan91c96-drv.c,v 1.4 2004/08/09 20:58:07 adamdunkels Exp $
+ * $Id: lan91c96-drv.c,v 1.5 2004/08/09 21:01:52 adamdunkels Exp $
  *
  */
 
@@ -48,7 +48,7 @@ static const struct packet_service_state state =
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
-EK_PROCESS(proc, PACKET_SERVICE_NAME ": IDE64", EK_PRIO_NORMAL,
+EK_PROCESS(proc, PACKET_SERVICE_NAME ": ETH64", EK_PRIO_NORMAL,
 	   eventhandler, pollhandler, (void *)&state);
 
 /*---------------------------------------------------------------------------*/
