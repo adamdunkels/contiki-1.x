@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.15 2003/04/18 00:18:38 adamdunkels Exp $
+ * $Id: ctk.c,v 1.16 2003/04/24 17:17:26 adamdunkels Exp $
  *
  */
 
@@ -101,6 +101,13 @@ ek_signal_t ctk_signal_keypress,
   ctk_signal_window_close,
   ctk_signal_pointer_move,
   ctk_signal_pointer_button;
+
+#if CTK_CONF_SCREENSAVER
+ek_signal_t ctk_signal_screensaver_start,
+  ctk_signal_screensaver_stop,
+  ctk_signal_screensaver_uninstall;
+#endif /* CTK_CONF_SCREENSAVER */
+
 
 #if CTK_CONF_MOUSE_SUPPORT
 unsigned short mouse_x, mouse_y, mouse_button;
@@ -181,7 +188,14 @@ ctk_init(void)
 
   ctk_signal_pointer_move = dispatcher_sigalloc();
   ctk_signal_pointer_button = dispatcher_sigalloc();
-  
+
+
+#if CTK_CONF_SCREENSAVER
+  ctk_signal_screensaver_start = dispatcher_sigalloc();
+  ctk_signal_screensaver_stop = dispatcher_sigalloc();
+  ctk_signal_screensaver_uninstall = dispatcher_sigalloc();
+#endif /* CTK_CONF_SCREENSAVER */
+    
   dispatcher_listen(ctk_signal_timer);
   dispatcher_timer(ctk_signal_timer, NULL, CLK_TCK);
 
@@ -395,7 +409,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
   /* Draw widgets in root window */
   for(widget = desktop_window.active;
       widget != NULL; widget = widget->next) {
-    ctk_draw_widget(widget, 0, clipy1, clipy2);
+    ctk_draw_widget(widget, CTK_FOCUS_WINDOW, clipy1, clipy2);
   }
   
   /* Draw windows */
@@ -584,10 +598,9 @@ ctk_widget_redraw(struct ctk_widget *widget)
 	window = widget->window;
 	if(window == dialog) {
 	  ctk_draw_widget(widget, CTK_FOCUS_DIALOG, 0, height);
-	} else if(window == windows) {
-	  ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);	      
-	} else if(window == &desktop_window) {
-	  ctk_draw_widget(widget, 0, 0, height);
+	} else if(window == windows ||
+		  window == &desktop_window) {
+	  ctk_draw_widget(widget, CTK_FOCUS_WINDOW, 0, height);
 	}
       }
   }
@@ -606,9 +619,9 @@ ctk_widget_add(CC_REGISTER_ARG struct ctk_window *window,
     widget->next = window->active;
     window->active = widget;
     widget->window = window;
-    if(window->focused == NULL) {
+    /*    if(window->focused == NULL) {
       window->focused = widget;
-    }
+      }*/
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -723,7 +736,12 @@ switch_open_menu(unsigned char rightleft)
     }
   }
 
-  menus.open->active = 0;  
+  menus.open->active = 0;
+
+  /*  if(menus.open->nitems > maxnitems) {
+    maxnitems = menus.open->nitems;
+    }*/
+
   /*  ctk_redraw();*/
 }
 /*-----------------------------------------------------------------------------------*/
@@ -1021,20 +1039,26 @@ ctk_idle(void)
 #endif /* CTK_CONF_MOUSE_SUPPORT */
 
 
+#if CTK_CONF_SCREENSAVER
   if(mode == CTK_MODE_SCREENSAVER) {
+#if 0
 #ifdef CTK_SCREENSAVER_RUN
     CTK_SCREENSAVER_RUN();
 #endif /* CTK_SCREENSAVER_RUN */
+#endif /* 0 */
     if(ctk_arch_keyavail()
 #if CTK_CONF_MOUSE_SUPPORT
        || mouse_moved || mouse_button_changed
 #endif /* CTK_CONF_MOUSE_SUPPORT */
        ) {
+      dispatcher_emit(ctk_signal_screensaver_stop, NULL, DISPATCHER_BROADCAST);
       mode = CTK_MODE_NORMAL;
-      ctk_draw_init();
-      ctk_redraw();
+      /*      ctk_draw_init();
+	      ctk_redraw();*/
     }
-  } else if(mode == CTK_MODE_NORMAL) {
+  } else
+#endif /* CTK_CONF_SCREENSAVER */
+    if(mode == CTK_MODE_NORMAL) {
 #if CTK_CONF_MOUSE_SUPPORT 
     /* If there is any change in the mouse conditions, find out in
        which window the mouse pointer currently is in order to send
@@ -1420,10 +1444,14 @@ DISPATCHER_SIGHANDLER(ctk_sighandler, s, data)
     if(mode == CTK_MODE_NORMAL) {
       ++screensaver_timer;
       if(screensaver_timer == SCREENSAVER_TIMEOUT) {
+#if CTK_CONF_SCREENSAVER
+	dispatcher_emit(ctk_signal_screensaver_start, NULL,
+			DISPATCHER_BROADCAST);
 #ifdef CTK_SCREENSAVER_INIT
 	CTK_SCREENSAVER_INIT();
 #endif /* CTK_SCREENSAVER_INIT */
 	mode = CTK_MODE_SCREENSAVER;
+#endif /* CTK_CONF_SCREENSAVER */
 	screensaver_timer = 0;
       }
     }
