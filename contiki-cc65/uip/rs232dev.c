@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev.c,v 1.2 2003/07/31 23:16:47 adamdunkels Exp $
+ * $Id: rs232dev.c,v 1.3 2003/07/31 23:56:01 adamdunkels Exp $
  *
  */
 
@@ -68,7 +68,7 @@
 #define SIO_POLL(c)  (rs232_get(&c) != RS_ERR_NO_DATA)
 #define SIO_SEND(c)  rs232_put(c)
 
-#define MAX_SIZE UIP_BUFSIZE
+#define MAX_SIZE (UIP_BUFSIZE - UIP_LLH_LEN)
 
 static u8_t slip_buf[MAX_SIZE + 2];
 
@@ -135,7 +135,7 @@ rs232dev_send(void)
 
   SIO_SEND(SLIP_END);
 
-  ptr = uip_buf;
+  ptr = &uip_buf[UIP_LLH_LEN];
   for(i = 0; i < uip_len; ++i) {
     if(i == 40) {
       ptr = uip_appdata;
@@ -190,7 +190,7 @@ rs232dev_poll(void)
       lastc = c;
       /* End marker found, we copy our input buffer to the uip_buf
 	 buffer and return the size of the packet we copied. */
-      memcpy(uip_buf + UIP_LLH_LEN, slip_buf, len);
+      memcpy(&uip_buf[UIP_LLH_LEN], slip_buf, len);
       tmplen = len;
       len = 0;
       return tmplen;
