@@ -1,11 +1,93 @@
 /**
+ * \defgroup ek The Contiki event kernel
+ * @{
+ *
+ * At the heart of the Contiki desktop environment is the event driven
+ * Contiki kernel. Using non-preemptive multitasking, the Contiki
+ * event kernel makes it possible to run several programs in
+ * parallel. It also provides message passing mechanisms to the
+ * running programs.
+ *
+ * The Contiki kernel is a simple event driven dispatcher which
+ * handles processes and events. All code execution is
+ * initiated by the kernel, and applications are implemented as C
+ * functions that must return within a short time after being
+ * called.
+ *
+ * The kernel does not provide multi-threading. Rather, this is
+ * implemented as an application library. For threads, see the
+ * \ref mt "Multithreading library" and \ref pt "Protothreads".
+ *
+ * The kernel is the initiator of all program execution in
+ * Contiki. After the system has been initialized by the boot up code,
+ * the ek_run() function is called. This function never
+ * returns, but will sit in a loop in which it does two things.
+ * 
+ * - Pulls the first event of the event queue and dispatches this to
+ *   all listening processes (ek_process_event()).
+ *
+ * - Executes the "poll" handlers of all processes that have
+ *   registered (ek_process_poll()).
+ *
+ * Only one event is processes at a time, and the poll handlers of
+ * all processes are called between two events are handled.
+ *
+ * 
+ * A process is defined by an initialization function, a event
+ * handler, a uIP event handler, and an poll handler. The event
+ * handler is called when a event has been posted, for which the
+ * process is currently listening. The uIP event handler is called
+ * when the uIP TCP/IP stack has an event to deliver to the
+ * process. Such events can be that new data has arrived on a
+ * connection, that previously sent data has been acknowledged or that
+ * a connection has been closed. The poll handler is periodically
+ * called by the system.
+ *
+ * A process is started by calling the ek_start()
+ * function. This function must be called by the initialization
+ * function before any other kernel function is called. When the
+ * function returns, the new process is running. 
+ *
+ * The initialization function is declared with the special
+ * LOADER_INIT() macro. The initializaition function takes a single
+ * argument; a char * pointer.
+ *
+ * The function ek_exit() is used to tell the kernel that
+ * a process has exited. This function must be called by the process
+ * itself, and must be called the process unloads itself.
+ *
+ * \note It is not possible to call ek_exit() on behalf of
+ * another process - instead, post the event ek_event_quit
+ * with the process as a receiver. The other process should then
+ * listen for this event, and call ek_exit() when the event
+ * is received. 
+ *
+ *
+ * The kernel can pass events between different
+ * processes. Events are simple messages that consist of a event
+ * number and a generic data pointer called the event data. The
+ * event data can be used to pass messages between processes. In
+ * order for a event to be delivered to a process, the process must
+ * be listening for the event number.
+ *
+ * If a process has registered an poll handler, the kernel will
+ * call it as often as possible. The poll handler can be used to
+ * implement timer based functionality (by checking the ek_clock()
+ * function), or other background processing. The poll handler must
+ * return to the caller within a short time, or otherwise the system
+ * will become sluggish.
+ *
+ *
+ */
+
+
+/**
  * \file
- * Event kernel, event dispatcher and handler of uIP events.
+ * Event kernel.
  * \author Adam Dunkels <adam@dunkels.com> 
  *
- * The dispatcher module is the event kernel in Contiki and handles
- * processes, events and uIP events. All process execution is
- * initiated by the dispatcher.
+ * The kernel in Contiki handles processes and events. All process
+ * execution is initiated by the kernel.
  */
 /*
  * Copyright (c) 2002-2003, Adam Dunkels.
@@ -38,7 +120,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.c,v 1.7 2004/09/01 18:19:43 adamdunkels Exp $
+ * $Id: ek.c,v 1.8 2005/02/22 22:46:33 adamdunkels Exp $
  *
  */
 
@@ -54,55 +136,8 @@ struct ek_proc *ek_procs = NULL;
 struct ek_proc *ek_proclist[EK_CONF_MAXPROCS];
 struct ek_proc *ek_current = NULL;
  
-/**
- * \defgroup events System events
- * @{
- *
- * The Contiki system defines a number of default events that can be
- * delivered to processes. 
- */
-
-/**
- * The "quit" event.
- *
- * This event is posted to a process in order to tell it to remove
- * itself from the system. Since each program may have allocated
- * system resources that must be released before the process quits,
- * each program must implement the event handler by itself. A process
- * that receives this event must call LOADER_UNLOAD() to unload itself
- * after doing all necessary clean ups (such as closing open windows,
- * deallocate allocated memory, etc.). The following code shows how
- * this can be implemented:
- * \code
- static struct ctk_window mainwindow;
- static EK_EVENTHANDLER(example_eventhandler, s, data);
-
- static
- EK_EVENTHANDLER(example_eventhandler, s, data)
- {
-   EK_EVENTHANDLER_ARGS(s, data);
-
-   if(s == ek_event_quit) {
-      ctk_window_close(&mainwindow);
-      ek_exit(&p);
-      LOADER_UNLOAD();
-   }
- }
- \endcode
- *
- */
 ek_event_t ek_event_quit;
-
-/**
- * A generic message event.
- *
- * This event may be used to send messages between processes. The
- * actual interpretation of the message is up to the applications to
- * decide.  
- */
 ek_event_t ek_event_msg;
- 
-/** @} */
 
 static ek_event_t lastevent;
 
@@ -128,96 +163,6 @@ static struct event_data events[EK_CONF_NUMEVENTS];
 
 volatile unsigned char ek_poll_request;
 
-
-/**
- * \defgroup kernel The Contiki event kernel
- * @{
- *
- * At the heart of the Contiki desktop environment is the event driven
- * Contiki kernel. Using non-preemptive multitasking, the Contiki
- * event kernel makes it possible to run several programs in
- * parallel. It also provides message passing mechanisms to the
- * running programs.
- *
- * The Contiki kernel is a simple event driven dispatcher which
- * handles processes, events and uIP events. All code execution is
- * initiated by the dispatcher, and applications are implemented as C
- * functions that must return within a short time after being
- * called. It therefore is not possible to implement processes with,
- * e.g., long-lasting while() loops such as the infamous while(1);
- * loop.
- *
- */
-
-/**
- * \page dispatcher The dispatcher
- *
- * The dispatcher is the initiator of all program execution in
- * Contiki. After the system has been initialized by the boot up code,
- * the ek_run() function is called. This function never
- * returns, but will sit in a loop in which it does two things.
- * 
- * - Pulls the first event of the event queue and dispatches this to
- *   all listening processes (ek_process_event()).
- *
- * - Executes the "poll" handlers of all processes that have
- *   registered (ek_process_poll()).
- *
- * Only one event is processes at a time, and the poll handlers of
- * all processes are called between two events are handled.
- *
- * 
- * A process is defined by an initialization function, a event
- * handler, a uIP event handler, and an poll handler. The event
- * handler is called when a event has been posted, for which the
- * process is currently listening. The uIP event handler is called
- * when the uIP TCP/IP stack has an event to deliver to the
- * process. Such events can be that new data has arrived on a
- * connection, that previously sent data has been acknowledged or that
- * a connection has been closed. The poll handler is periodically
- * called by the system.
- *
- * A process is started by calling the ek_start()
- * function. This function must be called by the initialization
- * function before any other dispatcher function is called. When the
- * function returns, the new process is running. 
- *
- * The initialization function is declared with the special
- * LOADER_INIT() macro. The initializaition function takes a single
- * argument; a char * pointer.
- *
- * The function ek_exit() is used to tell the dispatcher that
- * a process has exited. This function must be called by the process
- * itself, and must be called the process unloads itself.
- *
- * \note It is not possible to call ek_exit() on behalf of
- * another process - instead, post the event ek_event_quit
- * with the process as a receiver. The other process should then
- * listen for this event, and call ek_exit() when the event
- * is received. 
- *
- *
- * The dispatcher can pass events between different
- * processes. Events are simple messages that consist of a event
- * number and a generic data pointer called the event data. The
- * event data can be used to pass messages between processes. In
- * order for a event to be delivered to a process, the process must
- * be listening for the event number.
- *
- * If a process has registered an poll handler, the dispatcher will
- * call it as often as possible. The poll handler can be used to
- * implement timer based functionality (by checking the ek_clock()
- * function), or other background processing. The poll handler must
- * return to the caller within a short time, or otherwise the system
- * will feel sluggish.
- *
- *
- *
- * The uIP TCP/IP stack will call the dispatcher when a uIP event has
- * occured. The dispatcher will find the right process for which the
- * event is intended and call the process' uIP handler function.
- *
- */
 
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -477,6 +422,8 @@ ek_process_event(void)
 	}
       }
     } else {
+      /* This is not a broadcast event, so we deliver it to the
+	 specified process. */
       if(ek_poll_request) {
 	ek_poll_request = 0;
 	ek_process_poll();
@@ -486,7 +433,11 @@ ek_process_event(void)
       if(p != NULL &&
 	 p->eventhandler != NULL) {
 	ek_current = p;
-	p->eventhandler(s, data);	
+	p->eventhandler(s, data);
+
+	/* If the event was an INIT event, we should also put the
+	   process on the process list. */
+	/*	procs_add(p);*/
       }
     }    
   }

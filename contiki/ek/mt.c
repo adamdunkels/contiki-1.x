@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: mt.c,v 1.2 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: mt.c,v 1.3 2005/02/22 22:46:33 adamdunkels Exp $
  */
 
 /**

@@ -1,3 +1,15 @@
+/**
+ * \addtogroup ek
+ * @{
+ */
+
+/**
+ * \file
+ * Contiki Kernel header file.
+ * \author
+ * Adam Dunkels <adam@sics.se>
+ */
+
 /*
  * Copyright (c) 2004, Swedish Institute of Computer Science.
  * All rights reserved. 
@@ -30,7 +42,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ek.h,v 1.7 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: ek.h,v 1.8 2005/02/22 22:46:33 adamdunkels Exp $
  */
 #ifndef __EK_H__
 #define __EK_H__
@@ -65,19 +77,82 @@ typedef unsigned char ek_err_t;
 
 #define EK_BROADCAST             EK_ID_ALL
 
+/**
+ * \defgroup events System events
+ * @{
+ *
+ * The Contiki kernel defines a number of default events that can be
+ * delivered to processes. 
+ */
+
 #define EK_EVENT_NONE            0x80
 
+/**
+ * Initialization event.
+ *
+ * This event is posted by the kernel to a process in order to let the
+ * process to initialization.
+ *
+ */
 #define EK_EVENT_INIT            0x81
+
+/**
+ * Service replacement event.
+ *
+ * This event is posted by the kernel in order to inform a process
+ * that a service that the current process have requested to be
+ * replaced, is now replaced.
+ */
 #define EK_EVENT_REPLACE         0x82
+
+/**
+ * Continuation event.
+ *
+ * This event can be used to implement continuations.
+ */
 #define EK_EVENT_CONTINUE        0x83
+
+/**
+ * Generic message event.
+ *
+ * This event can be used to pass messages between processes.
+ */
 #define EK_EVENT_MSG             0x84
+
+/**
+ * A process has exited.
+ *
+ * This event is posted to all processes to inform that another
+ * process has exited.
+ */
 #define EK_EVENT_EXITED          0x85
 
+/**
+ * Request a process to exit itself.
+ *
+ * This event is posted to a process in order to tell it to remove
+ * itself from the system. Since each program may have allocated
+ * system resources that must be released before the process quits,
+ * each program must implement the event handler by itself. A process
+ * that receives this event must call LOADER_UNLOAD() to unload itself
+ * after doing all necessary clean ups (such as closing open windows,
+ * deallocate allocated memory, etc.).
+ */
 #define EK_EVENT_REQUEST_EXIT    0x86
+
+/**
+ * Request a service to be replaced.
+ *
+ * This event is posted by the kernel to a service that another
+ * process have requested to be replaced.
+ */
 #define EK_EVENT_REQUEST_REPLACE 0x87
 
 
 #define EK_EVENT_MAX             0x88
+
+/** @}*/
+
 /**
  * Instantiating macro for the ek_proc struct.
  *
@@ -85,32 +160,28 @@ typedef unsigned char ek_err_t;
  * for a process. It hides the internals of the ek_proc struct
  * and provides an easy way to define process signature.
  *
- * The following example shows how to define a process.
- \code
- static EK_EVENTHANDLER(proc_eventhandler, s, data);
- static EK_UIPHANDLER(proc_uiphandler, s);
- static void proc_poll(void);
- static struct ek_proc p =
-   {EK_PROC("An example process", proc_poll, proc_eventhandler,
-                    proc_uiphandler)};		  
- \endcode
+ * \note Defining a ek_proc struct does not start the process and does
+ * not register the process with the kernel. Rather, the process'
+ * initialization function must explicitly call the ek_start()
+ * function with a pointer to the ek_proc struct containing the
+ * process definition.
  *
- * \note Defining a ek_proc struct does not in any way start
- * the process and does not register the process with the
- * Dispatcher. Instead, the process' initialization function must
- * explicitly call the ek_start() function with a pointer to
- * the ek_proc struct containing the process definition.
+ * \param name The name of the \c struct \c ek_proc of the process.
  *
- * \param name The name of the process.
+ * \param strname A textual repressentation of the process' name.
  *
- * \param poll A pointer to the poll function or NULL if no poll
+ * \param prio The priority of the process.
+ *
+ * \param pollh A pointer to the poll function or NULL if no poll
  * handler should be registered.
  *
- * \param event A pointer to the process' event handler. All
+ * \param eventh A pointer to the process' event handler. All
  * processes are required to have a event handler.
  *
- * \param uip A pointer to the uIP TCP/IP event handler, or NULL if
- * uIP event handler should be registered.
+ * \param stateptr An opaque pointer that can be associated with the
+ * process.
+ *
+ * \hideinitializer
  */
 #define EK_PROCESS(name, strname, prio, eventh, pollh, stateptr)	\
   static struct ek_proc name = {NULL, EK_ID_NONE, strname, prio, eventh, pollh, stateptr}
@@ -125,12 +196,45 @@ struct ek_proc {
   void *procstate;
 };
 
+/**
+ * Lowest priority.
+ *
+ * This value can be used in the \c prio field in the EK_PROCESS() macro.
+ */
 #define EK_PRIO_LOWEST  0x00
+/**
+ * Low priority.
+ *
+ * This value can be used in the \c prio field in the EK_PROCESS() macro.
+ */
 #define EK_PRIO_LOW     0x3f
+/**
+ * Normal priority.
+ *
+ * This value can be used in the \c prio field in the EK_PROCESS() macro.
+ */
 #define EK_PRIO_NORMAL  0x7f
+/**
+ * High priority.
+ *
+ * This value can be used in the \c prio field in the EK_PROCESS() macro.
+ */
 #define EK_PRIO_HIGH    0xbf
+/**
+ * Highest priority.
+ *
+ * This value can be used in the \c prio field in the EK_PROCESS() macro.
+ */
 #define EK_PRIO_HIGHEST 0xff
 
+/**
+ * Get the process state of a process.
+ *
+ * This function is used by the kernel service module, and is in most
+ * cased not used directly by user programs.
+ *
+ * \param id The process ID of the process,
+ */
 void *ek_procstate(ek_id_t id);
 
 /**
@@ -188,10 +292,12 @@ struct ek_proc *ek_process(ek_id_t id);
  *
  * \param name The name of the event handler function.
  *
- * \param s The name of the event number parameter.
+ * \param ev The name of the event number parameter.
  *
  * \param data The name of the event data parameter.
  *
+ *
+ * \hideinitializer 
  */
 #define EK_EVENTHANDLER(name, ev, data) \
         static void name(ek_event_t ev, ek_data_t data)
@@ -237,7 +343,7 @@ struct ek_proc *ek_process(ek_id_t id);
  }
  \endcode
  *
- * \param s The name of the event number argument. Must match the one
+ * \param ev The name of the event number argument. Must match the one
  * in the EK_EVENTHANDLER() declaration.
  *
  * \param data The name of the event data argument. Must match the
@@ -294,7 +400,7 @@ void ek_replace(struct ek_proc *newp, void *arg);
  * In most situations, the ek_emit() function should be used
  * instead.
  *
- * \param s The event to be emitted.
+ * \param ev The event to be emitted.
  *
  * \param data The auxillary data to be sent with the event
  *

@@ -30,11 +30,11 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: mt.h,v 1.3 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: mt.h,v 1.4 2005/02/22 22:46:33 adamdunkels Exp $
  */
 
 /**
- * \defgroup mt Peemptive multi-threading
+ * \defgroup mt Multi-threading library
  * @{
  *
  * The event driven Contiki kernel does not provide multi-threading
@@ -226,6 +226,10 @@ void mt_exec(struct mt_thread *thread);
  * allocated by the caller.
  *
  * \param s The event that is posted to the thread.
+ *
+ * \param data An opaque pointer to a user specified structure
+ * containing additonal information, or NULL if no additional
+ * information is needed.
  */
 void mt_exec_event(struct mt_thread *thread, ek_event_t s, ek_data_t data);
 
@@ -312,20 +316,15 @@ main(int argc, char *argv[])
  *
  * Example:
 \code
-MTP(example_thread, "Example thread", p1, t1, t1_idle);
+MTP(example_thread, example_proc, "Example thread");
 \endcode
  *
- * \param thread The name of the thread. 
+ * \param thread The variable name of the thread.
+ *
+ * \param proc The variable name of the process containing the thread.
  *
  * \param name A string that specifies the user-visible name of the
  * process in which the thread will run.
- *
- * \param name_p The name of the variable holding the process' state.
- *
- * \param name_t The name of the variable holding the threads' state.
- *
- * \param name_idle The name of the function that is to execute the
- * threads' code.
  *
  * \hideinitializer
  */
