@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.8 2003/04/09 09:02:52 adamdunkels Exp $
+ * $Id: ctk.c,v 1.9 2003/04/09 09:22:24 adamdunkels Exp $
  *
  */
 
@@ -101,7 +101,9 @@ ek_signal_t ctk_signal_keypress,
   ctk_signal_pointer_down,
   ctk_signal_pointer_up;
 
+#if CTK_CONF_MOUSE_SUPPORT
 unsigned short mouse_last_x, mouse_last_y, mouse_last_button;
+#endif /* CTK_CONF_MOUSE_SUPPORT */
 
 static unsigned short screensaver_timer;
 #define SCREENSAVER_TIMEOUT (5*60)
@@ -943,9 +945,12 @@ static void
 ctk_idle(void)     
 {
   static ctk_arch_key_t c;
-  static unsigned char i, mxc, myc, mouse_clicked;  
+  static unsigned char i;
   register struct ctk_window *window;
-  register struct ctk_widget *widget;  
+  register struct ctk_widget *widget;
+#if CTK_CONF_MOUSE_SUPPORT 
+  static unsigned char mxc, myc, mouse_clicked;
+#endif /* CTK_CONF_MOUSE_SUPPORT */
   
 #if CTK_CONF_MENUS
   if(menus.open != NULL) {
@@ -965,12 +970,12 @@ ctk_idle(void)
       ctk_redraw();
     }
   } else if(mode == CTK_MODE_NORMAL) {
+#if CTK_CONF_MOUSE_SUPPORT 
     if(dialog != NULL) {
       window = dialog;
     } else {
       window = windows;
     }
-
 
     /* If there has been a change in the mouse button(s), we send out
        a signal. */
@@ -1036,6 +1041,7 @@ ctk_idle(void)
 	window->focused = NULL;
       }
     }
+#endif /* CTK_CONF_MOUSE_SUPPORT */
     
     while(ctk_arch_keyavail()) {
       
