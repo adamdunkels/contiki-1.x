@@ -1,3 +1,14 @@
+/**
+ * \addtogroup uipfw
+ * @{
+ */
+
+/**
+ * \file
+ * uIP packet forwarding header file.
+ * \author Adam Dunkels <adam@sics.se>
+ */
+
 /*
  * Copyright (c) 2004, Swedish Institute of Computer Science.
  * All rights reserved. 
@@ -30,7 +41,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: uip-fw.h,v 1.6 2004/09/12 20:24:56 adamdunkels Exp $
+ * $Id: uip-fw.h,v 1.7 2005/02/07 07:06:31 adamdunkels Exp $
  */
 #ifndef __UIP_FW_H__
 #define __UIP_FW_H__
@@ -161,3 +172,5 @@ void uip_fw_periodic(void);
 
 
 #endif /* __UIP_FW_H__ */
+
+/** @} */
