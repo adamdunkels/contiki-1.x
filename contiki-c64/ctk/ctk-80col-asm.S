@@ -8,24 +8,27 @@
 	.import		_ctk_80col_lefttab
 	.import		_ctk_80col_righttab
 	
-	.import		_ctk_hires_cursx
-	.import		_ctk_hires_cursy
-	.import		_ctk_hires_color
-	.import		_ctk_hires_underline
-	.import		_ctk_hires_reversed
+	.import		_ctk_80col_cursx
+	.import		_ctk_80col_cursy
+	.import		_ctk_80col_color
+	.import		_ctk_80col_underline
+	.import		_ctk_80col_reversed
 
-	.import		_ctk_hires_yhiresaddr
+	.import		_ctk_80col_yhiresaddr
 
-	.import		_ctk_hires_windowparams
+	.import		_ctk_80col_windowparams
 	
-	.import		_ctk_hires_bitmapptr
+	.import		_ctk_80col_bitmapptr
 
-	.import		_ctk_hires_theme
+	.import		_ctk_80col_theme
 			
-	.export		_ctk_hires_cclear
-	.export		_ctk_hires_chline
-	.export		_ctk_hires_cputc
-	.export		_ctk_hires_cputsn
+	.export		_ctk_80col_cclear
+	.export		_ctk_80col_chline
+	.export		_ctk_80col_cputc
+	.export		_ctk_80col_cputsn
+	
+	.export		_ctk_80col_clear_line
+	.export		_ctk_80col_draw_bitmapline
 
 ;---------------------------------------------------------------------
 
@@ -82,18 +85,18 @@ wptitle      = 7
 .code
 setupptrs:	
 	;; Find hires address.	
-	lda _ctk_hires_cursy
+	lda _ctk_80col_cursy
 	asl
 	tax
-	lda _ctk_hires_yhiresaddr,x
+	lda _ctk_80col_yhiresaddr,x
 	sta ptr2
-	lda _ctk_hires_yhiresaddr+1,x
+	lda _ctk_80col_yhiresaddr+1,x
 	sta ptr2+1
 
 	;; Add X coordinate to the hires address. 
 	lda #0
 	sta ptr1+1
-	lda _ctk_hires_cursx
+	lda _ctk_80col_cursx
 	asl
 	rol ptr1+1
 ; 	asl	
@@ -124,7 +127,7 @@ restore01:
 	cli
 	rts		
 ;---------------------------------------------------------------------
-_ctk_hires_cclear:
+_ctk_80col_cclear:
 	sta tmpl
 	cmp #0
 	bne @norts
@@ -137,11 +140,13 @@ _ctk_hires_cclear:
 	;; reversed flag		
 	
 	ldx tmpl
-	lda _ctk_hires_reversed
+	lda _ctk_80col_reversed
 	beq @noff
 	lda #$ff
 @noff:		
-	sta tmpf	
+	sta tmpf
+
+		
 @loop1:
 	ldy #7
 	lda tmpf
@@ -158,14 +163,14 @@ _ctk_hires_cclear:
 	inc ptr2+1
 @noinc:		
 
-	inc _ctk_hires_cursx
+	inc _ctk_80col_cursx
 
 	dex
 	bne @loop1
 
 	jmp restore01
 ;---------------------------------------------------------------------
-_ctk_hires_chline:
+_ctk_80col_chline:
 	sta tmpl
 	cmp #0
 	bne @norts
@@ -211,14 +216,14 @@ _ctk_hires_chline:
 	inc ptr2+1
 @noinc:	
 
-	inc _ctk_hires_cursx
+	inc _ctk_80col_cursx
 
 	dex
 	bne @loop1
 
 	jmp restore01
 ;---------------------------------------------------------------------	
-_ctk_hires_cputc:
+_ctk_80col_cputc:
 	sta tmpc
 
 	jsr setupptrs
@@ -242,7 +247,7 @@ _ctk_hires_cputc:
 	bpl @cont
 	eor #$a0
 @cont:
-	ldx _ctk_hires_reversed
+	ldx _ctk_80col_reversed
 	beq :+
 	eor #$80
 :		
@@ -259,7 +264,7 @@ _ctk_hires_cputc:
 	adc ptr1+1
 	sta ptr1+1
 
-	lda _ctk_hires_cursx
+	lda _ctk_80col_cursx
 	and #1
 	beq @left
 
@@ -267,7 +272,7 @@ _ctk_hires_cputc:
 	;; we do this by eor:ing the bottom line with #$ff
 	ldy #7
 	lda (ptr1),y
-	ldx _ctk_hires_underline
+	ldx _ctk_80col_underline
 	beq @rightnounderline
 	eor #$ff
 @rightnounderline:
@@ -287,7 +292,7 @@ _ctk_hires_cputc:
 	dey
 	bpl @rightloop	
 	
-	inc _ctk_hires_cursx	
+	inc _ctk_80col_cursx	
 	
 	jmp restore01		
 	
@@ -296,7 +301,7 @@ _ctk_hires_cputc:
 	;; we do this by eor:ing the bottom line with #$ff
 	ldy #7
 	lda (ptr1),y
-	ldx _ctk_hires_underline
+	ldx _ctk_80col_underline
 	beq @nounderline
 	eor #$ff
 @nounderline:
@@ -318,26 +323,25 @@ _ctk_hires_cputc:
 
 	
 	
-	inc _ctk_hires_cursx	
+	inc _ctk_80col_cursx	
 	
 	jmp restore01		
 ;---------------------------------------------------------------------
-_ctk_hires_cputsn:
+_ctk_80col_cputsn:
 	sta tmpl
 	cmp #0
 	bne :+
 	rts
 :		
-	
-	jsr setupptrs
 
+	jsr setupptrs
+	
 	;; Turn on font ROM
 	lda tmp01
 	and #$f8
 	ora #$01
 	sta $01
 
-	
 	;; Output each character from the string
 	lda #0
 	sta tmpc
@@ -348,16 +352,19 @@ _ctk_hires_cputsn:
 	lda (sp),y
 	sta ptr3+1	
 	
-@loop1:	
+@loop1:		
+
 	
 	lda #0
-	sta ptr1+1		  
-		
+	sta ptr1+1		  	
+
 	ldy tmpc
 	lda (ptr3),y
-	beq @end
-	
-	;; Convert from PETSCII to screen encoding		
+	bne :+
+	jmp @end
+:	
+			
+	;; Convert from PETSCII to screen encoding
 	eor #$e0
 	clc
 	adc #$20
@@ -366,7 +373,7 @@ _ctk_hires_cputsn:
 	bpl @cont
 	eor #$a0
 @cont:
-	ldx _ctk_hires_reversed
+	ldx _ctk_80col_reversed
 	beq :+
 	eor #$80
 :		
@@ -383,23 +390,34 @@ _ctk_hires_cputsn:
 	adc ptr1+1
 	sta ptr1+1
 
+	lda _ctk_80col_cursx
+	and #1
+	beq @left
+
 	;; Print on hires screen, bottom-up. If we should underline,
 	;; we do this by eor:ing the bottom line with #$ff
 	ldy #7
 	lda (ptr1),y
-	ldx _ctk_hires_underline
-	beq @nounderline
+	ldx _ctk_80col_underline
+	beq @rightnounderline
 	eor #$ff
-@nounderline:
-	sta (ptr2),y
+@rightnounderline:
+	tax
+	lda (ptr2),y
+	and #$f0
+	ora _ctk_80col_righttab,x	
+ 	sta (ptr2),y
 	dey
-@loop:
+@rightloop:
 	lda (ptr1),y
-	sta (ptr2),y
+	tax
+	lda (ptr2),y
+	and #$f0
+	ora _ctk_80col_righttab,x	
+ 	sta (ptr2),y
 	dey
-	bpl @loop
-	
-	inc _ctk_hires_cursx
+	bpl @rightloop	
+
 
 	lda ptr2
 	clc
@@ -407,15 +425,127 @@ _ctk_hires_cputsn:
 	sta ptr2
 	bcc :+
 	inc ptr2+1
-:
+:	
+	
+	inc _ctk_80col_cursx	
+	
+	jmp @loopend
+	
+@left:		
+	;; Print on hires screen, bottom-up. If we should underline,
+	;; we do this by eor:ing the bottom line with #$ff
+	ldy #7
+	lda (ptr1),y
+	ldx _ctk_80col_underline
+	beq @nounderline
+	eor #$ff
+@nounderline:
+	tax
+	lda (ptr2),y
+	and #$0f
+	ora _ctk_80col_lefttab,x	
+ 	sta (ptr2),y
+	dey
+@loop:
+	lda (ptr1),y
+	tax
+	lda (ptr2),y
+	and #$0f
+	ora _ctk_80col_lefttab,x	
+ 	sta (ptr2),y
+	dey
+	bpl @loop
+			
+	inc _ctk_80col_cursx	
+@loopend:
 	inc tmpc
 	lda tmpc
 	cmp tmpl
-	bne @loop1
+	beq :+
+	jmp @loop1
+:	
 	
-@end:		
+@end:
 	jsr restore01
 	
-        jmp incsp2
-	
+        jmp incsp2	
 ;---------------------------------------------------------------------
+_ctk_80col_clear_line:
+	asl
+	tax
+	lda _ctk_80col_yhiresaddr,x
+	sta ptr2
+	lda _ctk_80col_yhiresaddr+1,x
+	sta ptr2+1
+	
+	sei
+	lda $01
+	sta tmp01
+	and #$f8
+	sta $01
+
+	ldy #0
+:	
+	lda #$55
+	sta (ptr2),y
+	iny
+	lda #$aa
+	sta (ptr2),y
+	iny
+	bne :-
+
+	inc ptr2+1
+	
+:	
+	lda #$55
+	sta (ptr2),y
+	iny
+	lda #$aa
+	sta (ptr2),y
+	iny
+	cpy #$40
+	bne :-
+		
+	
+	jmp restore01	
+;---------------------------------------------------------------------	
+_ctk_80col_draw_bitmapline:
+	sta tmpl
+	cmp #0
+	bne :+
+	rts
+:		
+
+	jsr setupptrs
+	
+	ldy #0	
+	lda _ctk_80col_color
+:	
+	;  	sta (ptr1),y	
+	iny
+	cpy tmpl
+	bne :-
+
+	lda _ctk_80col_bitmapptr
+	sta ptr1
+	lda _ctk_80col_bitmapptr+1
+	sta ptr1+1
+	
+	ldy #0
+	ldx #0
+:		
+	lda (ptr1),y
+ 	sta (ptr2),y		
+	iny
+	inx
+	cpx #8
+	bne :-
+
+	ldx #0
+	
+	dec tmpl
+	bne :-
+	
+	jmp restore01	
+;---------------------------------------------------------------------
+	
