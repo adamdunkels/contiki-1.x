@@ -1,0 +1,67 @@
+This document is a checklist for what steps to take for a Contiki
+release.
+
+Version: $Id: release.txt,v 1.1 2003/04/09 11:01:29 adamdunkels Exp $
+Author: Adam Dunkels
+
+* Update version number for web browser user-agent string:
+- Update version number in apps/http-strings
+- Run ./makestrings in apps/
+
+* Make sure everything is commited by checking out a separate version,
+  compile and run. 
+
+* Tag base code and ports with CONTIKI-MAJOR-MINOR tag.
+
+* Export a version of the base code and ports with the
+  CONTIKI-MAJOR-MINOR tag.
+
+* Copy include files to contiki-devel-environment:
+ - ctk/ctk-draw.h
+ - ctk/ctk-mouse.h
+ - ctk/ctk.h
+ - ek/dispatcher.h
+ - ek/ek.h
+ - ek/loader.h
+ - lib/petsciiconv.h
+ - uip/resolv.h
+ - uip/uip.h
+ - uip/uip_main.h
+
+* Compile the rs232-eyecandy module and programs in contiki-c64
+ - gmake clean rs232-eyecandy programs
+
+* Make D64 image in contiki-c64
+ - gmake d64
+
+* Rename D64 image to contiki-minor.major.d64
+
+* Copy contiki, contiki-labels.o and loader-arch-module.o into
+  contiki-devel-environment
+
+* Rename contiki to contiki-minor.major and contiki-labels.o to
+  contiki-labels-minor.major.o
+
+* Update Makefile in contiki-devel-environment to use
+  contiki-labels-minor.major.o 
+
+* Compile and run test program in contiki-devel-environment
+
+* Commit in contiki-devel-environment
+
+* Tag contiki-devel-environment with CONTIKI-MAJOR-MINOR tag.
+
+* Export clean CONTIKI-MAJOR-MINOR sources for base, ports and
+  contiki-devel-enviroment 
+
+* Copy contiki, contiki-labels.o and loader-arch-module.o into
+  clean contiki-devel-environment
+
+* Rename directories to <dirname>-major.minor
+
+* Create tarball and zip of the clean base code and ports.
+
+* Create tarball and zip of the contiki-devel-environment with
+  contiki, contiki-labels.o and loader-arch-module.o
+
+* Create zip and gz of the D64 image.
