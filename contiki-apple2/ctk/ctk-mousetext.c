@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.4 2004/06/27 21:01:03 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.5 2004/06/27 22:51:27 oliverschmidt Exp $
  *
  */
 
@@ -68,6 +68,13 @@ cputsn(char *str, unsigned char len)
 void
 ctk_draw_init(void)
 {
+  unsigned char i = 0;
+
+  while(i < 40) {
+    ((char *)0x0200)[i++] = 'V';
+    ((char *)0x0200)[i++] = 'W';
+  }
+
   screensize(&sizex, &sizey);
   ctk_draw_clear(0, sizey);
 }
@@ -308,7 +315,6 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
 		unsigned char clipy1, unsigned char clipy2)
 {
   unsigned char x, y;
-  unsigned char h;
   unsigned char x1, y1, x2, y2;
 
   if(window->y + 1 >= clipy2) {
@@ -360,30 +366,33 @@ ctk_draw_dialog(struct ctk_window *dialog)
 void
 ctk_draw_clear(unsigned char y1, unsigned char y2)
 {
-  unsigned char x, y;
+  char c1, c2;
+  unsigned char i;
 
   if(*config.bkgnd == 'x') {
+    c1 = 'V';
+    c2 = 'W';
+  } else {
+    c1 = ' ' | 0x80;
+    c2 = ' ' | 0x80;
+  }
 
-    /* Set INVFLAG to mousetext output */
-    *(unsigned char *)0x32 = 0x7F;
-
-    for(y = y1; y < y2; ++y) {
-      gotoxy(0, y);
-      for(x = 0; x < sizex; x += 2) {
-        cputs("VW");
+  for(i = y1; i < y2; ++i) {
+    gotoxy(0, i);
+    if(sizex == 80) {
+      *(char *)0xC055 = 0;
+      memset(*(char **)0x28, c1, 40);
+      *(char *)0xC054 = 0;
+      memset(*(char **)0x28, c2, 40);
+    } else {
+      if(c1 == 'V') {
+	memcpy(*(char **)0x28, (char *)0x0200, 40);
+      } else {
+	memset(*(char **)0x28, ' ' | 0x80, 40);
       }
     }
-
-    /* Set INVFLAG to normal text output */
-    *(unsigned char *)0x32 = 0xFF;
-
-  } else {
-
-    for(y = y1; y < y2; ++y) {
-      cclearxy(0, y, sizex);
-
-    }
   }
+
 }
 /*-----------------------------------------------------------------------------------*/
 static void
