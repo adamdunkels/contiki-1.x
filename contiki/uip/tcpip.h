@@ -28,6 +28,8 @@ void tcp_markconn(struct uip_conn *conn,
 
 void tcp_listen(u16_t port);
 
+void tcp_unlisten(u16_t port);
+
 struct uip_conn *tcp_connect(u16_t *ripaddr, u16_t port,
 			     void *appstate);
 
