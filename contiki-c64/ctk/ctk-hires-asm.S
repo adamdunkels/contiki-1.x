@@ -6,34 +6,52 @@
 	.import		incsp2
 
 	
-	.import		_ctk_eyecandy_cursx
-	.import		_ctk_eyecandy_cursy
-	.import		_ctk_eyecandy_color
-	.import		_ctk_eyecandy_underline
-	.import		_ctk_eyecandy_reversed
+	.import		_ctk_hires_cursx
+	.import		_ctk_hires_cursy
+	.import		_ctk_hires_color
+	.import		_ctk_hires_underline
+	.import		_ctk_hires_reversed
 
-	.import		_ctk_eyecandy_yscreenaddr
-	.import		_ctk_eyecandy_yhiresaddr
+	.import		_ctk_hires_yscreenaddr
+	.import		_ctk_hires_yhiresaddr
 
-	.import		_ctk_eyecandy_windowparams
+	.import		_ctk_hires_windowparams
 	
-	.import		_ctk_eyecandy_bitmapptr
-		
-	.export		_ctk_eyecandy_cclear
-	.export		_ctk_eyecandy_chline
-	.export		_ctk_eyecandy_cputc
-	.export		_ctk_eyecandy_cputsn
+	.import		_ctk_hires_bitmapptr
 
-	.export		_ctk_eyecandy_draw_buttonleft
-	.export		_ctk_eyecandy_draw_buttonright
+	.import		_ctk_hires_theme
+			
+	.export		_ctk_hires_cclear
+	.export		_ctk_hires_chline
+	.export		_ctk_hires_cputc
+	.export		_ctk_hires_cputsn
+
+	.export		_ctk_hires_draw_buttonleft
+	.export		_ctk_hires_draw_buttonright
 	
-	.export		_ctk_eyecandy_draw_windowborders
+	.export		_ctk_hires_draw_windowborders
 
-	.export		_ctk_eyecandy_draw_bitmapline
+	.export		_ctk_hires_draw_bitmapline
 ;---------------------------------------------------------------------
 
 ptr5 = sreg
-		
+
+	;; Offsets in the theme struct
+
+	ulcornerpattern =	8
+	titlebarpattern =	ulcornerpattern+8
+	urcornerpattern =	titlebarpattern+8
+	rborderpattern  =	urcornerpattern+8
+	lrcornerpattern =	rborderpattern+8
+	lowerborderpattern =	lrcornerpattern+8
+	llcornerpattern =	lowerborderpattern+8
+	lborderpattern =	llcornerpattern+8
+
+	
+	buttonleftpattern =	lborderpattern+8
+	buttonrightpattern =	buttonleftpattern+8
+
+				
 .bss
 tmp01:	.res 1
 tmpl:	.res 1
@@ -65,23 +83,22 @@ wptitle      = 7
 	
 ;---------------------------------------------------------------------
 .data
-	.include "ctk/ctk-eyecandy-conf.inc"
 ;---------------------------------------------------------------------
 .code
 setupptrs:	
 	;; Find hires address.	
-	lda _ctk_eyecandy_cursy
+	lda _ctk_hires_cursy
 	asl
 	tax
-	lda _ctk_eyecandy_yhiresaddr,x
+	lda _ctk_hires_yhiresaddr,x
 	sta ptr2
-	lda _ctk_eyecandy_yhiresaddr+1,x
+	lda _ctk_hires_yhiresaddr+1,x
 	sta ptr2+1
 
 	;; Add X coordinate to the hires address. 
 	lda #0
 	sta ptr1+1
-	lda _ctk_eyecandy_cursx
+	lda _ctk_hires_cursx
 	asl
 	rol ptr1+1
 	asl	
@@ -97,14 +114,14 @@ setupptrs:
 
 
 	;; Find screen address. 
-	lda _ctk_eyecandy_cursy
+	lda _ctk_hires_cursy
 	asl
 	tax	
-	lda _ctk_eyecandy_yscreenaddr,x
+	lda _ctk_hires_yscreenaddr,x
 	clc
-	adc _ctk_eyecandy_cursx
+	adc _ctk_hires_cursx
 	sta ptr1
-	lda _ctk_eyecandy_yscreenaddr+1,x
+	lda _ctk_hires_yscreenaddr+1,x
 	adc #0
 	sta ptr1+1
 
@@ -123,7 +140,7 @@ restore01:
 	cli
 	rts		
 ;---------------------------------------------------------------------
-_ctk_eyecandy_cclear:
+_ctk_hires_cclear:
 	sta tmpl
 	cmp #0
 	bne @norts
@@ -136,7 +153,7 @@ _ctk_eyecandy_cclear:
 
 	ldy tmpl
 	dey
-	lda _ctk_eyecandy_color
+	lda _ctk_hires_color
 @loop0:
 	sta (ptr1),y
 	dey
@@ -146,7 +163,7 @@ _ctk_eyecandy_cclear:
 	;; reversed flag		
 	
 	ldx tmpl
-	lda _ctk_eyecandy_reversed
+	lda _ctk_hires_reversed
 	beq @noff
 	lda #$ff
 @noff:		
@@ -167,14 +184,14 @@ _ctk_eyecandy_cclear:
 	inc ptr2+1
 @noinc:		
 
-	inc _ctk_eyecandy_cursx
+	inc _ctk_hires_cursx
 
 	dex
 	bne @loop1
 
 	jmp restore01
 ;---------------------------------------------------------------------
-_ctk_eyecandy_chline:
+_ctk_hires_chline:
 	sta tmpl
 	cmp #0
 	bne @norts
@@ -187,7 +204,7 @@ _ctk_eyecandy_chline:
 
 	ldy tmpl
 	dey
-	lda _ctk_eyecandy_color
+	lda _ctk_hires_color
 @loop0:
 	sta (ptr1),y
 	dey
@@ -230,20 +247,20 @@ _ctk_eyecandy_chline:
 	inc ptr2+1
 @noinc:	
 
-	inc _ctk_eyecandy_cursx
+	inc _ctk_hires_cursx
 
 	dex
 	bne @loop1
 
 	jmp restore01
 ;---------------------------------------------------------------------	
-_ctk_eyecandy_cputc:
+_ctk_hires_cputc:
 	sta tmpc
 
 	jsr setupptrs
 
 	ldy #0
-	lda _ctk_eyecandy_color
+	lda _ctk_hires_color
 	sta (ptr1),y
 	
 	;; Turn on font ROM
@@ -265,7 +282,7 @@ _ctk_eyecandy_cputc:
 	bpl @cont
 	eor #$a0
 @cont:
-	ldx _ctk_eyecandy_reversed
+	ldx _ctk_hires_reversed
 	beq :+
 	eor #$80
 :		
@@ -286,7 +303,7 @@ _ctk_eyecandy_cputc:
 	;; we do this by eor:ing the bottom line with #$ff
 	ldy #7
 	lda (ptr1),y
-	ldx _ctk_eyecandy_underline
+	ldx _ctk_hires_underline
 	beq @nounderline
 	eor #$ff
 @nounderline:
@@ -298,11 +315,11 @@ _ctk_eyecandy_cputc:
 	dey
 	bpl @loop
 	
-	inc _ctk_eyecandy_cursx	
+	inc _ctk_hires_cursx	
 	
 	jmp restore01		
 ;---------------------------------------------------------------------
-_ctk_eyecandy_cputsn:
+_ctk_hires_cputsn:
 	sta tmpl
 	cmp #0
 	bne :+
@@ -313,7 +330,7 @@ _ctk_eyecandy_cputsn:
 
 	ldy tmpl
 	dey
-	lda _ctk_eyecandy_color
+	lda _ctk_hires_color
 @loop0:
 	sta (ptr1),y
 	dey
@@ -354,7 +371,7 @@ _ctk_eyecandy_cputsn:
 	bpl @cont
 	eor #$a0
 @cont:
-	ldx _ctk_eyecandy_reversed
+	ldx _ctk_hires_reversed
 	beq :+
 	eor #$80
 :		
@@ -375,7 +392,7 @@ _ctk_eyecandy_cputsn:
 	;; we do this by eor:ing the bottom line with #$ff
 	ldy #7
 	lda (ptr1),y
-	ldx _ctk_eyecandy_underline
+	ldx _ctk_hires_underline
 	beq @nounderline
 	eor #$ff
 @nounderline:
@@ -387,7 +404,7 @@ _ctk_eyecandy_cputsn:
 	dey
 	bpl @loop
 	
-	inc _ctk_eyecandy_cursx
+	inc _ctk_hires_cursx
 
 	lda ptr2
 	clc
@@ -407,11 +424,11 @@ _ctk_eyecandy_cputsn:
         jmp incsp2
 	
 ;---------------------------------------------------------------------
-_ctk_eyecandy_draw_windowborders:
+_ctk_hires_draw_windowborders:
 
 	jsr setupptrs
 
-	lda _ctk_eyecandy_windowparams + wpclipy1
+	lda _ctk_hires_windowparams + wpclipy1
 	beq :+
 	jmp @nofirstline
 :		
@@ -419,16 +436,16 @@ _ctk_eyecandy_draw_windowborders:
 	;; Draw first line of the border, including the window title
 
 	;; Start with filling color memory
-	ldy _ctk_eyecandy_windowparams + wpw
+	ldy _ctk_hires_windowparams + wpw
 	iny
-	lda _ctk_eyecandy_windowparams + wpcolor1
+	lda _ctk_hires_windowparams + wpcolor1
 	sta (ptr1),y	
 	dey
 	dey
 	dey
 	sty tmpw	
 
-	ldy _ctk_eyecandy_windowparams + wptitlelen
+	ldy _ctk_hires_windowparams + wptitlelen
 	iny
 	iny
 	iny
@@ -442,7 +459,7 @@ _ctk_eyecandy_draw_windowborders:
 
 	;; Set color for upper left corner
 	ldy #0
-	lda _ctk_eyecandy_windowparams + wpcolor1
+	lda _ctk_hires_windowparams + wpcolor1
 	sta (ptr1),y
 		
 	
@@ -462,7 +479,7 @@ _ctk_eyecandy_draw_windowborders:
 	;; Draw upper left corner
 	ldy #7
 :	
-	lda ulcornerpattern,y
+	lda _ctk_hires_theme+ulcornerpattern,y
 	sta (ptr3),y
 	dey
 	bpl :-
@@ -486,9 +503,9 @@ _ctk_eyecandy_draw_windowborders:
 	dec tmpw
 
 	;;  Draw the title
-	lda _ctk_eyecandy_windowparams + wptitle
+	lda _ctk_hires_windowparams + wptitle
 	sta ptr4
-	lda _ctk_eyecandy_windowparams + wptitle+1
+	lda _ctk_hires_windowparams + wptitle+1
 	sta ptr4+1
 	
 
@@ -542,7 +559,7 @@ _ctk_eyecandy_draw_windowborders:
 	
 	inc tmpc
 	lda tmpc
-	cmp _ctk_eyecandy_windowparams + wptitlelen
+	cmp _ctk_hires_windowparams + wptitlelen
 	bne @titleloop
 
 	;; Draw empty char after the title
@@ -566,7 +583,7 @@ _ctk_eyecandy_draw_windowborders:
 @titlebarloop:	
 	ldy #7
 :
-	lda titlebarpattern,y
+	lda _ctk_hires_theme+titlebarpattern,y
 	sta (ptr3),y
 	dey
 	bpl :-
@@ -596,7 +613,7 @@ _ctk_eyecandy_draw_windowborders:
 	;; Draw upper right corner piece
 	ldy #7
 :
-	lda urcornerpattern,y
+	lda _ctk_hires_theme+urcornerpattern,y
 	sta (ptr3),y
 	dey
 	bpl :-
@@ -605,7 +622,7 @@ _ctk_eyecandy_draw_windowborders:
 @nofirstline:
 
 
-	ldx _ctk_eyecandy_windowparams + wph
+	ldx _ctk_hires_windowparams + wph
 	inx
 	stx tmph
 	;; Draw left and right borders
@@ -613,13 +630,13 @@ _ctk_eyecandy_draw_windowborders:
 	;; Fill color memory (pointer in ptr1, setup by setupptrs)
 
 	;; First check how much we actually should draw by inspecting
-	;; the clipy1 and clipy2 fields in the _ctk_eyecandy_windowparams 
+	;; the clipy1 and clipy2 fields in the _ctk_hires_windowparams 
 	;; structure		
 
 	lda #1
 	sta tmpy
 	
-	ldx _ctk_eyecandy_windowparams + wpclipy1
+	ldx _ctk_hires_windowparams + wpclipy1
 @clipy1loop:
 	cpx #0
 	beq @clipy1loopend
@@ -653,15 +670,15 @@ _ctk_eyecandy_draw_windowborders:
 :
 		
 	ldx tmpy
-	ldy _ctk_eyecandy_windowparams + wpw
+	ldy _ctk_hires_windowparams + wpw
 	iny
 	sty tmpw
 @bordercloop:
 	ldy tmpw
-	lda _ctk_eyecandy_windowparams + wpcolor2
+	lda _ctk_hires_windowparams + wpcolor2
 	sta (ptr1),y
 	ldy #0
-	lda _ctk_eyecandy_windowparams + wpcolor1
+	lda _ctk_hires_windowparams + wpcolor1
 	sta (ptr1),y
 
 	lda ptr1
@@ -673,7 +690,7 @@ _ctk_eyecandy_draw_windowborders:
 :
 	
 	inx
-	cpx _ctk_eyecandy_windowparams + wpclipy2
+	cpx _ctk_hires_windowparams + wpclipy2
 	beq @bordercloopend
 	cpx tmph
 	bcc @bordercloop
@@ -682,7 +699,7 @@ _ctk_eyecandy_draw_windowborders:
 
 	
 	;; Fill color memory for lower border, if clipy2 allows
-	cpx _ctk_eyecandy_windowparams + wpclipy2
+	cpx _ctk_hires_windowparams + wpclipy2
 	beq @noclowerborder
 
 	lda ptr1
@@ -693,8 +710,8 @@ _ctk_eyecandy_draw_windowborders:
 	dec ptr1+1
 :
 		
-	ldy _ctk_eyecandy_windowparams + wpw
-	lda _ctk_eyecandy_windowparams + wpcolor2		
+	ldy _ctk_hires_windowparams + wpw
+	lda _ctk_hires_windowparams + wpcolor2		
 @lbordercloop:	
 	sta (ptr1),y
 	dey
@@ -715,19 +732,19 @@ _ctk_eyecandy_draw_windowborders:
 
 	ldy #7
 :
-	lda rborderpattern,y		
+	lda _ctk_hires_theme+rborderpattern,y		
 	sta (ptr3),y
 	dey
 	bpl :-
 
 	inx
-	cpx _ctk_eyecandy_windowparams + wpclipy2
+	cpx _ctk_hires_windowparams + wpclipy2
 	beq @rborderloopend
 	cpx tmph
 	bne @rborderloop	
 @rborderloopend:
 	
- 	cpx _ctk_eyecandy_windowparams + wpclipy2 
+ 	cpx _ctk_hires_windowparams + wpclipy2 
  	beq @norbordercorner
 	
 	lda ptr3
@@ -741,7 +758,7 @@ _ctk_eyecandy_draw_windowborders:
 	;; Draw lower right corner, if clipy2 allows it
 	ldy #7
 :		
-	lda lrcornerpattern,y
+	lda _ctk_hires_theme+lrcornerpattern,y
 	sta (ptr3),y
 	dey
 	bpl :-
@@ -751,7 +768,7 @@ _ctk_eyecandy_draw_windowborders:
 	stx tmpy
 		
 	;; Draw lower border
-	ldx _ctk_eyecandy_windowparams + wpw
+	ldx _ctk_hires_windowparams + wpw
 
 @lowerborderloop:
 	lda ptr3
@@ -763,26 +780,15 @@ _ctk_eyecandy_draw_windowborders:
 :	
 
 	lda tmpy
-	cmp _ctk_eyecandy_windowparams + wpclipy2
+	cmp _ctk_hires_windowparams + wpclipy2
 	beq @nolowerborder
 	
-	ldy #0
-	lda #$00
+	ldy #7
 :	
+	lda _ctk_hires_theme+lowerborderpattern,y
 	sta (ptr3),y
-	iny
-	cpy #4
-	bne :-
-	lda #$ff
-	sta (ptr3),y
-	iny
-	lda #$00
-	sta (ptr3),y
-	iny
-	lda #$ff
-	sta (ptr3),y
-	iny
-	sta (ptr3),y
+	dey
+	bpl :-
 @nolowerborder:	
 		
 	dex
@@ -804,7 +810,7 @@ _ctk_eyecandy_draw_windowborders:
 	;; Draw lower left corner, if clipy2 allows it
 	ldy #7
 :		
-	lda llcornerpattern,y
+	lda _ctk_hires_theme+llcornerpattern,y
 	sta (ptr3),y
 	dey
 	bpl :-
@@ -826,12 +832,12 @@ _ctk_eyecandy_draw_windowborders:
 @lborderloop:
 	cpx #1
 	beq @lborderloopend
-	cpx _ctk_eyecandy_windowparams + wpclipy1
+	cpx _ctk_hires_windowparams + wpclipy1
 	bcc @lborderloopend
 	
 	ldy #7
 :
-	lda lborderpattern,y	
+	lda _ctk_hires_theme+lborderpattern,y	
 	sta (ptr3),y
 	dey
 	bpl :-
@@ -852,15 +858,15 @@ _ctk_eyecandy_draw_windowborders:
 	
 	jmp restore01
 ;---------------------------------------------------------------------	
-_ctk_eyecandy_draw_buttonleft:
+_ctk_hires_draw_buttonleft:
 	jsr setupptrs
 
 	ldy #0
-	lda _ctk_eyecandy_color
+	lda _ctk_hires_color
 	sta (ptr1),y
 
 :		
-	lda buttonleftpattern,y
+	lda _ctk_hires_theme+buttonleftpattern,y
 	sta (ptr2),y
 	iny
 	cpy #8
@@ -868,14 +874,14 @@ _ctk_eyecandy_draw_buttonleft:
 	
 	jmp restore01
 ;---------------------------------------------------------------------	
-_ctk_eyecandy_draw_buttonright:
+_ctk_hires_draw_buttonright:
 	jsr setupptrs
 	ldy #0
-	lda _ctk_eyecandy_color
+	lda _ctk_hires_color
 	sta (ptr1),y
 
 :		
-	lda buttonrightpattern,y
+	lda _ctk_hires_theme+buttonrightpattern,y
 	sta (ptr2),y
 	iny
 	cpy #8
@@ -883,7 +889,7 @@ _ctk_eyecandy_draw_buttonright:
 	
 	jmp restore01	
 ;---------------------------------------------------------------------
-_ctk_eyecandy_draw_bitmapline:
+_ctk_hires_draw_bitmapline:
 	sta tmpl
 	cmp #0
 	bne :+
@@ -893,16 +899,16 @@ _ctk_eyecandy_draw_bitmapline:
 	jsr setupptrs
 	
 	ldy #0	
-	lda _ctk_eyecandy_color
+	lda _ctk_hires_color
 :	
  	sta (ptr1),y
 	iny
 	cpy tmpl
 	bne :-
 
-	lda _ctk_eyecandy_bitmapptr
+	lda _ctk_hires_bitmapptr
 	sta ptr1
-	lda _ctk_eyecandy_bitmapptr+1
+	lda _ctk_hires_bitmapptr+1
 	sta ptr1+1
 	
 	ldy #0

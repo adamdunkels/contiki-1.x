@@ -66,8 +66,7 @@ UIP=uip.o uip_arch.o uip_main.o resolv.o
 
 
 CTK_CONIO=ctk-conio.o
-CTK_EYECANDY=ctk-eyecandy.o ctk-eyecandy-asm.o
-CTK_BLUEROUND=ctk-blueround.o ctk-blueround-asm.o
+CTK_HIRES=ctk-hires.o ctk-hires-asm.o
 
 
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 

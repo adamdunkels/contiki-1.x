@@ -32,23 +32,23 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-blueround-asm.h,v 1.1 2003/03/19 16:26:19 adamdunkels Exp $
+ * $Id: ctk-hires-asm.h,v 1.1 2003/04/17 15:09:44 adamdunkels Exp $
  *
  */
 
-#ifndef __CTK_BLUEROUND_ASM_H__
-#define __CTK_BLUEROUND_ASM_H__
+#ifndef __CTK_HIRES_ASM_H__
+#define __CTK_HIRES_ASM_H__
 
-void __fastcall__ ctk_blueround_cclear(unsigned char len);
-void __fastcall__ ctk_blueround_chline(unsigned char len);
-void __fastcall__ ctk_blueround_cputc(unsigned char c);
-void __fastcall__ ctk_blueround_cputsn(unsigned char *str,
+void __fastcall__ ctk_hires_cclear(unsigned char len);
+void __fastcall__ ctk_hires_chline(unsigned char len);
+void __fastcall__ ctk_hires_cputc(unsigned char c);
+void __fastcall__ ctk_hires_cputsn(unsigned char *str,
 				      unsigned char len);
 
-void ctk_blueround_draw_buttonleft(void);
-void ctk_blueround_draw_buttonright(void);
+void ctk_hires_draw_buttonleft(void);
+void ctk_hires_draw_buttonright(void);
 
-struct ctk_blueround_windowparams {
+struct ctk_hires_windowparams {
   unsigned char w;
   unsigned char h;
   unsigned char clipy1;
@@ -58,13 +58,16 @@ struct ctk_blueround_windowparams {
   unsigned char titlelen;
   char *title;
 };
-extern struct ctk_blueround_windowparams ctk_blueround_windowparams;
-void ctk_blueround_draw_windowborder(void);
+extern struct ctk_hires_windowparams ctk_hires_windowparams;
+void ctk_hires_draw_windowborders(void);
 
-extern unsigned char ctk_blueround_cursx,
-  ctk_blueround_cursy,
-  ctk_blueround_color,
-  ctk_blueround_reversed,
-  ctk_blueround_underline;
+extern unsigned char ctk_hires_cursx,
+  ctk_hires_cursy,
+  ctk_hires_color,
+  ctk_hires_reversed,
+  ctk_hires_underline;
 
-#endif /* __CTK_BLUEROUND_ASM_H__ */
+
+void __fastcall__ ctk_hires_draw_bitmapline(unsigned char len);
+
+#endif /* __CTK_HIRES_ASM_H__ */

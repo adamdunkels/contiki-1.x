@@ -32,23 +32,15 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.1 2003/03/19 16:26:18 adamdunkels Exp $
+ * $Id: ctk-arch.h,v 1.2 2003/04/17 15:09:35 adamdunkels Exp $
  *
  */
 
 #ifndef __CTK_ARCH_H__
 #define __CTK_ARCH_H__
 
-#if CTK_EYECANDY
-#include "ctk-eyecandy.h"
-#endif 
-
-#if CTK_BLUEROUND
-#include "ctk-blueround.h"
-#endif 
-
-#if CTK_REDFIRE
-#include "ctk-redfire.h"
+#if CTK_HIRES
+#include "ctk-hires.h"
 #endif 
 
 #if CTK_CONIO

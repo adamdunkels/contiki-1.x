@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.3 2003/04/11 20:26:22 adamdunkels Exp $
+# $Id: Makefile,v 1.4 2003/04/17 15:09:31 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -40,8 +40,7 @@ usage:
 	@echo 'To compile Contiki, use "'$(MAKE)' target" where target'
 	@echo 'is one of the following:'
 	@echo tfe
-	@echo rs232-eyecandy programs
-	@echo rs232-blueround
+	@echo rs232 programs
 	@echo rs232-conio programs
 	@echo d64
 	@echo programs
@@ -51,15 +50,13 @@ programs:
 	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.programs
 tfe:
 	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-tfe
-rs232-eyecandy:
-	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232-eyecandy
+rs232:
+	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232
 rs232-conio:
 	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232-conio
-rs232-blueround:
-	$(MAKE) CONTIKI=$(CONTIKI) -f Makefile.c64-rs232-blueround
 
 depend:
-	gcc -MM -D_CBM__ -D__C64__ -v \
+	gcc -MM -D_CBM__ -D__C64__ -DCTK_HIRES -v \
         -Iapps -Ictk -Iuip -Iconf \
 	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
         -I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
@@ -73,5 +70,5 @@ clean:
 d64:
 	c1541 -format contiki,64 d64 contiki.d64
 	c1541 -attach contiki.d64 -write contiki
-	c1541 -attach contiki.d64 -write about.prg -write email.prg -write memstat.prg -write netconf.prg -write processes.prg -write simpletelnet.prg -write www.prg -write calc.prg 
+	c1541 -attach contiki.d64 -write about.prg -write email.prg -write memstat.prg -write netconf.prg -write processes.prg -write simpletelnet.prg -write www.prg -write calc.prg -write default.prg -write blueround.prg
 	c1541 -attach contiki.d64 -list

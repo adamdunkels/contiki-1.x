@@ -32,13 +32,16 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-eyecandy.c,v 1.4 2003/04/09 09:02:05 adamdunkels Exp $
+ * $Id: ctk-hires.c,v 1.1 2003/04/17 15:09:45 adamdunkels Exp $
  *
  */
+
 #include "ctk.h"
 #include "ctk-draw.h"
-#include "ctk-eyecandy.h"
-#include "ctk-eyecandy-asm.h"
+#include "ctk-hires.h"
+#include "ctk-hires-asm.h"
+
+#include "ctk-hires-theme.h"
 
 #include <string.h>
 
@@ -54,10 +57,10 @@
 
 static unsigned char lineptr;
 
-unsigned char ctk_eyecandy_cursx, ctk_eyecandy_cursy;
-unsigned char ctk_eyecandy_reversed;
-unsigned char ctk_eyecandy_color;
-unsigned char ctk_eyecandy_underline;
+unsigned char ctk_hires_cursx, ctk_hires_cursy;
+unsigned char ctk_hires_reversed;
+unsigned char ctk_hires_color;
+unsigned char ctk_hires_underline;
 
 static unsigned char cchar;
 
@@ -71,21 +74,15 @@ static unsigned char h;
 static unsigned char wfocus;
 static unsigned char x1, y1, x2, y2;
 
-struct ctk_eyecandy_windowparams ctk_eyecandy_windowparams;
-unsigned char *ctk_eyecandy_bitmapptr;
+struct ctk_hires_windowparams ctk_hires_windowparams;
+unsigned char *ctk_hires_bitmapptr;
 /*-----------------------------------------------------------------------------------*/
 /* Tables. */
 
-#define COLOR(bg, fg) ((fg << 4) | (bg))
-
-#define MENUCOLOR       54
-#define OPENMENUCOLOR   55
-#define ACTIVEMENUCOLOR 56
-
-#include "ctk-eyecandy-conf.h"
 
 
-unsigned short ctk_eyecandy_yscreenaddr[25] =
+
+unsigned short ctk_hires_yscreenaddr[25] =
   {0 * SCREEN_WIDTH + SCREENADDR, 1 * SCREEN_WIDTH + SCREENADDR,
    2 * SCREEN_WIDTH + SCREENADDR, 3 * SCREEN_WIDTH + SCREENADDR,
    4 * SCREEN_WIDTH + SCREENADDR, 5 * SCREEN_WIDTH + SCREENADDR,
@@ -100,7 +97,7 @@ unsigned short ctk_eyecandy_yscreenaddr[25] =
    22 * SCREEN_WIDTH + SCREENADDR, 23 * SCREEN_WIDTH + SCREENADDR,
    24 * SCREEN_WIDTH + SCREENADDR};
 
-unsigned short ctk_eyecandy_yhiresaddr[25] =
+unsigned short ctk_hires_yhiresaddr[25] =
   {0 * 320 + HIRESADDR, 1 * 320 + HIRESADDR,
    2 * 320 + HIRESADDR, 3 * 320 + HIRESADDR,
    4 * 320 + HIRESADDR, 5 * 320 + HIRESADDR,
@@ -114,85 +111,13 @@ unsigned short ctk_eyecandy_yhiresaddr[25] =
    20 * 320 + HIRESADDR, 21 * 320 + HIRESADDR,
    22 * 320 + HIRESADDR, 23 * 320 + HIRESADDR,
    24 * 320 + HIRESADDR};
-
-static unsigned char linecolors[25] =
-  {COLOR(BGCOLOR1,BGCOLOR1),
-   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
-   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
-   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
-   COLOR(BGCOLOR2,BGCOLOR1),COLOR(BGCOLOR2,BGCOLOR1),
-   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
-   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
-   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
-   COLOR(BGCOLOR3,BGCOLOR2),COLOR(BGCOLOR3,BGCOLOR2),
-   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
-   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
-   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
-   COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3)};
-
-static unsigned char dither48[4*8] =
-  {0x88,0x00,0x22,0x00,
-   0xff,0xff,0xff,0xff,
-   0xff,0xdd,0xff,0x77,
-   0xff,0x55,0xff,0x55,
-   0xee,0x55,0xbb,0x55,
-   0xaa,0x55,0xaa,0x55,
-   0xaa,0x44,0xaa,0x11,
-   0xaa,0x00,0xaa,0x00};
-
-static unsigned char mouseptrsprites[0x80] =
-  {
-    0x00, 0x00, 0x00,
-    0x40, 0x00, 0x00,
-    0x60, 0x00, 0x00,
-    0x70, 0x00, 0x00,
-    0x78, 0x00, 0x00,
-    0x7c, 0x00, 0x00,
-    0x70, 0x00, 0x00,
-    0x58, 0x00, 0x00,
-    0x18, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00,
-    
-    0xc0, 0x00, 0x00,
-    0xe0, 0x00, 0x00,
-    0xf0, 0x00, 0x00,
-    0xf8, 0x00, 0x00,
-    0xfc, 0x00, 0x00,
-    0xfe, 0x00, 0x00,
-    0xfe, 0x00, 0x00,
-    0xfc, 0x00, 0x00,
-    0xfc, 0x00, 0x00,
-    0x3c, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00,
-    0x00    
-  };
+extern struct ctk_hires_theme ctk_hires_theme;
+struct ctk_hires_theme *ctk_hires_theme_ptr = &ctk_hires_theme;
 /*-----------------------------------------------------------------------------------*/
-#define hires_wherex() ctk_eyecandy_cursx
-#define hires_revers(c)   ctk_eyecandy_reversed = c
-#define hires_color(c)   ctk_eyecandy_color = c
-#define hires_underline(c)   ctk_eyecandy_underline = c
+#define hires_wherex() ctk_hires_cursx
+#define hires_revers(c)   ctk_hires_reversed = c
+#define hires_color(c)   ctk_hires_color = c
+#define hires_underline(c)   ctk_hires_underline = c
 /*-----------------------------------------------------------------------------------*/
 static void
 hires_cvline(unsigned char length)
@@ -200,31 +125,31 @@ hires_cvline(unsigned char length)
   unsigned char i;
   
   for(i = 0; i < length; ++i) {
-    ctk_eyecandy_cputc('|');
-    --ctk_eyecandy_cursx;
-    ++ctk_eyecandy_cursy;
+    ctk_hires_cputc('|');
+    --ctk_hires_cursx;
+    ++ctk_hires_cursy;
   }
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 hires_gotoxy(unsigned char x, unsigned char y)
 {
-  ctk_eyecandy_cursx = x;
-  ctk_eyecandy_cursy = y;
+  ctk_hires_cursx = x;
+  ctk_hires_cursy = y;
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 hires_cclearxy(unsigned char x, unsigned char y, unsigned char length)
 {
   hires_gotoxy(x, y);
-  ctk_eyecandy_cclear(length);
+  ctk_hires_cclear(length);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 hires_chlinexy(unsigned char x, unsigned char y, unsigned char length)
 {
   hires_gotoxy(x, y);
-  ctk_eyecandy_chline(length);
+  ctk_hires_chline(length);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -238,23 +163,23 @@ static void
 hires_cputcxy(unsigned char x, unsigned char y, char c)
 {
   hires_gotoxy(x, y);
-  ctk_eyecandy_cputc(c);
+  ctk_hires_cputc(c);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 clear_line(unsigned char line)
 {
   lineptr = line;
-  asm("lda _lineptr");
+  asm("lda %v", lineptr);
   asm("asl");
   asm("tax");
-  asm("lda _ctk_eyecandy_yhiresaddr,x");
+  asm("lda %v,x", ctk_hires_yhiresaddr);
   asm("sta ptr2");
-  asm("lda _ctk_eyecandy_yhiresaddr+1,x");
+  asm("lda %v+1,x", ctk_hires_yhiresaddr);
   asm("sta ptr2+1");
-  asm("lda _ctk_eyecandy_yscreenaddr,x");
+  asm("lda %v,x", ctk_hires_yscreenaddr);
   asm("sta ptr1");
-  asm("lda _ctk_eyecandy_yscreenaddr+1,x");
+  asm("lda %v+1,x", ctk_hires_yscreenaddr);
   asm("sta ptr1+1");
 
   
@@ -264,8 +189,9 @@ clear_line(unsigned char line)
   asm("lda #$30");
   asm("sta $01");
   asm("ldy #39");
-  asm("ldx _lineptr");
-  asm("lda _linecolors,x");
+  asm("ldx %v", lineptr);
+  asm("lda %v+%w,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpatterncolors));
   asm("clearlineloop1:");
   asm("sta (ptr1),y");
   asm("dey");
@@ -275,68 +201,84 @@ clear_line(unsigned char line)
   asm("cli");
 
 
-  asm("lda _lineptr");
-  asm("and #7");
+  asm("lda %v", lineptr);
+  /*  asm("and #7");*/
   asm("asl");
-  /*  asm("asl");*/
+  asm("asl");
   asm("asl");
   asm("tax");
   asm("ldy #0");
   asm("clearlineloop2:");
-  asm("lda _dither48+0,x");
+  asm("lda %v+%w+0,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  asm("lda _dither48+1,x");
+  asm("lda %v+%w+1,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  asm("lda _dither48+2,x");
+  asm("lda %v+%w+2,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  asm("lda _dither48+3,x");
+  asm("lda %v+%w+3,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  /*  asm("lda _dither48+4,x");
-      asm("sta (ptr2),y");
-      asm("iny");
-      asm("lda _dither48+5,x");
-      asm("sta (ptr2),y");
-      asm("iny");
-      asm("lda _dither48+6,x");
-      asm("sta (ptr2),y");
-      asm("iny");
-      asm("lda _dither48+7,x");
-      asm("sta (ptr2),y");
-      asm("iny");*/
+  asm("lda %v+%w+4,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
+  asm("lda %v+%w+5,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
+  asm("lda %v+%w+6,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
+  asm("lda %v+%w+7,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
   asm("bne clearlineloop2");
   
   asm("inc ptr2+1");
 
   asm("ldy #0");
   asm("clearlineloop3:");
-  asm("lda _dither48+0,x");
+  asm("lda %v+%w+0,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  asm("lda _dither48+1,x");
+  asm("lda %v+%w+1,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  asm("lda _dither48+2,x");
+  asm("lda %v+%w+2,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  asm("lda _dither48+3,x");
+  asm("lda %v+%w+3,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
   asm("sta (ptr2),y");
   asm("iny");
-  /*  asm("lda _dither48+4,x");
-      asm("sta (ptr2),y");
-      asm("iny");
-      asm("lda _dither48+5,x");
-      asm("sta (ptr2),y");
-      asm("iny");
-      asm("lda _dither48+6,x");
-      asm("sta (ptr2),y");
-      asm("iny");
-      asm("lda _dither48+7,x");
-      asm("sta (ptr2),y");
-      asm("iny");*/
+  asm("lda %v+%w+4,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
+  asm("lda %v+%w+5,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
+  asm("lda %v+%w+6,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
+  asm("lda %v+%w+7,x", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, backgroundpattern));
+  asm("sta (ptr2),y");
+  asm("iny");
   asm("cpy #$40");
   asm("bne clearlineloop3");
   
@@ -394,9 +336,10 @@ ctk_draw_init(void)
   VIC.ctrl1 = 0x3b;  /* $D011 */
   VIC.addr  = 0x78;  /* $D018 */
   VIC.ctrl2 = 0xc8;  /* $D016 */
-  VIC.bordercolor = 0x06; /* $D020 */
-  VIC.bgcolor0 = 0x00; /* $D021 */  
   CIA2.pra  = 0x00;  /* $DD00 */
+
+  VIC.bordercolor = ctk_hires_theme.bordercolor; /* $D020 */
+  VIC.bgcolor0 = ctk_hires_theme.screencolor; /* $D021 */  
 
   /* Fill color memory. */
   asm("sei");
@@ -469,12 +412,14 @@ ctk_draw_init(void)
   ctk_draw_clear(0, SCREEN_HEIGHT);
 
   /* Setup mouse pointer sprite. */
-  asm("lda #0");
+  asm("lda %v+%w", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, pointermaskcolor));
   asm("sta $d027");
-  asm("lda #1");
+  asm("lda %v+%w", ctk_hires_theme,
+      offsetof(struct ctk_hires_theme, pointercolor));
   asm("sta $d028");
 
-  ptr1 = mouseptrsprites;
+  ptr1 = ctk_hires_theme.pointer;
   ptr2 = (unsigned char *)0xff40;
   
   for(i = 0; i < 0x80; ++i) {
@@ -490,12 +435,12 @@ draw_bitmap_icon(unsigned char *bitmap)
   tmpptr = bitmap;
 
   /* Find screen address. */
-  asm("lda _ctk_eyecandy_cursy");
+  asm("lda _ctk_hires_cursy");
   asm("asl");
   asm("tax");
-  asm("lda _ctk_eyecandy_yscreenaddr,x");
+  asm("lda _ctk_hires_yscreenaddr,x");
   asm("sta ptr1");
-  asm("lda _ctk_eyecandy_yscreenaddr+1,x");
+  asm("lda _ctk_hires_yscreenaddr+1,x");
   asm("sta ptr1+1");
 
   /* Turn off interrupts, prepare $01 to store color data in RAM under
@@ -507,8 +452,8 @@ draw_bitmap_icon(unsigned char *bitmap)
   asm("sta $01");
 
   /* Actually store color value in color RAM. */
-  asm("ldy _ctk_eyecandy_cursx");
-  asm("lda _ctk_eyecandy_color");
+  asm("ldy _ctk_hires_cursx");
+  asm("lda _ctk_hires_color");
   asm("sta (ptr1),y");
   asm("iny");
   asm("sta (ptr1),y");
@@ -518,7 +463,7 @@ draw_bitmap_icon(unsigned char *bitmap)
   asm("clc");
   asm("adc #$26");
   asm("tay");
-  asm("lda _ctk_eyecandy_color");
+  asm("lda _ctk_hires_color");
   asm("sta (ptr1),y");
   asm("iny");
   asm("sta (ptr1),y");
@@ -528,7 +473,7 @@ draw_bitmap_icon(unsigned char *bitmap)
   asm("clc");
   asm("adc #$26");
   asm("tay");
-  asm("lda _ctk_eyecandy_color");
+  asm("lda _ctk_hires_color");
   asm("sta (ptr1),y");
   asm("iny");
   asm("sta (ptr1),y");
@@ -538,18 +483,18 @@ draw_bitmap_icon(unsigned char *bitmap)
 
 
   /* Find hires address. */
-  asm("lda _ctk_eyecandy_cursy");
+  asm("lda _ctk_hires_cursy");
   asm("asl");
   asm("tax");
-  asm("lda _ctk_eyecandy_yhiresaddr,x");
+  asm("lda _ctk_hires_yhiresaddr,x");
   asm("sta ptr2");
-  asm("lda _ctk_eyecandy_yhiresaddr+1,x");
+  asm("lda _ctk_hires_yhiresaddr+1,x");
   asm("sta ptr2+1");
 
   /* Add X coordinate to the hires address. */
   asm("lda #0");
   asm("sta ptr1+1");
-  asm("lda _ctk_eyecandy_cursx");
+  asm("lda _ctk_hires_cursx");
   asm("asl");
   asm("rol ptr1+1");
   asm("asl");
@@ -608,29 +553,29 @@ draw_widget(struct ctk_widget *w,
 	    unsigned char focus)
 {
   unsigned char xpos, ypos, xscroll;
-  unsigned char i, j;
+  unsigned char i;
   char c, *text;
   unsigned char len;
 
   xpos = x + w->x;
   ypos = y + w->y;
-
-  hires_color(colors[w->type * 6 + focus]);
   
   switch(w->type) {
   case CTK_WIDGET_SEPARATOR:
+    hires_color(ctk_hires_theme.separatorcolors[focus]);
     if(ypos >= clipy1 && ypos < clipy2) {
       hires_chlinexy(xpos, ypos, w->w);
     }
     break;
   case CTK_WIDGET_LABEL:
+    hires_color(ctk_hires_theme.labelcolors[focus]);
     text = w->widget.label.text;
     for(i = 0; i < w->widget.label.h; ++i) {
       if(ypos >= clipy1 && ypos < clipy2) {
 	hires_gotoxy(xpos, ypos);
-	ctk_eyecandy_cputsn(text, w->w);
+	ctk_hires_cputsn(text, w->w);
 	if(w->w - (hires_wherex() - xpos) > 0) {
-	  ctk_eyecandy_cclear(w->w - (hires_wherex() - xpos));
+	  ctk_hires_cclear(w->w - (hires_wherex() - xpos));
 	}
       }
       ++ypos;
@@ -639,25 +584,27 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_BUTTON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      hires_color(colors[7 * 6 + focus]);
+      hires_color(ctk_hires_theme.buttonleftcolors[focus]);
       hires_gotoxy(xpos, ypos);
-      ctk_eyecandy_draw_buttonleft();
-      hires_color(colors[w->type * 6 + focus]);
+      ctk_hires_draw_buttonleft();
+      hires_color(ctk_hires_theme.buttoncolors[focus]);
       hires_gotoxy(xpos + 1, ypos);
-      ctk_eyecandy_cputsn(w->widget.button.text, w->w);
-      hires_color(colors[8 * 6 + focus]);      
-      ctk_eyecandy_draw_buttonright();
+      ctk_hires_cputsn(w->widget.button.text, w->w);
+      hires_color(ctk_hires_theme.buttonrightcolors[focus]);
+      ctk_hires_draw_buttonright();
     }
     break;
   case CTK_WIDGET_HYPERLINK:
     if(ypos >= clipy1 && ypos < clipy2) {
+      hires_color(ctk_hires_theme.hyperlinkcolors[focus]);
       hires_underline(1);
       hires_gotoxy(xpos, ypos);
-      ctk_eyecandy_cputsn(w->widget.button.text, w->w);
+      ctk_hires_cputsn(w->widget.button.text, w->w);
       hires_underline(0);
     }
     break;
   case CTK_WIDGET_TEXTENTRY:
+    hires_color(ctk_hires_theme.textentrycolors[focus]);
     text = w->widget.textentry.text;
     if(focus & CTK_FOCUS_WIDGET &&
        w->widget.textentry.state != CTK_TEXTENTRY_EDIT) {
@@ -669,50 +616,41 @@ draw_widget(struct ctk_widget *w,
     if(w->widget.textentry.xpos >= w->w - 1) {
       xscroll = w->widget.textentry.xpos - w->w + 1;
     }
-    for(j = 0; j < w->widget.textentry.h; ++j) {
-      if(ypos >= clipy1 && ypos < clipy2) {
-	if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT &&
-	   w->widget.textentry.ypos == j) {
-	  hires_revers(0);
-	  hires_cputcxy(xpos, ypos, '>');
-	  for(i = 0; i < w->w; ++i) {
-	    c = text[i + xscroll];
-	    if(i == w->widget.textentry.xpos - xscroll) {
-	      hires_revers(1);
-	    } else {
-	      hires_revers(0);
-	    }
-	    if(c == 0) {
-	      ctk_eyecandy_cputc(' ');
-	    } else {
-	      ctk_eyecandy_cputc(c);
-	    }
+    if(ypos >= clipy1 && ypos < clipy2) {
+      if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT) {
+	hires_revers(0);
+	hires_cputcxy(xpos, ypos, '>');
+	for(i = 0; i < w->w; ++i) {
+	  c = text[i + xscroll];
+	  if(i == w->widget.textentry.xpos - xscroll) {
+	    hires_revers(1);
+	  } else {
 	    hires_revers(0);
 	  }
-	  ctk_eyecandy_cputc('<');
-	} else {
-	  hires_cputcxy(xpos, ypos, '|');
-	  /*	  hires_gotoxy(xpos + 1, ypos);          */
-	  ctk_eyecandy_cputsn(text, w->w);
-	  i = hires_wherex();
-	  if(i - xpos - 1 < w->w) {
-	    ctk_eyecandy_cclear(w->w - (i - xpos) + 1);
+	  if(c == 0) {
+	    ctk_hires_cputc(' ');
+	  } else {
+	    ctk_hires_cputc(c);
 	  }
-	  ctk_eyecandy_cputc('|');
+	  hires_revers(0);
 	}
+	ctk_hires_cputc('<');
+      } else {
+	hires_cputcxy(xpos, ypos, '|');
+	/*	  hires_gotoxy(xpos + 1, ypos);          */
+	ctk_hires_cputsn(text, w->w);
+	i = hires_wherex();
+	if(i - xpos - 1 < w->w) {
+	  ctk_hires_cclear(w->w - (i - xpos) + 1);
+	}
+	ctk_hires_cputc('|');
       }
-      ++ypos;
-      text += w->widget.textentry.len;
     }
     hires_revers(0);
     break;
   case CTK_WIDGET_ICON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      if(focus) {
-	hires_color(COLOR(COLOR_BLACK, COLOR_YELLOW));
-      } else {
-	hires_color(COLOR(COLOR_WHITE, COLOR_BLACK));
-      }
+      hires_color(ctk_hires_theme.iconcolors[focus]);
       hires_gotoxy(xpos, ypos);
       if(w->widget.icon.bitmap != NULL) {
 	draw_bitmap_icon(w->widget.icon.bitmap);
@@ -725,17 +663,18 @@ draw_widget(struct ctk_widget *w,
       }
       
       hires_gotoxy(x, ypos + 3);
-      ctk_eyecandy_cputsn(w->widget.icon.title, len);
+      ctk_hires_cputsn(w->widget.icon.title, len);
     }
     break;
   case CTK_WIDGET_BITMAP:
-    ctk_eyecandy_bitmapptr = w->widget.bitmap.bitmap;
+    hires_color(ctk_hires_theme.bitmapcolors[focus]);
+    ctk_hires_bitmapptr = w->widget.bitmap.bitmap;
     for(i = 0; i < w->widget.bitmap.h; ++i) {
       if(ypos >= clipy1 && ypos < clipy2) {
 	hires_gotoxy(xpos, ypos);
-	ctk_eyecandy_draw_bitmapline(w->w);
+	ctk_hires_draw_bitmapline(w->w);
       }
-      ctk_eyecandy_bitmapptr += w->w * 8;
+      ctk_hires_bitmapptr += w->w * 8;
       ++ypos;
     }
     break;
@@ -774,7 +713,7 @@ ctk_draw_clear_window(struct ctk_window *window,
 {
   unsigned char h;
 
-  hires_color(colors[focus]);
+  hires_color(ctk_hires_theme.windowcolors[focus]);
   
   h = window->y + 2 + window->h;
   /* Clear window contents. */
@@ -801,30 +740,29 @@ ctk_draw_window(register struct ctk_window *window,
     return;
   }
   
-  hires_color(colors[focus+1]);
+  hires_color(ctk_hires_theme.windowcolors[focus+1]);
   
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + window->w;
   y2 = y1 + window->h;
 
-  hires_color(colors[focus+1]);
     
   hires_gotoxy(x, y);
-  ctk_eyecandy_windowparams.w = window->w;
-  ctk_eyecandy_windowparams.h = window->h;
+  ctk_hires_windowparams.w = window->w;
+  ctk_hires_windowparams.h = window->h;
   if(clipy1 < y) {
-    ctk_eyecandy_windowparams.clipy1 = 0;
+    ctk_hires_windowparams.clipy1 = 0;
   } else {
-    ctk_eyecandy_windowparams.clipy1 = clipy1 - y;
+    ctk_hires_windowparams.clipy1 = clipy1 - y;
   }
-  ctk_eyecandy_windowparams.clipy2 = clipy2 - y;
-  ctk_eyecandy_windowparams.color1 = colors[focus+1];
-  ctk_eyecandy_windowparams.color2 = colors[focus];
-  ctk_eyecandy_windowparams.title = window->title;
-  ctk_eyecandy_windowparams.titlelen = window->titlelen;
+  ctk_hires_windowparams.clipy2 = clipy2 - y;
+  ctk_hires_windowparams.color1 = ctk_hires_theme.windowcolors[focus+1];
+  ctk_hires_windowparams.color2 = ctk_hires_theme.windowcolors[focus];
+  ctk_hires_windowparams.title = window->title;
+  ctk_hires_windowparams.titlelen = window->titlelen;
 
-  ctk_eyecandy_draw_windowborders();
+  ctk_hires_draw_windowborders();
   
 #if 0
   /* Draw window frame. */  
@@ -834,10 +772,10 @@ ctk_draw_window(register struct ctk_window *window,
 		      y, window->w - 5 - strlen(window->title));
     windowurcorner(x + window->w + 1, y);
     hires_gotoxy(x + 1, y);
-    hires_color(colors[focus]);
-    ctk_eyecandy_cputc(' ');
-    ctk_eyecandy_cputsn(window->title, window->titlelen);
-    ctk_eyecandy_cputc(' ');
+    hires_color(ctk_hires_theme.windowcolors[focus]);
+    ctk_hires_cputc(' ');
+    ctk_hires_cputsn(window->title, window->titlelen);
+    ctk_hires_cputc(' ');
   }
 
   h = window->h;
@@ -863,9 +801,9 @@ ctk_draw_window(register struct ctk_window *window,
     return;
   }
   
-  hires_color(colors[focus+1]);  
+  hires_color(ctk_hires_theme.windowcolors[focus+1]);  
   windowsideborder(x, y1, h+1, 0xc0);
-  hires_color(colors[focus]);
+  hires_color(ctk_hires_theme.windowcolors[focus]);
   windowsideborder(x2, y+1, h, 0x0b);
 
   if(y + window->h >= clipy1 &&
@@ -901,7 +839,7 @@ ctk_draw_dialog(register struct ctk_window *dialog)
 {
   register struct ctk_widget *w;
 
-  hires_color(colors[CTK_FOCUS_DIALOG]);
+  hires_color(ctk_hires_theme.windowcolors[CTK_FOCUS_DIALOG]);
 
   /*  x = (SCREEN_WIDTH - dialog->w) / 2;
       y = (SCREEN_HEIGHT - 1 - dialog->h) / 2; */
@@ -975,32 +913,32 @@ draw_menu(struct ctk_menu *m)
 {
   unsigned char x, x2, y;
   
-  hires_color(colors[OPENMENUCOLOR]);
+  hires_color(ctk_hires_theme.openmenucolor);
   x = hires_wherex();
-  ctk_eyecandy_cputsn(m->title, m->titlelen);
-  ctk_eyecandy_cputc(' ');
+  ctk_hires_cputsn(m->title, m->titlelen);
+  ctk_hires_cputc(' ');
   x2 = hires_wherex();
   if(x + CTK_CONF_MENUWIDTH > SCREEN_WIDTH) {
     x = SCREEN_WIDTH - CTK_CONF_MENUWIDTH;
   }      
   for(y = 0; y < m->nitems; ++y) {
     if(y == m->active) {
-      hires_color(colors[ACTIVEMENUCOLOR]);
+      hires_color(ctk_hires_theme.activemenucolor);
     } else {
-      hires_color(colors[MENUCOLOR]);
+      hires_color(ctk_hires_theme.menucolor);
     }
     hires_gotoxy(x, y + 1);
     if(m->items[y].title[0] == '-') {
-      ctk_eyecandy_chline(CTK_CONF_MENUWIDTH);
+      ctk_hires_chline(CTK_CONF_MENUWIDTH);
     } else {
-      ctk_eyecandy_cputsn(m->items[y].title,
+      ctk_hires_cputsn(m->items[y].title,
 			  strlen(m->items[y].title));
     }
-    ctk_eyecandy_cclear(x + CTK_CONF_MENUWIDTH - hires_wherex());
+    ctk_hires_cclear(x + CTK_CONF_MENUWIDTH - hires_wherex());
     hires_revers(0);
   }
   hires_gotoxy(x2, 0);
-  hires_color(colors[MENUCOLOR]);  
+  hires_color(ctk_hires_theme.menucolor);  
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -1010,26 +948,26 @@ ctk_draw_menus(struct ctk_menus *menus)
   
   /* Draw menus */
 
-  hires_color(colors[MENUCOLOR]); 
+  hires_color(ctk_hires_theme.menucolor); 
   hires_gotoxy(0, 0);
   hires_revers(0);
-  ctk_eyecandy_cputc(' ');
+  ctk_hires_cputc(' ');
   for(m = menus->menus->next; m != NULL; m = m->next) {
     if(m != menus->open) {
-      ctk_eyecandy_cputsn(m->title, m->titlelen);
-      ctk_eyecandy_cputc(' ');
+      ctk_hires_cputsn(m->title, m->titlelen);
+      ctk_hires_cputc(' ');
     } else {
       draw_menu(m);
     }
   }
-  ctk_eyecandy_cclear(SCREEN_WIDTH - hires_wherex() -
+  ctk_hires_cclear(SCREEN_WIDTH - hires_wherex() -
 		      strlen(menus->desktopmenu->title) - 1);
   
   /* Draw desktopmenu */  
   if(menus->desktopmenu != menus->open) {
-    ctk_eyecandy_cputsn(menus->desktopmenu->title,
+    ctk_hires_cputsn(menus->desktopmenu->title,
 			menus->desktopmenu->titlelen);
-    ctk_eyecandy_cputc(' ');
+    ctk_hires_cputc(' ');
   } else {
     draw_menu(menus->desktopmenu);
   }

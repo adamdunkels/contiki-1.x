@@ -32,42 +32,20 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-eyecandy-asm.h,v 1.3 2003/04/09 00:31:14 adamdunkels Exp $
+ * $Id: ctk-hires.h,v 1.1 2003/04/17 15:09:45 adamdunkels Exp $
  *
  */
 
-#ifndef __CTK_EYECANDY_ASM_H__
-#define __CTK_EYECANDY_ASM_H__
+#ifndef __CTK_HIRES_H__
+#define __CTK_HIRES_H__
 
-void __fastcall__ ctk_eyecandy_cclear(unsigned char len);
-void __fastcall__ ctk_eyecandy_chline(unsigned char len);
-void __fastcall__ ctk_eyecandy_cputc(unsigned char c);
-void __fastcall__ ctk_eyecandy_cputsn(unsigned char *str,
-				      unsigned char len);
+#include <conio.h>
 
-void ctk_eyecandy_draw_buttonleft(void);
-void ctk_eyecandy_draw_buttonright(void);
+typedef char ctk_arch_key_t;
 
-struct ctk_eyecandy_windowparams {
-  unsigned char w;
-  unsigned char h;
-  unsigned char clipy1;
-  unsigned char clipy2;
-  unsigned char color1;
-  unsigned char color2;
-  unsigned char titlelen;
-  char *title;
-};
-extern struct ctk_eyecandy_windowparams ctk_eyecandy_windowparams;
-void ctk_eyecandy_draw_windowborders(void);
+#define ctk_arch_keyavail kbhit
+#define ctk_arch_getkey   cgetc
 
-extern unsigned char ctk_eyecandy_cursx,
-  ctk_eyecandy_cursy,
-  ctk_eyecandy_color,
-  ctk_eyecandy_reversed,
-  ctk_eyecandy_underline;
+#define CH_ENTER '\n'
 
-
-void __fastcall__ ctk_eyecandy_draw_bitmapline(unsigned char len);
-
-#endif /* __CTK_EYECANDY_ASM_H__ */
+#endif /* __CTK_HIRES_H__ */
