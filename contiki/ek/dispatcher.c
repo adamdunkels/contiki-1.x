@@ -125,7 +125,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.17 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.18 2003/09/04 19:37:46 adamdunkels Exp $
  *
  */
 
@@ -377,6 +377,8 @@ dispatcher_connect(u16_t *ripaddr, u16_t port, void *appstate)
 
   dispatcher_emit(uip_signal_poll, c, DISPATCHER_BROADCAST);
 
+  dispatcher_markconn(c, appstate);
+  
   return c;
 }
 /*-----------------------------------------------------------------------------------*/
