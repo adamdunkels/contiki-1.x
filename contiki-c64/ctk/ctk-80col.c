@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-80col.c,v 1.9 2004/09/14 07:33:36 adamdunkels Exp $
+ * $Id: ctk-80col.c,v 1.10 2004/09/18 20:43:01 adamdunkels Exp $
  */
 
 #include "contiki.h"
@@ -87,7 +87,7 @@ unsigned char ctk_80col_screencolors[25] =
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
    COLOR(BGCOLOR4,BGCOLOR3),COLOR(BGCOLOR4,BGCOLOR3),
-   COLOR(BGCOLOR4,0)};
+   COLOR(BGCOLOR4,1)};
 
 unsigned char ctk_80col_screenpattern[25*8] =
   {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
@@ -267,13 +267,13 @@ struct ctk_80col_theme ctk_80col_theme =
     
     /* Menu colors. */
     /*    unsigned char menucolor,*/
-    COLOR(COLOR_BLUE, COLOR_YELLOW),
+    COLOR(COLOR_YELLOW, COLOR_BLACK),
     
     /*    openmenucolor, */
-    COLOR(COLOR_YELLOW, COLOR_BLUE),
+    COLOR(COLOR_WHITE, COLOR_BLACK),
     
     /* activemenucolor; */
-    COLOR(COLOR_YELLOW, COLOR_BLUE),
+    COLOR(COLOR_BLACK, COLOR_WHITE),
     
   };
 char ctk_80col_versionstring[] = CONTIKI_VERSION_STRING;
@@ -357,14 +357,10 @@ quit(void)
 
   memset((char *)0xd800, 0x0e, 40*25);
 
-  *(unsigned short *)0xfff8 = reset;
-  *(unsigned short *)0xfffa = reset;
-  *(unsigned short *)0xfffc = reset;
-  *(unsigned short *)0xfffe = reset;
 }
 /*-----------------------------------------------------------------------------------*/
 #pragma optimize(push, off)
-void
+static void
 ctk_80col_init(void)
 {
   int i;
@@ -408,7 +404,7 @@ ctk_80col_init(void)
 
   /* Fill hires memory with 0. */
 
-  memset(0xe000, 0, 8000);
+  memset((char *)0xe000, 0, 8000);
 
   for(i = 0; i < 256; ++i) {
 #if 0
@@ -776,7 +772,7 @@ draw_widget(struct ctk_widget *w,
       if(ypos >= clipy1 && ypos < clipy2) {
 	len = strlen(w->widget.icon.title);
 	gotoxy((x & 0xfe) + 1, ypos);
-	ctk_80col_cclear(len / 2);
+	ctk_80col_cclear((len - 1)/ 2);
 	gotoxy(x, ypos);
 	ctk_80col_cputsn(w->widget.icon.title, len);
       }
@@ -1053,7 +1049,7 @@ draw_menu(struct ctk_menu *m)
     if(y == m->active) {
       color(ctk_80col_theme.activemenucolor);
     } else {
-      color(ctk_80col_theme.menucolor);
+      color(ctk_80col_theme.openmenucolor);
     }
     gotoxy(x, y + 1);
     ctk_80col_cclear(CTK_CONF_MENUWIDTH/2);
@@ -1062,7 +1058,8 @@ draw_menu(struct ctk_menu *m)
     if(m->items[y].title[0] == '-') {
       chline(CTK_CONF_MENUWIDTH);
     } else {
-      _cputs(m->items[y].title);
+      /*      _cputs(m->items[y].title);*/
+      ctk_80col_cputsn(m->items[y].title, m->items[y].titlelen);
     }
     /*    if(x + CTK_CONF_MENUWIDTH > wherex()) {
       cclear(x + CTK_CONF_MENUWIDTH - wherex());
@@ -1082,17 +1079,21 @@ s_ctk_draw_menus(struct ctk_menus *menus)
   memcpy((char *)0xe000, ctk_80col_theme.menuleftpattern, 8);
   /* Draw menus */
   gotoxy(2, 0);
-  revers(1);
+
+  revers(1); 
   for(m = menus->menus->next; m != NULL; m = m->next) {
+    color(ctk_80col_theme.menucolor);
     if(m != menus->open) {
-      _cputs(m->title);
+      /*      _cputs(m->title);*/
+      ctk_80col_cputsn(m->title, m->titlelen);
       cputc(' ');
     } else {
       draw_menu(m);
     }
   }
 
-
+  color(ctk_80col_theme.menucolor);
+    
   if(wherex() + strlen(menus->desktopmenu->title) + 2 >= SCREEN_WIDTH) {
     gotoxy(SCREEN_WIDTH - strlen(menus->desktopmenu->title) - 2, 0);
   } else {
@@ -1102,15 +1103,18 @@ s_ctk_draw_menus(struct ctk_menus *menus)
   
   /* Draw desktopmenu */
   if(menus->desktopmenu != menus->open) {
-    _cputs(menus->desktopmenu->title);
-    cputc(' ');
-    cputc(' ');    
+    ctk_80col_cputsn(menus->desktopmenu->title, menus->desktopmenu->titlelen);
   } else {
     draw_menu(menus->desktopmenu);
   }
 
+  /*  gotoxy(78, 0);
+  color(ctk_80col_screencolors[0]);
+  cputc(' ');
+  cputc(' ');    */
+  
   revers(0);
-  memcpy(0xe138, ctk_80col_theme.menurightpattern, 8);
+  memcpy((char *)0xe138, ctk_80col_theme.menurightpattern, 8);
 }
 /*-----------------------------------------------------------------------------------*/
 static unsigned char
