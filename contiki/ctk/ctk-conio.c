@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.14 2004/07/29 11:49:45 oliverschmidt Exp $
+ * $Id: ctk-conio.c,v 1.15 2004/08/12 21:52:03 oliverschmidt Exp $
  *
  */
 
@@ -283,6 +283,11 @@ ctk_draw_clear_window(struct ctk_window *window,
   unsigned char i;
   unsigned char h;
 
+  if(focus & CTK_FOCUS_WINDOW) {
+    textcolor(WINDOWCOLOR_FOCUS);
+  } else {
+    textcolor(WINDOWCOLOR);
+  }
   
   h = window->y + 2 + window->h;
   /* Clear window contents. */
@@ -445,6 +450,7 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
 {
   unsigned char i;
  
+  textcolor(BACKGROUNDCOLOR);
   for(i = y1; i < y2; ++i) {
     cclearxy(0, i, sizex);
   }
