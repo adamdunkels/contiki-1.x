@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.4 2003/08/06 23:13:16 adamdunkels Exp $
+ * $Id: main.c,v 1.5 2003/08/13 22:48:55 adamdunkels Exp $
  *
  */
 
@@ -62,10 +62,13 @@ main(int argc, char **argv)
 
   c64_dio_init(_curunit);
   
-  ek_init();
   dispatcher_init();
+  uip_init();
+  
   ctk_init();
 
+  resolv_init();
+  
   uip_signal_init();
   
   program_handler_init();
@@ -76,7 +79,7 @@ main(int argc, char **argv)
 
   program_handler_load("config.prg");
   
-  ek_run();
+  dispatcher_run();
 
   return 0;
 
