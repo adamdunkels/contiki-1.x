@@ -32,13 +32,14 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.8 2003/04/28 23:20:23 adamdunkels Exp $
+ * $Id: netconf.c,v 1.9 2003/07/31 23:25:34 adamdunkels Exp $
  *
  */
 
 #include "uip_main.h"
 #include "uip.h"
 #include "uip_arp.h"
+#include "resolv.h"
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "dispatcher.h"
@@ -101,16 +102,14 @@ LOADER_INIT_FUNC(netconf_init)
     
     /* Create TCP/IP configuration window. */
     ctk_window_new(&tcpipwindow, 30, 10, "TCP/IP config");
-    if(ctk_desktop_width(&tcpipwindow) < 30) {
+    if(ctk_desktop_width(tcpipwindow.desktop) < 30) {
       ctk_window_move(&tcpipwindow, 0,
-		      (ctk_desktop_height(&tcpipwindow) - 10) / 2 - 2);
+		      (ctk_desktop_height(tcpipwindow.desktop) - 10) / 2 - 2);
     } else {
       ctk_window_move(&tcpipwindow,
-		      (ctk_desktop_width(&tcpipwindow) - 30) / 2,
-		      (ctk_desktop_height(&tcpipwindow) - 10) / 2 - 2);
+		      (ctk_desktop_width(tcpipwindow.desktop) - 30) / 2,
+		      (ctk_desktop_height(tcpipwindow.desktop) - 10) / 2 - 2);
     }
-
-    
     
 #ifdef WITH_ETHERNET
     CTK_WIDGET_ADD(&tcpipwindow, &ipaddrlabel);  
@@ -252,9 +251,11 @@ DISPATCHER_SIGHANDLER(netconf_sighandler, s, data)
       apply_tcpipconfig();
       ctk_window_close(&tcpipwindow);
       netconf_quit();
-      ctk_redraw();
+      /*      ctk_desktop_redraw(tcpipwindow.desktop);*/
     }
-  } else if(s == ctk_signal_window_close) {
+  } else if(s == ctk_signal_window_close ||
+	    s == dispatcher_signal_quit) {
+    ctk_window_close(&tcpipwindow);
     netconf_quit();
   }
 }
