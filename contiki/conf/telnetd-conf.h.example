@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: telnetd-conf.h.example,v 1.1 2004/02/16 20:46:04 adamdunkels Exp $
+ * $Id: telnetd-conf.h.example,v 1.2 2004/07/04 11:37:34 adamdunkels Exp $
  *
  */
 #ifndef __TELNETD_CONF_H__

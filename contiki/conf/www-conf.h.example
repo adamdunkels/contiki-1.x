@@ -36,13 +36,11 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h.example,v 1.3 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: www-conf.h.example,v 1.4 2004/07/04 11:37:34 adamdunkels Exp $
  *
  */
 #ifndef __WWW_CONF_H__
 #define __WWW_CONF_H__
-
-/* The size of the HTML viewing area. */
 
 /**
  * The width of the web page viewing area, measured in characters.
@@ -102,6 +100,11 @@
 /**
  * Maximum length of HTML form input value.
  */
-#define WWW_CONF_MAX_INPUTVALUELEN  34
+#define WWW_CONF_MAX_INPUTVALUELEN  (WWW_CONF_WEBPAGE_WIDTH - 1)
+
+/**
+ * The defaule home page.
+ */
+#define WWW_CONF_HOMEPAGE "http://contiki.c64.org/"
 
 #endif /* __WWW_CONF_H__ */
