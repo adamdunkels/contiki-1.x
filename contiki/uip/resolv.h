@@ -34,7 +34,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.h,v 1.6 2004/07/04 16:52:30 adamdunkels Exp $
+ * $Id: resolv.h,v 1.7 2005/02/07 07:08:03 adamdunkels Exp $
  *
  */
 #ifndef __RESOLV_H__
@@ -43,15 +43,9 @@
 #include "uip.h"
 
 /**
- * \addtogroup signals
- * @{
- */
-
-/**
- * Signal that is sent when a DNS name has been resolved.
+ * Event that is broadcasted when a DNS name has been resolved.
  */
 extern ek_event_t resolv_event_found;
-/** @} */
 
 /* Callbacks. */
 void resolv_found(char *name, u16_t *ipaddr);

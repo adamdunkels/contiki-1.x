@@ -13,9 +13,8 @@
  * function. New hostnames can be resolved using the resolv_query()
  * function.
  *
- * The signal resolv_signal_found is emitted when a hostname has been
- * resolved. The signal is emitted to all processes listening for the
- * signal, and it is up to the receiving process to determine if the
+ * The event resolv_event_found is posted when a hostname has been
+ * resolved. It is up to the receiving process to determine if the
  * correct hostname has been found by calling the resolv_lookup()
  * function with the hostname.
  */
@@ -58,7 +57,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.14 2004/09/17 20:49:05 adamdunkels Exp $
+ * $Id: resolv.c,v 1.15 2005/02/07 07:08:03 adamdunkels Exp $
  *
  */
 
