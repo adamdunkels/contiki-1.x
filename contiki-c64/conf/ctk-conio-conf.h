@@ -32,14 +32,14 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio-conf.h,v 1.2 2004/08/12 21:54:48 oliverschmidt Exp $
+ * $Id: ctk-conio-conf.h,v 1.1 2004/09/12 11:20:48 adamdunkels Exp $
  *
  */
 
 #ifndef __CTK_CONIO_CONF_H__
 #define __CTK_CONIO_CONF_H__
 
-#if 0
+#if 1
 /* Light gray inverted color scheme: */
 #define BORDERCOLOR         COLOR_WHITE
 #define SCREENCOLOR         COLOR_WHITE
@@ -83,7 +83,7 @@
 #define ACTIVEMENUITEMCOLOR COLOR_YELLOW
 #endif /* 0 */
 
-#if 1
+#if 0
 /* Black and white monocrome color scheme: */
 #define BORDERCOLOR         COLOR_BLACK
 #define SCREENCOLOR         COLOR_BLACK
