@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.6 2003/08/24 22:35:22 adamdunkels Exp $
+ * $Id: main.c,v 1.7 2004/02/16 21:21:46 adamdunkels Exp $
  *
  */
 
@@ -57,6 +57,12 @@
 
 #include <cbm.h>
 
+/*-----------------------------------------------------------------------------------*/
+ek_clock_t
+ek_clock(void)
+{
+  return clock();
+}
 /*-----------------------------------------------------------------------------------*/
 int
 main(int argc, char **argv)
