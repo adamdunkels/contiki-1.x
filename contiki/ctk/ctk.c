@@ -43,7 +43,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.35 2004/03/25 09:53:35 adamdunkels Exp $
+ * $Id: ctk.c,v 1.36 2004/06/06 06:19:25 adamdunkels Exp $
  *
  */
 
@@ -1211,23 +1211,25 @@ textentry_input(ctk_arch_key_t c,
     break;
     
   default:
-    len = tlen - txpos - 1;
-    if(c == CH_DEL) {
-      if(txpos > 0 && len > 0) {
-	strncpy(cptr - 1, cptr, len);
-	*(cptr + len - 1) = 0;
-	--txpos;
-      }
-    } else {
-      if(len > 0) {
-	cptr2 = cptr + len - 1;
-	while(cptr2 + 1 > cptr) {
-	  *(cptr2 + 1) = *cptr2;
-	  --cptr2;
+    if(ctk_arch_isprint(c)) {
+      len = tlen - txpos - 1;
+      if(c == CH_DEL) {
+	if(txpos > 0 && len > 0) {
+	  strncpy(cptr - 1, cptr, len);
+	  *(cptr + len - 1) = 0;
+	  --txpos;
 	}
+      } else {
+	if(len > 0) {
+	  cptr2 = cptr + len - 1;
+	  while(cptr2 + 1 > cptr) {
+	    *(cptr2 + 1) = *cptr2;
+	    --cptr2;
+	  }
 	
-	*cptr = c;
-	++txpos;
+	  *cptr = c;
+	  ++txpos;
+	}
       }
     }
     break;
