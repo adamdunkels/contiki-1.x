@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.2 2003/08/20 21:54:19 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.3 2003/08/25 12:42:41 adamdunkels Exp $
  *
  */
 
@@ -186,11 +186,11 @@ main(int argc, char **argv)
 
   rtl8019_drv_init();
 
-  ctk_vncserver_init();  
+  ctk_vncserver_init(NULL);  
 
   program_handler_init();
 
-  webserver_init();
+  webserver_init(NULL);
 
   
   /*  program_handler_add(&directory_dsc, "Directory", 1);*/

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: weblinks.c,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: weblinks.c,v 1.2 2003/08/25 12:42:41 adamdunkels Exp $
  *
  */
 
@@ -99,9 +99,11 @@ static struct dispatcher_proc p =
 static ek_id_t id;
 
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(weblinks_init)
+LOADER_INIT_FUNC(weblinks_init, arg)
 {
   unsigned char y, i;
+  
+  arg_free(arg);
 		     
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);

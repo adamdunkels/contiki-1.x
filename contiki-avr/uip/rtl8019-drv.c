@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rtl8019-drv.c,v 1.1 2003/07/04 10:54:52 adamdunkels Exp $
+ * $Id: rtl8019-drv.c,v 1.2 2003/08/25 12:42:41 adamdunkels Exp $
  *
  */
 
@@ -132,8 +132,9 @@ rtl8019_drv_idle(void)
   }    
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(rtl8019_drv_init)
+LOADER_INIT_FUNC(rtl8019_drv_init, arg)
 {
+  arg_free(arg);
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: webserver.c,v 1.1 2003/07/04 10:54:51 adamdunkels Exp $
+ * $Id: webserver.c,v 1.2 2003/08/25 12:42:41 adamdunkels Exp $
  *
  */
 
@@ -69,8 +69,9 @@ static char log[LOG_WIDTH*LOG_HEIGHT];
 static struct ctk_label loglabel =
 {CTK_LABEL(0, 1, LOG_WIDTH, LOG_HEIGHT, log)};
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(webserver_init)
+LOADER_INIT_FUNC(webserver_init, arg)
 {
+  arg_free(arg);
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
 
