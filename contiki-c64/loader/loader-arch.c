@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.5 2003/08/04 00:12:50 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.6 2003/08/09 13:28:31 adamdunkels Exp $
  *
  */
 
@@ -78,7 +78,7 @@ load(const char *name)
     /* ### */
     return LOADER_ERR_OPEN;
   }
-  ctrl.callerdata = &file;
+  ctrl.callerdata = (int)&file;
   
   /* Load the module */
   res = mod_load(&ctrl);
