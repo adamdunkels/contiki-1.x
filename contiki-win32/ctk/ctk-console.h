@@ -29,12 +29,15 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.h,v 1.1 2004/07/15 00:36:57 oliverschmidt Exp $
+ * $Id: ctk-console.h,v 1.2 2004/07/31 14:55:17 oliverschmidt Exp $
  *
  */
 
 #ifndef __CTK_CONSOLE_H__
 #define __CTK_CONSOLE_H__
+
+void console_init(void);
+void console_exit(void);
 
 unsigned char wherex(void);
 unsigned char wherey(void);

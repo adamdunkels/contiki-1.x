@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.1 2004/07/15 00:36:57 oliverschmidt Exp $
+ * $Id: ctk-arch.h,v 1.2 2004/07/31 14:55:17 oliverschmidt Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
@@ -56,6 +56,7 @@
 #undef ctk_arch_getkey
 #define cputc		putch
 
+#define COLOR_BLACK	0
 #define COLOR_BLUE	1
 #define COLOR_GRAY	1 | 2 | 4
 #define COLOR_CYAN	1 | 2 | 8

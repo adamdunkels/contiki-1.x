@@ -29,39 +29,84 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.c,v 1.1 2004/07/15 00:36:57 oliverschmidt Exp $
+ * $Id: ctk-console.c,v 1.2 2004/07/31 14:55:17 oliverschmidt Exp $
  *
  */
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <stdlib.h>
 #include <conio.h>
 
 #include "ctk-console.h"
+
+static HANDLE stdouthandle;
+
+static unsigned char       saved_foreground;
+static unsigned char       saved_background;
+static char                saved_title[1024];
+static DWORD               saved_consolemode;
+static CONSOLE_CURSOR_INFO saved_cursorinfo;
 
 static unsigned char reversed;
 static unsigned char foreground;
 static unsigned char background;
 
 /*-----------------------------------------------------------------------------------*/
-static HANDLE
-getconsole(void)
+static BOOL WINAPI
+consolehandler(DWORD event)
 {
-  static HANDLE console = INVALID_HANDLE_VALUE;
-
-  if(console == INVALID_HANDLE_VALUE) {
-    console = CreateFile("CONOUT$", GENERIC_READ | GENERIC_WRITE,
-			 FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
-                         OPEN_EXISTING, 0, NULL);
+  if(event == CTRL_C_EVENT ||
+     event == CTRL_BREAK_EVENT) {
+    console_exit();
   }
-  return console;
+
+  return FALSE;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+console_init(void)
+{
+  CONSOLE_SCREEN_BUFFER_INFO consoleinfo;
+  CONSOLE_CURSOR_INFO cursorinfo = {1, FALSE};
+
+  stdouthandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+  GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
+  saved_foreground = consoleinfo.wAttributes % 0x10;
+  saved_background = consoleinfo.wAttributes / 0x10;
+
+  GetConsoleTitle(saved_title, sizeof(saved_title));
+  SetConsoleTitle("Contiki");
+
+  GetConsoleMode(stdouthandle, &saved_consolemode);
+  SetConsoleMode(stdouthandle, ENABLE_PROCESSED_OUTPUT);
+
+  GetConsoleCursorInfo(stdouthandle, &saved_cursorinfo);
+  SetConsoleCursorInfo(stdouthandle, &cursorinfo);
+
+  SetConsoleCtrlHandler(consolehandler, TRUE);
+}
+/*-----------------------------------------------------------------------------------*/
+void
+console_exit(void)
+{
+  revers(0);
+  textcolor(saved_foreground);
+  bgcolor(saved_background);
+  clrscr();
+  gotoxy(0, 0);
+
+  SetConsoleTitle(saved_title);
+  SetConsoleMode(stdouthandle, saved_consolemode);
+  SetConsoleCursorInfo(stdouthandle, &saved_cursorinfo);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
 setcolor(void)
 {
-  SetConsoleTextAttribute(getconsole(), reversed? background + foreground * 0x10 
-						: foreground + background * 0x10);
+  SetConsoleTextAttribute(stdouthandle, reversed? background + foreground * 0x10 
+					        : foreground + background * 0x10);
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
@@ -69,7 +114,7 @@ wherex(void)
 {
   CONSOLE_SCREEN_BUFFER_INFO consoleinfo;
 
-  GetConsoleScreenBufferInfo(getconsole(), &consoleinfo);
+  GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
   return consoleinfo.dwCursorPosition.X;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -78,7 +123,7 @@ wherey(void)
 {
   CONSOLE_SCREEN_BUFFER_INFO consoleinfo;
 
-  GetConsoleScreenBufferInfo(getconsole(), &consoleinfo);
+  GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
   return consoleinfo.dwCursorPosition.Y;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -133,7 +178,7 @@ gotoxy(unsigned char x, unsigned char y)
 {
   COORD coord = {x, y};
 
-  SetConsoleCursorPosition(getconsole(), coord);
+  SetConsoleCursorPosition(stdouthandle, coord);
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -188,11 +233,6 @@ bgcolor(unsigned char c)
 void
 bordercolor(unsigned char c)
 {
-  CONSOLE_CURSOR_INFO cursorinfo = {1, FALSE};
-
-  SetConsoleCursorInfo(getconsole(), &cursorinfo);
-  SetConsoleMode(getconsole(), 0);
-  SetConsoleTitle("Contiki");
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -200,7 +240,7 @@ screensize(unsigned char *x, unsigned char *y)
 {
   CONSOLE_SCREEN_BUFFER_INFO consoleinfo;
 
-  GetConsoleScreenBufferInfo(getconsole(), &consoleinfo);
+  GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
   *x = consoleinfo.dwMaximumWindowSize.X;
   *y = consoleinfo.dwMaximumWindowSize.Y;
 }
