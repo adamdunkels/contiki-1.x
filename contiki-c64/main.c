@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.8 2004/02/24 09:52:54 adamdunkels Exp $
+ * $Id: main.c,v 1.9 2004/06/08 11:47:18 adamdunkels Exp $
  *
  */
 
@@ -64,8 +64,8 @@ ek_clock(void)
   return clock();
 }
 /*-----------------------------------------------------------------------------------*/
-int
-main(int argc, char **argv)
+void
+main(void)
 {
 
   c64_dio_init(_curunit);
@@ -89,9 +89,5 @@ main(int argc, char **argv)
   
   dispatcher_run();
 
-  return 0;
-
-  argv = argv;
-  argc = argc;
 }
 /*-----------------------------------------------------------------------------------*/
