@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.9 2003/09/04 19:19:36 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.10 2004/02/16 21:27:17 uid93195 Exp $
  *
  */
 
@@ -94,13 +94,13 @@ main(int argc, char **argv)
 
   
   uip_init();
-  resolv_init();
+  resolv_init(NULL);
 
   /* XXX: just for making it easier to test. */
-  uip_ipaddr(addr, 192,168,1,2);
+  uip_ipaddr(addr, 192,168,2,2);
   uip_sethostaddr(addr);
 
-  uip_ipaddr(addr, 192,168,1,1);
+  uip_ipaddr(addr, 192,168,2,1);
   uip_setdraddr(addr);
 
   uip_ipaddr(addr, 255,255,255,0);
@@ -144,11 +144,27 @@ main(int argc, char **argv)
   
   /*  ctk_redraw();*/
  /* maze_init();*/
+
+  telnetd_init();
+  webserver_init();
   gtk_main();
     
   return 0;
 
   argv = argv;
   argc = argc;
+}
+/*-----------------------------------------------------------------------------------*/
+#include <sys/time.h>
+ 
+ek_clock_t
+ek_clock(void)
+{
+  struct timeval tv;
+  struct timezone tz;
+   
+  gettimeofday(&tv, &tz);
+ 
+  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 /*-----------------------------------------------------------------------------------*/
