@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.4 2003/04/09 13:45:09 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.5 2003/04/09 19:19:24 adamdunkels Exp $
  *
  */
 
@@ -46,7 +46,7 @@
 
 ek_id_t dispatcher_current;
 static struct dispatcher_proc *procs;
-static ek_id_t ids = 0;
+static ek_id_t ids = 1;
 
 
 static ek_signal_t lastsig = 1;
@@ -78,8 +78,10 @@ dispatcher_start(struct dispatcher_proc *p)
   struct dispatcher_proc *q;
   
  again:
-  id = ids++;
-
+  do {
+    id = ids++;
+  } while(id == EK_ID_NONE);
+  
   /* Check if this ID is use. */
   for(q = procs; q != NULL; q = q->next) {
     if(id == q->id) {
