@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.8 2003/04/09 13:45:06 adamdunkels Exp $
+ * $Id: www.c,v 1.9 2003/04/15 21:24:14 adamdunkels Exp $
  *
  */
 
@@ -390,7 +390,7 @@ log_back(void)
 {
   memcpy(history[history_last], url, WWW_CONF_MAX_URLLEN);
   ++history_last;
-  if(history_last > WWW_CONF_HISTORY_SIZE) {
+  if(history_last >= WWW_CONF_HISTORY_SIZE) {
     history_last = 0;
   }
 }
