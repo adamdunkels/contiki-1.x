@@ -112,7 +112,7 @@ clean:
 	rm -f *.o *~ *core contiki *.s *.dsc *.prg *.drv contiki-labels
 
 depend:
-	gcc $(CCDEPFLAGS) -MM -Iapps -Ictk -Iuip -Iconf \
+	gcc $(CCDEPFLAGS) -MM -Iapps -Ictk -Iuip -Iconf -Iloader \
         -I$(CONTIKICC65)/apps -I$(CONTIKICC65)/loader -I$(CONTIKICC65)/uip \
 	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
 	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
