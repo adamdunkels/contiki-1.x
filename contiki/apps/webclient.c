@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.6 2003/07/31 23:32:04 adamdunkels Exp $
+ * $Id: webclient.c,v 1.7 2003/08/09 13:31:54 adamdunkels Exp $
  *
  */
 
@@ -40,6 +40,8 @@
 #include "webclient.h"
 #include "resolv.h"
 #include "uip_main.h"
+
+#include "www-conf.h"
 
 #include <string.h>
 
@@ -67,7 +69,7 @@ struct webclient_state {
 
   u16_t port;
   char host[40];
-  char file[100];  
+  char file[WWW_CONF_MAX_URLLEN];  
   u16_t getrequestptr;
   u16_t getrequestleft;
   
@@ -166,8 +168,9 @@ webclient_get(char *host, u16_t port, char *file)
   return 1;
 }
 /*-----------------------------------------------------------------------------------*/
-static unsigned char *
-copy_string(unsigned char *dest, unsigned char *src, unsigned char len)
+static unsigned char * CC_FASTCALL
+copy_string(unsigned char *dest,
+	    unsigned char *src, unsigned char len)
 {
   return strcpy(dest, src) + len;
 }
