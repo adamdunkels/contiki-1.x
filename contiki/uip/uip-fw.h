@@ -1,6 +1,8 @@
 #ifndef __UIP_FW_H__
 #define __UIP_FW_H__
 
+#include "uip.h"
+
 /**
  * Representation of a uIP network interface.
  */
