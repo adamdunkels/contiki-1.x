@@ -39,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: cc.h,v 1.4 2004/02/24 09:56:06 adamdunkels Exp $
+ * $Id: cc.h,v 1.5 2004/03/02 20:45:57 adamdunkels Exp $
  *
  */
 #ifndef __CC_H__
@@ -95,5 +95,8 @@
 #define CC_DOUBLE_HASH 0
 #endif /* CC_CONF_DOUBLE_HASH */
 
+#ifndef NULL
+#define NULL (void *)0
+#endif /* NULL */
 #endif /* __CC_H__ */
 
