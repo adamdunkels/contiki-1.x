@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.19 2003/08/24 22:41:31 adamdunkels Exp $
+ * $Id: www.c,v 1.20 2003/08/29 20:36:23 adamdunkels Exp $
  *
  */
 
@@ -102,13 +102,13 @@ static struct ctk_separator sep2 =
 
 static struct ctk_window wgetdialog;
 static struct ctk_label wgetlabel1 =
-  {CTK_LABEL(0, 0, 34, 1, "This web page cannot be displayed.")};
+  {CTK_LABEL(1, 1, 34, 1, "This web page cannot be displayed.")};
 static struct ctk_label wgetlabel2 =
-  {CTK_LABEL(0, 2, 35, 1, "Would you like to download instead?")};
+  {CTK_LABEL(1, 3, 35, 1, "Would you like to download instead?")};
 static struct ctk_button wgetnobutton =
-  {CTK_BUTTON(0, 4, 6, "Cancel")};
+  {CTK_BUTTON(1, 5, 6, "Cancel")};
 static struct ctk_button wgetyesbutton =
-  {CTK_BUTTON(9, 4, 24, "Close browser & download")};
+  {CTK_BUTTON(11, 5, 24, "Close browser & download")};
 
 /* The char arrays that hold the history of visited URLs. */
 static char history[WWW_CONF_HISTORY_SIZE][WWW_CONF_MAX_URLLEN];
@@ -238,10 +238,13 @@ LOADER_INIT_FUNC(www_init, arg)
     ctk_window_new(&mainwindow, WWW_CONF_WEBPAGE_WIDTH, 
                    WWW_CONF_WEBPAGE_HEIGHT+5, "Web browser");
     make_window();
+#ifdef WWW_CONF_HOMEPAGE
+    strncpy(editurl, WWW_CONF_HOMEPAGE, sizeof(editurl));
+#endif /* WWW_CONF_HOMEPAGE */    
     CTK_WIDGET_FOCUS(&mainwindow, &urlentry);
 
     /* Create download dialog.*/
-    ctk_dialog_new(&wgetdialog, 35, 5);
+    ctk_dialog_new(&wgetdialog, 38, 7);
     CTK_WIDGET_ADD(&wgetdialog, &wgetlabel1);
     CTK_WIDGET_ADD(&wgetdialog, &wgetlabel2);
     CTK_WIDGET_ADD(&wgetdialog, &wgetnobutton);
@@ -255,6 +258,7 @@ LOADER_INIT_FUNC(www_init, arg)
     dispatcher_listen(ctk_signal_hyperlink_activate);
     dispatcher_listen(ctk_signal_hyperlink_hover);
     dispatcher_listen(resolv_signal_found);
+
   }
   ctk_window_open(&mainwindow);
 }
