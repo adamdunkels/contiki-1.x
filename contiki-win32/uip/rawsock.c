@@ -45,7 +45,7 @@ static DWORD (WINAPI *DeleteProxyArpEntry)(DWORD, DWORD, DWORD);
 
 void debug_printf(char *format, ...);
 
-static DWORD  interfaceindex = -1;
+static DWORD  interfaceindex;
 static DWORD  proxyaddr;
 static SOCKET rawsock = INVALID_SOCKET;
 
@@ -135,12 +135,13 @@ rawsock_init(void)
     error_exit("GetIpAddrTable(ptr) error: %d\n", retval);
   }
 
-  while(interfaceindex == -1) {
+  while(1) {
     if(entry == addrtable->dwNumEntries) {
       error_exit("Parameter error: Unknown host IP address\n", 0);
     }
     if(addrtable->table[entry].dwAddr == hostaddr) {
       interfaceindex = addrtable->table[entry].dwIndex;
+      break;
     }
     entry++;
   }
