@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd.c,v 1.1 2003/08/21 22:24:19 adamdunkels Exp $
+ * $Id: telnetd.c,v 1.2 2003/08/21 22:31:38 adamdunkels Exp $
  *
  */
 
@@ -36,6 +36,7 @@
 #include "loader.h"
 #include "uip.h"
 #include "uip_main.h"
+#include "petsciiconv.h"
 #include "uip_arp.h"
 #include "resolv.h"
 
@@ -136,6 +137,7 @@ shell_output(char *str1, char *str2)
       line[len+1] = ISO_nl;
       line[len+2] = 0;
     }
+    petsciiconv_toascii(line, LINELEN);
     for(i = 0; i < NUMLINES; ++i) {
       if(s.lines[i] == NULL) {
 	s.lines[i] = line;
@@ -209,6 +211,7 @@ newdata(void)
     if(s.buf[s.bufptr] == ISO_cr ||
        s.buf[s.bufptr] == ISO_nl) {
       s.buf[s.bufptr] = 0;
+      petsciiconv_topetscii(s.buf, LINELEN);
       shell_input(s.buf);
       s.bufptr = 0;
     } else {
