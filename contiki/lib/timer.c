@@ -11,7 +11,7 @@ timer_set(struct timer *t, clock_time_t interval)
 void
 timer_reset(struct timer *t)
 {
-  t->start = t->start + t->interval;
+  t->start = clock_time();
 }
 /*---------------------------------------------------------------------------*/
 int
