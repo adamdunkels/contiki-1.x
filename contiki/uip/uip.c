@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.19 2005/02/07 06:59:39 adamdunkels Exp $
+ * $Id: uip.c,v 1.20 2005/02/22 22:33:56 adamdunkels Exp $
  *
  */
 
@@ -174,13 +174,6 @@ static u16_t tmp16;
 
 #define ICMP_ECHO_REPLY 0
 #define ICMP_ECHO       8     
-
-/* Header sizes. */
-#define UIP_IPH_LEN    20    /* Size of IP header */
-#define UIP_UDPH_LEN    8    /* Size of UDP header */
-#define UIP_TCPH_LEN   20    /* Size of TCP header */
-#define UIP_IPUDPH_LEN 28    /* Size of IP + UDP header */
-#define UIP_IPTCPH_LEN 40    /* Size of IP + TCP header */
 
 
 /* Macros. */
@@ -377,7 +370,6 @@ static u8_t uip_reassflags;
 #define UIP_REASS_FLAG_LASTFRAG 0x01
 static u8_t uip_reasstmr;
 
-#define IP_HLEN 20
 #define IP_MF   0x20
 
 static u8_t
@@ -390,11 +382,11 @@ uip_reass(void)
      write the IP header of the fragment into the reassembly
      buffer. The timer is updated with the maximum age. */
   if(uip_reasstmr == 0) {
-    memcpy(uip_reassbuf, &BUF->vhl, IP_HLEN);
+    memcpy(uip_reassbuf, &BUF->vhl, UIP_IPH_LEN);
     uip_reasstmr = UIP_REASS_MAXAGE;
     uip_reassflags = 0;
     /* Clear the bitmap. */
-    memset(uip_reassbitmap, sizeof(uip_reassbitmap), 0);
+    memset(uip_reassbitmap, 0, sizeof(uip_reassbitmap));
   }
 
   /* Check if the incoming fragment matches the one currently present
@@ -420,7 +412,7 @@ uip_reass(void)
 
     /* Copy the fragment into the reassembly buffer, at the right
        offset. */
-    memcpy(&uip_reassbuf[IP_HLEN + offset],
+    memcpy(&uip_reassbuf[UIP_IPH_LEN + offset],
 	   (char *)BUF + (int)((BUF->vhl & 0x0f) * 4),
 	   len);
       
@@ -1268,7 +1260,7 @@ uip_process(u8_t flag)
     state. We require that there is no outstanding data; otherwise the
     sequence numbers will be screwed up. */
 
-    if(BUF->flags & TCP_FIN) {
+    if(BUF->flags & TCP_FIN && !(uip_connr->tcpstateflags & UIP_STOPPED)) {
       if(uip_outstanding(uip_connr)) {
 	goto drop;
       }
