@@ -28,7 +28,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.10 2005/03/09 23:31:54 oliverschmidt Exp $
+ * $Id: cs8900a.c,v 1.11 2005/03/11 23:59:12 oliverschmidt Exp $
  *
  */
 
@@ -182,11 +182,6 @@ sendloop1:
   asm("inc %v+1", uip_len);
 noinc:
 
-  asm("lda ptr1");
-  asm("pha");
-  asm("lda ptr1+1");
-  asm("pha");
-  
   asm("lda %v", uip_appdata);
   asm("sta ptr1");
   asm("lda %v+1", uip_appdata);
@@ -207,11 +202,6 @@ check:
   asm("bne %g", sendloop2);
   asm("dec %v+1", uip_len);
   asm("bpl %g", sendloop2);
-
-  asm("pla");
-  asm("sta ptr1+1");
-  asm("pla");
-  asm("sta ptr1");  
 }
 #pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
@@ -283,11 +273,6 @@ noinc:
   }
 
   /* Read bytes into uip_buf. */
-  asm("lda ptr1");
-  asm("pha");
-  asm("lda ptr1+1");
-  asm("pha");
-  
   asm("lda #<%v", uip_buf);
   asm("sta ptr1");
   asm("lda #>%v", uip_buf);
@@ -308,11 +293,6 @@ check:
   asm("bne %g", readloop);
   asm("dec %v+1", cnt);
   asm("bpl %g", readloop);
-
-  asm("pla");
-  asm("sta ptr1+1");
-  asm("pla");
-  asm("sta ptr1");
   return len;
 }
 #pragma optimize(pop)
