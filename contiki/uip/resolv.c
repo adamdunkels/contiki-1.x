@@ -58,14 +58,13 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: resolv.c,v 1.12 2004/07/04 16:52:30 adamdunkels Exp $
+ * $Id: resolv.c,v 1.13 2004/08/09 20:46:32 adamdunkels Exp $
  *
  */
 
 #include "ek.h"
 #include "tcpip.h"
 #include "resolv.h"
-#include "uip-event.h"
 
 #include <string.h>
 
@@ -465,7 +464,9 @@ resolv_getserver(void)
 void
 resolv_conf(u16_t *dnsserver)
 {
-  ek_post_synch(id, EVENT_NEW_SERVER, dnsserver);
+  static u16_t server[2];
+  uip_ipaddr_copy(server, dnsserver);
+  ek_post(id, EVENT_NEW_SERVER, server);
   
   /*  if(resolv_conn != NULL) {
     uip_udp_remove(resolv_conn);
@@ -482,18 +483,16 @@ resolv_conf(u16_t *dnsserver)
 void
 resolv_init(char *arg)
 {
- static u8_t i;
- arg_free(arg);
+  static u8_t i;
+  arg_free(arg);
   
-  if(id == EK_ID_NONE) {
-    id = ek_start(&p);
-	
-    for(i = 0; i < RESOLV_ENTRIES; ++i) {
-      names[i].state = STATE_UNUSED;
-    }
-    
-    resolv_event_found = ek_alloc_event();    
+  id = ek_start(&p);
+  
+  for(i = 0; i < RESOLV_ENTRIES; ++i) {
+    names[i].state = STATE_UNUSED;
   }
+  resolv_conn = NULL;
+  resolv_event_found = ek_alloc_event();    
 }
 /*-----------------------------------------------------------------------------------*/
 /** \internal
