@@ -272,7 +272,7 @@ void ek_replace(struct ek_proc *newp, void *arg);
 /*-----------------------------------------------------------------------------------*/
 void ek_post_synch(ek_id_t id, ek_event_t ev, ek_data_t data);
 
-extern unsigned char ek_poll_request;
+extern volatile unsigned char ek_poll_request;
 #define EK_REQUEST_POLL() ek_poll_request = 1
 
 #endif /* __EK_H__ */
