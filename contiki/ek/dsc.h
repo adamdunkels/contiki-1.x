@@ -46,7 +46,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: dsc.h,v 1.4 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: dsc.h,v 1.5 2003/09/04 19:38:04 adamdunkels Exp $
  *
  */
 #ifndef __DSC_H__
@@ -105,7 +105,7 @@ struct dsc {
 #else /* WITH_LOADER_ARCH */
 #define DSC(dscname, description, prgname, initfunc, icon) \
     void initfunc(char *arg); \
-    struct dsc dscname = {description, initfunc, icon}
+    const struct dsc dscname = {description, initfunc, icon}
 #endif /* WITH_LOADER_ARCH */
 
 #define DSC_HEADER(name) extern struct dsc name;
