@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.11 2003/09/02 21:46:06 adamdunkels Exp $
+ * $Id: webclient.c,v 1.12 2003/09/04 19:35:00 adamdunkels Exp $
  *
  */
 
@@ -168,7 +168,7 @@ webclient_get(char *host, u16_t port, char *file)
 /*-----------------------------------------------------------------------------------*/
 static unsigned char * CC_FASTCALL
 copy_string(unsigned char *dest,
-	    unsigned char *src, unsigned char len)
+	    const unsigned char *src, unsigned char len)
 {
   return strcpy(dest, src) + len;
 }
@@ -265,7 +265,7 @@ parse_statusline(u16_t len)
 }
 /*-----------------------------------------------------------------------------------*/
 static char
-casecmp(char *str1, char *str2, char len)
+casecmp(char *str1, const char *str2, char len)
 {
   static char c;
   
