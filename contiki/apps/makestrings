@@ -37,6 +37,7 @@ stringify("http-strings");
 stringify("http-user-agent-string");
 stringify("smtp-strings");
 stringify("html-strings");
+stringify("ircc-strings");
 
 exit 0;
 
