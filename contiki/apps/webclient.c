@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.12 2003/09/04 19:35:00 adamdunkels Exp $
+ * $Id: webclient.c,v 1.13 2003/09/04 23:06:53 adamdunkels Exp $
  *
  */
 
@@ -337,7 +337,7 @@ parse_headers(u16_t len)
 	  }
 	}
 	strncpy(s.file, cptr, sizeof(s.file));
-	s.file[s.httpheaderlineptr - i] = 0;
+	/*	s.file[s.httpheaderlineptr - i] = 0;*/
       }
 
 
