@@ -32,13 +32,15 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.2 2004/06/08 20:28:33 oliverschmidt Exp $
+ * $Id: ctk-arch.h,v 1.3 2004/06/09 22:06:33 oliverschmidt Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
 #define __CTK_ARCH_H__
 
 #include "ctk-conio.h"
+
+#define ctk_arch_isprint(c) isprint(c)
 
 #ifndef CH_CURS_UP
 #define CH_CURS_UP  	0x0B	/* Ctrl-K */
