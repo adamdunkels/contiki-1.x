@@ -1,1 +1,1 @@
-extern char http_user_agent_fields[102];
+extern char http_user_agent_fields[100];
