@@ -39,7 +39,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.c,v 1.15 2004/09/12 07:17:37 adamdunkels Exp $
+ * $Id: uip.c,v 1.16 2004/09/17 20:48:39 adamdunkels Exp $
  *
  */
 
@@ -233,7 +233,7 @@ uip_connect(u16_t *ripaddr, u16_t rport)
     }
     if(cconn->tcpstateflags == TIME_WAIT) {
       if(conn == 0 ||
-	 cconn->timer > uip_conn->timer) {
+	 cconn->timer > conn->timer) {
 	conn = cconn;
       }
     }
@@ -301,7 +301,7 @@ uip_udp_new(u16_t *ripaddr, u16_t rport)
   }
   
   conn->lport = HTONS(lastport);
-  conn->rport = HTONS(rport);
+  conn->rport = rport;
   conn->ripaddr[0] = ripaddr[0];
   conn->ripaddr[1] = ripaddr[1];
   
@@ -641,44 +641,45 @@ uip_process(u8_t flag)
 #endif /* UIP_REASSEMBLY */
   }
 
-  /* If we are configured to use ping IP address configuration and
-     hasn't been assigned an IP address yet, we accept all ICMP
-     packets. */
-#if UIP_PINGADDRCONF
   if((uip_hostaddr[0] | uip_hostaddr[1]) == 0) {
+    /* If we are configured to use ping IP address configuration and
+       hasn't been assigned an IP address yet, we accept all ICMP
+       packets. */
+#if UIP_PINGADDRCONF
     if(BUF->proto == UIP_PROTO_ICMP) {
       UIP_LOG("ip: possible ping config packet received.");
       goto icmp_input;
     } else {
       UIP_LOG("ip: packet dropped since no address assigned.");
       goto drop;
-    }
-  }
+    }  
 #endif /* UIP_PINGADDRCONF */
 
-  /* If IP broadcast support is configured, we check for a broadcast
-     UDP packet, which may be destined to us. */
+  } else {
+    /* If IP broadcast support is configured, we check for a broadcast
+       UDP packet, which may be destined to us. */
 #if UIP_BROADCAST
-  if(BUF->proto == UIP_PROTO_UDP &&
-     BUF->destipaddr[0] == 0xffff &&
+    if(BUF->proto == UIP_PROTO_UDP &&
+       BUF->destipaddr[0] == 0xffff &&
      BUF->destipaddr[1] == 0xffff &&
-     uip_ipchksum() == 0xffff) {
-    goto udp_input;
-  }
+       uip_ipchksum() == 0xffff) {
+      goto udp_input;
+    }
 #endif /* UIP_BROADCAST */
+    
+    /* Check if the packet is destined for our IP address. */  
+    if(BUF->destipaddr[0] != uip_hostaddr[0]) {
+      UIP_STAT(++uip_stat.ip.drop);
+      /*    UIP_LOG("ip: packet not for us.");        */
+      goto drop;
+    }
+    if(BUF->destipaddr[1] != uip_hostaddr[1]) {
+      UIP_STAT(++uip_stat.ip.drop);
+      /*    UIP_LOG("ip: packet not for us.");        */
+      goto drop;
+    }
+  }
   
-  /* Check if the packet is destined for our IP address. */  
-  if(BUF->destipaddr[0] != uip_hostaddr[0]) {
-    UIP_STAT(++uip_stat.ip.drop);
-    /*    UIP_LOG("ip: packet not for us.");        */
-    goto drop;
-  }
-  if(BUF->destipaddr[1] != uip_hostaddr[1]) {
-    UIP_STAT(++uip_stat.ip.drop);
-    /*    UIP_LOG("ip: packet not for us.");        */
-    goto drop;
-  }
-
   if(uip_ipchksum() != 0xffff) { /* Compute and check the IP header
 				    checksum. */
     UIP_STAT(++uip_stat.ip.drop);
