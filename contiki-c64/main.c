@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.1 2003/07/30 23:11:47 adamdunkels Exp $
+ * $Id: main.c,v 1.2 2003/08/04 00:14:03 adamdunkels Exp $
  *
  */
 
@@ -50,11 +50,17 @@
 #include "netconf-dsc.h"
 #include "directory-dsc.h"
 
+#include "c64-dio.h"
+
+#include <cbm.h>
+
 /*-----------------------------------------------------------------------------------*/
 int
 main(int argc, char **argv)
 {
 
+  c64_dio_init(_curunit);
+  
   ek_init();
   dispatcher_init();
   ctk_init();
