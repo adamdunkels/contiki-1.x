@@ -3,97 +3,10 @@
  * Event kernel, signal dispatcher and handler of uIP events.
  * \author Adam Dunkels <adam@dunkels.com> 
  *
- * The Dispatcher module is the event kernel in Contiki and handles
+ * The dispatcher module is the event kernel in Contiki and handles
  * processes, signals and uIP events. All process execution is
- * initiated by the Dispatcher.
- *
- *
- *
- * The Dispatcher is the initiator of all program execution in
- * Contiki. After the system has been initialized by the boot up code,
- * the dispatcher_run() function is called. This function never
- * returns, but will sit in a loop in which it does two things.
- * 
- * - Pulls the first signal of the signal queue and dispatches this to
- *   all listening processes.
- *
- * - Executes the "idle" handlers of all processes that have
- *   registered.
- *
- * Only one signal is processes at a time, and the idle handlers of
- * all processes are called between two signals are handled.
- *
- *
- *
- * A process is defined by a signal handler, a uIP event handler, and
- * an idle handler. The signal handler is called when a signal has
- * been emitted, for which the process is currently listening. The uIP
- * event handler is called when the uIP TCP/IP stack has an event to
- * deliver to the process. Such events can be that new data has
- * arrived on a connection, that previously sent data has been
- * acknowledged or that a connection has been closed. The idle handler
- * is periodically called by the system.
- *
- * \note The name "idle handler" is a misnomer, since the idle handler
- * will be called even though the system is not idle.
- *
- * A process is started by calling the dispatcher_start()
- * function. This function must be called before any other Dispatcher
- * function is called. When the function returns, the new process is
- * running. The function dispatcher_exit() is used to tell the
- * Dispatcher that a process has exited. This function must be called
- * by the process itself, and must be called the process unloads
- * itself.
- *
- * \note It is not possible to call dispatcher_exit() on behalf of
- * another process - instead, emit the signal dispatcher_signal_quit
- * with the process as a receiver. The other process should then
- * listen for this signal, and call dispatcher_exit() when the signal
- * is received. 
- *
- *
- *
- * The Dispatcher can pass signals between different
- * processes. Signals are simple messages that consist of a signal
- * number and a generic data pointer called the signal data. The
- * signal data can be used to pass messages between processes. In
- * order for a signal to be delivered to a process, the process must
- * be listening for the signal number.
- *
- * When a process is running, the function dispatcher_listen() can be
- * called to register the process as a listener for a signal. When a
- * signal for which the process has registered itself as a listener is
- * emitted by another process, the process' signal handler will be
- * invoked. The signal number and the signal data are passed as
- * function parameters to the signal handler. The signal handler must
- * check the signal number and do whatever it should do based on the
- * value of the signal number.
- *
- * Every process listens to the dispatcher_signal_quit signal by
- * default, and the signal handler function must check for this
- * signal. If this signal is received, the process must do any
- * necessary clean-ups (i.e., close open windows, deallocate allocated
- * memory, etc.) call process_exit(), and call the LOADER_UNLOAD()
- * function.
- *
- * \note It is not possible to unregister a listening signal.
- *
- *
- *
- * If a process has registered an idle handler, the Dispatcher will
- * call it as often as possible. The idle handler can be used to
- * implement timer based functionality (by checking the ek_clock()
- * function), or other background processing. The idle handler must
- * return to the caller within a short time, or otherwise the system
- * will feel sluggish.
- *
- *
- *
- * The uIP TCP/IP stack will call the Dispatcher when a uIP event has
- * occured. The Dispatcher will find the right process for which the
- * event is intended and call the process' uIP handler function. 
+ * initiated by the dispatcher.
  */
-
 /*
  * Copyright (c) 2002-2003, Adam Dunkels.
  * All rights reserved. 
@@ -125,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.19 2003/09/07 18:13:50 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.20 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -152,12 +65,43 @@ static struct dispatcher_proc *curproc;
 static ek_id_t ids = 1;
 
 /**
+ * \defgroup signals System signals
+ * @{
+ *
+ * The Contiki system defines a number of default signals that can be
+ * delivered to processes. 
+ */
+
+/**
  * The "quit" signal.
  *
  * All processes listens to this signal by default, but each program
- * must implement the signal handler for the signal by itself.
+ * must implement the signal handler for the signal by itself. A
+ * process that receives this signal must exit after doing all
+ * necessary clean ups (such as closing open windows, deallocate
+ * allocated memory, etc.). The following code shows how this can be
+ * implemented:
+ \code
+ static struct ctk_window mainwindow;
+ static DISPATCHER_SIGHANDLER(example_sighandler, s, data);
+
+ static
+ DISPATCHER_SIGHANDLER(example_sighandler, s, data)
+ {
+   DISPATCHER_SIGHANDLER_ARGS(s, data);
+
+   if(s == dispatcher_signal_quit) {
+      ctk_window_close(&mainwindow);
+      dispatcher_exit(&p);
+      LOADER_UNLOAD();
+   }
+ }
+ \endcode
+ *
  */
 ek_signal_t dispatcher_signal_quit;
+
+/** @} */
 
 static ek_signal_t lastsig = 1;
 
@@ -191,6 +135,120 @@ struct signal_data {
 
 static ek_num_signals_t nsignals, fsignal;
 static struct signal_data signals[EK_CONF_NUMSIGNALS];
+
+
+/**
+ * \defgroup kernel The Contiki kernel
+ * @{
+ *
+ * At the heart of the Contiki desktop environment is the event driven
+ * Contiki kernel. Using non-preemptive multitasking, the Contiki
+ * event kernel makes it possible to run several programs in
+ * parallel. It also provides message passing mechanisms to the
+ * running programs.
+ *
+ * The Contiki kernel is a simple event driven dispatcher which
+ * handles processes, signals and uIP events. All code execution is
+ * initiated by the dispatcher, and applications are implemented as C
+ * functions that must return within a short time after being
+ * called. It therefore is not possible to implement processes with,
+ * e.g., long-lasting while() loops such as the infamous while(1);
+ * loop.
+ *
+ */
+
+/**
+ * \page disptacher The dispatcher
+ *
+ * The dispatcher is the initiator of all program execution in
+ * Contiki. After the system has been initialized by the boot up code,
+ * the dispatcher_run() function is called. This function never
+ * returns, but will sit in a loop in which it does two things.
+ * 
+ * - Pulls the first signal of the signal queue and dispatches this to
+ *   all listening processes (dispatcher_process_signal()).
+ *
+ * - Executes the "idle" handlers of all processes that have
+ *   registered (dispatcher_process_idle()).
+ *
+ * Only one signal is processes at a time, and the idle handlers of
+ * all processes are called between two signals are handled.
+ *
+ * 
+ * A process is defined by an initialization function, a signal
+ * handler, a uIP event handler, and an idle handler. The signal
+ * handler is called when a signal has been emitted, for which the
+ * process is currently listening. The uIP event handler is called
+ * when the uIP TCP/IP stack has an event to deliver to the
+ * process. Such events can be that new data has arrived on a
+ * connection, that previously sent data has been acknowledged or that
+ * a connection has been closed. The idle handler is periodically
+ * called by the system.
+ *
+ * \note The name "idle handler" is a misnomer, since the idle handler
+ * will be called even though the system is not idle.
+ *
+ * A process is started by calling the dispatcher_start()
+ * function. This function must be called by the initialization
+ * function before any other dispatcher function is called. When the
+ * function returns, the new process is running. 
+ *
+ * The initialization function is declared with the special
+ * LOADER_INIT() macro. The initializaition function takes a single
+ * argument; a char * pointer.
+ *
+ * The function dispatcher_exit() is used to tell the dispatcher that
+ * a process has exited. This function must be called by the process
+ * itself, and must be called the process unloads itself.
+ *
+ * \note It is not possible to call dispatcher_exit() on behalf of
+ * another process - instead, emit the signal dispatcher_signal_quit
+ * with the process as a receiver. The other process should then
+ * listen for this signal, and call dispatcher_exit() when the signal
+ * is received. 
+ *
+ *
+ * The dispatcher can pass signals between different
+ * processes. Signals are simple messages that consist of a signal
+ * number and a generic data pointer called the signal data. The
+ * signal data can be used to pass messages between processes. In
+ * order for a signal to be delivered to a process, the process must
+ * be listening for the signal number.
+ *
+ * When a process is running, the function dispatcher_listen() can be
+ * called to register the process as a listener for a signal. When a
+ * signal for which the process has registered itself as a listener is
+ * emitted by another process, the process' signal handler will be
+ * invoked. The signal number and the signal data are passed as
+ * function parameters to the signal handler. The signal handler must
+ * check the signal number and do whatever it should do based on the
+ * value of the signal number.
+ *
+ * Every process listens to the dispatcher_signal_quit signal by
+ * default, and the signal handler function must check for this
+ * signal. If this signal is received, the process must do any
+ * necessary clean-ups (i.e., close open windows, deallocate allocated
+ * memory, etc.) call process_exit(), and call the LOADER_UNLOAD()
+ * function.
+ *
+ * \note It is not possible to unregister a listening signal.
+ *
+ *
+ *
+ * If a process has registered an idle handler, the dispatcher will
+ * call it as often as possible. The idle handler can be used to
+ * implement timer based functionality (by checking the ek_clock()
+ * function), or other background processing. The idle handler must
+ * return to the caller within a short time, or otherwise the system
+ * will feel sluggish.
+ *
+ *
+ *
+ * The uIP TCP/IP stack will call the dispatcher when a uIP event has
+ * occured. The dispatcher will find the right process for which the
+ * event is intended and call the process' uIP handler function.
+ *
+ */
 
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -268,6 +326,11 @@ dispatcher_start(CC_REGISTER_ARG struct dispatcher_proc *p)
  * Must be called by the process itself before it unloads itself, or
  * the system will crash.
  *
+ * \bug The parameter p is not really needed, since the function can
+ * obtain the process' dispatcher_proc structure from
+ * DISPATCHER_CURRENT() instead. The parameter will be removed for
+ * future versions.
+ *
  * \param p A pointer to the process' dispatcher_proc struct that was
  * started with dispatcher_start().
  */
@@ -324,8 +387,30 @@ ek_clock(void)
 }
 #ifdef WITH_UIP
 /*-----------------------------------------------------------------------------------*/
+
+/** @} */
+
 /**
- * Starts to connect to a remote host using TCP.
+ * \addtogroup uip
+ * @{
+ */
+
+/**
+ * \defgroup ContikiuIPExtensions Contiki extensions to uIP
+ * @{
+ *
+ * Contiki applications that want to commuicate over the Internet
+ * using TCP/IP will use the uIP TCP/IP stack.  Even though Contiki
+ * applications mostly work directly with the uIP API, there are a
+ * number of functions that are replaced with new ones. The reason for
+ * this is that the uIP API works with a single application function,
+ * whereas Contiki requires a more flexible interface where the TCP/IP
+ * stack can be used by several processes.
+ *
+ */
+/**
+ * Starts to connect to a remote host using the TCP realiable byte
+ * stream protocol.
  *
  * This function should be called to connect to a remote host using
  * the reliable TCP protocol. It is a wrapper to the uIP function
@@ -364,6 +449,8 @@ ek_clock(void)
  *
  * \return The connection identifier, or NULL if no connection
  * identifier could be allocated.
+ *
+ * \sa uip_connect()
  */
 /*-----------------------------------------------------------------------------------*/
 struct uip_conn *
@@ -448,6 +535,8 @@ dispatcher_uipcall(void)
  *
  * \param port The TCP port number that should be opened for
  * listening, in network byte order.
+ *
+ * \sa uip_listen()
  */
 /*-----------------------------------------------------------------------------------*/
 void
@@ -472,7 +561,8 @@ dispatcher_uiplisten(u16_t port)
 }
 /*-----------------------------------------------------------------------------------*/
 /**
- * Associates a generic pointer with a uIP connection.
+ * Mark a uIP connection as belonging to the current process and
+ * associate a generic pointer with the connection.
  *
  * This function is used for registering a pointer to a uIP
  * connection. This pointer will be passed as an argument to the
@@ -495,6 +585,15 @@ dispatcher_markconn(struct uip_conn *conn,
   s->id = dispatcher_current;
   s->state = appstate;
 }
+
+/** @} */
+/** @} */
+
+/**
+ * \addtogroup kernel
+ * @{
+ */
+
 /*-----------------------------------------------------------------------------------*/
 /**
  * Registers the calling process as a listener for a signal.
@@ -737,3 +836,4 @@ dispatcher_emit(ek_signal_t s, ek_data_t data, ek_id_t id)
   return EK_ERR_OK;
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */

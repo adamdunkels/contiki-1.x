@@ -1,0 +1,397 @@
+/**
+\defgroup uip The uIP TCP/IP stack
+@{
+*/
+
+/**
+\page uip The uIP TCP/IP stack
+
+The uIP TCP/IP stack provides Internet communication abilities to
+Contiki.
+
+\section uIPIntroduction uIP introduction
+
+With the success of the Internet, the TCP/IP protocol suite has become
+a global standard for communication. TCP/IP is the underlying protocol
+used for web page transfers, e-mail transmissions, file transfers, and
+peer-to-peer networking over the Internet. For embedded systems, being
+able to run native TCP/IP makes it possible to connect the system
+directly to an intranet or even the global Internet. Embedded devices
+with full TCP/IP support will be first-class network citizens, thus
+being able to fully communicate with other hosts in the network.
+
+Traditional TCP/IP implementations have required far too much
+resources both in terms of code size and memory usage to be useful in
+small 8 or 16-bit systems. Code size of a few hundred kilobytes and
+RAM requirements of several hundreds of kilobytes have made it
+impossible to fit the full TCP/IP stack into systems with a few tens
+of kilobytes of RAM and room for less than 100 kilobytes of
+code.
+
+The uIP implementation is designed to have only the absolute minimal
+set of features needed for a full TCP/IP stack. It can only handle a
+single network interface and does not implement UDP, but focuses on
+the IP, ICMP and TCP protocols. uIP is written in the C programming
+language.
+
+Many other TCP/IP implementations for small systems assume that the
+embedded device always will communicate with a full-scale TCP/IP
+implementation running on a workstation-class machine. Under this
+assumption, it is possible to remove certain TCP/IP mechanisms that
+are very rarely used in such situations. Many of those mechanisms are
+essential, however, if the embedded device is to communicate with
+another equally limited device, e.g., when running distributed
+peer-to-peer services and protocols. uIP is designed to be RFC
+compliant in order to let the embedded devices to act as first-class
+network citizens. The uIP TCP/IP implementation that is not tailored
+for any specific application.
+
+
+\section tcpip TCP/IP communication
+
+The full TCP/IP suite consists of numerous protocols, ranging from low
+level protocols such as ARP which translates IP addresses to MAC
+addresses, to application level protocols such as SMTP that is used to
+transfer e-mail. The uIP is mostly concerned with the TCP and IP
+protocols and upper layer protocols will be refered to as ``the
+application''. Lower layer protocols are often implemented in hardware
+or firmware and will be referred to as ``the network device'' that are
+controlled by the network device driver.
+
+TCP provides a reliable byte stream to the upper layer protocols. It
+breaks the byte stream into appropriately sized segments and each
+segment is sent in its own IP packet. The IP packets are sent out on
+the network by the network device driver. If the destination is not on
+the physically connected network, the IP packet is forwarded onto
+another network by a router that is situated between the two
+networks. If the maximum packet size of the other network is smaller
+than the size of the IP packet, the packet is fragmented into smaller
+packets by the router. If possible, the size of the TCP segments are
+chosen so that fragmentation is minimized. The final recipient of the
+packet will have to reassemble any fragmented IP packets before they
+can be passed to higher layers.
+
+The formal requirements for the protocols in the TCP/IP stack is
+specified in a number of RFC documents published by the Internet
+Engineering Task Force, IETF. Each of the protocols in the stack is
+defined in one more RFC documents and RFC1122 collects
+all requirements and updates the previous RFCs. 
+
+The RFC1122 requirements can be divided into two categories; those
+that deal with the host to host communication and those that deal with
+communication between the application and the networking stack. An
+example of the first kind is "A TCP MUST be able to receive a TCP
+option in any segment" and an example of the second kind is "There
+MUST be a mechanism for reporting soft TCP error conditions to the
+application." A TCP/IP implementation that violates requirements of
+the first kind may not be able to communicate with other TCP/IP
+implementations and may even lead to network failures. Violation of
+the second kind of requirements will only affect the communication
+within the system and will not affect host-to-host communication.
+
+In our implementations, we have implemented all RFC requirements that
+affect host-to-host communication. However, in order to reduce code
+size, we have removed certain mechanisms in the interface between the
+application and the stack, such as the soft error reporting mechanism
+and dynamically configurable type-of-service bits for TCP
+connections. Since there are only very few applications that make use
+of those features they can be removed without loss of generality.
+
+\section memory Memory management
+
+In the architectures for which uIP is intended, RAM is the most
+scarce resource. With only a few kilobytes of RAM available for the
+TCP/IP stack to use, mechanisms used in traditional TCP/IP cannot be
+directly applied.
+
+
+The uIP stack does not use explicit dynamic memory
+allocation. Instead, it uses a single global buffer for holding
+packets and has a fixed table for holding connection state. The global
+packet buffer is large enough to contain one packet of maximum
+size. When a packet arrives from the network, the device driver places
+it in the global buffer and calls the TCP/IP stack. If the packet
+contains data, the TCP/IP stack will notify the corresponding
+application. Because the data in the buffer will be overwritten by the
+next incoming packet, the application will either have to act
+immediately on the data or copy the data into a secondary buffer for
+later processing. The packet buffer will not be overwritten by new
+packets before the application has processed the data. Packets that
+arrive when the application is processing the data must be queued,
+either by the network device or by the device driver. Most single-chip
+Ethernet controllers have on-chip buffers that are large enough to
+contain at least 4 maximum sized Ethernet frames. Devices that are
+handled by the processor, such as RS-232 ports, can copy incoming
+bytes to a separate buffer during application processing. If the
+buffers are full, the incoming packet is dropped. This will cause
+performance degradation, but only when multiple connections are
+running in parallel. This is because uIP advertises a very small
+receiver window, which means that only a single TCP segment will be in
+the network per connection.
+
+In uIP, the same global packet buffer that is used for incoming
+packets is also used for the TCP/IP headers of outgoing data. If the
+application sends dynamic data, it may use the parts of the global
+packet buffer that are not used for headers as a temporary storage
+buffer. To send the data, the application passes a pointer to the data
+as well as the length of the data to the stack. The TCP/IP headers are
+written into the global buffer and once the headers have been
+produced, the device driver sends the headers and the application data
+out on the network. The data is not queued for
+retransmissions. Instead, the application will have to reproduce the
+data if a retransmission is necessary.
+
+The total amount of memory usage for uIP depends heavily on the
+applications of the particular device in which the implementations are
+to be run. The memory configuration determines both the amount of
+traffic the system should be able to handle and the maximum amount of
+simultaneous connections. A device that will be sending large e-mails
+while at the same time running a web server with highly dynamic web
+pages and multiple simultaneous clients, will require more RAM than a
+simple Telnet server. It is possible to run the uIP implementation
+with as little as 200 bytes of RAM, but such a configuration will
+provide extremely low throughput and will only allow a small number of
+simultaneous connections.
+
+\section api Application program interface (API)
+
+The Application Program Interface (API) defines the way the
+application program interacts with the TCP/IP stack. The most commonly
+used API for TCP/IP is the BSD socket API which is used in most Unix
+systems and has heavily influenced the Microsoft Windows WinSock
+API. Because the socket API uses stop-and-wait semantics, it requires
+support from an underlying multitasking operating system. Since the
+overhead of task management, context switching and allocation of stack
+space for the tasks might be too high in the intended uIP target
+architectures, the BSD socket interface is not suitable for our
+purposes.
+
+Instead, uIP uses an event driven interface where the application is
+invoked in response to certain events. An application running on top
+of uIP is implemented as a C function that is called by uIP in
+response to certain events. uIP calls the application when data is
+received, when data has been successfully delivered to the other end
+of the connection, when a new connection has been set up, or when data
+has to be retransmitted. The application is also periodically polled
+for new data. The application program provides only one callback
+function; it is up to the application to deal with mapping different
+network services to different ports and connections. Because the
+application is able to act on incoming data and connection requests as
+soon as the TCP/IP stack receives the packet, low response times can
+be achieved even in low-end systems.
+
+uIP is different from other TCP/IP stacks in that it requires help
+from the application when doing retransmissions. Other TCP/IP stacks
+buffer the transmitted data in memory until the data is known to be
+successfully delivered to the remote end of the connection. If the
+data needs to be retransmitted, the stack takes care of the
+retransmission without notifying the application. With this approach,
+the data has to be buffered in memory while waiting for an
+acknowledgment even if the application might be able to quickly
+regenerate the data if a retransmission has to be made.
+
+In order to reduce memory usage, uIP utilizes the fact that the
+application may be able to regenerate sent data and lets the
+application take part in retransmissions. uIP does not keep track of
+packet contents after they have been sent by the device driver, and
+uIP requires that the application takes an active part in performing
+the retransmission. When uIP decides that a segment should be
+retransmitted, it calls the application with a flag set indicating
+that a retransmission is required. The application checks the
+retransmission flag and produces the same data that was previously
+sent. From the application's standpoint, performing a retransmission
+is not different from how the data originally was sent. Therefore the
+application can be written in such a way that the same code is used
+both for sending data and retransmitting data. Also, it is important
+to note that even though the actual retransmission operation is
+carried out by the application, it is the responsibility of the stack
+to know when the retransmission should be made. Thus the complexity of
+the application does not necessarily increase because it takes an
+active part in doing retransmissions.
+
+\subsection appevents Application events
+
+The application must be implemented as a C function, UIP_APPCALL(),
+that uIP calls whenever an event occurs. Each event has a corresponing
+test function that is used to distinguish between different
+events. The functions are implemented as C macros that will evaluate
+to either zero or non-zero. Note that certain events can happen in
+conjunction with each other (i.e., new data can arrive at the same
+time as data is acknowledged).
+
+\subsection connstate The connection pointer
+
+When the application is called by uIP, the global variable uip_conn is
+set to point to the uip_conn structure for the current
+connection. This can be used to distinguish between different
+services. A typical use would be to inspect the uip_conn->lport (the
+local TCP port number) to decide which service the connection should
+provide. For instance, an application might decide to act as an HTTP
+server if the value of uip_conn->lport is equal to 80 and act as a
+TELNET server if the value is 23.
+
+\subsection recvdata Receiving data
+
+If the uIP test function uip_newdata() is non-zero, the remote host of
+the connection has sent new data. The uip_appdata pointer point to the
+actual data. The size of the data is obtained through the uIP function
+uip_datalen(). The data is not buffered by uIP, but will be
+overwritten after the application function returns, and the
+application will therefor have to either act directly on the incoming
+data, or by itself copy the incoming data into a buffer for later
+processing.
+
+\subsection senddata Sending data
+
+When sending data, the application must check the number of available
+bytes in the send window and adjust the length of the data to be sent
+accordingly. The size of the send window is dictated by the memory
+configuration as well as the buffer space announced by the remote
+host. If no buffer space is available, the application has to defer
+the send and wait until later.
+
+The application sends data by using the uIP function uip_send(). The
+uip_send() function takes two arguments; a pointer to the data to be
+sent and the length of the data. If the application needs RAM space
+for producing the actual data that should be sent, the packet buffer
+(pointed to by the uip_appdata pointer) can be used for this purpose.
+
+The application can send only one chunk of data at a time on a
+connection and it is not possible to call uip_send() more than once
+per application invocation; only the data from the last call will be
+sent.
+
+\subsection rexmitdata Retransmitting data
+
+Retransmissions are driven by the periodic TCP timer. Every time the
+periodic timer is invoked, the retransmission timer for each
+connection is decremented. If the timer reaches zero, a retransmission
+should be made. As uIP does not keep track of packet contents after they have
+been sent by the device driver, uIP requires that the
+application takes an active part in performing the
+retransmission. When uIP decides that a segment should be
+retransmitted, the application function is called with the
+uip_rexmit() flag set, indicating that a retransmission is
+required.
+
+The application must check the uip_rexmit() flag and produce the same
+data that was previously sent. From the application's standpoint,
+performing a retransmission is not different from how the data
+originally was sent. Therefor, the application can be written in such
+a way that the same code is used both for sending data and
+retransmitting data. Also, it is important to note that even though
+the actual retransmission operation is carried out by the application,
+it is the responsibility of the stack to know when the retransmission
+should be made. Thus the complexity of the application does not
+necessarily increase because it takes an active part in doing
+retransmissions.
+
+\subsection closing Closing connections
+
+The application closes the current connection by calling the
+uip_close() during an application call. This will cause the connection
+to be cleanly closed. In order to indicate a fatal error, the
+application might want to abort the connection and does so by calling
+the uip_abort() function.
+
+If the connection has been closed by the remote end, the test function
+uip_closed() is true. The application may then do any necessary
+cleanups.
+
+\subsection errors Reporting errors
+
+There are two fatal errors that can happen to a connection, either
+that the connection was aborted by the remote host, or that the
+connection retransmitted the last data too many times and has been
+aborted. uIP reports this by calling the application function. The
+application can use the two test functions uip_aborted() and
+uip_timedout() to test for those error conditions.
+
+\subsection polling Polling
+
+When a connection is idle, uIP polls the application every time the
+periodic timer fires. The application uses the test function
+uip_poll() to check if it is being polled by uIP.
+
+The polling event has two purposes. The first is to let the
+application periodically know that a connection is idle, which allows
+the application to close connections that have been idle for too
+long. The other purpose is to let the application send new data that
+has been produced. The application can only send data when invoked by
+uIP, and therefore the poll event is the only way to send data on an
+otherwise idle connection.
+
+\subsection listen Listening ports
+
+uIP maintains a list of listening TCP ports. A new port is opened for
+listening with the uip_listen() function. When a connection request
+arrives on a listening port, uIP creates a new connection and calls
+the application function. The test function uip_connected() is true if
+the application was invoked because a new connection was created.
+
+The application can check the lport field in the uip_conn structure to
+check to which port the new connection was connected.
+
+\subsection connect Opening connections
+
+New connections can be opened from within
+uIP by the function uip_connect(). This function
+allocates a new connection and sets a flag in the connection state
+which will open a TCP connection to the specified IP address and port
+the next time the connection is polled by uIP. The uip_connect()
+function returns
+a pointer to the uip_conn structure for the new
+connection. If there are no free connection slots, the function
+returns NULL. 
+
+The function uip_ipaddr() may be used to pack an IP address into the
+two element 16-bit array used by uIP to represent IP addresses.
+
+Two examples of usage are shown below. The first example shows how to
+open a connection to TCP port 8080 of the remote end of the current
+connection. If there are not enough TCP connection slots to allow a
+new connection to be opened, the uip_connect() function returns NULL
+and the current connection is aborted by uip_abort(). 
+
+\code
+void connect_example1_app(void) {
+   if(uip_connect(uip_conn->ripaddr, 8080) == NULL) {
+      uip_abort();
+   }
+}   
+\endcode
+
+The second example shows how to open a new connection to a specific IP
+address. No error checks are made in this example.
+
+\code
+void connect_example2(void) {
+   u16_t ipaddr[2];
+
+   uip_ipaddr(ipaddr, 192,168,0,1);
+   uip_connect(ipaddr, 8080);
+}
+\endcode
+
+\section drivers uIP device drivers
+
+From the network device driver's standpoint, uIP consists of two C
+functions: uip_input() and uip_periodic(). The uip_input() function
+should be called by the device driver when an IP packet has been
+received and put into the uip_buf packet buffer. The uip_input()
+function will process the packet, and when it returns an outbound
+packet may have been placed in the same uip_buf packet buffer
+(indicated by the uip_len variable being non-zero). The device driver
+should then send out this packet onto the network.
+
+The uip_periodic() function should be invoked periodically once per
+connection by the device driver, typically one per second. This
+function is used by uIP to drive protocol timers and retransmissions,
+and when it returns it may have placed an outbound packet in the
+uip_buf buffer.
+
+\section checksums Checksum calculation
+
+*/
+
+/** @} */

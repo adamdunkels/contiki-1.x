@@ -2,6 +2,15 @@
  * \file
  * Argument buffer for passing arguments when starting processes
  * \author Adam Dunkels <adam@dunkels.com>
+ */
+
+/**
+ * \addtogroup kernel
+ * @{
+ */
+
+/**
+ * \page arg Argument buffer
  *
  * The argument buffer can be used when passing an argument from an
  * exiting process to a process that has not been created yet. Since
@@ -50,7 +59,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: arg.c,v 1.2 2003/08/31 22:18:31 adamdunkels Exp $
+ * $Id: arg.c,v 1.3 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -95,7 +104,7 @@ arg_alloc(char size)
 {
   if(bufs[0].used == 0) {
     bufs[0].used = 1;
-    return &bufs[0].buf;
+    return bufs[0].buf;
   } 
   return 0;
 }
@@ -119,3 +128,4 @@ arg_free(char *arg)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */

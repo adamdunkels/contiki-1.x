@@ -3,7 +3,7 @@
 #---------------------------------------------------------------------------
 # General configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = Contiki
+PROJECT_NAME           = "Contiki 1.1"
 PROJECT_NUMBER         = 
 OUTPUT_DIRECTORY       = .
 OUTPUT_LANGUAGE        = English
@@ -24,7 +24,7 @@ FULL_PATH_NAMES        = YES
 STRIP_FROM_PATH        = ../
 INTERNAL_DOCS          = NO
 CASE_SENSE_NAMES       = YES
-SHORT_NAMES            = NO
+SHORT_NAMES            = YES
 HIDE_SCOPE_NAMES       = NO
 SHOW_INCLUDE_FILES     = YES
 JAVADOC_AUTOBRIEF      = YES
@@ -37,14 +37,14 @@ DISTRIBUTE_GROUP_DOC   = NO
 TAB_SIZE               = 8
 GENERATE_TODOLIST      = YES
 GENERATE_TESTLIST      = YES
-GENERATE_BUGLIST       = YES
-GENERATE_DEPRECATEDLIST= YES
+GENERATE_BUGLIST       = NO
+GENERATE_DEPRECATEDLIST= NO
 ALIASES                = 
 ENABLED_SECTIONS       = 
 MAX_INITIALIZER_LINES  = 30
 OPTIMIZE_OUTPUT_FOR_C  = YES
 OPTIMIZE_OUTPUT_JAVA   = NO
-SHOW_USED_FILES        = YES
+SHOW_USED_FILES        = NO
 SUBGROUPING            = YES
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
@@ -58,25 +58,27 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../ek/arg.c \
-                         ../ek/dispatcher.c \
-                         ../apps/program-handler.c \
+INPUT                  = ../ek/dispatcher.c \
+                         ../ek/arg.c \
+                         ../ek/dispatcher.h \
+                         ../ek/dsc.h \
+                         ../ek/loader.h \
+			 ../apps/program-handler.c \
                          ../ctk/ctk.h \
                          ../ctk/ctk.c \
                          ../ctk/ctk-draw.h \
-                         ../ctk/ctk-vncserver.c \
+                         uip-doc.txt \
                          ../uip/uip.h \
+                         ../uip/uip.c \
                          ../uip/uip_arp.h \
                          ../uip/uip_arp.c \
-                         ../ek/loader.h \
-                         ../ek/dispatcher.h \
-                         ../lib/cc.h \
-                         ../lib/petsciiconv.h \
+                         ../uip/resolv.h \
                          ../uip/resolv.c \
                          ../uip/uip-signal.h \
+                         ../lib/cc.h \
+                         ../lib/petsciiconv.h \
                          ../lib/ctk-textedit.h \
                          ../lib/ctk-textedit.c \
-                         ../ek/dsc.h \
                          ../conf/uip-conf.h.example \
                          ../conf/www-conf.h.example \
                          contiki-mainpage.txt
@@ -103,7 +105,7 @@ VERBATIM_HEADERS       = YES
 #---------------------------------------------------------------------------
 # configuration options related to the alphabetical class index
 #---------------------------------------------------------------------------
-ALPHABETICAL_INDEX     = YES
+ALPHABETICAL_INDEX     = NO
 COLS_IN_ALPHA_INDEX    = 5
 IGNORE_PREFIX          = 
 #---------------------------------------------------------------------------
@@ -116,7 +118,7 @@ HTML_HEADER            =
 HTML_FOOTER            = 
 HTML_STYLESHEET        = 
 HTML_ALIGN_MEMBERS     = YES
-GENERATE_HTMLHELP      = NO
+GENERATE_HTMLHELP      = YES
 CHM_FILE               = 
 HHC_LOCATION           = 
 GENERATE_CHI           = NO
@@ -124,7 +126,7 @@ BINARY_TOC             = NO
 TOC_EXPAND             = NO
 DISABLE_INDEX          = NO
 ENUM_VALUES_PER_LINE   = 4
-GENERATE_TREEVIEW      = YES
+GENERATE_TREEVIEW      = NO
 TREEVIEW_WIDTH         = 250
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
@@ -138,7 +140,7 @@ PAPER_TYPE             = a4wide
 EXTRA_PACKAGES         = 
 LATEX_HEADER           = 
 PDF_HYPERLINKS         = YES
-USE_PDFLATEX           = NO
+USE_PDFLATEX           = YES
 LATEX_BATCHMODE        = NO
 LATEX_HIDE_INDICES     = NO
 #---------------------------------------------------------------------------
@@ -153,7 +155,7 @@ RTF_EXTENSIONS_FILE    =
 #---------------------------------------------------------------------------
 # configuration options related to the man page output
 #---------------------------------------------------------------------------
-GENERATE_MAN           = YES
+GENERATE_MAN           = NO
 MAN_OUTPUT             = man
 MAN_EXTENSION          = .3
 MAN_LINKS              = NO
@@ -209,7 +211,7 @@ UML_LOOK               = NO
 TEMPLATE_RELATIONS     = NO
 INCLUDE_GRAPH          = NO
 INCLUDED_BY_GRAPH      = YES
-CALL_GRAPH             = NO
+CALL_GRAPH             = YES
 GRAPHICAL_HIERARCHY    = YES
 DOT_IMAGE_FORMAT       = png
 DOT_PATH               = 

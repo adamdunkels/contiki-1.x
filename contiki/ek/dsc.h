@@ -3,6 +3,16 @@
  * Declaration of the DSC program description structure.
  * \author Adam Dunkels <adam@dunkels.com>
  *
+ */
+
+/**
+ * \addtogroup loader
+ * @{
+ */
+
+/**
+ * \page dsc The program description structure
+ *
  * The Contiki DSC structure is used for describing programs. It
  * includes a string describing the program, the name of the program
  * file on disk (or a pointer to the programs initialization function
@@ -46,7 +56,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: dsc.h,v 1.5 2003/09/04 19:38:04 adamdunkels Exp $
+ * $Id: dsc.h,v 1.6 2003/10/01 07:53:58 adamdunkels Exp $
  *
  */
 #ifndef __DSC_H__
@@ -113,5 +123,7 @@ struct dsc {
 #ifndef NULL
 #define NULL 0
 #endif /* NULL */
+
+/** @} */
 
 #endif /* _DSC_H__ */

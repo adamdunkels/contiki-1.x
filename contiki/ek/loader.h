@@ -5,6 +5,14 @@
  *
  */
 
+/**
+ * \defgroup loader The Contiki program loader
+ * @{
+ *
+ * The Contiki program loader is an abstract interface for loading and
+ * starting programs.
+ */
+
 /*
  * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
@@ -36,7 +44,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader.h,v 1.7 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: loader.h,v 1.8 2003/10/01 07:53:58 adamdunkels Exp $
  *
  */
 #ifndef __LOADER_H__

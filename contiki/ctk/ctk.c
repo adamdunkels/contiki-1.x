@@ -1,14 +1,15 @@
 /**
- * \file
- * The Contiki Toolkit CTK, the Contiki GUI.
- * \author Adam Dunkels <adam@dunkels.com>
- *
+ * \defgroup ctk The CTK graphical user interface.
+ * @{
  * The Contiki Toolkit (CTK) provides the graphical user interface for
  * the Contiki system.
  *
- *
- *
- * 
+ */
+
+/**
+ * \file
+ * The Contiki Toolkit CTK, the Contiki GUI.
+ * \author Adam Dunkels <adam@dunkels.com>
  */
 
 /*
@@ -42,7 +43,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.33 2003/09/04 19:36:04 adamdunkels Exp $
+ * $Id: ctk.c,v 1.34 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -99,31 +100,39 @@ static struct dispatcher_proc p =
   {DISPATCHER_PROC("CTK Contiki GUI", ctk_idle, NULL, NULL)};
 static ek_id_t ctkid;
 
+/** @} */
+
+/**
+ * \addtogroup signals System signals
+ * @{
+ */
 ek_signal_t
 
-  /** Emitted for every key being pressed. The key is passed as signal
-      data.*/
+  /**
+   * Emitted for every key being pressed.
+   *
+   * The key is passed as signal data.*/
   ctk_signal_keypress,
   
   /** Emitted when a widget is activated (pressed). A pointer to the
       widget is passed as signal data. */
   ctk_signal_widget_activate,
   
-  /** \deprecated Same as ctk_signal_widget_activate. */
+  /** Same as ctk_signal_widget_activate. */
   ctk_signal_button_activate,
 
   /** Emitted when a widget is selected. A pointer to the widget is
       passed as signal data. */
   ctk_signal_widget_select,
   
-  /** \deprecated Same as ctk_signal_widget_select. */  
+  /** Same as ctk_signal_widget_select. */  
   ctk_signal_button_hover,
 
   /** Emitted when a hyperlink is activated. The signal is broadcast
       to all listeners. */
   ctk_signal_hyperlink_activate,
 
-  /** \deprecated Same as ctk_signal_widget_select.. */  
+  /** Same as ctk_signal_widget_select. */  
   ctk_signal_hyperlink_hover,
 
   /** Emitted when a menu item is activated. The number of the menu
@@ -144,10 +153,20 @@ ek_signal_t
   ctk_signal_pointer_button;
 
 #if CTK_CONF_SCREENSAVER
+/** Emitted when the user has been idle long enough for the
+    screensaver to start. */
 ek_signal_t ctk_signal_screensaver_stop,
+  /** Emitted when the user presses a key or moves the mouse when the
+      screensaver is active. */
   ctk_signal_screensaver_start;
 #endif /* CTK_CONF_SCREENSAVER */
 
+/** @} */
+
+/**
+ * \addtogroup ctk
+ * @{
+ */
 
 #if CTK_CONF_MOUSE_SUPPORT
 unsigned short mouse_x, mouse_y, mouse_button;
@@ -250,6 +269,12 @@ ctk_init(void)
 
   start = ek_clock();
 }
+
+/**
+ * \addtogroup ctkappfunc
+ * @{
+ */
+
 /*-----------------------------------------------------------------------------------*/
 /**
  * Sets the current CTK mode.
@@ -584,6 +609,7 @@ do_redraw_all(unsigned char clipy1, unsigned char clipy2)
  *
  * \note Currently the parameter d is not used, but must be set to
  * NULL.
+ *
  */
 /*-----------------------------------------------------------------------------------*/
 void
@@ -855,8 +881,6 @@ widget_redraw(struct ctk_widget *widget)
 void 
 ctk_widget_redraw(struct ctk_widget *widget)
 {
-  struct ctk_window *window;
-
   if(mode != CTK_MODE_NORMAL || widget == NULL) {
     return;
   }
@@ -1785,3 +1809,6 @@ ctk_idle(void)
   
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */
+/** @} */
+

@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.21 2003/09/04 19:34:22 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.22 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -296,8 +296,11 @@ program_handler_screensaver(char *name)
 static
 DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 {
-  unsigned char err, i;
+#ifdef WITH_LOADER_ARCH
+  unsigned char err;
   struct dsc *dsc;
+#endif /* WITH_LOADER_ARCH */
+  unsigned char i;
   struct dsc **dscp;
   DISPATCHER_SIGHANDLER_ARGS(s, data);
   

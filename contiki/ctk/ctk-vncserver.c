@@ -3,7 +3,11 @@
  * The ctk-draw implementation for the CTK VNC server.
  * \author Adam Dunkels <adam@dunkels.com>
  *
- *
+ */
+
+/**
+ * \defgroup CTKVNCServer The CTK VNC server
+ * @{
  */
 
 /*
@@ -37,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.5 2003/09/02 21:47:27 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.6 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -1058,3 +1062,4 @@ LOADER_INIT_FUNC(ctk_vncserver_init, arg)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+/** @} */

@@ -7,6 +7,10 @@
  *
  */
 
+/**
+ * \addtogroup kernel
+ * @{
+ */
 
 /*
  * Copyright (c) 2002, Adam Dunkels.
@@ -37,9 +41,9 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the "ek" event kernel.
+ * This file is part of the Contiki desktop OS.
  *
- * $Id: dispatcher.h,v 1.12 2003/09/02 21:47:28 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.13 2003/10/01 07:53:58 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -248,6 +252,14 @@ extern void *dispatcher_uipcall_state;
 
 #endif /* CC_FUNCTION_POINTER_ARGS */
 
+/**
+ * The uIP application function.
+ *
+ * This is the uIP application function that is called by uIP for any
+ * TCP/IP events. The purpose of the function is to dispatch the uIP
+ * event to the process that owns the connection on which the event
+ * occured.
+ */
 #define UIP_APPCALL dispatcher_uipcall
 #define UIP_APPSTATE_SIZE sizeof(struct dispatcher_uipstate)
 
@@ -272,5 +284,7 @@ void dispatcher_process_signal(void);
 void dispatcher_process_idle(void);
 
 void dispatcher_run(void);
+
+/** @} */
 
 #endif /* __DISPATCHER_H__ */

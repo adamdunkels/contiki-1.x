@@ -1,4 +1,9 @@
 /**
+ * \addtogroup ctk
+ * @{
+ */
+
+/**
  * \file
  * CTK screen drawing module interface, ctk-draw.
  * \author Adam Dunkels <adam@dunkels.com>
@@ -7,62 +12,6 @@
  * ctk-draw module takes care of the actual screen drawing for CTK by
  * implementing a handful of functions that are called by CTK.
  *
- * The purpose of the ctk-arch and the ctk-draw is to act as an
- * interface between the CTK and the actual hardware of the system on
- * which Contiki is run. The ctk-arch takes care of the keyboard input
- * from the user, and the ctk-draw is responsible for drawing the CTK
- * desktop, windows and user interface widgets onto the actual screen.
- *
- * In order to aid in implementing a ctk-draw module, a text-based
- * ctk-draw called ctk-conio has already been implemented. It conforms
- * to the Borland conio C library, and a skeleton implementation of
- * said library exists in lib/libconio.c. If a more machine specific
- * ctk-draw module is to be implemented, the instructions in this file
- * should be followed.
- *
- * In order to work efficiently even on limited systems, CTK uses a
- * simple coordinate system, where the screen is addressed using
- * character coordinates instead of pixel coordinates. This makes it
- * trivial to implement the coordinate system on a text-based screen,
- * and significantly reduces complexity for pixel based screen
- * systems.
- *
- * The top left of the screen is (0,0) with x and y coordinates
- * growing downwards and to the right.
- *
- * It is the responsibility of the ctk-draw module to keep track of
- * the screen size and must implement the two functions
- * ctk_draw_width() and ctk_draw_height(), which are used by the CTK
- * for querying the screen size. The functions must return the width
- * and the height of the ctk-draw screen in character coordinates.
- *
- * The ctk-draw module is responsible for drawing CTK windows onto the
- * screen through the function ctk_draw_window().. A pseudo-code
- * implementation of this  function might look like this:
- * \code
-   ctk_draw_window(window, focus, clipy1, clipy2) {
-      draw_window_borders(window, focus, clipy1, clipy2);
-      foreach(widget, window->inactive) {
-         draw_widget(widget, focus, clipy1, clipy2);
-      }
-      foreach(widget, window->active) {
-         if(widget == window->focused) {
-	    draw_widget(widget, focus | CTK_FOCUS_WIDGET,
-	                    clipy1, clipy2);
-	 } else {
-	    draw_widget(widget, focus, clipy1, clipy2);
-	 }
-      }
-   }
-   
-   \endcode
-   
- * Where draw_window_borders() draws the window borders (also between
- * clipy1 and clipy2). The draw_widget() function used may the same
- * function as ctk_draw_widget() explained later. Notice how the
- * clipy1 and clipy2 parameters are passed to all other functions;
- * every function needs to know the boundaries within which they are
- * allowed to draw.
  */
 
 /*
@@ -96,7 +45,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk-draw.h,v 1.3 2003/09/01 22:23:26 adamdunkels Exp $
+ * $Id: ctk-draw.h,v 1.4 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -106,6 +55,77 @@
 #include "ctk.h"
 
 #include "ctk-arch.h"
+
+/**
+ * \defgroup ctkdraw CTK device driver functions
+ * @{
+ *
+ * The CTK device driver functions are divided into two modules, the
+ * ctk-draw module and the ctk-arch module. The purpose of the
+ * ctk-arch and the ctk-draw modules is to act as an interface between
+ * the CTK and the actual hardware of the system on which Contiki is
+ * run. The ctk-arch takes care of the keyboard input from the user,
+ * and the ctk-draw is responsible for drawing the CTK desktop,
+ * windows and user interface widgets onto the actual screen.
+ *
+ * More information about the ctk-draw and the ctk-arch modules can be
+ * found in the sections \ref ctk-draw and \ref ctk-arch.
+ */
+
+/**
+ * \page ctk-draw The ctk-draw module
+ *
+ * In order to work efficiently even on limited systems, CTK uses a
+ * simple coordinate system, where the screen is addressed using
+ * character coordinates instead of pixel coordinates. This makes it
+ * trivial to implement the coordinate system on a text-based screen,
+ * and significantly reduces complexity for pixel based screen
+ * systems.
+ *
+ * The top left of the screen is (0,0) with x and y coordinates
+ * growing downwards and to the right.
+ *
+ * It is the responsibility of the ctk-draw module to keep track of
+ * the screen size and must implement the two functions
+ * ctk_draw_width() and ctk_draw_height(), which are used by the CTK
+ * for querying the screen size. The functions must return the width
+ * and the height of the ctk-draw screen in character coordinates.
+ *
+ * The ctk-draw module is responsible for drawing CTK windows onto the
+ * screen through the function ctk_draw_window().. A pseudo-code
+ * implementation of this  function might look like this:
+ * \code
+   ctk_draw_window(window, focus, clipy1, clipy2) {
+      draw_window_borders(window, focus, clipy1, clipy2);
+      foreach(widget, window->inactive) {
+         ctk_draw_widget(widget, focus, clipy1, clipy2);
+      }
+      foreach(widget, window->active) {
+         if(widget == window->focused) {
+	    ctk_draw_widget(widget, focus | CTK_FOCUS_WIDGET,
+	                    clipy1, clipy2);
+	 } else {
+	    ctk_draw_widget(widget, focus, clipy1, clipy2);
+	 }
+      }
+   }
+   
+   \endcode
+ *
+ * Where draw_window_borders() draws the window borders (also between
+ * clipy1 and clipy2). The ctk_draw_widget() function is explained
+ * below. Notice how the clipy1 and clipy2 parameters are passed to
+ * all other functions; every function needs to know the boundaries
+ * within which they are allowed to draw.
+ *
+ * In order to aid in implementing a ctk-draw module, a text-based
+ * ctk-draw called ctk-conio has already been implemented. It conforms
+ * to the Borland conio C library, and a skeleton implementation of
+ * said library exists in lib/libconio.c. If a more machine specific
+ * ctk-draw module is to be implemented, the instructions in this file
+ * should be followed.
+ * 
+ */
 
 /**
  * The initialization function.
@@ -255,4 +275,55 @@ unsigned char ctk_draw_width(void);
 unsigned char ctk_draw_height(void);
 
 
+
 #endif /* __CTK_DRAW_H__ */
+
+
+/**
+ * The keyboard character type of the system
+ *
+ * The ctk_arch_key_t is usually typedef'd to the char type, but some
+ * systems (such as VNC) have a 16-bit key type.
+ *
+ * \var typedef char ctk_arch_key_t;
+ */
+
+/**
+ * Get a keypress from the keyboard input queue.
+ *
+ * This function will remove the first keypress in the keyboard input
+ * queue and return it. If the keyboard queue is empty, the return
+ * value is undefined. This function is intended to be used only after
+ * the ctk_arch_keyavail() function has returned non-zero.
+ *
+ * \return The first keypress from the keyboard input queue.
+ *
+ * \fn ctk_arch_key_t ctk_arch_getkey(void);
+ */
+
+/**
+ * Check if there is a keypress in the keyboard input queue.
+ *
+ * \return Zero if the keyboard input queue is empty, non-zero
+ * otherwise.
+ *
+ * \fn unsigned char ctk_arch_keyavail(void);
+ */
+
+/**
+ * The character used for the Return/Enter key.
+ *
+ * \define #define CH_ENTER '\n'
+ */
+
+/**
+ * \page ctk-arch The ctk-arch module
+ *
+ * The ctk-arch module deals with keyboard input from the underlying
+ * target system on which Contiki is running. The ctk-arch manages a
+ * keyboard input queue that is queried using the two functions
+ * ctk_arch_keyavail() and ctk_arch_getkey().
+ */
+ 
+/** @} */
+/** @} */

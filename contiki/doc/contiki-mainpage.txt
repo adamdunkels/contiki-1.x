@@ -1,18 +1,25 @@
 /**
 
-\mainpage
+\mainpage The Contiki Operating System
 
-Contiki is a TCP/IP-enabled operating system for small systems such as
-8-bit microcontrollers and 8-bit homecomputers from the 80's. It
-features the following, among others:
+\author Adam Dunkels <adam@dunkels.com>
 
- - TCP/IP support using the uIP TCP/IP stack
- - Cooperative multitasking kernel
+The Contiki desktop environment is a highly portable, modern, open
+source, Internet-enabled operating system and desktop environment for
+very constrained systems, such as 8-bit microcontrollers or 8-bit
+homecomputers like the Commodore 64
+
+Contiki has the following features:
+
+ - Windowing system and GUI toolkit
+ - Cooperative multitasking event kernel
  - Message passing using signals
- - GUI toolkit with keyboard and mouse navigation
+ - TCP/IP support using the uIP TCP/IP stack
  - VNC server
 
-More information about Contiki can be found at the Contiki home page:
+Contiki is written in the C programming language and is freely
+available as open source under a BSD-style license. More information
+about Contiki can be found at the Contiki home page:
 http://dunkels.com/adam/contiki/
 
 */

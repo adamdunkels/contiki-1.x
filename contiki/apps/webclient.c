@@ -32,7 +32,7 @@
  *
  * This file is part of the "contiki" web browser.
  *
- * $Id: webclient.c,v 1.13 2003/09/04 23:06:53 adamdunkels Exp $
+ * $Id: webclient.c,v 1.14 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -289,7 +289,7 @@ static u16_t
 parse_headers(u16_t len)
 {
   char *cptr;
-  static char c, i;
+  static unsigned char i;
   
   while(len > 0 && s.httpheaderlineptr < sizeof(s.httpheaderline)) {
     s.httpheaderline[s.httpheaderlineptr] = *uip_appdata;
@@ -374,7 +374,6 @@ newdata(void)
 /*-----------------------------------------------------------------------------------*/
 DISPATCHER_UIPCALL(webclient_appcall, state)
 {
-  struct uip_conn *conn;
   DISPATCHER_UIPCALL_ARG(state);
 
   if(uip_connected()) {

@@ -1,4 +1,9 @@
 /**
+ * \addtogroup ctk
+ * @{
+ */
+
+/**
  * \file
  * CTK header file.
  * \author Adam Dunkels <adam@dunkels.com>
@@ -38,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.17 2003/09/04 19:36:04 adamdunkels Exp $
+ * $Id: ctk.h,v 1.18 2003/10/01 07:53:57 adamdunkels Exp $
  *
  */
 
@@ -54,22 +59,36 @@
 
 /* Defintions for the CTK widget types. */
 
-/** The CTK separator widget. */
+/**
+ * \addtogroup ctkdraw
+ * @{
+ */
+
+/** Widget number: The CTK separator widget. */
 #define CTK_WIDGET_SEPARATOR 1
-/** The CTK label widget. */
+/** Widget number: The CTK label widget. */
 #define CTK_WIDGET_LABEL     2
-/** The CTK button widget. */
+/** Widget number: The CTK button widget. */
 #define CTK_WIDGET_BUTTON    3
-/** The CTK hyperlink widget. */
+/** Widget number: The CTK hyperlink widget. */
 #define CTK_WIDGET_HYPERLINK 4
-/** The CTK textentry widget. */
+/** Widget number: The CTK textentry widget. */
 #define CTK_WIDGET_TEXTENTRY 5
-/** The CTK bitmap widget. */
+/** Widget number: The CTK bitmap widget. */
 #define CTK_WIDGET_BITMAP    6
-/** The CTK icon widget. */
+/** Widget number: The CTK icon widget. */
 #define CTK_WIDGET_ICON      7
 
+/** @} */
+
 struct ctk_widget;
+
+/**
+ * \defgroup ctkappfunc CTK application functions
+ * @{
+ *
+ * The CTK functions used by an application program.
+ */
 
 /**
  * Instantiating macro for the ctk_separator widget.
@@ -80,11 +99,11 @@ struct ctk_widget;
   struct ctk_separator sep =
          {CTK_SEPARATOR(0, 0, 23)};
  \endcode
- * \param w The widget's width.
  * \param x The x position of the widget, relative to the widget's
  * window.
  * \param y The y position of the widget, relative to the widget's
  * window.
+ * \param w The widget's width.
  */
 #define CTK_SEPARATOR(x, y, w) \
  NULL, NULL, x, y, CTK_WIDGET_SEPARATOR, w, 1
@@ -105,12 +124,12 @@ struct ctk_separator {
   struct ctk_button but =
          {CTK_BUTTON(0, 0, 2, "Ok")};
  \endcode
- * \param text The button text.
- * \param w The widget's width.
  * \param x The x position of the widget, relative to the widget's
  * window.
  * \param y The y position of the widget, relative to the widget's
  * window.
+ * \param w The widget's width.
+ * \param text The button text.
  */
 #define CTK_BUTTON(x, y, w, text) \
  NULL, NULL, x, y, CTK_WIDGET_BUTTON, w, 1, text
@@ -132,13 +151,13 @@ struct ctk_button {
   struct ctk_label lab =
          {CTK_LABEL(0, 0, 5, 1, "Label")};
  \endcode
- * \param text The label text.
- * \param h The height of the label. 
- * \param w The widget's width.
  * \param x The x position of the widget, relative to the widget's
  * window.
  * \param y The y position of the widget, relative to the widget's
  * window.
+ * \param w The widget's width.
+ * \param h The height of the label. 
+ * \param text The label text.
  */
 #define CTK_LABEL(x, y, w, h, text) \
  NULL, NULL, x, y, CTK_WIDGET_LABEL, w, h, text,
@@ -160,13 +179,13 @@ struct ctk_label {
   struct ctk_hyperlink hlink =
          {CTK_HYPERLINK(0, 0, 7, "Contiki", "http://dunkels.com/adam/contiki/")};
  \endcode
- * \param text The hyperlink text.
- * \param url The hyperlink URL.
- * \param w The widget's width.
  * \param x The x position of the widget, relative to the widget's
  * window.
  * \param y The y position of the widget, relative to the widget's
  * window.
+ * \param w The widget's width.
+ * \param text The hyperlink text.
+ * \param url The hyperlink URL.
  */
 #define CTK_HYPERLINK(x, y, w, text, url) \
  NULL, NULL, x, y, CTK_WIDGET_HYPERLINK, w, 1, text, url
@@ -206,14 +225,14 @@ struct ctk_hyperlink {
  * \note The height of the text entry widget is obsolete and not
  * intended to be used.
  *
- * \param text A pointer to the buffer that should be edited.
- * \param len The length of the text buffer
- * \param h The text entry height (obsolete).
- * \param w The widget's width.
  * \param x The x position of the widget, relative to the widget's
  * window.
  * \param y The y position of the widget, relative to the widget's
  * window.
+ * \param w The widget's width.
+ * \param h The text entry height (obsolete).
+ * \param text A pointer to the buffer that should be edited.
+ * \param len The length of the text buffer
  */
 #define CTK_TEXTENTRY(x, y, w, h, text, len) \
   NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, 1, text, len, \
@@ -325,6 +344,12 @@ struct ctk_widget_icon {
 struct ctk_widget_bitmap {
   unsigned char *bitmap;
 };
+/** @} */
+
+/**
+ * \addtogroup ctkdraw
+ * @{
+ */
 
 /**
  * The generic CTK widget structure that contains all other widget
@@ -373,10 +398,11 @@ struct ctk_widget {
 				type field. */
 };
 
+
 struct ctk_desktop;
 
 /**
- * Repressentation of a CTK window.
+ * Representation of a CTK window.
  *
  * For the CTK, each window is repessented by a ctk_window
  * structure. All open windows are kept on a doubly linked list,
@@ -446,7 +472,7 @@ struct ctk_window {
 };
 
 /**
- * Repressentation of an individual menu item.
+ * Representation of an individual menu item.
  */
 struct ctk_menuitem {
   char *title;           /**< The menu items text. */
@@ -455,7 +481,7 @@ struct ctk_menuitem {
 };
 
 /**
- * Repressentation of an individual menu.
+ * Representation of an individual menu.
  */
 struct ctk_menu {
   struct ctk_menu *next; /**< Apointer to the next menu, or is NULL if
@@ -480,7 +506,7 @@ struct ctk_menu {
 };
 
 /**
- * Repressentation of the menu bar.
+ * Representation of the menu bar.
  */
 struct ctk_menus {
   struct ctk_menu *menus;       /**< A pointer to a linked list of all
@@ -495,6 +521,9 @@ struct ctk_menus {
 				   as drawing it at the rightmost
 				   position). */ 
 };
+
+/** @} */
+
 
 /**
  * \internal The structure describing a Contiki desktop.
@@ -588,6 +617,11 @@ void ctk_menu_remove(struct ctk_menu *menu);
 unsigned char ctk_menuitem_add(struct ctk_menu *menu, char *name);
 
 /* Functions for icons. */
+
+/**
+ * \addtogroup ctkappfunc
+ * @{
+ */
 /**
  * Add an icon to the desktop.
  *
@@ -814,6 +848,12 @@ extern ek_signal_t ctk_signal_button_activate,
   ctk_signal_button_hover,
   ctk_signal_hyperlink_activate,
   ctk_signal_hyperlink_hover;
+/** @} */
+
+/**
+ * \addtogroup ctkdraw
+ * @{
+ */
 
 /* Focus flags */
 /** Widget focus flag: no focus. */
@@ -825,6 +865,6 @@ extern ek_signal_t ctk_signal_button_activate,
 /** Widget focus flag: widget is in a dialog. */
 #define CTK_FOCUS_DIALOG   4
 
-
-
+/** @} */
+/** @} */
 #endif /* __CTK_H__ */
