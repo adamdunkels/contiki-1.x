@@ -29,13 +29,14 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.4 2004/07/04 20:17:37 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.5 2004/08/09 22:22:03 adamdunkels Exp $
  *
  */
 
 #include "ctk.h"
 #include "ctk-draw.h"
 #include "ctk-vncserver.h"
+#include "ctk-termtelnet.h"
 #include "ek.h"
 
 
@@ -139,7 +140,8 @@ main(int argc, char **argv)
   sei();
 
   ek_init();
-  
+
+  uip_init();
   tcpip_init(NULL);
   
   resolv_init(NULL);
@@ -152,14 +154,14 @@ main(int argc, char **argv)
 
  
     
-#if 0
+#if 1
   uip_ipaddr(addr, 193,10,67,152);
   uip_sethostaddr(addr);
  
-  uip_ipaddr(addr, 193,10,67,1);
+  uip_ipaddr(addr, 193,10,64,1);
   uip_setdraddr(addr);
  
-  uip_ipaddr(addr, 255,255,255,0);
+  uip_ipaddr(addr, 255,255,252,0);
   uip_setnetmask(addr);
 
   uip_ipaddr(addr, 193,10,66,195);
@@ -187,21 +189,28 @@ main(int argc, char **argv)
   rtl8019_drv_init();
 
   ctk_vncserver_init(NULL);  
+  /*  ctk_termtelnet_init(NULL);*/
 
   program_handler_init();
 
-  /*  webserver_init(NULL);*/
+  webserver_init(NULL);
 
+  /*  program_handler_add(&netconf_dsc, "Network config", 1);*/
   
-  /*  program_handler_add(&directory_dsc, "Directory", 1);*/
-  program_handler_add(&about_dsc, "About", 1);
-  /*  program_handler_add(&webserver_dsc, "Web server", 1);*/
-  program_handler_add(&www_dsc, "Web browser", 1);
-  /*  program_handler_add(&calc_dsc, "Calculator", 0);*/
-  program_handler_add(&processes_dsc, "Processes", 0);
+  program_handler_add(&calc_dsc, "Shell server", 1);
+  
+  program_handler_add(&telnetd_dsc, "Telnet server", 1);
+  
+  program_handler_add(&calc_dsc, "Calculator", 0);
   program_handler_add(&weblinks_dsc, "Web links", 1);
 
-  program_handler_add(&telnetd_dsc, "Shell server", 1);
+  program_handler_add(&www_dsc, "Web browser", 1);
+  program_handler_add(&webserver_dsc, "Web server", 1);
+  program_handler_add(&processes_dsc, "Processes", 1);
+  program_handler_add(&about_dsc, "About", 1);
+
+
+
 
 
   debug_print8(64);
