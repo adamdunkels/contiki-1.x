@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: sensorview-dsc.c,v 1.1 2003/09/04 19:46:33 adamdunkels Exp $
+ * $Id: sensorview-dsc.c,v 1.2 2004/06/27 12:49:59 oliverschmidt Exp $
  *
  */
 
@@ -43,6 +43,7 @@ DSC(sensorview_dsc,
     sensorview_init,
     &sensorview_icon);
 /*-----------------------------------------------------------------------------------*/
+#if CTK_CONF_ICON_BITMAPS
 static const unsigned char sensorviewicon_bitmap[3*3*8] = {
   0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
   0x00, 0xff, 0x00, 0x7e, 0x00, 0xff, 0x00, 0xff,
@@ -56,12 +57,15 @@ static const unsigned char sensorviewicon_bitmap[3*3*8] = {
   0x07, 0xe7, 0x0f, 0xef, 0x0f, 0x0f, 0xff, 0x00,
   0x8e, 0x06, 0x06, 0x06, 0x8e, 0xfe, 0xfe, 0x00
 };
+#endif /* CTK_CONF_ICON_BITMAPS */
 
+#if CTK_CONF_ICON_TEXTMAPS
 static const char sensorviewicon_textmap[9] = {
   ' ', ' ', 'c',
   ' ', '?', ' ',
   '.', ' ', ' '
 };
+#endif /* CTK_CONF_ICON_TEXTMAPS */
 
 static struct ctk_icon sensorview_icon =
   {CTK_ICON("Sensors", sensorviewicon_bitmap, sensorviewicon_textmap)};
