@@ -1,5 +1,13 @@
+/**
+ * \file
+ * The ctk-draw implementation for the CTK VNC server.
+ * \author Adam Dunkels <adam@dunkels.com>
+ *
+ *
+ */
+
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +19,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -32,7 +37,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.3 2003/08/24 22:38:44 adamdunkels Exp $
+ * $Id: ctk-vncserver.c,v 1.4 2003/09/01 22:24:24 adamdunkels Exp $
  *
  */
 
@@ -45,6 +50,7 @@
 #include "vnc-out.h"
 
 #include "ctk-vncserver.h"
+#include "ctk-vncserver-conf.h"
 
 static unsigned char sizex, sizey;
 
@@ -104,15 +110,23 @@ static struct dispatcher_proc p =
 		   ctk_vncserver_appcall)};
 static ek_id_t id;
 
-
-#define VNCSERVER_CONF_NUMCONNS 8
-static struct vnc_server_state conns[VNCSERVER_CONF_NUMCONNS];
+static struct vnc_server_state conns[CTK_VNCSERVER_CONF_NUMCONNS];
 
 #define PRINTF(x) 
 
 #define revers(x)
 
 
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Add an update request from a client to the list of pending updates
+ * for the connection.
+ *
+ * This function is called from the vnc-out module.
+ *
+ * \param vs The VNC connection state.
+ * \param a The area that is requested to be updated.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 vnc_server_update_add(struct vnc_server_state *vs,
@@ -122,6 +136,18 @@ vnc_server_update_add(struct vnc_server_state *vs,
   a->next = vs->updates_pending;
   vs->updates_pending = a;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Allocate an update request from the VNC connection state.
+ *
+ * This function is called from the vnc-out module.
+ *
+ * \param vs The VNC connection state.
+ *
+ * \return Memory for an update structure, or NULL if no update could
+ * be allocated.
+ */
+/*-----------------------------------------------------------------------------------*/
 struct vnc_server_update *
 vnc_server_update_alloc(struct vnc_server_state *vs)
 {
@@ -135,6 +161,17 @@ vnc_server_update_alloc(struct vnc_server_state *vs)
   a->next = NULL;
   return a;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Deallocate an update request from the VNC connection state.
+ *
+ * This function is called from the vnc-out module.
+ *
+ * \param vs The VNC connection state.
+ *
+ * \param a The update structure to be deallocated.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 vnc_server_update_free(struct vnc_server_state *vs,
 		       struct vnc_server_update *a)
@@ -142,6 +179,17 @@ vnc_server_update_free(struct vnc_server_state *vs,
   a->next = vs->updates_free;
   vs->updates_free = a;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Dequeue the first update on the queue of updates.
+ *
+ * This function is called from the vnc-out module.
+ *
+ * \param vs The VNC connection state.
+ *
+ * \return The first update on the queue, or NULL if the queue is empty.
+ */
+/*-----------------------------------------------------------------------------------*/
 struct vnc_server_update *
 vnc_server_update_dequeue(struct vnc_server_state *vs)
 {
@@ -155,6 +203,14 @@ vnc_server_update_dequeue(struct vnc_server_state *vs)
   a->next = NULL;
   return a;
 }
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Remove a specific update on the queue of updates.
+ *
+ * \param vs The VNC connection state.
+ * \param a The update to be removed.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 vnc_server_update_remove(struct vnc_server_state *vs,
 			 struct vnc_server_update *a)
@@ -164,12 +220,17 @@ vnc_server_update_remove(struct vnc_server_state *vs,
   if(a == vs->updates_pending) {
     vs->updates_pending = a->next;
   } else {
-    
+    b = vs->updates_pending;
     for(c = vs->updates_pending; c != a; b = c, c = c->next);
 
     b->next = a->next;
   }
 }
+/*-----------------------------------------------------------------------------------*/
+/** \internal
+ * Flag an area to be updated for all open VNC server connections.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 static void
 update_area(u8_t x, u8_t y, u8_t w, u8_t h)
@@ -181,7 +242,7 @@ update_area(u8_t x, u8_t y, u8_t w, u8_t h)
   }
   
   /* Update for all active VNC connections. */
-  for(i = 0; i < VNCSERVER_CONF_NUMCONNS; ++i) {
+  for(i = 0; i < CTK_VNCSERVER_CONF_NUMCONNS; ++i) {
     if(conns[i].state != VNC_DEALLOCATED) {
       vnc_out_update_area(&conns[i],
 			  x, y, w, h);
@@ -190,23 +251,32 @@ update_area(u8_t x, u8_t y, u8_t w, u8_t h)
 
 }
 /*-----------------------------------------------------------------------------------*/
+/** \internal
+ * Allocate a VNC server connection state from the array of available
+ * VNC connection states.
+ */
+/*-----------------------------------------------------------------------------------*/
 static struct vnc_server_state *
 alloc_state(void)
 {
   u8_t i;
-  for(i = 0; i < VNCSERVER_CONF_NUMCONNS; ++i) {
+  for(i = 0; i < CTK_VNCSERVER_CONF_NUMCONNS; ++i) {
     if(conns[i].state == VNC_DEALLOCATED) {
       return &conns[i];
     }
   }
 
   /* We are overloaded! XXX: we'll just kick all other connections! */
-  for(i = 0; i < VNCSERVER_CONF_NUMCONNS; ++i) {
+  for(i = 0; i < CTK_VNCSERVER_CONF_NUMCONNS; ++i) {
     conns[i].state = VNC_DEALLOCATED;
   }
   
   return NULL;
 }
+/*-----------------------------------------------------------------------------------*/
+/** \internal
+ * Deallocate a VNC connection state.
+ */
 /*-----------------------------------------------------------------------------------*/
 static void
 dealloc_state(struct vnc_server_state *s)
@@ -222,6 +292,11 @@ cputsn(char *str, unsigned char len)
   tmp[len] = 0;
   cputs(tmp);
 }
+/*-----------------------------------------------------------------------------------*/
+/** 
+ * Initialize the VNC ctk-draw module. Called by the CTK module.
+ *
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_init(void)
@@ -434,6 +509,15 @@ draw_widget(struct ctk_widget *w,
   }
 }
 /*-----------------------------------------------------------------------------------*/
+/** 
+ * Draw a widget on the VNC screen. Called by the CTK module.
+ *
+ * \param w The widget to be drawn.
+ * \param focus The focus of the widget.
+ * \param clipy1 The lower y coordinate bound.
+ * \param clipy2 The upper y coordinate bound.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_widget(struct ctk_widget *w,
 		unsigned char focus,
@@ -476,6 +560,15 @@ ctk_draw_widget(struct ctk_widget *w,
   CTK_CONIO_CONF_UPDATE();
 #endif /* CTK_CONIO_CONF_UPDATE */
 }
+/*-----------------------------------------------------------------------------------*/
+/** 
+ * Clear a window on the VNC screen. Called by the CTK module.
+ *
+ * \param window The window to be cleared.
+ * \param focus The focus of the window.
+ * \param clipy1 The lower y coordinate bound.
+ * \param clipy2 The upper y coordinate bound.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_clear_window(struct ctk_window *window,
@@ -537,6 +630,15 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
 #endif /* CTK_CONIO_CONF_UPDATE */
 
 }
+/*-----------------------------------------------------------------------------------*/
+/** 
+ * Draw a window on the VNC screen. Called by the CTK module.
+ *
+ * \param window The window to be drawn.
+ * \param focus The focus of the window.
+ * \param clipy1 The lower y coordinate bound.
+ * \param clipy2 The upper y coordinate bound.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_window(struct ctk_window *window, unsigned char focus,
@@ -619,6 +721,12 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
   update_area(window->x, window->y, window->w + 2, window->h + 2);
 }
 /*-----------------------------------------------------------------------------------*/
+/** 
+ * Draw a dialog on the VNC screen. Called by the CTK module.
+ *
+ * \param dialog The dialog to be drawn.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_dialog(struct ctk_window *dialog)
 {
@@ -677,6 +785,13 @@ ctk_draw_dialog(struct ctk_window *dialog)
   update_area(dialog->x, dialog->y, dialog->w + 4, dialog->h + 4);
 }
 /*-----------------------------------------------------------------------------------*/
+/** 
+ * Clear parts of the VNC desktop. Called by the CTK module.
+ *
+ * \param y1 The lower y coordinate bound.
+ * \param y2 The upped y coordinate bound.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_clear(unsigned char y1, unsigned char y2)
 {
@@ -689,6 +804,12 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
 
   update_area(0, y1, sizex, y2 - y1);
 }
+/*-----------------------------------------------------------------------------------*/
+/** \internal
+ * Draw one menu on the VNC desktop.
+ *
+ * \param m The CTK menu to be drawn.
+ */
 /*-----------------------------------------------------------------------------------*/
 static void
 draw_menu(struct ctk_menu *m)
@@ -729,6 +850,12 @@ draw_menu(struct ctk_menu *m)
 
   update_area(x, 0, CTK_CONF_MENUWIDTH, m->nitems + 1);
 }
+/*-----------------------------------------------------------------------------------*/
+/** 
+ * Draw the menus on the virtual VNC desktop. Called by the CTK module.
+ *
+ * \param menus The CTK menubar.
+ */
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_menus(struct ctk_menus *menus)
@@ -776,17 +903,33 @@ ctk_draw_menus(struct ctk_menus *menus)
 
 }
 /*-----------------------------------------------------------------------------------*/
+/** 
+ * Obtain the height of the VNC desktop. Called by the CTK module.
+ *
+ * \return The height of the VNC desktop, in characters.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
 ctk_draw_height(void)
 {
   return sizey;
 }
 /*-----------------------------------------------------------------------------------*/
+/** 
+ * Obtain the height of the VNC desktop. Called by the CTK module.
+ *
+ * \return The height of the VNC desktop, in characters.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
 ctk_draw_width(void)
 {
   return sizex;
 }
+/*-----------------------------------------------------------------------------------*/
+/** \internal
+ * Converts between ASCII and the VNC screen character encoding.
+ */
 /*-----------------------------------------------------------------------------------*/
 static unsigned char
 ascii2screen(unsigned char c)
@@ -812,7 +955,17 @@ ascii2screen(unsigned char c)
 
   return 32;
 }
-
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Draws a character on the virtual VNC screen. Called by the libconio module.
+ *
+ * \param c The character to be drawn.
+ * \param xpos The x position of the character.
+ * \param ypos The y position of the character.
+ * \param reversedflag Determines if the character should be reversed or not.
+ * \param color The color of the character.
+ */
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_arch_draw_char(char c,
 		   unsigned char xpos,
@@ -826,18 +979,37 @@ ctk_arch_draw_char(char c,
   /*  vnc_out_update_screen(xpos, ypos, c |
       (reversedflag? 0x80: 0));*/
 }
-
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Checks the key press input queue to see if there are pending
+ * keys. Called by the CTK module.
+ *
+ * \return Zero if no key presses are in buffer, non-zero if there are
+ * key presses in input buffer.
+ */
+/*-----------------------------------------------------------------------------------*/
 unsigned char
 ctk_arch_keyavail(void)
 {
   return vnc_out_keyavail();
 }
-
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Retrieves key presses from the VNC client. Called by the CTK
+ * module.
+ *
+ * \return The next key in the input queue.
+ */
+/*-----------------------------------------------------------------------------------*/
 ctk_arch_key_t
 ctk_arch_getkey(void)
 {
   return vnc_out_getkey() & 0x7f;
 }
+/*-----------------------------------------------------------------------------------*/
+/** \internal
+ * The uIP event handler.
+ */
 /*-----------------------------------------------------------------------------------*/
 static
 DISPATCHER_UIPCALL(ctk_vncserver_appcall, state)
@@ -880,7 +1052,7 @@ LOADER_INIT_FUNC(ctk_vncserver_init, arg)
     id = dispatcher_start(&p);
     dispatcher_uiplisten(5900);
 
-    for(i = 0; i < VNCSERVER_CONF_NUMCONNS; ++i) {
+    for(i = 0; i < CTK_VNCSERVER_CONF_NUMCONNS; ++i) {
       conns[i].state = VNC_DEALLOCATED;
     }
   }
