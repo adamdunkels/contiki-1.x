@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack and the Contiki operating system.
  *
- * $Id: uiplib.c,v 1.1 2004/02/24 09:49:08 adamdunkels Exp $
+ * $Id: uiplib.c,v 1.2 2004/06/06 06:17:16 adamdunkels Exp $
  *
  */
 
@@ -39,8 +39,6 @@
 #include "uiplib.h"
 
 #include "ek.h"
-
-u16_t uip_arp_draddr[2], uip_arp_netmask[2];
 
 /*-----------------------------------------------------------------------------------*/
 unsigned char
