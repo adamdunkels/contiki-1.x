@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.23 2004/08/09 21:54:13 adamdunkels Exp $
+# $Id: Makefile.programs,v 1.24 2004/09/05 07:10:44 adamdunkels Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -54,13 +54,14 @@ all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
      email.prg \
      vnc.prg  \
      ctk-text.drv ctk-default.drv ctk-80col.drv \
+     irc.prg irc.dsc \
+     slip.drv slip.dsc \
 #     mtest.prg warmboot.prg lc-test
 #     blueround.prg blueround.dsc \
 #     enabler.prg enabler.dsc \
 #     springlight.prg springlight.dsc \
 #     default.prg default.dsc \
 #     ravenpine.prg ravenpine.dsc \
-#     slip.drv slip.dsc \
 #     slip-ss.drv \
 #     calc.prg \
 #     ssconfig.prg \
@@ -90,6 +91,8 @@ configedit.prg: configedit.o #c64-fs-write.o
 email.prg: $(EMAIL) 
 
 www.prg: $(WWW)
+
+irc.prg: irc.o ircc.o socket.o uipbuf.o lc-asm.o ircc-strings.o
 
 webserver.prg: $(WEBSERVER) #c64-fs-raw.o
 
@@ -124,7 +127,7 @@ ctk-vnc.drv: ctk-vncserver-service.o libconio.o vnc-server.o vnc-out.o ctk-vncfo
 ctk-text.drv: ctk-conio-service.o contiki-labels.o
 	cl65 --module -t c64 -o $@ loader-arch-module.o $^
 
-ctk-80col.drv: ctk-conio-service.o ctk-80col-libconio.o ctk-80col.o ctk-80col-asm.o contiki-labels.o
+ctk-80col.drv: ctk-80col.o ctk-80col-asm.o contiki-labels.o
 	cl65 --module -t c64 -o $@ loader-arch-module.o $^
 
 ctk-default.drv: ctk-hires-service.o ctk-hires-asm.o ctk-hires-theme-default.o contiki-labels.o
