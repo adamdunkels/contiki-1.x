@@ -32,15 +32,15 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www-conf.h,v 1.2 2003/04/02 10:09:55 adamdunkels Exp $
+ * $Id: www-conf.h,v 1.3 2003/09/04 19:18:40 adamdunkels Exp $
  *
  */
 #ifndef __WWW_CONF_H__
 #define __WWW_CONF_H__
 
 /* The size of the HTML viewing area. */
-#define WWW_CONF_WEBPAGE_WIDTH 36
-#define WWW_CONF_WEBPAGE_HEIGHT 17
+#define WWW_CONF_WEBPAGE_WIDTH 56
+#define WWW_CONF_WEBPAGE_HEIGHT 37
 
 /* The size of the "Back" history. */
 #define WWW_CONF_HISTORY_SIZE 4
@@ -63,5 +63,7 @@
 #define WWW_CONF_MAX_FORMNAMELEN    20
 #define WWW_CONF_MAX_INPUTNAMELEN   20
 #define WWW_CONF_MAX_INPUTVALUELEN  34
+
+#define WWW_CONF_PAGEVIEW 1
 
 #endif /* __WWW_CONF_H__ */
