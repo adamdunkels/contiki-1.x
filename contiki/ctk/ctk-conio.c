@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.6 2003/07/30 23:31:56 adamdunkels Exp $
+ * $Id: ctk-conio.c,v 1.7 2003/08/24 22:37:37 adamdunkels Exp $
  *
  */
 
@@ -476,8 +476,6 @@ ctk_draw_menus(struct ctk_menus *menus)
 {
   struct ctk_menu *m;  
 
-  return;
-  
   /* Draw menus */
   textcolor(MENUCOLOR);
   gotoxy(0, 0);
