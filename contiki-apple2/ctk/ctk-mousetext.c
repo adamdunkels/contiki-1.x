@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.1 2004/06/14 22:30:33 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.2 2004/06/27 15:05:13 oliverschmidt Exp $
  *
  */
 
@@ -187,7 +187,7 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_ICON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      if(focus & 1) {
+      if(wfocus != 0) {
 	revers(1);
       } else {
 	revers(0);
