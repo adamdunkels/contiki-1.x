@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.h,v 1.14 2003/08/20 20:55:35 adamdunkels Exp $
+ * $Id: ctk.h,v 1.15 2003/08/31 22:18:23 adamdunkels Exp $
  *
  */
 
@@ -353,8 +353,8 @@ void ctk_menu_remove(struct ctk_menu *menu);
 unsigned char ctk_menuitem_add(struct ctk_menu *menu, char *name);
 
 /* Functions for icons. */
-#define CTK_ICON_ADD(icon, id) ctk_icon_add((struct ctk_widget *)icon, id)
-void ctk_icon_add(struct ctk_widget *icon, ek_id_t id);
+#define CTK_ICON_ADD(icon) ctk_icon_add((struct ctk_widget *)icon)
+void ctk_icon_add(struct ctk_widget *icon);
 
 /* Functions for manipulating widgets. */
 #define CTK_WIDGET_ADD(win, widg) \
