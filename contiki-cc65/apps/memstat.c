@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.1 2003/04/24 17:01:20 adamdunkels Exp $
+ * $Id: memstat.c,v 1.2 2003/08/24 22:41:55 adamdunkels Exp $
  *
  */
 
@@ -87,8 +87,10 @@ update(void)
 
 }
 /*-----------------------------------------------------------------------------------*/
-LOADER_INIT_FUNC(memstat_init)
+LOADER_INIT_FUNC(memstat_init, arg)
 {
+  arg_free(arg);
+  
   if(id == EK_ID_NONE) {
     id = dispatcher_start(&p);
     

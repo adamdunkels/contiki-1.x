@@ -31,7 +31,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: rs232dev.c,v 1.3 2003/07/31 23:56:01 adamdunkels Exp $
+ * $Id: rs232dev.c,v 1.4 2003/08/24 22:41:55 adamdunkels Exp $
  *
  */
 
@@ -248,3 +248,4 @@ rs232dev_init(void)
   return;
 }
 /*-----------------------------------------------------------------------------------*/
+

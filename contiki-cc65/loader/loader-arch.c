@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.2 2003/07/31 23:16:13 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.3 2003/08/24 22:41:55 adamdunkels Exp $
  *
  */
 
@@ -97,7 +97,7 @@ load(const char *name)
 }
 /*-----------------------------------------------------------------------------------*/
 unsigned char
-loader_arch_load(const char *name)
+loader_arch_load(const char *name, char *arg)
 {
   unsigned char r;
   struct loader_arch_hdr *hdr;
@@ -113,7 +113,7 @@ loader_arch_load(const char *name)
   
   /* Call the init function. */
 
-  ((void (*)(void))hdr->initfunc)();
+  ((void (*)(char *))hdr->initfunc)(arg);
 
   return LOADER_OK;
 }
