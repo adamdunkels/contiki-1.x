@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.17 2005/02/27 09:44:33 adamdunkels Exp $
+ * $Id: uip.h,v 1.18 2005/02/27 09:52:43 adamdunkels Exp $
  *
  */
 
@@ -267,7 +267,7 @@ void uip_init(void);
                                 uip_process(UIP_TIMER); } while (0)
 
 /**
- * Perform eriodic processing for a connection identified by a pointer
+ * Perform periodic processing for a connection identified by a pointer
  * to its structure.
  *
  * Same as uip_periodic() but takes a pointer to the actual uip_conn
