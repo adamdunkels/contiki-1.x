@@ -186,6 +186,18 @@ SOURCE=..\contiki\apps\dhcp.h
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\apps\editor-dsc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\editor-dsc.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\editor.c
+# End Source File
+# Begin Source File
+
 SOURCE="..\contiki\apps\email-dsc.c"
 # End Source File
 # Begin Source File
@@ -199,6 +211,26 @@ SOURCE=..\contiki\apps\email.c
 # Begin Source File
 
 SOURCE=..\contiki\apps\email.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\ftp-dsc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\ftp-dsc.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\ftp.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\ftpc.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\ftpc.h
 # End Source File
 # Begin Source File
 
@@ -495,7 +527,27 @@ SOURCE=..\contiki\lib\cc.h
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\lib\cfs-service.h"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\lib\cfs.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\lib\cfs.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\lib\clock.h
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\lib\ctk-filedialog.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\lib\ctk-filedialog.h"
 # End Source File
 # Begin Source File
 
@@ -876,6 +928,10 @@ SOURCE=".\conf\ppp-conf.h"
 # End Source File
 # Begin Source File
 
+SOURCE=".\conf\program-handler-conf.h"
+# End Source File
+# Begin Source File
+
 SOURCE=".\conf\uip-conf.h"
 # End Source File
 # Begin Source File
@@ -906,6 +962,14 @@ SOURCE=".\ctk\ctk-console.h"
 # Begin Group "contiki-win32-lib"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=".\lib\cfs-win32.c"
+# End Source File
+# Begin Source File
+
+SOURCE=".\lib\cfs-win32.h"
+# End Source File
 # Begin Source File
 
 SOURCE=.\lib\debug.c
