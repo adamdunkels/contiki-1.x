@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64,v 1.9 2003/08/24 22:35:22 adamdunkels Exp $
+# $Id: Makefile.c64,v 1.10 2004/02/24 09:52:24 adamdunkels Exp $
 #
 
 all: contiki contiki-labels.o
@@ -51,4 +51,7 @@ contiki:  main.o petsciiconv.o \
  $(UIP) \
  program-handler.o 
 	cl65 -C c64.cfg -Ln contiki-labels -o contiki -t $(SYS) $^
+
+contiki-exo: contiki
+	exomizer -s sys -o contiki-exo contiki
 
