@@ -1,3 +1,3 @@
-i /d64header.plain
+i /binaryheader.plain
 c d
 .
