@@ -43,7 +43,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.34 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: ctk.c,v 1.35 2004/03/25 09:53:35 adamdunkels Exp $
  *
  */
 
@@ -1678,8 +1678,8 @@ ctk_idle(void)
 	    } else {
 	      /*	      window->focused = NULL;*/
 	      unfocus_widget(window->focused);
-	      dispatcher_fastemit(ctk_signal_keypress, (void *)c,
-				  window->owner);
+	      dispatcher_post_synch(ctk_signal_keypress, (void *)c,
+				    window->owner);
 	    }
 	  }
 	  break;
