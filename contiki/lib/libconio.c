@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: libconio.c,v 1.1 2003/03/19 14:16:05 adamdunkels Exp $
+ * $Id: libconio.c,v 1.2 2003/04/02 18:50:17 adamdunkels Exp $
  *
  */
 
@@ -46,6 +46,12 @@ unsigned char
 wherex(void)
 {
   return cursx;
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+wherey(void)
+{
+  return cursy;
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -157,5 +163,24 @@ void
 textcolor(unsigned char c)
 {
 
+}
+/*-----------------------------------------------------------------------------------*/
+void
+bgcolor(unsigned char c)
+{
+
+}
+/*-----------------------------------------------------------------------------------*/
+void
+bordercolor(unsigned char c)
+{
+
+}
+/*-----------------------------------------------------------------------------------*/
+void
+screensize(unsigned char *x, unsigned char *y)
+{
+  x = LIBCONIO_SCREEN_WIDTH;
+  y = LIBCONIO_SCREEN_HEIGHT;
 }
 /*-----------------------------------------------------------------------------------*/
