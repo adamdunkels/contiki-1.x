@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.h,v 1.4 2003/04/10 09:04:53 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.5 2003/04/10 09:23:12 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -90,6 +90,8 @@ struct dispatcher_uipstate {
 
 #define DISPATCHER_UIPCALL(name, state) \
         void name(void *state)
+
+#define DISPATCHER_UIPCALL_ARG(state)
 
 #else /* CC_FUNCTION_POINTER_ARGS */
 #define DISPATCHER_SIGHANDLER(name, s, data) \
