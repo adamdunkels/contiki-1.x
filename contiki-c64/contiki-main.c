@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.1 2003/03/19 16:26:18 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.2 2003/04/08 19:11:19 adamdunkels Exp $
  *
  */
 
@@ -40,11 +40,7 @@
 #include "ctk-draw.h"
 #include "dispatcher.h"
 
-#include "simpletelnet.h"
-#include "programs.h"
-#include "email.h"
-#include "www.h"
-#include "contiki.h"
+#include "program-handler.h"
 
 #include "uip_main.h"
 #include "uip.h"
@@ -54,20 +50,11 @@
 #endif /* WITH_TFE */
 #include "resolv.h"
 
-#include <time.h>
-#include <stdio.h>
-#include <6502.h>
-#include <conio.h>
-#include <rs232.h>
-#include <time.h>
-#include <string.h>
-
 
 /*-----------------------------------------------------------------------------------*/
 int
 main(int argc, char **argv)
 {
-  /*  irqload_init();*/
 
 #ifdef WITH_UIP
   uip_init();
@@ -94,9 +81,7 @@ main(int argc, char **argv)
   dispatcher_init();
   ctk_init();
   
-  contiki_init();
-  
-  programs_init();
+  program_handler_init();
   
   ctk_redraw();
   ek_run();
