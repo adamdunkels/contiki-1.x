@@ -9,7 +9,8 @@ struct uip_fw_netif {
 				 linked in a list. */
   u16_t ipaddr[2];            /**< The IP address of this interface. */
   u16_t netmask[2];           /**< The netmask of the interface. */
-  void (* output)(void);      /**< A pointer to the function that
+  void (* output)(void);
+                              /**< A pointer to the function that
 				 sends a packet. */
 };
 

@@ -1,4 +1,15 @@
 /**
+ * \addtogroup uip
+ * @{
+ */
+
+/**
+ * \defgroup uipfw uIP packet forwarding
+ * @{
+ *
+ */
+
+/**
  * \file
  * uIP packet forwarding.
  * \author Adam Dunkels <adam@sics.se>

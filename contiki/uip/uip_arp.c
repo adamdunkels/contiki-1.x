@@ -54,12 +54,14 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.8 2003/10/01 11:25:37 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.9 2003/10/14 11:12:50 adamdunkels Exp $
  *
  */
 
 
 #include "uip_arp.h"
+
+#include <string.h>
 
 struct arp_hdr {
   struct uip_eth_hdr ethhdr;
@@ -100,12 +102,16 @@ struct arp_entry {
   u8_t time;
 };
 
-struct uip_eth_addr uip_ethaddr = {{UIP_ETHADDR0,
-				    UIP_ETHADDR1,
-				    UIP_ETHADDR2,
-				    UIP_ETHADDR3,
-				    UIP_ETHADDR4,
-				    UIP_ETHADDR5}};
+#if UIP_FIXEDETHADDR
+const struct uip_eth_addr uip_ethaddr = {{UIP_ETHADDR0,
+					  UIP_ETHADDR1,
+					  UIP_ETHADDR2,
+					  UIP_ETHADDR3,
+					  UIP_ETHADDR4,
+					  UIP_ETHADDR5}};
+#else
+struct uip_eth_addr uip_ethaddr = {{0,0,0,0,0,0}};
+#endif
 
 static struct arp_entry arp_table[UIP_ARPTAB_SIZE];
 static u16_t ipaddr[2];
@@ -233,7 +239,8 @@ uip_arp_update(u16_t *ipaddr, struct uip_eth_addr *ethaddr)
 void
 uip_arp_ipin(void)
 {
-
+  uip_len -= sizeof(struct uip_eth_hdr);
+	
   /* Only insert/update an entry if the source IP address of the
      incoming IP packet comes from a host on the local network. */
   if((IPBUF->srcipaddr[0] & uip_arp_netmask[0]) !=

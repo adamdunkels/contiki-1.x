@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.h,v 1.6 2003/10/01 11:35:21 adamdunkels Exp $
+ * $Id: uip_arp.h,v 1.7 2003/10/14 11:12:50 adamdunkels Exp $
  *
  */
 
@@ -125,6 +125,8 @@ void uip_arp_timer(void);
  *
  * \param addr A pointer to a 4-byte array containing the IP address
  * of the default router.
+ *
+ * \hideinitializer
  */
 #define uip_setdraddr(addr) do { uip_arp_draddr[0] = addr[0]; \
                                  uip_arp_draddr[1] = addr[1]; } while(0)
@@ -134,6 +136,8 @@ void uip_arp_timer(void);
  *
  * \param addr A pointer to a 4-byte array containing the IP address
  * of the netmask.
+ *
+ * \hideinitializer
  */
 #define uip_setnetmask(addr) do { uip_arp_netmask[0] = addr[0]; \
                                   uip_arp_netmask[1] = addr[1]; } while(0)
@@ -144,6 +148,8 @@ void uip_arp_timer(void);
  *
  * \param addr A pointer to a 4-byte array that will be filled in with
  * the IP address of the default router.
+ *
+ * \hideinitializer
  */
 #define uip_getdraddr(addr) do { addr[0] = uip_arp_draddr[0]; \
                                  addr[1] = uip_arp_draddr[1]; } while(0)
@@ -153,6 +159,8 @@ void uip_arp_timer(void);
  *
  * \param addr A pointer to a 4-byte array that will be filled in with
  * the value of the netmask.
+ *
+ * \hideinitializer
  */
 #define uip_getnetmask(addr) do { addr[0] = uip_arp_netmask[0]; \
                                   addr[1] = uip_arp_netmask[1]; } while(0)
@@ -171,6 +179,8 @@ void uip_arp_timer(void);
  *
  * \param eaddr A pointer to a struct uip_eth_addr containing the
  * Ethernet MAC address of the Ethernet card.
+ *
+ * \hideinitializer
  */
 #define uip_setethaddr(eaddr) do {uip_ethaddr.addr[0] = eaddr.addr[0]; \
                               uip_ethaddr.addr[1] = eaddr.addr[1];\
