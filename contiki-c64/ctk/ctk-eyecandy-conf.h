@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-eyecandy-conf.h,v 1.1 2003/03/19 16:26:19 adamdunkels Exp $
+ * $Id: ctk-eyecandy-conf.h,v 1.2 2003/03/28 12:16:23 adamdunkels Exp $
  *
  */
 
@@ -88,6 +88,14 @@ static unsigned char colors[] = {
   COLOR(COLOR_GRAY3, COLOR_BLACK),
   COLOR(COLOR_GRAY3, COLOR_BLACK),
 
+  /* Bitmap colors. */
+  COLOR(COLOR_GRAY2, COLOR_GRAY1),
+  COLOR(COLOR_GRAY1, COLOR_BLACK),
+  COLOR(COLOR_WHITE, COLOR_GRAY1),
+  COLOR(COLOR_GRAY3, COLOR_BLACK),
+  COLOR(COLOR_GRAY3, COLOR_BLACK),
+  COLOR(COLOR_GRAY3, COLOR_BLACK),
+
   /* Button left corner colors.*/
   COLOR(COLOR_GRAY3, COLOR_GRAY2),
   COLOR(COLOR_GRAY1, COLOR_GRAY2),
@@ -109,6 +117,8 @@ static unsigned char colors[] = {
   COLOR(COLOR_BLACK, COLOR_YELLOW),
   COLOR(COLOR_WHITE, COLOR_BLACK),
 };
+
+
 
 #define BGCOLOR1 0x06
 #define BGCOLOR2 0x04

@@ -17,6 +17,8 @@
 
 	.import		_ctk_eyecandy_windowparams
 	
+	.import		_ctk_eyecandy_bitmapptr
+		
 	.export		_ctk_eyecandy_cclear
 	.export		_ctk_eyecandy_chline
 	.export		_ctk_eyecandy_cputc
@@ -26,6 +28,8 @@
 	.export		_ctk_eyecandy_draw_buttonright
 	
 	.export		_ctk_eyecandy_draw_windowborders
+
+	.export		_ctk_eyecandy_draw_bitmapline
 ;---------------------------------------------------------------------
 
 ptr5 = sreg
@@ -40,7 +44,6 @@ tmpptr:	.res 2
 
 tmpy:	.res 1
 tmph:	.res 1
-	
 
 	;; Window border parameters	
 w:	.res 1
@@ -876,6 +879,45 @@ _ctk_eyecandy_draw_buttonright:
 	sta (ptr2),y
 	iny
 	cpy #8
+	bne :-
+	
+	jmp restore01	
+;---------------------------------------------------------------------
+_ctk_eyecandy_draw_bitmapline:
+	sta tmpl
+	cmp #0
+	bne :+
+	rts
+:		
+
+	jsr setupptrs
+	
+	ldy #0	
+	lda _ctk_eyecandy_color
+:	
+ 	sta (ptr1),y
+	iny
+	cpy tmpl
+	bne :-
+
+	lda _ctk_eyecandy_bitmapptr
+	sta ptr1
+	lda _ctk_eyecandy_bitmapptr+1
+	sta ptr1+1
+	
+	ldy #0
+	ldx #0
+:		
+	lda (ptr1),y
+ 	sta (ptr2),y		
+	iny
+	inx
+	cpx #8
+	bne :-
+
+	ldx #0
+	
+	dec tmpl
 	bne :-
 	
 	jmp restore01	

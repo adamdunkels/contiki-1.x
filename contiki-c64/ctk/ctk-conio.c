@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.1 2003/03/19 16:26:19 adamdunkels Exp $
+ * $Id: ctk-conio.c,v 1.2 2003/03/28 12:16:22 adamdunkels Exp $
  *
  */
 
@@ -256,30 +256,11 @@ ctk_draw_widget(struct ctk_widget *w,
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_draw_clear_window(struct ctk_window *window,
-		      unsigned char focus,
-		      unsigned char clipy1,
-		      unsigned char clipy2)
-{
-  unsigned char i;
-  unsigned char h;
-
-  
-  h = window->y + 2 + window->h;
-  /* Clear window contents. */
-  for(i = window->y + 2; i < h; ++i) {
-    if(i >= clipy1 && i < clipy2) {
-      cclearxy(window->x + 1, i, window->w);
-    }
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-void
 ctk_draw_window(struct ctk_window *window, unsigned char focus,
 		unsigned char clipy1, unsigned char clipy2)
 {
   unsigned char x, y;
-  unsigned char h;
+  unsigned char i, h;
   struct ctk_widget *w;
   unsigned char wfocus;
   unsigned char x1, y1, x2, y2;
@@ -287,9 +268,12 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
   if(window->y + 1 >= clipy2) {
     return;
   }
-    
   x = window->x;
   y = window->y + 1;
+  x1 = x + 1;
+  y1 = y + 1;
+  x2 = x1 + window->w;
+  y2 = y1 + window->h;
   
   if(focus & CTK_FOCUS_WINDOW) {
     textcolor(WINDOWCOLOR_FOCUS);
@@ -297,11 +281,17 @@ ctk_draw_window(struct ctk_window *window, unsigned char focus,
     textcolor(WINDOWCOLOR);
   }
 
-  x1 = x + 1;
-  y1 = y + 1;
-  x2 = x1 + window->w;
-  y2 = y1 + window->h;
 
+
+  h = y1 + window->h;
+  /* Clear window contents. */
+  for(i = y1; i < h; ++i) {
+    if(i >= clipy1 && i < clipy2) {
+      cclearxy(x1, i, window->w);
+    }
+  }
+    
+  
   /* Draw window frame. */  
   if(y >= clipy1) {
     cputcxy(x, y, CH_ULCORNER);

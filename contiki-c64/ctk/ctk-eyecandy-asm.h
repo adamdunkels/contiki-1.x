@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-eyecandy-asm.h,v 1.1 2003/03/19 16:26:19 adamdunkels Exp $
+ * $Id: ctk-eyecandy-asm.h,v 1.2 2003/03/28 12:16:23 adamdunkels Exp $
  *
  */
 
@@ -66,5 +66,8 @@ extern unsigned char ctk_eyecandy_cursx,
   ctk_eyecandy_color,
   ctk_eyecandy_reversed,
   ctk_eyecandy_underline;
+
+
+void __fastcall__ ctk_eyecandy_draw_bitmapline(unsigned char len);
 
 #endif /* __CTK_EYECANDY_ASM_H__ */

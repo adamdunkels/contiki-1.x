@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-eyecandy.c,v 1.1 2003/03/19 16:26:19 adamdunkels Exp $
+ * $Id: ctk-eyecandy.c,v 1.2 2003/03/28 12:16:24 adamdunkels Exp $
  *
  */
 #include "ctk.h"
@@ -72,14 +72,15 @@ static unsigned char wfocus;
 static unsigned char x1, y1, x2, y2;
 
 struct ctk_eyecandy_windowparams ctk_eyecandy_windowparams;
+unsigned char *ctk_eyecandy_bitmapptr;
 /*-----------------------------------------------------------------------------------*/
 /* Tables. */
 
 #define COLOR(bg, fg) ((fg << 4) | (bg))
 
-#define MENUCOLOR       48
-#define OPENMENUCOLOR   49
-#define ACTIVEMENUCOLOR 50
+#define MENUCOLOR       54
+#define OPENMENUCOLOR   55
+#define ACTIVEMENUCOLOR 56
 
 #include "ctk-eyecandy-conf.h"
 
@@ -567,43 +568,14 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_BUTTON:
     if(ypos >= clipy1 && ypos < clipy2) {
-      /*      hires_cputcxy(xpos, ypos, SC_LBRACK);*/
-      /*      if(focus & CTK_FOCUS_WINDOW) {
-	if(focus & CTK_FOCUS_WIDGET) {
-	  hires_color(COLOR(COLOR_GRAY1, COLOR_GRAY3));
-	} else {
-	  hires_color(COLOR(COLOR_WHITE, COLOR_GRAY3));
-	}	
-      } else {
-	if(focus & CTK_FOCUS_WIDGET) {
-	  hires_color(COLOR(COLOR_GRAY1, COLOR_GRAY2));
-	} else {
-	  hires_color(COLOR(COLOR_GRAY3, COLOR_GRAY2));
-	}	
-	}*/
-      hires_color(colors[6 * 6 + focus]);
+      hires_color(colors[7 * 6 + focus]);
       hires_gotoxy(xpos, ypos);
       ctk_eyecandy_draw_buttonleft();
       hires_color(colors[w->type * 6 + focus]);
       hires_gotoxy(xpos + 1, ypos);
       ctk_eyecandy_cputsn(w->widget.button.text, w->w);
-      hires_color(colors[7 * 6 + focus]);      
-      /*      if(focus & CTK_FOCUS_WINDOW) {
-	if(focus & CTK_FOCUS_WIDGET) {
-	  hires_color(COLOR(COLOR_WHITE, COLOR_GRAY3));
-	} else {
-	  hires_color(COLOR(COLOR_GRAY1, COLOR_GRAY3));
-	}
-      } else {
-	if(focus & CTK_FOCUS_WIDGET) {
-	  hires_color(COLOR(COLOR_GRAY3, COLOR_GRAY2));
-	} else {
-	  hires_color(COLOR(COLOR_GRAY1, COLOR_GRAY2));
-	}
-
-	}*/
+      hires_color(colors[8 * 6 + focus]);      
       ctk_eyecandy_draw_buttonright();
-      /*      ctk_eyecandy_cputc(SC_RBRACK);*/
     }
     break;
   case CTK_WIDGET_HYPERLINK:
@@ -685,6 +657,18 @@ draw_widget(struct ctk_widget *w,
       ctk_eyecandy_cputsn(w->widget.icon.title, len);
     }
     break;
+  case CTK_WIDGET_BITMAP:
+    ctk_eyecandy_bitmapptr = w->widget.bitmap.bitmap;
+    for(i = 0; i < w->widget.bitmap.h; ++i) {
+      if(ypos >= clipy1 && ypos < clipy2) {
+	hires_gotoxy(xpos, ypos);
+	ctk_eyecandy_draw_bitmapline(w->w);
+      }
+      ctk_eyecandy_bitmapptr += w->w * 8;
+      ++ypos;
+    }
+    break;
+
   default:
     break;
   }
@@ -712,25 +696,6 @@ ctk_draw_widget(struct ctk_widget *w,
 }
 /*-----------------------------------------------------------------------------------*/
 void
-ctk_draw_clear_window(struct ctk_window *window,
-		      unsigned char focus,
-		      unsigned char clipy1,
-		      unsigned char clipy2)
-{
-  unsigned char h;
-
-  hires_color(colors[focus]);
-  
-  h = window->y + 2 + window->h;
-  /* Clear window contents. */
-  for(i = window->y + 2; i < h; ++i) {
-    if(i >= clipy1 && i < clipy2) {
-      hires_cclearxy(window->x + 1, i, window->w);
-    }
-  }
-}
-/*-----------------------------------------------------------------------------------*/
-void
 ctk_draw_window(register struct ctk_window *window,
 		unsigned char focus,
 		unsigned char clipy1, unsigned char clipy2)
@@ -750,14 +715,25 @@ ctk_draw_window(register struct ctk_window *window,
   if(clipy2 < y) {
     return;
   }
-  
-  hires_color(colors[focus+1]);
-  
+
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + window->w;
   y2 = y1 + window->h;
+ 
+  
+  hires_color(colors[focus]);
+  
+  h = y1 + window->h;
+  /* Clear window contents. */
+  for(i = y1; i < h; ++i) {
+    if(i >= clipy1 && i < clipy2) {
+      hires_cclearxy(x1, i, window->w);
+    }
+  }
 
+  hires_color(colors[focus+1]);
+    
   hires_gotoxy(x, y);
   ctk_eyecandy_windowparams.w = window->w;
   ctk_eyecandy_windowparams.h = window->h;
@@ -957,11 +933,12 @@ ctk_draw_menus(struct ctk_menus *menus)
   struct ctk_menu *m;
   
   /* Draw menus */
-  
+
+  hires_color(colors[MENUCOLOR]); 
   hires_gotoxy(0, 0);
   hires_revers(0);
+  ctk_eyecandy_cputc(' ');
   for(m = menus->menus->next; m != NULL; m = m->next) {
-    hires_color(colors[MENUCOLOR]);    
     if(m != menus->open) {
       ctk_eyecandy_cputsn(m->title, m->titlelen);
       ctk_eyecandy_cputc(' ');
