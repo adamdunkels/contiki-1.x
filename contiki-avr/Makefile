@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.5 2004/07/04 20:17:37 adamdunkels Exp $
+# $Id: Makefile,v 1.6 2004/08/09 22:21:42 adamdunkels Exp $
 #
 
 all: contiki.srec
@@ -75,7 +75,7 @@ LDFLAGS=-mmcu=atmega128 -Wl,-Map=contiki.map,--cref,-Tdata,0x801100
 %.srec:
 	$(OBJCOPY) -O srec $< $@
 
-UIP=uip.o uip_arch.o uiplib.o resolv.o
+UIP=uip.o uip_arch.o uiplib.o resolv.o 
 
 WWW=www.o webclient.o http-strings.o http-user-agent-string.o \
     htmlparser.o html-strings.o  www-dsc.o
@@ -86,6 +86,8 @@ TELNET=simpletelnet.o telnet.o
 SYSTEM=ek.o ek-service.o loader-arch.o
 CONTIKIFILES= $(SYSTEM) $(UIP) uip-fw.o uip-fw-service.o timer.o 
 
+CTKVNC=ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o
+CTKTELNET=libconio.o ctk-term.o ctk-term-in.o ctk-term-out.o ctk-termtelnet.o
 
 clean:
 	rm -f *.o *~ *core contiki contiki.srec *.lst *.map
@@ -98,14 +100,14 @@ depend:
 
 contiki: $(CONIKIFILES) contiki-main.o strncasecmp.o \
  ctk.o ek.o arg.o timer.o ek-service.o \
- uip.o uip_arch.o uip_arp.o resolv.o uip-event.o uiplib.o tcpip.o \
+ uip.o uip_arch.o uip_arp.o resolv.o uip-event.o uiplib.o tcpip.o uip-split.o \
  rtl8019.o rtl8019dev.o delay.o debug.o rtl8019-drv.o \
- ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o \
+ $(CTKVNC) \
  program-handler.o about.o about-dsc.o \
  processes.o processes-dsc.o calc.o calc-dsc.o \
- telnetd.o telnetd-dsc.o shell.o memb.o \
+ telnetd.o telnetd-dsc.o shell.o memb.o netconf.o netconf-dsc.o \
  $(WWW) weblinks.o weblinks-dsc.o \
-# webserver.o httpd.o httpd-cgi.o httpd-fs.o webserver-dsc.o 
+ webserver.o httpd.o httpd-cgi.o httpd-fs.o webserver-dsc.o 
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $@ $^
 
 
