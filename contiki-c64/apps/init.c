@@ -31,7 +31,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: init.c,v 1.3 2003/08/05 23:26:11 adamdunkels Exp $
+ * $Id: init.c,v 1.4 2003/08/06 22:54:16 adamdunkels Exp $
  *
  */
 
@@ -175,6 +175,8 @@ dnsconf(char *str)
 static struct ptentry initparsetab[] =
   {{'l', loadfile},
    {'L', loadfile},
+   {'t', loadfile},
+   {'T', loadfile},
    {'i', ipaddrconf},
    {'I', ipaddrconf},
    {'n', netmaskconf},
