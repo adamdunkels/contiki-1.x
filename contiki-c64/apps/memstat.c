@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: memstat.c,v 1.1 2003/04/08 19:03:57 adamdunkels Exp $
+ * $Id: memstat.c,v 1.2 2003/04/09 13:51:07 adamdunkels Exp $
  *
  */
 
@@ -60,7 +60,7 @@ static struct ctk_button updatebutton =
 static struct ctk_button closebutton =
   {CTK_BUTTON(17, 4, 5, "Close")};
 
-static void memstat_sighandler(ek_signal_t s, ek_data_t data);
+static DISPATCHER_SIGHANDLER(memstat_sighandler, s, data);
 static struct dispatcher_proc p =
   {DISPATCHER_PROC("Memory statistics", NULL, memstat_sighandler, NULL)};
 static ek_id_t id;
@@ -123,9 +123,11 @@ quit(void)
   ctk_redraw();
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-memstat_sighandler(ek_signal_t s, ek_data_t data)
+static
+DISPATCHER_SIGHANDLER(memstat_sighandler, s, data)
 {
+  DISPATCHER_SIGHANDLER_ARGS(s, data);
+  
   if(s == ctk_signal_button_activate) {
     if(data == (ek_data_t)&updatebutton) {
       update();
