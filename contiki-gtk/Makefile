@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.8 2003/09/04 19:20:07 adamdunkels Exp $
+# $Id: Makefile,v 1.9 2004/02/16 21:19:23 adamdunkels Exp $
 #
 
 CONTIKI=../contiki
@@ -68,7 +68,7 @@ LDFLAGS=-pg `gtk12-config --libs`
 
 WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o http-user-agent-string.o
 EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
-WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-cgi.o httpd-fs.o
+WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o
 TELNET=simpletelnet.o telnet.o
 
 CTKGTK=ctk-gtksim.o ctk-conio.o libconio.o
@@ -84,7 +84,7 @@ contiki: contiki-main.o \
  $(EMAIL) email-dsc.o $(WEBSERVER) $(TELNET) telnet-dsc.o \
  vnc.o vnc-viewer.o vnc-draw.o \
  calc.o calc-dsc.o \
- $(WWW) telnetd.o telnetd-dsc.o shell.o \
+ $(WWW) telnetd.o telnetd-dsc.o shell.o memb.o\
  #maze.o maze-dsc.o
 	gcc $(LDFLAGS) -o $@ $^
 
