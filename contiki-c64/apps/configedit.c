@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.4 2003/08/09 23:40:17 adamdunkels Exp $
+ * $Id: configedit.c,v 1.5 2003/08/15 18:44:26 adamdunkels Exp $
  *
  */
 
@@ -274,6 +274,21 @@ initscript(void)
   return;
 }
 /*-----------------------------------------------------------------------------------*/
+static int
+makeline(char *line, char c, char *str)
+{
+  int len;
+
+  len = strlen(str);
+  
+  line[0] = c;
+  line[1] = ' ';
+  strcpy(&line[2], str);
+  line[2 + len] = '\n';
+  line[3 + len] = 0;
+  return len + 3;
+}
+/*-----------------------------------------------------------------------------------*/
 static void
 savescript(void)
 {
@@ -284,36 +299,29 @@ savescript(void)
     return;
   }
   if(theme[0] != 0) {
-    sprintf(line, "t %s\n", theme);
-    c64_fs_write(&f, line, strlen(line));
+    c64_fs_write(&f, line, makeline(line, 't', theme));
   }
   if(driver[0] != 0) {
-    sprintf(line, "l %s\n", driver);
-    c64_fs_write(&f, line, strlen(line));
+    c64_fs_write(&f, line, makeline(line, 'l', driver));
   }
   if(ipaddr[0] != 0) {
-    sprintf(line, "i %s\n", ipaddr);
-    c64_fs_write(&f, line, strlen(line));
+    c64_fs_write(&f, line, makeline(line, 'i', ipaddr));
   }
   if(netmask[0] != 0) {
-    sprintf(line, "n %s\n", netmask);
-    c64_fs_write(&f, line, strlen(line));
+    c64_fs_write(&f, line, makeline(line, 'n', netmask));
   }
   if(gateway[0] != 0) {
-    sprintf(line, "r %s\n", gateway);
-    c64_fs_write(&f, line, strlen(line));
+    c64_fs_write(&f, line, makeline(line, 'r', gateway));
   }
   if(dnsserver[0] != 0) {
-    sprintf(line, "d %s\n", dnsserver);
-    c64_fs_write(&f, line, strlen(line));
+    c64_fs_write(&f, line, makeline(line, 'd', dnsserver));
   }
   
   if(screensaver[0] != 0) {
-    sprintf(line, "s %s\n", screensaver);
-    c64_fs_write(&f, line, strlen(line));
+    c64_fs_write(&f, line, makeline(line, 's', screensaver));
   }
   
-  sprintf(line, ".\n\0\n\n\n");
+  strcpy(line, ".\n\0\n\n\n");
   c64_fs_write(&f, line, strlen(line));
   
   c64_fs_close(&f);
