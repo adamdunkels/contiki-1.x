@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: dispatcher.h,v 1.13 2003/10/01 07:53:58 adamdunkels Exp $
+ * $Id: dispatcher.h,v 1.14 2003/11/27 15:53:33 adamdunkels Exp $
  *
  */
 #ifndef __DISPATCHER_H__
@@ -52,6 +52,7 @@
 #include "ek.h"
 #include "cc.h"
 #include "arg.h"
+#include "loader.h"
 
 void dispatcher_init(void);
 
@@ -276,9 +277,11 @@ void dispatcher_uiplisten(u16_t port);
 
 struct uip_conn *dispatcher_connect(u16_t *ripaddr, u16_t port, void *appstate);
 
+struct uip_udp_conn *dispatcher_udp_new(u16_t *ripaddr, u16_t port, void *appstate);
+
 extern ek_id_t dispatcher_current;
 extern struct dispatcher_proc *dispatcher_procs;
-extern ek_signal_t dispatcher_signal_quit;
+extern ek_signal_t dispatcher_signal_quit, dispatcher_signal_msg;
 
 void dispatcher_process_signal(void);
 void dispatcher_process_idle(void);

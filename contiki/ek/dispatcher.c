@@ -38,7 +38,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.20 2003/10/01 07:53:57 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.21 2003/11/27 15:53:33 adamdunkels Exp $
  *
  */
 
@@ -101,6 +101,15 @@ static ek_id_t ids = 1;
  */
 ek_signal_t dispatcher_signal_quit;
 
+/**
+ * A generic message signal.
+ *
+ * This signal may be used to send messages between processes. The
+ * actual interpretation of the message is up to the applications to
+ * decide.  
+ */
+ek_signal_t dispatcher_signal_msg;
+ 
 /** @} */
 
 static ek_signal_t lastsig = 1;
@@ -380,11 +389,13 @@ dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
  * unit.
  */
 /*-----------------------------------------------------------------------------------*/
+#if 0
 ek_clock_t
 ek_clock(void)
 {
   return clock();
 }
+#endif /* 0 */
 #ifdef WITH_UIP
 /*-----------------------------------------------------------------------------------*/
 
@@ -489,8 +500,11 @@ dispatcher_uipcall(void)
   static u8_t i;
   struct listenport *l;
 
-
-  s = (struct dispatcher_uipstate *)uip_conn->appstate;
+  if(uip_conn != NULL) {
+    s = (struct dispatcher_uipstate *)uip_conn->appstate;
+  } else {
+    s = (struct dispatcher_uipstate *)uip_udp_conn->appstate;
+  }
 
   /* If this is a connection request for a listening port, we must
      mark the connection with the right process ID. */
@@ -586,6 +600,43 @@ dispatcher_markconn(struct uip_conn *conn,
   s->state = appstate;
 }
 
+/*-----------------------------------------------------------------------------------*/
+/**
+ * Set up a new UDP connection.
+ *
+ * This function sets up a new UDP connection with uIP and marks the
+ * connection so that it belongs to the calling process.
+ *
+ * \param ripaddr A pointer to a 4-byte structure representing the IP
+ * address of the remote host.
+ *
+ * \param rport The remote port number in network byte order.
+ *
+ * \param appstate A pointer to an application specific state object.
+ *
+ * \return The uip_udp_conn structure for the new connection or NULL
+ * if no connection could be allocated.
+ */
+/*-----------------------------------------------------------------------------------*/
+struct uip_udp_conn *
+dispatcher_udp_new(u16_t *ripaddr,
+		   u16_t port, void *appstate)
+{
+  struct uip_udp_conn *c;
+  struct dispatcher_uipstate *s;
+  
+  c = uip_udp_new(ripaddr, port);
+  if(c == NULL) {
+    return NULL;
+  }
+
+  s = (struct dispatcher_uipstate *)c->appstate;
+  s->id = dispatcher_current;
+  s->state = appstate;
+
+  return c;
+}
+
 /** @} */
 /** @} */
 
@@ -649,6 +700,7 @@ dispatcher_init(void)
 
   lastsig = 1;
   dispatcher_signal_quit = dispatcher_sigalloc();
+  dispatcher_signal_msg = dispatcher_sigalloc();
 
   nsignals = fsignal = 0;
 
