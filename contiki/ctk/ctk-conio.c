@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.4 2003/04/24 17:20:18 adamdunkels Exp $
+ * $Id: ctk-conio.c,v 1.5 2003/04/28 20:31:48 adamdunkels Exp $
  *
  */
 
@@ -253,6 +253,10 @@ ctk_draw_widget(struct ctk_widget *w,
 	      posy + win->h,
 	      clipy1, clipy2,
 	      focus);
+  
+#ifdef CTK_CONIO_CONF_UPDATE
+  CTK_CONIO_CONF_UPDATE();
+#endif /* CTK_CONIO_CONF_UPDATE */
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -301,6 +305,10 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
 	       clipy1, clipy2,
 	       wfocus);
   }
+
+#ifdef CTK_CONIO_CONF_UPDATE
+  CTK_CONIO_CONF_UPDATE();
+#endif /* CTK_CONIO_CONF_UPDATE */
 
 }
 /*-----------------------------------------------------------------------------------*/
