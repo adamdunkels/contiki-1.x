@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.5 2003/08/24 22:35:23 adamdunkels Exp $
+ * $Id: wget.c,v 1.6 2003/08/29 20:33:32 adamdunkels Exp $
  *
  */
 
@@ -63,20 +63,6 @@ static char url[80];
 static char urledit[80];
 struct ctk_textentry urltextentry =
   {CTK_TEXTENTRY(5, 1, 29, 1, urledit, 78)};
-
-/*static struct ctk_label hostlabel =
-  {CTK_LABEL(0, 1, 7, 1, "Server:")};
-static char hostedit[40];
-static char host[40];
-static struct ctk_textentry hosttextentry =
-  {CTK_TEXTENTRY(8, 1, 26, 1, hostedit, 38)};
-
-static struct ctk_label filelabel =
-  {CTK_LABEL(0, 3, 5, 1, "File:")};
-static char fileedit[40];
-static char file[40];
-static struct ctk_textentry filetextentry =
-{CTK_TEXTENTRY(8, 3, 26, 1, fileedit, 38)};*/
 
 
 static struct ctk_label savefilenamelabel =
@@ -153,11 +139,6 @@ LOADER_INIT_FUNC(wget_init, arg)
     /* Create the main window. */
     ctk_window_new(&window, 36, 8, "Web downloader");
 
-    /*    CTK_WIDGET_ADD(&window, &hostlabel);
-    CTK_WIDGET_ADD(&window, &hosttextentry);
-
-    CTK_WIDGET_ADD(&window, &filelabel);
-    CTK_WIDGET_ADD(&window, &filetextentry);*/
     
     CTK_WIDGET_ADD(&window, &urllabel);
     CTK_WIDGET_ADD(&window, &urltextentry);
@@ -171,8 +152,6 @@ LOADER_INIT_FUNC(wget_init, arg)
 
     CTK_WIDGET_ADD(&window, &statustext);
 
-    /*    memset(hostedit, 0, sizeof(hostedit));
-	  memset(fileedit, 0, sizeof(fileedit));*/
     dload_state = DLOAD_NONE;
       
     memset(savefilename, 0, sizeof(savefilename));
@@ -301,21 +280,17 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
 
   if(s == ctk_signal_button_activate) {
     if(data == (void *)&filebutton) {
-      ret = cbm_open(2, 8, 2, savefilename);
-      if(ret == -1) {
+      /*      ret = cbm_open(2, 8, 2, savefilename);
+	      if(ret == -1) {*/
 	sprintf(statusmsg, "Open error with '%s'", savefilename);
 	show_statustext(statusmsg);
-      } else {
-	/*	strncpy(host, hostedit, sizeof(host));
-		strncpy(file, fileedit, sizeof(file));*/
-	/*	petsciiconv_toascii(host, sizeof(host));
-		petsciiconv_toascii(file, sizeof(file));*/
+	/*      } else {
 	strncpy(url, urledit, sizeof(url));
 	petsciiconv_toascii(url, sizeof(url));
 	start_get();
 	dload_bytes = 0;
 	dload_state = DLOAD_FILE;
-      }
+	}*/
     } else if(data == (void *)&d64button) {
       ctk_dialog_open(&d64dialog);
     } else if(data == (void *)&cancelbutton) {
@@ -409,86 +384,6 @@ webclient_connected(void)
   show_statustext("Request sent...");
 }
 /*-----------------------------------------------------------------------------------*/
-static void
-x_open(u8_t f, u8_t d, u8_t cmd, u8_t *fname)
-{
-  u8_t ret;
-  
-  ret = cbm_open(f, d, cmd, fname);
-  if(ret != 0) {
-    /*    printf("open: error %d\n", ret);*/
-    /*    ctk_label_set_text(&statuslabel, "Open err");
-	  CTK_WIDGET_REDRAW(&statuslabel);*/
-    show_statustext("Open error");
-  }
-  
-}
-
-#if 0
-static u8_t cmd[32];
-static void
-read_sector(u8_t device, u8_t track, u8_t sect, void *mem)
-{  
-  int ret;
-  
-  x_open(15, device, 15, NULL);
-  x_open(2, device, 2, "#");
-
-  /*  sprintf(cmd, "u1: 2  0%3d%3d", track, sect);  */
-  strcpy(cmd, "u1: 2  0");
-  cmd[8] = ' ';
-  cmd[9] = '0' + track / 10;
-  cmd[10] = '0' + track % 10;
-  cmd[11] = ' ';
-  cmd[12] = '0' + sect / 10;
-  cmd[13] = '0' + sect % 10;
-  cmd[14] = 0;
-  cbm_write(15, cmd, strlen(cmd));
-  /*  printf("%s\n", cmd);*/
-    
-  ret = cbm_read(2, mem, 256);
-  if(ret == -1) {
-    ctk_label_set_text(&statuslabel, "Read err");
-    CTK_WIDGET_REDRAW(&statuslabel);
-  }
-  /*  printf("read: read %d bytes\n", ret);*/
-
-  cbm_close(2);
-  cbm_close(15);
-
-}
-#endif /* 0 */
-
-static void
-write_sector(u8_t device, u8_t track, u8_t sect, void *mem)
-{
-  u16_t ret;
-  static u8_t cmd[32];
-  
-  x_open(15, device, 15, NULL);
-  x_open(2, device, 2, "#");
-
-  ret = cbm_write(2, mem, 256);
-  
-  sprintf(cmd, "u2: 2 0 %d %d", track, sect);  
-  cbm_write(15, cmd, strlen(cmd));
-  /*  printf("%s\n", cmd);*/
-    
-
-  /*  ret = 0;*/
-  if(ret == -1) {
-    sprintf(statusmsg, "Write error at %d:%d", track, sect);
-    show_statustext(statusmsg);
-  } else {
-    sprintf(statusmsg, "Wrote %d bytes to %d:%d", ret, track, sect);
-    show_statustext(statusmsg);
-  }
-  /*  printf("write: wrote %d bytes\n", ret);*/
-
-  cbm_close(2);
-  cbm_close(15);
-}
-
 static u8_t
 next_sector(void)
 {
