@@ -93,4 +93,4 @@ for($i = 0; $i < @fvars; $i++) {
 }
 
 print(OUTPUT "#define HTTPD_FS_ROOT file$fvars[$i - 1]\n\n");
-print(OUTPUT "#define HTTPD_FS_NUMFILES $i");
+print(OUTPUT "#define HTTPD_FS_NUMFILES $i\n");
