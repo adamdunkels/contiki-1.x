@@ -60,12 +60,14 @@ readl:
          iny
          bne readl
          clc
+	 lda #0
+         tax	
          rts
 readerr:	
 	;          sta $07c0	
 	 jsr recv
 	; 	 sta $07c1
-         sec
+         ldx #0
          rts
 ;---------------------------------------
 _c64_dio_asm_write_block:		
@@ -93,14 +95,15 @@ writel:
          jsr recv
          cmp #errok
          bne writeerr
-         clc
+         lda #0
+	 tax
          rts
 
 writeerr:	
 	;          sta $07c0
 	 jsr recv
 	; 	 sta $07c1
-         sec
+         ldx #0
          rts
 ;---------------------------------------
 _c64_dio_asm_init:		
@@ -227,22 +230,18 @@ sendl:
          dex
          bpl sendl
 
-	 lda $d020
-	 pha
+	 ldx $d020
 	 lda #1
 	 sta $d020
-	 pla
-	 sta $d020
+	 stx $d020
 		
          rts
 ;---------------------------------------
 recv:
-	 lda $d020
-	 pha
+	 ldx $d020
 	 lda #0
 	 sta $d020
-	 pla
-	 sta $d020
+	 stx $d020
 	
          ldx #7
 recvl:	
@@ -275,7 +274,7 @@ recvl:
 ;---------------------------------------
 
 ;---------------------------------------
-;Ôhe code residing in the drive:
+;the code residing in the drive:
 ;---------------------------------------
 dtmp     = $46
 dtmp2    = $97
@@ -448,8 +447,6 @@ dgsserr:
          jsr dsend
          pla
          jsr dsend
-         pla
-         pla
          rts
 dgsnoerr:	
          lda #errok
@@ -494,8 +491,6 @@ dpsserr:
          jsr dsend
          pla
          jsr dsend
-         pla
-         pla
          rts
 dpsnoerr:	
          lda #errok
