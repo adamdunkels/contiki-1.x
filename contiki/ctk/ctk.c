@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk.c,v 1.19 2003/06/30 20:44:57 adamdunkels Exp $
+ * $Id: ctk.c,v 1.20 2003/08/01 00:07:19 adamdunkels Exp $
  *
  */
 
@@ -43,6 +43,8 @@
 #include "ctk-draw.h"
 #include "ctk-conf.h"
 #include "ctk-mouse.h"
+
+#include <string.h>
 
 static unsigned char height, width;
 
@@ -77,11 +79,11 @@ static unsigned char redraw_widgetptr;
 static unsigned char maxnitems;
 
 static unsigned char iconx, icony;
-#define ICONX_START  (width - 5)
+#define ICONX_START  (width - 6)
 #define ICONY_START  0
-#define ICONX_DELTA  -8
+#define ICONX_DELTA  -16
 #define ICONY_DELTA  5
-#define ICONY_MAX    (height - 4)
+#define ICONY_MAX    (height - 5)
 
 static void ctk_idle(void);
 static DISPATCHER_SIGHANDLER(ctk_sighandler, s, data);
@@ -243,7 +245,7 @@ void
 ctk_dialog_open(struct ctk_window *d)
 {
   dialog = d;
-  redraw |= REDRAW_ALL;
+  redraw |= REDRAW_FOCUS;
 }
 /*-----------------------------------------------------------------------------------*/
 void
@@ -1063,20 +1065,14 @@ ctk_idle(void)
 
 #if CTK_CONF_SCREENSAVER
   if(mode == CTK_MODE_SCREENSAVER) {
-#if 0
-#ifdef CTK_SCREENSAVER_RUN
-    CTK_SCREENSAVER_RUN();
-#endif /* CTK_SCREENSAVER_RUN */
-#endif /* 0 */
     if(ctk_arch_keyavail()
 #if CTK_CONF_MOUSE_SUPPORT
        || mouse_moved || mouse_button_changed
 #endif /* CTK_CONF_MOUSE_SUPPORT */
        ) {
-      dispatcher_emit(ctk_signal_screensaver_stop, NULL, DISPATCHER_BROADCAST);
+      dispatcher_emit(ctk_signal_screensaver_stop, NULL,
+		      DISPATCHER_BROADCAST);
       mode = CTK_MODE_NORMAL;
-      /*      ctk_draw_init();
-	      ctk_desktop_redraw();*/
     }
   } else
 #endif /* CTK_CONF_SCREENSAVER */
@@ -1327,7 +1323,6 @@ ctk_idle(void)
 	    for(window = windows; window->next != NULL;
 		window = window->next);
 	    ctk_window_open(window);
-	    ctk_desktop_redraw(NULL);
 	  }
 	  break;
 	default:
