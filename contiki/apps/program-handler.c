@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.25 2004/08/20 21:32:41 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.26 2004/09/09 21:15:55 adamdunkels Exp $
  *
  */
 
@@ -331,6 +331,7 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
 	RUN(dsc->prgname, dsc->init, NULL);
       } else if(contikimenu.active == runmenuitem) {
 	make_windows();
+	ctk_window_close(&runwindow);
 	ctk_window_open(&runwindow);
 	CTK_WIDGET_FOCUS(&runwindow, &nameentry);
       }
