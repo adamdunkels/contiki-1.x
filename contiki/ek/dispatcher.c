@@ -32,7 +32,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: dispatcher.c,v 1.9 2003/08/05 13:51:08 adamdunkels Exp $
+ * $Id: dispatcher.c,v 1.10 2003/08/09 13:34:50 adamdunkels Exp $
  *
  */
 
@@ -110,15 +110,18 @@ dispatcher_exit(CC_REGISTER_ARG struct dispatcher_proc *p)
 {
   struct dispatcher_proc *q;
   unsigned char i;
+  struct listenport *l;
 
   /* Unlisten all signals. */
   ek_unlisten(p->id);
   
   /* If this process has any listening TCP ports, we remove them. */
+  l = listenports;
   for(i = 0; i < UIP_LISTENPORTS; ++i) {
-    if(listenports[i].id == p->id) {
-      listenports[i].port = 0;
-    } 
+    if(l->id == p->id) {
+      l->port = 0;
+    }
+    ++l;
   }
   /* Remove process from the process list. */
   if(p == dispatcher_procs) {
@@ -179,18 +182,22 @@ dispatcher_uipcall(void)
   register struct dispatcher_proc *p;
   register struct dispatcher_uipstate *s;
   u8_t i;
+  struct listenport *l;
+
 
   s = (struct dispatcher_uipstate *)uip_conn->appstate;
 
   /* If this is a connection request for a listening port, we must
      mark the connection with the right process ID. */
   if(uip_connected()) {
+    l = listenports;
     for(i = 0; i < UIP_LISTENPORTS; ++i) {
-      if(listenports[i].port == uip_conn->lport) {
-	s->id = listenports[i].id;
+      if(l->port == uip_conn->lport) {
+	s->id = l->id;
 	s->state = NULL;
 	break;
       }
+      ++l;
     }
   }
   
@@ -218,13 +225,16 @@ void
 dispatcher_uiplisten(u16_t port)
 {
   unsigned char i;
+  struct listenport *l;
 
+  l = listenports;
   for(i = 0; i < UIP_LISTENPORTS; ++i) {
-    if(listenports[i].port == 0) {
-      listenports[i].port = HTONS(port);
-      listenports[i].id = dispatcher_current;
+    if(l->port == 0) {
+      l->port = HTONS(port);
+      l->id = dispatcher_current;
       break;
     }
+    ++l;
   }
 
   /*  ++listenportsptr;*/
@@ -254,7 +264,9 @@ dispatcher_listen(ek_signal_t s)
 void
 dispatcher_timer(ek_signal_t s, ek_data_t data, ek_ticks_t t)
 {
+#if EK_CONF_TIMERS
   ek_timer(s, data, dispatcher_current, t);
+#endif /* EK_CONF_TIMERS */
 }
 /*-----------------------------------------------------------------------------------*/
 struct dispatcher_proc *
