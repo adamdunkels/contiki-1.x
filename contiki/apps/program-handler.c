@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.6 2003/04/11 20:11:40 adamdunkels Exp $
+ * $Id: program-handler.c,v 1.7 2003/04/17 19:00:00 adamdunkels Exp $
  *
  */
 
@@ -44,158 +44,25 @@
 #include "ctk-draw.h"
 #include "dispatcher.h"
 #include "resolv.h"
-#include "telnet.h"
 
 #include "loader.h"
 
+#include "program-handler.h"
 
 /* Menus */
 static struct ctk_menu contikimenu;
-static unsigned char menuitem_about, menuitem_processes, menuitem_tcpip;
 
-static struct ctk_menu programsmenu;
-static unsigned char menuitem_www,
-  menuitem_email, menuitem_telnet, menuitem_webserver,
-  menuitem_run;
+static struct dsc *contikidsc[10];
+static unsigned char contikidsclast = 0;
 
-/* Icons */
-static unsigned char abouticon_bitmap[3*3*8] = {
-  0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
-  0x00, 0xff, 0x00, 0x7e, 0x00, 0xff, 0x00, 0xff,
-  0x00, 0xfe, 0xc2, 0x32, 0x1a, 0xca, 0x06, 0xf6,
-
-  0x40, 0x5f, 0x40, 0x5f, 0x40, 0x5f, 0x40, 0x4f,
-  0x00, 0xff, 0x00, 0xff, 0x00, 0xfc, 0x01, 0xf3,
-  0x02, 0xfa, 0x02, 0x82, 0x3e, 0xfe, 0xfe, 0xfe,
-
-  0x60, 0x67, 0x50, 0x59, 0x4c, 0x43, 0x7f, 0x00,
-  0x07, 0xe7, 0x0f, 0xef, 0x0f, 0x0f, 0xff, 0x00,
-  0x8e, 0x06, 0x06, 0x06, 0x8e, 0xfe, 0xfe, 0x00
-};
-
-static char abouticon_textmap[9] = {
-  ' ', ' ', 'c',
-  ' ', '?', ' ',
-  '.', ' ', ' '
-};
-
-static struct ctk_icon abouticon =
-  {CTK_ICON("About Contiki", abouticon_bitmap, abouticon_textmap)};
-
-static unsigned char tcpipconficon_bitmap[3*3*8] = {
-  0x00, 0x79, 0x43, 0x73, 0x47, 0x77, 0x47, 0x6f,
-  0x00, 0xfe, 0xfe, 0xfc, 0xfc, 0xfc, 0xf8, 0xfb,
-  0x00, 0x16, 0x02, 0x00, 0x02, 0x00, 0x00, 0xc2,
-
-  0x48, 0x4c, 0x5f, 0x5f, 0x1f, 0x3f, 0x3f, 0x03,
-  0x79, 0xf0, 0xf0, 0xf0, 0xe0, 0xe0, 0xfe, 0xfc,
-  0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-
-  0x77, 0x47, 0x70, 0x43, 0x79, 0x41, 0x7c, 0x00,
-  0xfc, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xf7, 0x00,
-  0x00, 0x80, 0x00, 0x00, 0x00, 0x84, 0xf0, 0x00
-};
-
-static char tcpipconficon_textmap[9] = {
-  't', 'c', 'p',
-  '/', 'i', 'p',
-  'c', 'f', 'g'
-};
-
-
-static struct ctk_icon tcpipconficon =
-  {CTK_ICON("TCP/IP conf", tcpipconficon_bitmap, tcpipconficon_textmap)};
-
-
-#ifdef WITH_WWW
-/* The icon for the WWW browser */
-static unsigned char wwwicon_bitmap[3*3*8] = {
-  0x00, 0x7e, 0x40, 0x73, 0x46, 0x4c, 0x18, 0x13,
-  0x00, 0x00, 0xff, 0x81, 0x34, 0xc9, 0x00, 0xb6,
-  0x00, 0x7e, 0x02, 0xce, 0x72, 0x32, 0x18, 0x48,
-
-  0x30, 0x27, 0x24, 0x20, 0x37, 0x24, 0x20, 0x33,
-  0x00, 0x7b, 0x42, 0x00, 0x7b, 0x42, 0x00, 0x3b,
-  0x0c, 0x24, 0x24, 0x04, 0xa4, 0x24, 0x04, 0x4c,
-
-  0x12, 0x19, 0x4c, 0x46, 0x63, 0x40, 0x7c, 0x00,
-  0x22, 0x91, 0x00, 0xc4, 0x81, 0xff, 0x00, 0x00,
-  0x08, 0x18, 0x32, 0x62, 0xc6, 0x02, 0x3e, 0x00
-};
-
-static char wwwicon_textmap[9] = {
-  'w', 'w', 'w',
-  '(', ')', ' ',
-  ' ', '(', ')'
-};
-
-static struct ctk_icon wwwicon =
-  {CTK_ICON("Web browser", wwwicon_bitmap, wwwicon_textmap)};
-#endif /* WITH_WWW */
-
-#ifdef WITH_WEBSERVER
-/* The icon for the web server */
-static unsigned char webservericon_bitmap[3*3*8] = {
-  0x00, 0x7f, 0x40, 0x41, 0x44, 0x48, 0x40, 0x50,
-  0x00, 0xff, 0x5a, 0x00, 0x00, 0x00, 0x3c, 0x81,
-  0x00, 0xfe, 0x02, 0x82, 0x22, 0x12, 0x02, 0x0a,
-
-  0x41, 0x60, 0x42, 0x62, 0x62, 0x42, 0x60, 0x41,
-  0x00, 0x00, 0x00, 0x18, 0x18, 0x00, 0x18, 0x18,
-  0x82, 0x06, 0x42, 0x46, 0x46, 0x42, 0x06, 0x82,
-
-  0x50, 0x40, 0x48, 0x44, 0x41, 0x40, 0x7e, 0x00,
-  0xc5, 0x34, 0x3c, 0x52, 0x7a, 0x7e, 0xa1, 0xfd,
-  0x0a, 0x02, 0x12, 0x22, 0x82, 0x02, 0x7e, 0x00
-};
-
-static char webservericon_textmap[9] = {
-  '+', '-', '+',
-  '|', ')', '|',
-  '+', '-', '+'
-};
-
-static struct ctk_icon webservericon =
-  {CTK_ICON("Web server", webservericon_bitmap, webservericon_textmap)};
-#endif /* WITH_WEBSERVER */
-
-#ifdef WITH_TELNET 
-/* The icon for the telnet client */
-static unsigned char telneticon_bitmap[3*3*8] = {
-  0x00, 0x7f, 0x43, 0x4c, 0x58, 0x53, 0x60, 0x6f,
-  0x00, 0xff, 0x00, 0x7e, 0x00, 0xff, 0x00, 0xff,
-  0x00, 0xfe, 0xc2, 0x32, 0x1a, 0xca, 0x06, 0xf6,
-
-  0x40, 0x5f, 0x40, 0x5f, 0x40, 0x5f, 0x40, 0x4f,
-  0x00, 0xff, 0x00, 0xff, 0x00, 0xfc, 0x01, 0xf3,
-  0x02, 0xfa, 0x02, 0x82, 0x3e, 0xfe, 0xfe, 0xfe,
-
-  0x60, 0x67, 0x50, 0x59, 0x4c, 0x43, 0x7f, 0x00,
-  0x07, 0xe7, 0x0f, 0xef, 0x0f, 0x0f, 0xff, 0x00,
-  0x8e, 0x06, 0x06, 0x06, 0x8e, 0xfe, 0xfe, 0x00
-};
-
-static char telneticon_textmap[9] = {
-  't', 'e', 'l',
-  'n', 'e', 't',
-  '-', '-', '-'
-};
-
-static struct ctk_icon telneticon =
-  {CTK_ICON("Telnet client", telneticon_bitmap, telneticon_textmap)};
-#endif /* WITH_TELNET */
-
-
-/* Main window */
+/* "Run..." window */
 static struct ctk_window runwindow;
-
+static unsigned char runmenuitem;
 static struct ctk_label namelabel =
   {CTK_LABEL(0, 0, 13, 1, "Program name:")};
-
 static char name[31];
 static struct ctk_textentry nameentry =
   {CTK_TEXTENTRY(0, 1, 14, 1, name, 30)};
-
 static struct ctk_button loadbutton =
   {CTK_BUTTON(10, 2, 4, "Load")};
 
@@ -232,16 +99,17 @@ static struct ctk_button errorokbutton =
   {CTK_BUTTON(9, 5, 2, "Ok")};
 
 
-/* Function declarations for init() functions for external
-   programs: */
-
-void about_init(void);
-void netconf_init(void);
-void processes_init(void);
-void www_init(void);
-void webserver_init(void);
-void simpletelnet_init(void);
-void email_init(void);
+/*-----------------------------------------------------------------------------------*/
+void
+program_handler_add(struct dsc *dsc, char *menuname,
+		    unsigned char desktop)
+{
+  contikidsc[contikidsclast++] = dsc;
+  ctk_menuitem_add(&contikimenu, menuname);
+  if(desktop) {
+    CTK_ICON_ADD(dsc->icon, id);
+  }
+}
 /*-----------------------------------------------------------------------------------*/
 void
 program_handler_init(void)     
@@ -252,44 +120,8 @@ program_handler_init(void)
     /* Create the menus */
     ctk_menu_new(&contikimenu, "Contiki");
     ctk_menu_add(&contikimenu);
-    menuitem_about = ctk_menuitem_add(&contikimenu, "About");
-    menuitem_processes = ctk_menuitem_add(&contikimenu, "Processes");
-    menuitem_tcpip = ctk_menuitem_add(&contikimenu, "TCP/IP conf");
+    runmenuitem = ctk_menuitem_add(&contikimenu, "Run program...");
     
-    ctk_menu_new(&programsmenu, "Programs");
-    ctk_menu_add(&programsmenu);
-#ifdef WITH_WWW
-    menuitem_www = ctk_menuitem_add(&programsmenu, "Web browser");
-#endif /* WITH_WWW */    
-#ifdef WITH_EMAIL
-    menuitem_email = ctk_menuitem_add(&programsmenu, "E-mail");
-#endif /* WITH_EMAIL */
-#ifdef WITH_WEBSERVER
-    menuitem_webserver = ctk_menuitem_add(&programsmenu, "Web server");
-#endif /* WITH_WEBSERVER */
-#ifdef WITH_TELNET
-    menuitem_telnet = ctk_menuitem_add(&programsmenu, "Telnet client");
-#endif /* WITH_TELNET */
-
-#ifdef WITH_LOADER_ARCH
-    menuitem_run = ctk_menuitem_add(&programsmenu, "Run...");
-#endif /* WITH_LOADER_ARCH */
-    
-
-    CTK_ICON_ADD(&abouticon, id);
-    CTK_ICON_ADD(&tcpipconficon, id);
-
-#ifdef WITH_WWW  
-    CTK_ICON_ADD(&wwwicon, id);
-#endif /* WITH_WWW */
-#ifdef WITH_WEBSERVER
-    CTK_ICON_ADD(&webservericon, id);
-#endif /* WITH_WEBSERVER */  
-#ifdef WITH_TELNET
-    CTK_ICON_ADD(&telneticon, id);
-#endif /* WITH_TELNET */  
-    
-
     ctk_window_new(&runwindow, 16, 3, "Run");
  
     CTK_WIDGET_ADD(&runwindow, &namelabel);
@@ -320,7 +152,7 @@ void
 program_handler_load(char *name)
 {
 #ifdef WITH_LOADER_ARCH
-  dispatcher_emit(loader_signal_load, name, DISPATCHER_CURRENT());
+  dispatcher_emit(loader_signal_load, name, id);
   ctk_label_set_text(&loadingname, name);
   ctk_dialog_open(&loadingdialog);
   ctk_redraw();
@@ -336,7 +168,7 @@ program_handler_load(char *name)
 static
 DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
 {
-  unsigned char err;
+  unsigned char err, i;
   DISPATCHER_SIGHANDLER_ARGS(s, data);
   
   if(s == ctk_signal_button_activate) {
@@ -349,66 +181,24 @@ DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data)
       ctk_dialog_close();
       ctk_redraw();
     }
-    
-    if((struct ctk_widget *)data == (struct ctk_widget *)&abouticon) {
-      RUN("about.prg", about_init);
-    } 
-    if((struct ctk_widget *)data == (struct ctk_widget *)&tcpipconficon) {
-      RUN("netconf.prg", netconf_init);
-    } 
 
-#ifdef WITH_WWW    
-    if((struct ctk_widget *)data == (struct ctk_widget *)&wwwicon) {
-      RUN("www.prg", www_init);
-    } 
-#endif /* WITH_WWW */
-#ifdef WITH_WEBSERVER      
-    if((struct ctk_widget *)data ==
-       (struct ctk_widget *)&webservericon) {
-      RUN("webserver.prg", webserver_init);
-    } 
-#endif /* WITH_WEBSERVER */
-#ifdef WITH_TELNET
-    if((struct ctk_widget *)data ==
-       (struct ctk_widget *)&telneticon) {
-      RUN("simpletelnet.prg", simpletelnet_init);
-    } 
-#endif /* WITH_TELNET */  
-    
+    for(i = 0; i < CTK_CONF_MAXMENUITEMS; ++i) {
+      if(data == (ek_data_t)contikidsc[i]->icon) {
+	RUN(contikidsc[i]->prgname, contikidsc[i]->init);
+	break;
+      }
+    }    
   } else if(s == ctk_signal_menu_activate) {
-    if((struct ctk_menu *)data == &programsmenu) {
-      if(0) {
-#ifdef WITH_WWW
-      } else if(programsmenu.active == menuitem_www) {
-	RUN("www.prg", www_init);
-#endif /* WITH_WWW */
-#ifdef WITH_EMAIL	
-      } else if(programsmenu.active == menuitem_email) {
-	RUN("email.prg", email_init);
-#endif /* WITH_EMAIL */
-#ifdef WITH_TELNET
-      } else if(programsmenu.active == menuitem_telnet) {
-	RUN("simpletelnet.prg", simpletelnet_init);
-#endif /* WITH_TELNET */
-#ifdef WITH_WEBSERVER
-      } else if(programsmenu.active == menuitem_webserver) {
-	RUN("webserver.prg", webserver_init);
-#endif /* WITH_WEBSERVER */
-#ifdef WITH_LOADER_ARCH
-      } else if(programsmenu.active == menuitem_run) {
+    if((struct ctk_menu *)data == &contikimenu) {
+      if(contikimenu.active == runmenuitem) {
 	ctk_window_open(&runwindow);
 	ctk_redraw();
-#endif /* WITH_LOADER_ARCH */
+      } else if(contikidsc[contikimenu.active - 1] != NULL) {
+	RUN(contikidsc[contikimenu.active - 1]->prgname,
+	    contikidsc[contikimenu.active - 1]->init);
       }
-    } else if((struct ctk_menu *)data == &contikimenu) {
-      if(contikimenu.active == menuitem_about) {
-	RUN("about.prg", about_init);
-      } else if(contikimenu.active == menuitem_tcpip) {
-	RUN("netconf.prg", netconf_init);
-      } else if(contikimenu.active == menuitem_processes) {
-	RUN("processes.prg", processes_init);
-      } 
-    }
+    }      
+    
   } else if(s == loader_signal_load) {
     ctk_dialog_close();
     err = LOADER_LOAD(data);

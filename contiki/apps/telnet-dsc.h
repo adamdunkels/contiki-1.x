@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -30,20 +27,16 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment for the C64.
+ * This file is part of the Contiki desktop environment
  *
- * $Id: program-handler.h,v 1.3 2003/04/17 19:00:01 adamdunkels Exp $
+ * $Id: telnet-dsc.h,v 1.1 2003/04/17 19:00:01 adamdunkels Exp $
  *
  */
-#ifndef __PROGRAM_HANDLER_H__
-#define __PROGRAM_HANDLER_H__
+#ifndef __TELNET_DSC_H__
+#define __TELNET_DSC_H__
 
 #include "dsc.h"
 
-void program_handler_init(void);
-void program_handler_load(char *name);
+DSC_HEADER(telnet_dsc);
 
-void program_handler_add(struct dsc *dsc, char *menuname,
-			 unsigned char desktop);
-
-#endif /* __PROGRAM_HANDLER_H__ */
+#endif /* __TELNET_DSC_H__ */

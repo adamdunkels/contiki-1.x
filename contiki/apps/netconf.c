@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: netconf.c,v 1.5 2003/04/16 18:27:33 adamdunkels Exp $
+ * $Id: netconf.c,v 1.6 2003/04/17 19:00:00 adamdunkels Exp $
  *
  */
 
@@ -40,6 +40,7 @@
 #include "uip.h"
 #include "uip_arp.h"
 #include "ctk.h"
+#include "ctk-draw.h"
 #include "dispatcher.h"
 
 #include "loader.h"

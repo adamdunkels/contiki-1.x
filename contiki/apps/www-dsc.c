@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, Adam Dunkels.
+ * Copyright (c) 2003, Adam Dunkels.
  * All rights reserved. 
  *
  * Redistribution and use in source and binary forms, with or without 
@@ -11,10 +11,7 @@
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution. 
- * 3. All advertising materials mentioning features or use of this
- *    software must display the following acknowledgement:
- *        This product includes software developed by Adam Dunkels. 
- * 4. The name of the author may not be used to endorse or promote
+ * 3. The name of the author may not be used to endorse or promote
  *    products derived from this software without specific prior
  *    written permission.  
  *
@@ -30,20 +27,42 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
  *
- * This file is part of the Contiki desktop environment for the C64.
+ * This file is part of the Contiki desktop environment
  *
- * $Id: program-handler.h,v 1.3 2003/04/17 19:00:01 adamdunkels Exp $
+ * $Id: www-dsc.c,v 1.1 2003/04/17 19:00:01 adamdunkels Exp $
  *
  */
-#ifndef __PROGRAM_HANDLER_H__
-#define __PROGRAM_HANDLER_H__
 
 #include "dsc.h"
 
-void program_handler_init(void);
-void program_handler_load(char *name);
+extern struct ctk_icon icon;
+/*-----------------------------------------------------------------------------------*/
+DSC(www_dsc,
+    "The Contiki web browser",
+    "www.prg",
+    www_init,
+    &icon);
+/*-----------------------------------------------------------------------------------*/
+static unsigned char wwwicon_bitmap[3*3*8] = {
+  0x00, 0x7e, 0x40, 0x73, 0x46, 0x4c, 0x18, 0x13,
+  0x00, 0x00, 0xff, 0x81, 0x34, 0xc9, 0x00, 0xb6,
+  0x00, 0x7e, 0x02, 0xce, 0x72, 0x32, 0x18, 0x48,
 
-void program_handler_add(struct dsc *dsc, char *menuname,
-			 unsigned char desktop);
+  0x30, 0x27, 0x24, 0x20, 0x37, 0x24, 0x20, 0x33,
+  0x00, 0x7b, 0x42, 0x00, 0x7b, 0x42, 0x00, 0x3b,
+  0x0c, 0x24, 0x24, 0x04, 0xa4, 0x24, 0x04, 0x4c,
 
-#endif /* __PROGRAM_HANDLER_H__ */
+  0x12, 0x19, 0x4c, 0x46, 0x63, 0x40, 0x7c, 0x00,
+  0x22, 0x91, 0x00, 0xc4, 0x81, 0xff, 0x00, 0x00,
+  0x08, 0x18, 0x32, 0x62, 0xc6, 0x02, 0x3e, 0x00
+};
+
+static char wwwicon_textmap[9] = {
+  'w', 'w', 'w',
+  '(', ')', ' ',
+  ' ', '(', ')'
+};
+
+static struct ctk_icon icon =
+  {CTK_ICON("Web browser", wwwicon_bitmap, wwwicon_textmap)};
+/*-----------------------------------------------------------------------------------*/
