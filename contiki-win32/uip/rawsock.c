@@ -192,8 +192,8 @@ rawsock_send(void)
   static unsigned long on  = 1;
   struct sockaddr_in   addr;
   DWORD                dummy;
-  WSABUF               sendbuf[2] = {{          40, uip_buf},
-				     {uip_len - 40, uip_appdata}};
+  WSABUF               sendbuf[2] = {{          UIP_TCPIP_HLEN, uip_buf},
+				     {uip_len - UIP_TCPIP_HLEN, uip_appdata}};
 
   if(ioctlsocket(rawsock, FIONBIO, &off) == SOCKET_ERROR) {
     error_exit("ioctlsocket(!FIONBIO) error: %d\n", WSAGetLastError());
