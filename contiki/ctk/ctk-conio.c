@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conio.c,v 1.16 2004/12/27 22:03:04 oliverschmidt Exp $
+ * $Id: ctk-conio.c,v 1.17 2005/03/15 14:19:41 oliverschmidt Exp $
  *
  */
 
@@ -290,6 +290,7 @@ ctk_draw_clear_window(struct ctk_window *window,
   }
   
   h = window->y + 2 + window->h;
+
   /* Clear window contents. */
   for(i = window->y + 2; i < h; ++i) {
     if(i >= clipy1 && i < clipy2) {
@@ -411,15 +412,12 @@ ctk_draw_dialog(struct ctk_window *dialog)
   x = dialog->x;
   y = dialog->y + 1;
 
-
   x1 = x + 1;
   y1 = y + 1;
   x2 = x1 + dialog->w;
   y2 = y1 + dialog->h;
 
-
   /* Draw dialog frame. */
-  
   cvlinexy(x, y1,
 	   dialog->h);
   cvlinexy(x2, y1,
@@ -434,7 +432,6 @@ ctk_draw_dialog(struct ctk_window *dialog)
   cputcxy(x, y2, CH_LLCORNER);
   cputcxy(x2, y, CH_URCORNER);
   cputcxy(x2, y2, CH_LRCORNER);
-  
   
   /* Clear dialog contents. */
   for(i = y1; i < y2; ++i) {
@@ -457,47 +454,50 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-draw_menu(struct ctk_menu *m)
+draw_menu(struct ctk_menu *m, unsigned char open)
 {
   unsigned char x, x2, y;
-  textcolor(OPENMENUCOLOR);
-  revers(0);
-  x = wherex();
+
+  if(open) {
+    x = x2 = wherex();
+    if(x2 + CTK_CONF_MENUWIDTH > sizex) {
+      x2 = sizex - CTK_CONF_MENUWIDTH;
+    }
+
+    for(y = 0; y < m->nitems; ++y) {
+      if(y == m->active) {
+	textcolor(ACTIVEMENUITEMCOLOR);
+	revers(0);
+      } else {
+	textcolor(MENUCOLOR);	  
+	revers(1);
+      }
+      gotoxy(x2, y + 1);
+      if(m->items[y].title[0] == '-') {
+	chline(CTK_CONF_MENUWIDTH);
+      } else {
+	cputs(m->items[y].title);
+      }
+      if(x2 + CTK_CONF_MENUWIDTH > wherex()) {
+	cclear(x2 + CTK_CONF_MENUWIDTH - wherex());
+      }
+    }
+
+    gotoxy(x, 0);
+    textcolor(OPENMENUCOLOR);
+    revers(0);
+  }
+
   cputs(m->title);
   cputc(' ');
-  x2 = wherex();
-  if(x + CTK_CONF_MENUWIDTH > sizex) {
-    x = sizex - CTK_CONF_MENUWIDTH;
-  }
-  
-  
-  for(y = 0; y < m->nitems; ++y) {
-    if(y == m->active) {
-      textcolor(ACTIVEMENUITEMCOLOR);
-      revers(0);
-    } else {
-      textcolor(MENUCOLOR);	  
-      revers(1);
-    }
-    gotoxy(x, y + 1);
-    if(m->items[y].title[0] == '-') {
-      chline(CTK_CONF_MENUWIDTH);
-    } else {
-      cputs(m->items[y].title);
-    }
-    if(x + CTK_CONF_MENUWIDTH > wherex()) {
-      cclear(x + CTK_CONF_MENUWIDTH - wherex());
-    }
-  }
-  gotoxy(x2, 0);
-  textcolor(MENUCOLOR);  
+  textcolor(MENUCOLOR);
   revers(1);
 }
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_menus(struct ctk_menus *menus)
 {
-  struct ctk_menu *m;  
+  struct ctk_menu *m;
 
   /* Draw menus */
   textcolor(MENUCOLOR);
@@ -505,29 +505,17 @@ ctk_draw_menus(struct ctk_menus *menus)
   revers(1);
   cputc(' ');
   for(m = menus->menus->next; m != NULL; m = m->next) {
-    if(m != menus->open) {
-      cputs(m->title);
-      cputc(' ');
-    } else {
-      draw_menu(m);
-    }
+    draw_menu(m, m == menus->open);
   }
 
-
-  if(wherex() + strlen(menus->desktopmenu->title) + 1>= sizex) {
+  /* Draw desktopmenu */
+  if(wherex() + strlen(menus->desktopmenu->title) + 1 >= sizex) {
     gotoxy(sizex - strlen(menus->desktopmenu->title) - 1, 0);
   } else {
     cclear(sizex - wherex() -
 	   strlen(menus->desktopmenu->title) - 1);
   }
-  
-  /* Draw desktopmenu */
-  if(menus->desktopmenu != menus->open) {
-    cputs(menus->desktopmenu->title);
-    cputc(' ');
-  } else {
-    draw_menu(menus->desktopmenu);
-  }
+  draw_menu(menus->desktopmenu, menus->desktopmenu == menus->open);
 
   revers(0);
 }
