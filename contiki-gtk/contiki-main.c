@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: contiki-main.c,v 1.6 2003/08/11 22:19:42 adamdunkels Exp $
+ * $Id: contiki-main.c,v 1.7 2003/08/31 22:20:52 adamdunkels Exp $
  *
  */
 
@@ -63,12 +63,24 @@
 #include "wget-dsc.h"
 
 #include "email-dsc.h"
+/*#include "maze-dsc.h"*/
+
+#include "telnetd-dsc.h"
+
+#include "resolv.h"
+#include "ctk-vncserver.h"
+
+#include <gdk/gdktypes.h>
+#include <gtk/gtk.h>
+
+
 
 static gint
 idle_callback(gpointer data)
 {
-  ek_signals();
-  ek_idle();
+  dispatcher_process_signal();
+  dispatcher_process_idle();
+  
   return TRUE;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -77,12 +89,11 @@ main(int argc, char **argv)
 {
   u16_t addr[2];
 
-  ek_init();
+  /*  ek_init();*/
   dispatcher_init();
 
   
   uip_init();
-  uip_main_init();
   resolv_init();
 
   /* XXX: just for making it easier to test. */
@@ -97,9 +108,14 @@ main(int argc, char **argv)
 
   
   tapdev_drv_init();
-  
+
+#if WITH_CTKVNC
+  ctk_init();
+  ctk_vncserver_init(NULL);
+#else
   ctk_gtksim_init();
   ctk_init();
+#endif
   
   program_handler_init();
   
@@ -120,11 +136,14 @@ main(int argc, char **argv)
   /*  program_handler_add(&presenter_dsc, "Presenter", 1);*/
 
   program_handler_add(&email_dsc, "E-mail", 1);
+  
+  program_handler_add(&telnetd_dsc, "Telnet daemon", 1);
+  /*  program_handler_add(&maze_dsc, "3D maze", 1);*/
 
   /*program_handler_add(&wget_dsc, "Web downloader", 1);*/
-
   
   /*  ctk_redraw();*/
+  maze_init();
   gtk_main();
     
   return 0;
