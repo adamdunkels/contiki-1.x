@@ -2,35 +2,18 @@
 ; Bank switching code for Contiki (Apple2 version)
 ;
 
-	.export		SETWND, BASCALC
+	.export		VTABZ
 
 	.segment	"CONTIKI"
 
-SETWND:
+VTABZ:
 	.ifdef __APPLE2__
 	sei
 	.endif
 
-	; Switch in ROM and call SETWND
+	; Switch in ROM and call VTABZ
 	bit	$C082
-	jsr	$FB4B
-
-	; Switch in LC bank 2 for R/O
-	bit	$C080
-
-	.ifdef __APPLE2__
-	cli
-	.endif
-	rts
-
-BASCALC:
-	.ifdef __APPLE2__
-	sei
-	.endif
-
-	; Switch in ROM and call BASCALC
-	bit	$C082
-	jsr	$FBC1
+	jsr	$FC24
 
 	; Switch in LC bank 2 for R/O
 	bit	$C080
