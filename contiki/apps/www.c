@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.28 2005/02/07 23:13:01 oliverschmidt Exp $
+ * $Id: www.c,v 1.29 2005/03/13 22:42:31 oliverschmidt Exp $
  *
  */
 
@@ -199,8 +199,6 @@ make_window(void)
   CTK_WIDGET_ADD(&mainwindow, &sep2);
   CTK_WIDGET_ADD(&mainwindow, &statustext);
 
-  CTK_WIDGET_FOCUS(&mainwindow, &stopbutton);
-  
   pagewidgetptr = 0;
 }
 /*-----------------------------------------------------------------------------------*/
@@ -611,6 +609,7 @@ webclient_closed(void)
   show_statustext("Stopped.");
   petsciiconv_topetscii(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
 				 WWW_CONF_WEBPAGE_WIDTH], WWW_CONF_WEBPAGE_WIDTH);
+  CTK_WIDGET_FOCUS(&mainwindow, &downbutton);
   redraw_window();
 }
 /*-----------------------------------------------------------------------------------*/
