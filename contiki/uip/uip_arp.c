@@ -54,7 +54,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip_arp.c,v 1.11 2004/03/25 09:46:10 adamdunkels Exp $
+ * $Id: uip_arp.c,v 1.12 2004/06/06 06:16:41 adamdunkels Exp $
  *
  */
 
@@ -245,12 +245,12 @@ uip_arp_ipin(void)
 	
   /* Only insert/update an entry if the source IP address of the
      incoming IP packet comes from a host on the local network. */
-  if((IPBUF->srcipaddr[0] & uip_arp_netmask[0]) !=
-     (uip_hostaddr[0] & uip_arp_netmask[0])) {
+  if((IPBUF->srcipaddr[0] & uip_netmask[0]) !=
+     (uip_hostaddr[0] & uip_netmask[0])) {
     return;
   }
-  if((IPBUF->srcipaddr[1] & uip_arp_netmask[1]) !=
-     (uip_hostaddr[1] & uip_arp_netmask[1])) {
+  if((IPBUF->srcipaddr[1] & uip_netmask[1]) !=
+     (uip_hostaddr[1] & uip_netmask[1])) {
     return;
   }
   uip_arp_update(IPBUF->srcipaddr, &(IPBUF->ethhdr.src));
@@ -284,21 +284,20 @@ uip_arp_ipin(void)
 void
 uip_arp_arpin(void)
 {
-
+  
   if(uip_len < sizeof(struct arp_hdr)) {
     uip_len = 0;
     return;
   }
-
   uip_len = 0;
   
   switch(BUF->opcode) {
   case HTONS(ARP_REQUEST):
     /* ARP request. If it asked for our address, we send out a
-       reply. */
-    if(BUF->dipaddr[0] == uip_hostaddr[0] &&
-       BUF->dipaddr[1] == uip_hostaddr[1]) {
-
+       reply. */    
+    /*    if(BUF->dipaddr[0] == uip_hostaddr[0] &&
+	  BUF->dipaddr[1] == uip_hostaddr[1]) {*/
+    if(uip_ipaddr_cmp(BUF->dipaddr, uip_hostaddr)) {
       /* First, we register the one who made the request in our ARP
 	 table, since it is likely that we will do more communication
 	 with this host in the future. */
@@ -324,9 +323,9 @@ uip_arp_arpin(void)
   case HTONS(ARP_REPLY):
     /* ARP reply. We insert or update the ARP table if it was meant
        for us. */
-    if(BUF->dipaddr[0] == uip_hostaddr[0] &&
-       BUF->dipaddr[1] == uip_hostaddr[1]) {
-
+    /*    if(BUF->dipaddr[0] == uip_hostaddr[0] &&
+	  BUF->dipaddr[1] == uip_hostaddr[1]) {*/
+    if(uip_ipaddr_cmp(BUF->dipaddr, uip_hostaddr)) {
       uip_arp_update(BUF->sipaddr, &BUF->shwaddr);
     }
     break;
@@ -366,12 +365,6 @@ void
 uip_arp_out(void)
 {
   struct arp_entry *tabptr;
-
-  /* Only work with IP packets. */
-  if(IPBUF->ethhdr.type != HTONS(UIP_ETHTYPE_IP)) {
-    return;
-  }
-      
   
   /* Find the destination IP address in the ARP table and construct
      the Ethernet header. If the destination IP addres isn't on the
@@ -381,26 +374,31 @@ uip_arp_out(void)
      packet with an ARP request for the IP address. */
 
   /* Check if the destination address is on the local network. */
-  if((IPBUF->destipaddr[0] & uip_arp_netmask[0]) !=
-     (uip_hostaddr[0] & uip_arp_netmask[0]) ||
-     (IPBUF->destipaddr[1] & uip_arp_netmask[1]) !=
-     (uip_hostaddr[1] & uip_arp_netmask[1])) {
+  /*  if((IPBUF->destipaddr[0] & uip_netmask[0]) !=
+     (uip_hostaddr[0] & uip_netmask[0]) ||
+     (IPBUF->destipaddr[1] & uip_netmask[1]) !=
+     (uip_hostaddr[1] & uip_netmask[1])) {*/
+  if(!uip_ipaddr_maskcmp(IPBUF->destipaddr, uip_hostaddr, uip_netmask)) {
     /* Destination address was not on the local network, so we need to
        use the default router's IP address instead of the destination
        address when determining the MAC address. */
-    ipaddr[0] = uip_arp_draddr[0];
-    ipaddr[1] = uip_arp_draddr[1];
+    /*    ipaddr[0] = uip_draddr[0];
+	  ipaddr[1] = uip_draddr[1];*/
+    uip_ipaddr_copy(ipaddr, uip_draddr); 
   } else {
     /* Else, we use the destination IP address. */
-    ipaddr[0] = IPBUF->destipaddr[0];
-    ipaddr[1] = IPBUF->destipaddr[1];
+    /*ipaddr[0] = IPBUF->destipaddr[0];
+      ipaddr[1] = IPBUF->destipaddr[1];*/
+    uip_ipaddr_copy(ipaddr, IPBUF->destipaddr); 
   }
       
   for(i = 0; i < UIP_ARPTAB_SIZE; ++i) {
     tabptr = &arp_table[i];
-    if(ipaddr[0] == tabptr->ipaddr[0] &&
-       ipaddr[1] == tabptr->ipaddr[1])
+    /*    if(ipaddr[0] == tabptr->ipaddr[0] &&
+	  ipaddr[1] == tabptr->ipaddr[1])*/
+    if(uip_ipaddr_cmp(ipaddr, tabptr->ipaddr)) {
       break;
+    }
   }
 
   if(i == UIP_ARPTAB_SIZE) {
@@ -412,10 +410,12 @@ uip_arp_out(void)
     memcpy(BUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
     memcpy(BUF->shwaddr.addr, uip_ethaddr.addr, 6);
     
-    BUF->dipaddr[0] = ipaddr[0];
-    BUF->dipaddr[1] = ipaddr[1];
-    BUF->sipaddr[0] = uip_hostaddr[0];
-    BUF->sipaddr[1] = uip_hostaddr[1];
+    /*    BUF->dipaddr[0] = ipaddr[0];
+	  BUF->dipaddr[1] = ipaddr[1];*/
+    uip_ipaddr_copy(BUF->dipaddr, ipaddr);
+    /*    BUF->sipaddr[0] = uip_hostaddr[0];
+	  BUF->sipaddr[1] = uip_hostaddr[1];*/
+    uip_ipaddr_copy(BUF->sipaddr, uip_hostaddr);
     BUF->opcode = HTONS(ARP_REQUEST); /* ARP request. */
     BUF->hwtype = HTONS(ARP_HWTYPE_ETH);
     BUF->protocol = HTONS(UIP_ETHTYPE_IP);
