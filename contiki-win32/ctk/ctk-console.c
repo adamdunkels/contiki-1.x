@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.c,v 1.3 2004/08/12 22:09:34 oliverschmidt Exp $
+ * $Id: ctk-console.c,v 1.4 2004/08/12 22:53:22 oliverschmidt Exp $
  *
  */
 
@@ -41,6 +41,9 @@
 #include "ctk-console.h"
 
 static HANDLE stdouthandle;
+
+static unsigned char width;
+static unsigned char height;
 
 static unsigned char       saved_color;
 static char                saved_title[1024];
@@ -70,6 +73,8 @@ console_init(void)
 
   stdouthandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
+  screensize(&width, &height);
+
   GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
   saved_color = consoleinfo.wAttributes;
 
@@ -96,6 +101,24 @@ console_exit(void)
   SetConsoleTitle(saved_title);
   SetConsoleMode(stdouthandle, saved_consolemode);
   SetConsoleCursorInfo(stdouthandle, &saved_cursorinfo);
+}
+/*-----------------------------------------------------------------------------------*/
+unsigned char
+console_resize(void)
+{
+  unsigned char new_width;
+  unsigned char new_height;
+
+  screensize(&new_width, &new_height);
+
+  if(new_width  != width ||
+     new_height != height) {
+    width  = new_width;
+    height = new_height;
+    return 1;
+  }
+
+  return 0;
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -236,7 +259,7 @@ screensize(unsigned char *x, unsigned char *y)
   CONSOLE_SCREEN_BUFFER_INFO consoleinfo;
 
   GetConsoleScreenBufferInfo(stdouthandle, &consoleinfo);
-  *x = consoleinfo.dwMaximumWindowSize.X;
-  *y = consoleinfo.dwMaximumWindowSize.Y;
+  *x = consoleinfo.srWindow.Right - consoleinfo.srWindow.Left + 1;
+  *y = consoleinfo.srWindow.Bottom - consoleinfo.srWindow.Top + 1;
 }
 /*-----------------------------------------------------------------------------------*/

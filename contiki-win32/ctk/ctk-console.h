@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.h,v 1.2 2004/07/31 14:55:17 oliverschmidt Exp $
+ * $Id: ctk-console.h,v 1.3 2004/08/12 22:53:22 oliverschmidt Exp $
  *
  */
 
@@ -38,6 +38,7 @@
 
 void console_init(void);
 void console_exit(void);
+unsigned char console_resize(void);
 
 unsigned char wherex(void);
 unsigned char wherey(void);

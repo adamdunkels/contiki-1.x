@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.2 2004/07/31 14:49:33 oliverschmidt Exp $
+ * $Id: main.c,v 1.3 2004/08/12 22:53:42 oliverschmidt Exp $
  *
  */
 
@@ -124,6 +124,11 @@ main(int argc)
 
   while(1) {
     ek_run();
+
+    if(console_resize()) {
+      ctk_restore();
+    }
+
     _sleep(0);
   }
 }
