@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs-posix.c,v 1.3 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: cfs-posix.c,v 1.4 2005/04/10 19:23:06 oliverschmidt Exp $
  */
 #include "contiki.h"
 
@@ -102,7 +102,7 @@ s_open(const char *n, int f)
   if(f == CFS_READ) {
     return open(filename, O_RDONLY);
   } else {
-    return open(filename, O_CREAT|O_RDWR);
+    return open(filename, O_CREAT|O_TRUNC|O_RDWR);
   }
 }
 /*---------------------------------------------------------------------------*/
