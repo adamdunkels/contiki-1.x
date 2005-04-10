@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.2 2004/07/04 21:15:53 adamdunkels Exp $
+ * $Id: wget.c,v 1.3 2005/04/10 19:23:47 oliverschmidt Exp $
  *
  */
 
@@ -316,7 +316,7 @@ DISPATCHER_SIGHANDLER(wget_sighandler, s, data)
       start_get();
       dload_bytes = 0;
       dload_state = DLOAD_D64;
-      d64file = open("d64.d64", O_CREAT|O_WRONLY);
+      d64file = open("d64.d64", O_CREAT|O_TRUNC|O_WRONLY);
       ds.track = 1;
       ds.sect = 0;
       bufferptr = 0;
