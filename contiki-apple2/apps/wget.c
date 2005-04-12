@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.1 2005/03/29 23:12:31 oliverschmidt Exp $
+ * $Id: wget.c,v 1.2 2005/04/12 21:56:30 oliverschmidt Exp $
  *
  */
 
@@ -40,6 +40,7 @@
 #include "resolv.h"
 #include "uiplib.h"
 #include "loader.h"
+#include "cfs.h"
 
 #include "contiki.h"
 
@@ -47,8 +48,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
 #include <dio.h>
 
 
@@ -147,7 +146,7 @@ dload_close(char *text)
 {
   show_statustext(text);
   if(dload_state == DLOAD_FILE) {
-    close(savefile);
+    cfs_close(savefile);
   } else if(dload_state == DLOAD_DSK) {
     dio_close(savedsk);
   }
@@ -251,9 +250,9 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
 
     CTK_WIDGET_ADD(&window, &urllabel);
     CTK_WIDGET_ADD(&window, &urltextentry);
-//  CTK_WIDGET_ADD(&window, &savefilenamelabel);
-//  CTK_WIDGET_ADD(&window, &savefilenametextentry);
-//  CTK_WIDGET_ADD(&window, &filebutton);
+    CTK_WIDGET_ADD(&window, &savefilenamelabel);
+    CTK_WIDGET_ADD(&window, &savefilenametextentry);
+    CTK_WIDGET_ADD(&window, &filebutton);
     CTK_WIDGET_ADD(&window, &dskbutton);
     CTK_WIDGET_ADD(&window, &statustext);
 
@@ -274,7 +273,8 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
     webclient_appcall(data);
   } else if(ev == ctk_signal_button_activate) {
     if(data == (void *)&filebutton) {
-      savefile = open(savefilename, O_WRONLY | O_CREAT | O_TRUNC);
+      dload_close("");
+      savefile = cfs_open(savefilename, CFS_WRITE);
       if(savefile == -1) {
 	sprintf(statusmsg, "Open error with '%s'", savefilename);
 	show_statustext(statusmsg);
@@ -290,6 +290,7 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
       ctk_dialog_close();
     } else if(data == (void *)&overwritebutton) {
       ctk_dialog_close();
+      dload_close("");
       savedsk = dio_open(/*slot*/6 * 2 + /*drive*/1 - 1);
       if(savedsk == NULL) {
 	sprintf(statusmsg, "Access error with slot 6 drive 1");
@@ -321,6 +322,7 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
       show_statustext("Host not found.");
     }
   } else if(ev == ctk_signal_window_close) {
+    dload_close("");
     ek_exit();
     id = EK_ID_NONE;
     LOADER_UNLOAD();
@@ -439,7 +441,7 @@ webclient_datahandler(char *data, u16_t len)
 	dload_close("Write error with slot 6 drive 1");
       }
     } else if(dload_state == DLOAD_FILE) {      
-      ret = write(savefile, data, len);       
+      ret = cfs_write(savefile, data, len);       
       if(ret != len) {
 	sprintf(statusmsg, "Wrote only %d bytes", ret);
 	dload_close(statusmsg);
