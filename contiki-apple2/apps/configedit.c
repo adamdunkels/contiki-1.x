@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.4 2005/03/20 00:23:28 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.5 2005/04/12 21:54:08 oliverschmidt Exp $
  *
  */
 
@@ -45,6 +45,7 @@
 
 #include "program-handler.h"
 #include "packet-service.h"
+#include "kfs.h"
 #include "cfs.h"
 
 #include "config.h"
@@ -331,7 +332,7 @@ config_save(void)
 {
   int fd;
 
-  fd = cfs_open("contiki.cfg", CFS_WRITE);
+  fd = cfs_open(strcat(kfs_getdir(), "contiki.cfg"), CFS_WRITE);
   if(fd == -1) {
     return;
   }
