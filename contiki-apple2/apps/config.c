@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.6 2005/03/20 00:23:28 oliverschmidt Exp $
+ * $Id: config.c,v 1.7 2005/04/12 21:50:57 oliverschmidt Exp $
  *
  */
 
@@ -43,7 +43,7 @@
 #include "resolv.h"
 
 #include "program-handler.h"
-#include "cfs.h"
+#include "kfs.h"
 
 #include "config.h"
 
@@ -56,12 +56,12 @@ config_load(void)
 {
   int fd;
 
-  fd = cfs_open("contiki.cfg", CFS_READ);
+  fd = kfs_open("contiki.cfg");
   if(fd == -1) {
     return;
   }
-  cfs_read(fd, &config, sizeof(config));
-  cfs_close(fd);
+  kfs_read(fd, &config, sizeof(config));
+  kfs_close(fd);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
