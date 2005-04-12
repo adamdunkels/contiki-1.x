@@ -30,20 +30,14 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs.h,v 1.2 2005/04/12 21:42:40 oliverschmidt Exp $
+ * $Id: kfs.h,v 1.1 2005/04/12 21:42:40 oliverschmidt Exp $
  */
-#ifndef __CFS_H__
-#define __CFS_H__
+#ifndef __KFS_H__
+#define __KFS_H__
 
-#include <fcntl.h>
-#include <unistd.h>
+int kfs_open(const char* name);
+int __fastcall__ kfs_read(int fd, void* buf, unsigned count);
+int __fastcall__ kfs_close(int fd);
+char* kfs_getdir(void);
 
-#define CFS_READ  (O_RDONLY)
-#define CFS_WRITE (O_WRONLY | O_CREAT | O_TRUNC)
-
-#define cfs_open  open
-#define cfs_close close
-#define cfs_read  read
-#define cfs_write write
-
-#endif /* __CFS_H__ */
+#endif /* __KFS_H__ */

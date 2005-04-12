@@ -1,18 +1,14 @@
 ;
-; MLI code for Contiki (Apple2 version)
+; Contiki kernel file system (Apple2 version)
 ;
-; int open (const char* name, int flags);
-; int read (int fd, void* buf, unsigned count);
-; int write (int fd, const void* buf, unsigned count);
-; int close (int fd);
+; int kfs_open(const char* name);
+; int __fastcall__ kfs_read(int fd, void* buf, unsigned count);
+; int __fastcall__ kfs_close(int fd);
+; char* kfs_getdir(void);
 ;
-; Be sure to keep the value priority of closeallfiles lower than that of
-; closeallstreams (which is the high level C file I/O counterpart and must be
-; called before closeallfiles).
 
 	.constructor	initprefix
-        .destructor     closeallfiles, 17
-	.export		_open, _read, _write, _close, PREFIX
+	.export		_kfs_open, _kfs_read, _kfs_close, _kfs_getdir
 	.import		_uip_buf, popax
 	.importzp 	ptr1
 
@@ -21,7 +17,6 @@ MLI		:= $BF00
 
 OPEN_CALL	= $C8
 READ_CALL	= $CA
-WRITE_CALL	= $CB
 CLOSE_CALL	= $CC
 
 ; ------------------------------------------------------------------------
@@ -40,12 +35,12 @@ OPEN_PARAM:
 		.addr	_uip_buf	;IO_BUFFER
 OPEN_FD:	.byte	$00		;REF_NUM
 
-RW_PARAM:
+READ_PARAM:
 		.byte	$04		;PARAM_COUNT
-RW_FD:		.byte	$00		;REF_NUM
-RW_BUFFER:	.addr	$0000		;DATA_BUFFER
-RW_COUNT_IN:	.word	$0000		;REQUEST_COUNT
-RW_COUNT_OUT:	.word	$0000		;TRANS_COUNT
+READ_FD:	.byte	$00		;REF_NUM
+READ_BUFFER:	.addr	$0000		;DATA_BUFFER
+READ_COUNT_IN:	.word	$0000		;REQUEST_COUNT
+READ_COUNT_OUT:	.word	$0000		;TRANS_COUNT
 
 CLOSE_PARAM:
 		.byte	$01		;PARAM_COUNT
@@ -66,9 +61,8 @@ initprefix:
 
 	.segment	"CONTIKI"
 
-_open:
-	; Pop flags and name
-	jsr     popax
+_kfs_open:
+	; Pop name
 	jsr	popax
 
 	; Append name to prefix
@@ -94,39 +88,31 @@ _open:
 	ldx	#$00
 	rts
 
-_write:
-	ldy	#WRITE_CALL
-	bne	:+	; bra
-_read:
-	ldy	#READ_CALL
-:	sty	RW_CMD
-
+_kfs_read:
 	; Store count
-	sta	RW_COUNT_IN
-	stx	RW_COUNT_IN+1
+	sta	READ_COUNT_IN
+	stx	READ_COUNT_IN+1
 
 	; Pop and store buf
 	jsr	popax
-	sta	RW_BUFFER
-	stx	RW_BUFFER+1
+	sta	READ_BUFFER
+	stx	READ_BUFFER+1
 
 	; Pop and store fd
 	jsr     popax
-	sta	RW_FD
+	sta	READ_FD
 
 	jsr	MLI
-RW_CMD:	.byte	$00
-	.addr	RW_PARAM
+	.byte	READ_CALL
+	.addr	READ_PARAM
 	bcs	ERROR
 
 	; Return bytes transfered
-	lda	RW_COUNT_OUT
-	ldx	RW_COUNT_OUT+1
+	lda	READ_COUNT_OUT
+	ldx	READ_COUNT_OUT+1
 	rts
 
-closeallfiles:
-	lda	#$00
-_close:
+_kfs_close:
 	; Store	fd
 	sta	CLOSE_FD
 
@@ -137,6 +123,17 @@ _close:
 
 	; Return 0
 	tax
+	rts
+
+_kfs_getdir:
+	; Append '\0' to prefix
+	lda	#$00
+	ldx	PREFIX
+	sta	PATHNAME+1,x
+
+	; Return prefix
+	lda	#<(PATHNAME+1)
+	ldx	#>(PATHNAME+1)
 	rts
 
 ERROR:
