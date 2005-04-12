@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: slip-dsc.c,v 1.3 2004/09/09 21:28:39 adamdunkels Exp $
+ * $Id: slip-dsc.c,v 1.4 2005/04/12 20:49:53 oliverschmidt Exp $
  *
  */
 
@@ -65,6 +65,8 @@ static char slipicon_textmap[9] = {
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
+#if CTK_CONF_ICONS
 static struct ctk_icon slip_icon =
   {CTK_ICON("SLIP driver", slipicon_bitmap, slipicon_textmap)};
+#endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
