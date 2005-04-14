@@ -30,12 +30,12 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: kfs.h,v 1.1 2005/04/12 21:42:40 oliverschmidt Exp $
+ * $Id: kfs.h,v 1.2 2005/04/14 21:01:07 oliverschmidt Exp $
  */
 #ifndef __KFS_H__
 #define __KFS_H__
 
-int kfs_open(const char* name);
+int __fastcall__ kfs_open(const char* name);
 int __fastcall__ kfs_read(int fd, void* buf, unsigned count);
 int __fastcall__ kfs_close(int fd);
 char* kfs_getdir(void);

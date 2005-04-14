@@ -62,9 +62,6 @@ initprefix:
 	.segment	"CONTIKI"
 
 _kfs_open:
-	; Pop name
-	jsr	popax
-
 	; Append name to prefix
 	sta	ptr1
 	stx	ptr1+1
