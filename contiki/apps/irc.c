@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: irc.c,v 1.5 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: irc.c,v 1.6 2005/04/16 14:12:11 oliverschmidt Exp $
  */
 
 #include "irc-conf.h"
@@ -193,7 +193,6 @@ parse_line(void)
 void
 ircc_sent(struct ircc_state *s)
 {
-  memset(line, 0, sizeof(line));
   /*  ctk_textedit_init(&lineedit);*/
   CTK_TEXTENTRY_CLEAR(&lineedit);
   CTK_WIDGET_REDRAW(&lineedit);
@@ -208,7 +207,6 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   if(ev == EK_EVENT_INIT) {
     /*    ctk_textedit_init(&lineedit);*/
     CTK_TEXTENTRY_CLEAR(&lineedit);
-    memset(line, 0, sizeof(line));
     memset(log, 0, sizeof(log));
     ctk_window_new(&window, LOG_WIDTH, LOG_HEIGHT + 1, "IRC");
     CTK_WIDGET_ADD(&window, &loglabel);
