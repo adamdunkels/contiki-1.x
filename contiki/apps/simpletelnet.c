@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: simpletelnet.c,v 1.13 2004/09/12 20:02:16 oliverschmidt Exp $
+ * $Id: simpletelnet.c,v 1.14 2005/04/16 14:17:32 oliverschmidt Exp $
  *
  */
 
@@ -92,6 +92,8 @@ static struct telnet_state ts_appstate;
 #define ISO_NL       0x0a
 #define ISO_CR       0x0d
 
+static char sendline[31+2];
+
 EK_EVENTHANDLER(simpletelnet_eventhandler, ev, data);
 EK_PROCESS(p, "Telnet client", EK_PRIO_NORMAL,
 	   simpletelnet_eventhandler, NULL, NULL);
@@ -136,7 +138,7 @@ add_text(char *text)
       i = 0;
     } else if(*text == '\r') {
       i = 0;
-    } else {
+    } else if(*text >= ' ') {
       telnettext[9 * 38 + i] = *text;
       ++i;
       if(i == 38) {
@@ -147,7 +149,7 @@ add_text(char *text)
     ++text;
     --len;
   }
-  
+
   /*  if(strlen(text) > 37) {
       memcpy(&telnettext[9 * 38], text, 37);
       } else {
@@ -211,12 +213,14 @@ connect(void)
 EK_EVENTHANDLER(simpletelnet_eventhandler, ev, data)
 {
   struct ctk_widget *w;
-  char *ptr;
+  int sendlen;
   EK_EVENTHANDLER_ARGS(ev, data);
 
   if(ev == EK_EVENT_INIT) {
     /* Create Telnet window. */
     ctk_window_new(&telnetwindow, 38, 20, "Simple telnet");
+
+    strcpy(telnetport, "23");
     
     CTK_WIDGET_ADD(&telnetwindow, &telnethostlabel);
     CTK_WIDGET_ADD(&telnetwindow, &telnetportlabel);
@@ -246,11 +250,12 @@ EK_EVENTHANDLER(simpletelnet_eventhandler, ev, data)
     
     w = (struct ctk_widget *)data;
     if(w == (struct ctk_widget *)&telnetsendbutton) {
-      petsciiconv_toascii(telnetline, sizeof(telnetline));
-      ptr = telnetline + strlen(telnetline);
-      *ptr++ = ISO_CR;     
-      *ptr++ = ISO_NL;
-      if(telnet_send(&ts_appstate, telnetline, ptr - telnetline)) {
+      strcpy(sendline, telnetline);
+      sendlen = strlen(sendline);
+      petsciiconv_toascii(sendline, sendlen);
+      sendline[sendlen++] = ISO_CR;
+      sendline[sendlen++] = ISO_NL;
+      if(telnet_send(&ts_appstate, sendline, sendlen)) {
 	/* Could not send. */
 	ctk_label_set_text(&telnetstatus, "Could not send");
 	ctk_window_redraw(&telnetwindow);
@@ -288,29 +293,35 @@ telnet_connected(struct telnet_state *s)
 {  
   show("Connected");
 }
+/*-----------------------------------------------------------------------------------*/
 void
 telnet_closed(struct telnet_state *s)
 {
   show("Connection closed");
 }
+/*-----------------------------------------------------------------------------------*/
 void
 telnet_sent(struct telnet_state *s)
 {
-  petsciiconv_topetscii(telnetline, sizeof(telnetline));
-  add_text(telnetline);
-  memset(telnetline, 0, sizeof(telnetline));
+  petsciiconv_topetscii(sendline, sizeof(sendline));
+  scrollup();
+  add_text(sendline);
+  CTK_TEXTENTRY_CLEAR(&telnetlinetextentry);
   ctk_window_redraw(&telnetwindow);
 }
+/*-----------------------------------------------------------------------------------*/
 void
 telnet_aborted(struct telnet_state *s)
 {
   show("Connection reset by peer");
 }
+/*-----------------------------------------------------------------------------------*/
 void
 telnet_timedout(struct telnet_state *s)
 {
   show("Connection timed out");
 }
+/*-----------------------------------------------------------------------------------*/
 void
 telnet_newdata(struct telnet_state *s, char *data, u16_t len)
 {
@@ -319,3 +330,4 @@ telnet_newdata(struct telnet_state *s, char *data, u16_t len)
   add_text(data);
   ctk_window_redraw(&telnetwindow);
 }
+/*-----------------------------------------------------------------------------------*/
