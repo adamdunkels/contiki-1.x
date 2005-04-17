@@ -48,12 +48,9 @@ _exit:	ldx	#$02
 
 	jsr	donelib
 
-; ProDOS TechRefMan, chapter 5.2.1:
-; "System programs should set the stack pointer to $FF at the warm-start
-;  entry point."
+; Switch in ROM
 
-	ldx	#$FF
-	txs			; Re-init stack pointer
+	bit	$C082
 
 ; Back to DOS
 
@@ -63,13 +60,6 @@ _exit:	ldx	#$02
 ; The linker doesn't calculate where this code runs so it has to be PIC
 
 .segment	"BOOT"
-
-; ProDOS TechRefMan, chapter 5.2.1:
-; "For maximum interrupt efficiency, a system program should not use more
-;  than the upper 3/4 of the stack."
-
-	ldx	#$FF
-	txs	       		; Init stack pointer
 
 ; Switch to 80 column mode
 
