@@ -10,8 +10,8 @@
 ; closeallstreams (which is the high level C file I/O counterpart and must be
 ; called before closeallfiles).
 
-	.constructor	initprefix
-        .destructor     closeallfiles, 17
+	.constructor	init_kfs
+        .destructor     done_kfs, 17
 	.export		_kfs_open, _kfs_read, _kfs_close, _kfs_getdir
 	.import		_uip_buf, popax
 	.importzp 	ptr1
@@ -54,7 +54,7 @@ CLOSE_FD:	.byte	$00		;REF_NUM
 
 	.segment	"INIT"
 
-initprefix:
+init_kfs:
 	lda	PATHNAME
 	sec
 	sbc	#.strlen("CONTIKI")
@@ -113,7 +113,7 @@ _kfs_read:
 	ldx	READ_COUNT_OUT+1
 	rts
 
-closeallfiles:
+done_kfs:
 	lda	#$00
 
 _kfs_close:
