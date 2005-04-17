@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.7 2005/03/29 20:31:55 oliverschmidt Exp $
+ * $Id: ctk-arch.h,v 1.8 2005/04/17 12:37:24 oliverschmidt Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
@@ -53,6 +53,8 @@
 #endif /* CH_DEL */
 
 #ifdef __APPLE2ENH__
+
+#define ctk_arch_isprint(x) isprint(x)
 
 extern unsigned char ctk_draw_background;
 
