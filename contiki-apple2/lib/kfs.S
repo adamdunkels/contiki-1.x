@@ -1,13 +1,17 @@
 ;
 ; Contiki kernel file system (Apple2 version)
 ;
-; int kfs_open(const char* name);
+; int __fastcall__ kfs_open(const char* name);
 ; int __fastcall__ kfs_read(int fd, void* buf, unsigned count);
 ; int __fastcall__ kfs_close(int fd);
 ; char* kfs_getdir(void);
 ;
+; Be sure to keep the value priority of closeallfiles lower than that of
+; closeallstreams (which is the high level C file I/O counterpart and must be
+; called before closeallfiles).
 
 	.constructor	initprefix
+        .destructor     closeallfiles, 17
 	.export		_kfs_open, _kfs_read, _kfs_close, _kfs_getdir
 	.import		_uip_buf, popax
 	.importzp 	ptr1
@@ -108,6 +112,9 @@ _kfs_read:
 	lda	READ_COUNT_OUT
 	ldx	READ_COUNT_OUT+1
 	rts
+
+closeallfiles:
+	lda	#$00
 
 _kfs_close:
 	; Store	fd
