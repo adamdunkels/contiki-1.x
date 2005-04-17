@@ -30,12 +30,13 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ftpc.c,v 1.2 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: ftpc.c,v 1.3 2005/04/17 22:42:33 oliverschmidt Exp $
  */
 #include "contiki.h"
 #include "ftpc.h"
 
 #include <string.h>
+#include <stdio.h>
 
 #define ISO_nl 0x0a
 #define ISO_cr 0x0d
