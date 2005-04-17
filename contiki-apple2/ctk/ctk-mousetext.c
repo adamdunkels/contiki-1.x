@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.15 2005/04/17 12:37:24 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.16 2005/04/17 22:40:11 oliverschmidt Exp $
  *
  */
 
@@ -427,3 +427,8 @@ ctk_draw_width(void)
   return 80;
 }
 /*-----------------------------------------------------------------------------------*/
+int
+ctk_arch_isprint(char c)
+{
+  return isprint(c);
+}
