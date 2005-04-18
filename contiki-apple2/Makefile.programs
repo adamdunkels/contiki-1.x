@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.9 2005/04/12 21:48:54 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.10 2005/04/18 23:19:33 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o contiki-labels.o \
@@ -38,9 +38,11 @@ all: loader-arch-module.o contiki-labels.o \
      config.prg \
      configedit.prg \
      dhcp.prg \
+     ftp.prg \
      irc.prg \
      memstat.prg \
      processes.prg \
+     shell.prg \
      telnet.prg \
      welcome.prg \
      wget.prg \
@@ -48,7 +50,8 @@ all: loader-arch-module.o contiki-labels.o \
 
 SYS=apple2enh
 
-include $(CONTIKICC65)/Makefile.common 
+include $(CONTIKI)/Makefile.common
+include $(CONTIKICC65)/Makefile.cc65
 
 AFLAGS:=-t $(SYS)
 
@@ -59,12 +62,16 @@ lancegs.drv: lancegs-drv.o lan91c96.o uip_arp.o
 
 uther.drv: uther-drv.o cs8900a.o uther-drv-asm.o uip_arp.o
 
-dhcp.prg: dhcp.o dhcpc.o lc-asm.o
+dhcp.prg: $(DHCP) lc-asm.o
 
-irc.prg: irc.o ircc.o psock.o uipbuf.o lc-asm.o ircc-strings.o
+ftp.prg: $(FTP) cfs.o
+
+irc.prg: $(IRC) lc-asm.o
+
+shell.prg: $(SHELL) cfs.o
 
 telnet.prg: $(TELNET)
 
-wget.prg: wget.o webclient.o http-strings.o http-user-agent-string.o
+wget.prg: $(WGET)
 
 www.prg: $(WWW)

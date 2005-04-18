@@ -22,12 +22,14 @@ Installation
    a2 in b.0000 dos33.dsk TFE.DRV        tfe.drv
    a2 in b.0000 dos33.dsk ABOUT.PRG      about.prg
    a2 in b.0000 dos33.dsk CALC.PRG       calc.prg
-   a2 in b.0000 dos33.dsk DHCP.PRG       dhcp.prg
-   a2 in b.0000 dos33.dsk IRC.PRG        irc.prg
-   a2 in b.0000 dos33.dsk MEMSTAT.PRG    memstat.prg
    a2 in b.0000 dos33.dsk CONFIG.PRG     config.prg
    a2 in b.0000 dos33.dsk CONFIGEDIT.PRG config~1.prg
+   a2 in b.0000 dos33.dsk DHCP.PRG       dhcp.prg
+   a2 in b.0000 dos33.dsk FTP.PRG        ftp.prg
+   a2 in b.0000 dos33.dsk IRC.PRG        irc.prg
+   a2 in b.0000 dos33.dsk MEMSTAT.PRG    memstat.prg
    a2 in b.0000 dos33.dsk PROCESSES.PRG  proces~1.prg
+   a2 in b.0000 dos33.dsk SHELL.PRG      shell.prg
    a2 in b.0000 dos33.dsk TELNET.PRG     telnet.prg
    a2 in b.0000 dos33.dsk WELCOME.PRG    welcome.prg
    a2 in b.0000 dos33.dsk WGET.PRG       wget.prg
@@ -43,7 +45,7 @@ Installation
    BLOAD  CONTIKI.SYSTEM
    DELETE CONTIKI.SYSTEM
    CREATE CONTIKI.SYSTEM,TSYS
-   BSAVE  CONTIKI.SYSTEM,TSYS,A$2000,L350
+   BSAVE  CONTIKI.SYSTEM,TSYS,A$2000,L459
 
 
 Usage
