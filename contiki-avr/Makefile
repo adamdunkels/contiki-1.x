@@ -27,13 +27,14 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.8 2004/09/13 23:17:13 adamdunkels Exp $
+# $Id: Makefile,v 1.9 2005/04/18 22:43:55 oliverschmidt Exp $
 #
 
 all: contiki.srec
 
 CONTIKI=../contiki
 
+include $(CONTIKI)/Makefile.common
 include Makefile.depend
 
 CC=avr-gcc
@@ -74,14 +75,6 @@ LDFLAGS=-mmcu=atmega128 -Wl,-Map=contiki.map,--cref,-Tdata,0x801100
 
 %.srec:
 	$(OBJCOPY) -O srec $< $@
-
-UIP=uip.o uip_arch.o uiplib.o resolv.o 
-
-WWW=www.o webclient.o http-strings.o http-user-agent-string.o \
-    htmlparser.o html-strings.o  www-dsc.o
-EMAIL=email.o smtp.o smtp-strings.o
-WEBSERVER=webserver.o http-strings.o 
-TELNET=simpletelnet.o telnet.o
 
 SYSTEM=ek.o ek-service.o loader-arch.o
 CONTIKIFILES= $(SYSTEM) $(UIP) uip-fw.o uip-fw-service.o timer.o 
