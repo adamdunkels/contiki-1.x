@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.10 2004/09/12 13:22:52 adamdunkels Exp $
+# $Id: Makefile,v 1.11 2005/04/18 21:49:58 oliverschmidt Exp $
 #
 
 CONTIKI=../contiki
@@ -60,5 +60,5 @@ wget:
 
 CCDEPFLAGS=-D__CBM__ -D__C64__ -DCTK_HIRES -DWITH_UIP -DWITH_LOADER_ARCH -I/usr/local/lib/cc65/include
 
-include $(CONTIKICC65)/Makefile.common
+include $(CONTIKICC65)/Makefile.cc65
 

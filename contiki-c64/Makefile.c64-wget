@@ -30,12 +30,12 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-wget,v 1.2 2004/09/18 20:52:10 adamdunkels Exp $
+# $Id: Makefile.c64-wget,v 1.3 2005/04/18 21:49:59 oliverschmidt Exp $
 #
 
 all: contiki-exo
 
-include $(CONTIKICC65)/Makefile.common
+include $(CONTIKICC65)/Makefile.cc65
 SYS=c64
 
 CFLAGS:=$(CFLAGSCOMMON) -t $(SYS) \
