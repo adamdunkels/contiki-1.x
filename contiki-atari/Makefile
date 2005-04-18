@@ -31,13 +31,15 @@
 # Makefile for Atari 8-bit version
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.2 2003/04/14 21:31:28 sannyx Exp $
+# $Id: Makefile,v 1.3 2005/04/18 22:43:22 oliverschmidt Exp $
 #
 
 all: contiki.com
 
 CONTIKI=../contiki
 SYS=atari
+
+include $(CONTIKI)/Makefile.common
 
 CC=cc65
 AS=ca65
@@ -98,12 +100,6 @@ OPT=-Or
 
 %.o: loader/%.S
 	$(AS) -o $@ $(AFLAGS) $<
-
-UIP=uip.o uip_arch.o uip_main.o resolv.o
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 
-EMAIL=email.o smtp.o smtp-strings.o
-WEBSERVER=webserver.o http-strings.o 
-TELNET=simpletelnet.o telnet.o
 
 contiki.com: contiki-main.o strncasecmp.o petsciiconv.o \
  ctk-conio.o ctk.o ek.o dispatcher.o \
