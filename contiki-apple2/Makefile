@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.5 2005/01/22 03:00:27 oliverschmidt Exp $
+# $Id: Makefile,v 1.6 2005/04/18 21:49:36 oliverschmidt Exp $
 #
 
 CONTIKI=../contiki
@@ -63,5 +63,5 @@ programsenh:
 
 CCDEPFLAGS=
 
-include $(CONTIKICC65)/Makefile.common
+include $(CONTIKICC65)/Makefile.cc65
 
