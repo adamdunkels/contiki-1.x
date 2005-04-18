@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.16 2005/04/18 22:45:46 oliverschmidt Exp $
+# $Id: Makefile,v 1.17 2005/04/18 23:09:53 oliverschmidt Exp $
 #
 
 all: contiki
@@ -66,18 +66,17 @@ contiki: contiki-main.o ek.o arg.o ek-service.o \
  timer.o uiplib.o resolv.o resolv.o uipbuf.o \
  cfs.o cfs-posix.o codeprop.o \
  tapdev-service.o tapdev.o uip_arp.o uip-fw.o uip-fw-service.o \
- ctk.o $(CTKGTK) \
- ftpc.o ftp.o ftp-dsc.o \
- about.o editor.o editor-dsc.o memb.o ctk-filedialog.o \
- simpletelnet.o telnet.o netconf.o program-handler.o \
- about-dsc.o netconf-dsc.o www-dsc.o \
- www.o webclient.o htmlparser.o html-strings.o http-strings.o http-user-agent-string.o \
- processes-dsc.o processes.o \
- shell-dsc.o shell.o shell-gui.o \
- calc-dsc.o calc.o \
- email.o email-dsc.o smtp-socket.o smtp-strings.o ctk-textedit.o \
- ircc.o irc.o irc-dsc.o psock.o ircc-strings.o $(VNCVIEWER) $(WEBSERVER) \
- dhcpc.o dhcp.o dhcp-dsc.o  \
+ ctk.o $(CTKGTK) program-handler.o \
+ $(FTP) ftp-dsc.o \
+ $(EDITOR) editor-dsc.o \
+ $(WWW) www-dsc.o \
+ $(SHELL) shell-dsc.o \
+ $(DHCP) dhcp-dsc.o  \
+ processes.o processes-dsc.o \
+ calc.o calc-dsc.o \
+ about.o about-dsc.o \
+ netconf.o netconf-dsc.o \
+ $(TELNET) $(EMAIL) $(IRC) $(VNCVIEWER) $(WEBSERVER) \
 # sock-httpd.o socket.o list.o filecache.o \
 # program-handler.o about.o netconf.o processes.o \
 # about-dsc.o netconf-dsc.o processes-dsc.o  \
