@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.36 2005/04/18 22:44:32 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.37 2005/04/18 23:09:17 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -86,9 +86,9 @@ config.cfg:
 
 directory.prg: directory.o
 
-shell.prg: shell-gui.o shell.o
+shell.prg: $(SHELL)
 
-telnetd.prg: telnetd.o shell.o memb.o telnetd-gui.o
+telnetd.prg: $(TELNETD)
 
 configedit.prg: configedit.o #c64-fs-write.o
 
@@ -96,11 +96,11 @@ email.prg: $(EMAIL) lc-asm.o
 
 www.prg: $(WWW)
 
-irc.prg: irc.o ircc.o socket.o uipbuf.o lc-asm.o ircc-strings.o
+irc.prg: $(IRC) lc-asm.o
 
 cgterm.prg: cgterm.o socket.o uipbuf.o lc-asm.o
 
-dhcp.prg: dhcp.o dhcpc.o lc-asm.o
+dhcp.prg: $(DHCP) lc-asm.o
 
 webserver.prg: $(WEBSERVER) lc-asm.o #c64-fs-raw.o
 
@@ -126,11 +126,11 @@ slip-ss.drv: slip-drv.o rs232dev-ss.o rs232silversurfer.o contiki-labels.o
 
 wget.prg: wget.o webclient.o http-strings.o http-user-agent-string.o c64-dio.o c64-dio-asm.o
 
-ftp.prg: ftp.o ftpc.o memb.o
+ftp.prg: $(FTP)
 
 ftp.dsc: ftp-dsc.o
 
-editor.prg: editor.o memb.o ctk-filedialog.o
+editor.prg: $(EDITOR)
 
 VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
 vnc.prg: $(VNC)
