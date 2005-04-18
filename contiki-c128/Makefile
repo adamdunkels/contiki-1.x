@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.5 2005/04/18 22:06:20 oliverschmidt Exp $
+# $Id: Makefile,v 1.6 2005/04/18 22:44:12 oliverschmidt Exp $
 #
 
 all: contiki loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -43,13 +43,6 @@ include $(CONTIKICC65)/Makefile.cc65
 include Makefile.depend
 
 CFLAGS=$(CFLAGSCOMMON) -DWITH_LOADER_ARCH
-
-UIP=uip.o uip_arch.o uiplib.o resolv.o tcpip.o
-
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o 
-EMAIL=email.o smtp.o smtp-strings.o
-WEBSERVER=webserver.o http-strings.o 
-TELNET=simpletelnet.o telnet.o
 
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
  ctk-conio.o ctk.o arg.o ek.o timer.o \
