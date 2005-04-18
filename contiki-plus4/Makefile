@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.3 2004/12/24 15:16:53 oliverschmidt Exp $
+# $Id: Makefile,v 1.4 2005/04/18 22:46:49 oliverschmidt Exp $
 #
 
 all: contiki loader-arch-module.o contiki-labels.o \
@@ -37,6 +37,8 @@ all: contiki loader-arch-module.o contiki-labels.o \
 CONTIKI=../contiki
 CONTIKICC65=../contiki-cc65
 SYS=plus4
+
+include $(CONTIKI)/Makefile.common
 
 CC=cc65
 AS=ca65
@@ -104,16 +106,7 @@ OPT=-Or
 %.prg:  %.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
 
-
-UIP=uip.o uip_arch.o uip_main.o resolv.o
-
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o http-user-agent-string.o
-EMAIL=email.o smtp.o smtp-strings.o ctk-textedit.o
-WEBSERVER=webserver.o http-strings.o 
-TELNET=simpletelnet.o telnet.o
-VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
-
-email.prg: $(EMAIL) 
+email.prg: $(EMAIL) lc-asm.o
 www.prg: $(WWW)
 telnet.prg: $(TELNET)
 vnc.prg: $(VNC)
