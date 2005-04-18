@@ -30,44 +30,70 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs.h,v 1.3 2005/04/18 21:41:07 oliverschmidt Exp $
+ * $Id: cfs.c,v 1.1 2005/04/18 21:41:07 oliverschmidt Exp $
  */
-#ifndef __CFS_H__
-#define __CFS_H__
+
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdio.h>
 
-#define CFS_READ  (O_RDONLY)
-#define CFS_WRITE (O_WRONLY | O_CREAT | O_TRUNC)
+#include "contiki.h"
 
-#define cfs_open  open
-#define cfs_close close
-#define cfs_read  read
-#define cfs_write write
+#include "cfs.h"
 
-struct cfs_dir {
-  int fd;
-  unsigned char entry_length;
-  unsigned char entries_per_block;
-  unsigned char current_entry;
-  union {
-    unsigned char bytes[512];
-    struct {
-      unsigned prev_block;
-      unsigned next_block;
-      char entries[1];
-    } content;
-  } block;
-};
 
-struct cfs_dirent {
-  char name[16];
-  unsigned int size;
-};
+static char cwd[FILENAME_MAX+1];
 
-int cfs_opendir(struct cfs_dir *dirp, const char *name);
-int cfs_readdir(struct cfs_dir *dirp, struct cfs_dirent *dirent);
-int cfs_closedir(struct cfs_dir *dirp);
+/*---------------------------------------------------------------------------*/
+int
+cfs_opendir(struct cfs_dir *dirp, const char *name)
+{
+  char *openname = strcmp(name, "/") ? (char *)name : getcwd(cwd, sizeof(cwd));
 
-#endif /* __CFS_H__ */
+  if((dirp->fd = cfs_open(openname, CFS_READ)) != -1) {
+    if(cfs_read(dirp->fd,
+		dirp->block.bytes,
+		sizeof(dirp->block)) == sizeof(dirp->block)) {
+      dirp->entry_length      = dirp->block.bytes[0x23];
+      dirp->entries_per_block = dirp->block.bytes[0x24];
+      dirp->current_entry     = 1;
+      return 0;
+    }
+    cfs_close(dirp->fd);
+  }
+  return -1;
+}
+/*---------------------------------------------------------------------------*/
+int
+cfs_readdir(struct cfs_dir *dirp, struct cfs_dirent *dirent)
+{
+  char* entry;
+
+  do {
+    if(dirp->current_entry == dirp->entries_per_block) {
+      if(cfs_read(dirp->fd,
+		  dirp->block.bytes,
+		  sizeof(dirp->block)) != sizeof(dirp->block)) {
+	return -1;
+      }
+      dirp->current_entry = 0;
+    }
+    entry = dirp->block.content.entries +
+	    dirp->current_entry * dirp->entry_length;
+    ++dirp->current_entry;
+  } while (entry[0x00] == 0);
+
+  entry[0x01 + (entry[0x00] & 15)] = '\0';
+  strcpy(dirent->name, &entry[0x01]);
+  dirent->size = *(unsigned int *)&entry[0x13];
+  return 0;
+}
+/*---------------------------------------------------------------------------*/
+int
+cfs_closedir(struct cfs_dir *dirp)
+{
+  return cfs_close(dirp->fd);
+}
+/*---------------------------------------------------------------------------*/

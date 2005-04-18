@@ -8,3 +8,4 @@
 ; the contiki-labels mechanism.
 
 	.forceimport	__dos_type
+	.forceimport	__cwd
