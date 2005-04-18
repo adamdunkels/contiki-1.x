@@ -1,0 +1,6 @@
+UIP=uip.o uip_arch.o uiplib.o resolv.o tcpip.o
+WWW=www.o webclient.o http-strings.o http-user-agent-string.o htmlparser.o html-strings.o 
+EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o psock.o uipbuf.o lc-asm.o memb.o
+WEBSERVER=webserver.o httpd.o http-strings.o psock.o uipbuf.o lc-asm.o memb.o
+TELNET=simpletelnet.o telnet.o
+WGET=wget.o webclient.o http-strings.o http-user-agent-string.o 
