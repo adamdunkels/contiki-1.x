@@ -30,10 +30,12 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/05/19 09:30:01 gpz Exp $
+# $Id: Makefile,v 1.2 2005/04/18 22:45:29 oliverschmidt Exp $
 #
 
 CONTIKI=../contiki
+
+include $(CONTIKI)/Makefile.common
 
 # Change the target system type here
 SYS=gp32
@@ -89,16 +91,6 @@ OPT=-O3
 %.o: $(CONTIKI)/uip/%.c
 	$(CC) $(CFLAGS) -S $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
-
-
-UIP=uip.o uip_arch.o uip_main.o resolv.o
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o
-EMAIL=email.o smtp.o smtp-strings.o
-TELNET=simpletelnet.o telnet.o
-
-#cbm only :(
-#WEBSERVER=webserver.o http-strings.o
-#VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
 
 all: contiki
 
