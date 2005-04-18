@@ -30,13 +30,14 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.10 2005/04/18 21:49:36 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.11 2005/04/18 22:05:31 oliverschmidt Exp $
 #
 
 all: contiki
 
 SYS=apple2enh
 
+include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
 
 AFLAGS:=-t $(SYS) -I lib -I $(CC65_INC)/../asminc
