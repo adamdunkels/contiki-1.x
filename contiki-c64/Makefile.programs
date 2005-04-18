@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.35 2005/04/18 22:06:45 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.36 2005/04/18 22:44:32 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -92,7 +92,7 @@ telnetd.prg: telnetd.o shell.o memb.o telnetd-gui.o
 
 configedit.prg: configedit.o #c64-fs-write.o
 
-email.prg: $(EMAIL) 
+email.prg: $(EMAIL) lc-asm.o
 
 www.prg: $(WWW)
 
@@ -102,7 +102,7 @@ cgterm.prg: cgterm.o socket.o uipbuf.o lc-asm.o
 
 dhcp.prg: dhcp.o dhcpc.o lc-asm.o
 
-webserver.prg: $(WEBSERVER) #c64-fs-raw.o
+webserver.prg: $(WEBSERVER) lc-asm.o #c64-fs-raw.o
 
 telnet.prg: $(TELNET)
 
