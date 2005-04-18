@@ -10,7 +10,7 @@ Installation
 
 
 2. Get the 'Apple][ ProDOS 8 system program for loading binary programs':
-   ftp://ftp.musoftware.de/pub/uz/cc65/contrib/loader-1.0.zip
+   ftp://ftp.musoftware.de/pub/uz/cc65/contrib/loader-1.1.zip
 
 
 3. Use the 'a2tools' by Terry Kyriacopoulos to copy these files into a DOS 3.3
