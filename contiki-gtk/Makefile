@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.15 2005/02/27 13:18:50 adamdunkels Exp $
+# $Id: Makefile,v 1.16 2005/04/18 22:45:46 oliverschmidt Exp $
 #
 
 all: contiki
@@ -36,6 +36,7 @@ CONTIKI=../contiki
 SDIRS = apps conf ctk lib uip 
 CSDIRS = ${addprefix $(CONTIKI)/,apps ctk ek lib uip}
 
+include $(CONTIKI)/Makefile.common
 -include Makefile.depend
 
 CC=gcc
@@ -53,12 +54,6 @@ vpath %.c ${SDIRS} $(CSDIRS) ${filter-out CVS,${wildcard labs/*}}
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $(<:.o=.c)
-
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o www-dsc.o http-user-agent-string.o
-EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o
-WEBSERVER=webserver.o webserver-dsc.o httpd.o httpd-fs.o http-strings.o httpd-cgi.o
-TELNET=simpletelnet.o telnet.o
-VNCVIEWER=vnc.o vnc-viewer.o vnc-draw.o vnc-dsc.o
 
 CTKGTK=ctk-gtksim.o ctk-draw.o ctk-gtksim-service.o libconio.o ctk-gtksim-draw.o
 CTKVNC=ctk-vncserver.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o
