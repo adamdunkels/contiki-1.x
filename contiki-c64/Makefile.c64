@@ -27,13 +27,14 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64,v 1.15 2005/04/18 21:49:59 oliverschmidt Exp $
+# $Id: Makefile.c64,v 1.16 2005/04/18 22:06:44 oliverschmidt Exp $
 #
 
 all: contiki contiki-labels.o
 
 SYS=c64
 
+include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
 
 CFLAGS:=$(CFLAGSCOMMON) \
