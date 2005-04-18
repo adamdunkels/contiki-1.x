@@ -12,6 +12,7 @@ CFLAGSCOMMON=-I $(CONTIKICC65)/apps -I $(CONTIKICC65)/ctk \
 CLFLAGS=-Ln contiki-labels
 OPT=-Or
 
+
 %.o: %.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
@@ -120,19 +121,11 @@ tfe-drv.o: uip/tfe-drv.c
 	cl65 --module -t $(SYS) -o $@ loader-arch-dsc.o $^
 
 
-
-
 contiki-labels.o: contiki-labels.s
 	ca65 -o contiki-labels.o contiki-labels.s
 contiki-labels.s: contiki
 	./$(CONTIKICC65)/make-labels
 
-UIP=uip.o uip_arch.o uiplib.o resolv.o tcpip.o
-WWW=www.o webclient.o http-strings.o http-user-agent-string.o htmlparser.o html-strings.o 
-EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o psock.o uipbuf.o lc-asm.o memb.o
-WEBSERVER=webserver.o httpd.o http-strings.o psock.o uipbuf.o lc-asm.o memb.o
-TELNET=simpletelnet.o telnet.o
-WGET=wget.o webclient.o http-strings.o http-user-agent-string.o 
 
 clean:
 	rm -f *.o *~ *core contiki *.s *.dsc *.prg *.drv *.sav contiki-labels
