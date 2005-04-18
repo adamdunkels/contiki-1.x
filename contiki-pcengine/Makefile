@@ -30,10 +30,12 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2003/05/19 09:18:10 gpz Exp $
+# $Id: Makefile,v 1.2 2005/04/18 22:46:19 oliverschmidt Exp $
 #
 
 CONTIKI=../contiki
+
+include $(CONTIKI)/Makefile.common
 
 # Change the target system type here
 #SYS=pce
@@ -78,10 +80,6 @@ OPT=-Or
 %.o: $(CONTIKI)/uip/%.c
 	$(CC) $(CFLAGS) $(OPT) -o $(patsubst %c, %s, $(notdir $<)) $<
 	$(AS) -o $@ $(AFLAGS) $(*).s
-
-
-WWW=www.o webclient.o http-strings.o htmlparser.o html-strings.o
-EMAIL=email.o smtp.o smtp-strings.o
 
 # needed for zeropage.inc, joy-kernel.inc etc
 CC65_ASMINC=/usr/lib/cc65/asminc
