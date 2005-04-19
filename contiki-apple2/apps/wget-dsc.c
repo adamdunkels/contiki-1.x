@@ -29,19 +29,19 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget-dsc.c,v 1.1 2005/03/29 23:12:31 oliverschmidt Exp $
+ * $Id: wget-dsc.c,v 1.2 2005/04/19 22:01:22 oliverschmidt Exp $
  *
  */
 
 #include "dsc.h"
 
-extern struct ctk_icon icon;
+extern struct ctk_icon wget_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(wget_dsc,
     "Downloads files or disks from the web",
     "wget.prg",
     wget_init,
-    &icon);
+    &wget_icon);
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_ICON_BITMAPS
 static unsigned char wgeticon_bitmap[3*3*8] = {
@@ -68,7 +68,7 @@ static char wgeticon_textmap[9] = {
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
 #if CTK_CONF_ICONS
-static struct ctk_icon icon =
+static struct ctk_icon wget_icon =
   {CTK_ICON("Web downloader", wgeticon_bitmap, wgeticon_textmap)};
 #endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
