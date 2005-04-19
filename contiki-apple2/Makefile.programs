@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.10 2005/04/18 23:19:33 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.11 2005/04/19 22:17:47 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o contiki-labels.o \
@@ -68,7 +68,7 @@ ftp.prg: $(FTP) cfs.o
 
 irc.prg: $(IRC) lc-asm.o
 
-shell.prg: $(SHELL) cfs.o
+shell.prg: $(SHELL_) cfs.o
 
 telnet.prg: $(TELNET)
 
