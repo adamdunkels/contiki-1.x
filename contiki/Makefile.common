@@ -10,7 +10,7 @@ FTP=ftp.o ftpc.o memb.o
 
 IRC=irc.o ircc.o psock.o uipbuf.o ircc-strings.o
 
-SHELL=shell-gui.o shell.o
+SHELL_=shell-gui.o shell.o
 
 TELNET=simpletelnet.o telnet.o
 
