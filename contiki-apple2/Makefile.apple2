@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.11 2005/04/18 22:05:31 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.12 2005/04/19 23:00:01 oliverschmidt Exp $
 #
 
 all: contiki
@@ -57,9 +57,11 @@ contiki:crt0.o main.o ek.o ek-service.o timer.o program-handler.o arg.o \
 	calc-dsc.o \
 	configedit-dsc.o \
 	dhcp-dsc.o \
+	ftp-dsc.o \
 	irc-dsc.o \
 	memstat-dsc.o \
 	processes-dsc.o \
+	shell-dsc.o \
 	telnet-dsc.o \
 	www-dsc.o
 	$(LD) -C apple2.cfg -Ln contiki-labels -m contiki.map $^ $(SYS).lib
