@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.11 2005/02/26 09:46:40 oliverschmidt Exp $
+ * $Id: main.c,v 1.12 2005/04/19 23:07:15 oliverschmidt Exp $
  *
  */
 
@@ -64,6 +64,7 @@
 #include "editor-dsc.h"
 #include "calc-dsc.h"
 #include "processes-dsc.h"
+#include "shell-dsc.h"
 #include "about-dsc.h"
 
 #include "clock.h"
@@ -139,6 +140,7 @@ main(int argc)
   program_handler_add(&editor_dsc,    "Editor",        1);
   program_handler_add(&calc_dsc,      "Calculator",    1);
   program_handler_add(&processes_dsc, "Processes",     1);
+  program_handler_add(&shell_dsc,     "Command shell", 1);
   program_handler_add(&about_dsc,     "About Contiki", 0);
 
   while(1) {

@@ -357,6 +357,26 @@ SOURCE="..\contiki\apps\program-handler.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\apps\shell-dsc.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\shell-dsc.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\apps\shell-gui.c"
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\shell.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\contiki\apps\shell.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\contiki\apps\simpletelnet.c
 # End Source File
 # Begin Source File

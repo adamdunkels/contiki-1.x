@@ -30,11 +30,11 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: program-handler-conf.h,v 1.1 2005/02/15 15:03:07 oliverschmidt Exp $
+ * $Id: program-handler-conf.h,v 1.2 2005/04/19 23:07:54 oliverschmidt Exp $
  */
 #ifndef __PROGRAM_HANDLER_CONF_H__
 #define __PROGRAM_HANDLER_CONF_H__
 
-#define PROGRAM_HANDLER_CONF_MAX_NUMDSCS 15
+#define PROGRAM_HANDLER_CONF_MAX_NUMDSCS 16
 
 #endif /* __PROGRAM_HANDLER_CONF_H__ */
