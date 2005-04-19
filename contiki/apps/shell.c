@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.1 2005/04/18 23:13:40 oliverschmidt Exp $
+ * $Id: shell.c,v 1.2 2005/04/19 23:01:13 oliverschmidt Exp $
  *
  */
 
@@ -48,7 +48,8 @@ static struct cfs_dir dir;
 static unsigned int totsize;
 
 struct ptentry {
-  char c;
+  char c1;
+  char c2;
   void (* pfunc)(char *str);
 };
 
@@ -63,8 +64,8 @@ parse(register char *str, struct ptentry *t)
   
   /* Loop over the parse table entries in t in order to find one that
      matches the first character in str. */
-  for(p = t; p->c != 0; ++p) {
-    if(*str == p->c) {
+  for(p = t; p->c1 != 0; ++p) {
+    if(*str == p->c1 || *str == p->c2) {
       /* Skip rest of the characters up to the first space. */
       while(*str != ' ') {
 	++str;
@@ -222,16 +223,16 @@ none(char *str)
 }
 /*-----------------------------------------------------------------------------------*/
 static struct ptentry configparsetab[] =
-  {{'e', execfile},
-   {'r', runfile},
-   {'k', killproc},   
-   {'p', processes},
-   {'l', directory},
-   {'q', shell_quit},
-   {'?', help},
+  {{'e', 'E', execfile},
+   {'r', 'R', runfile},
+   {'k', 'K', killproc},   
+   {'p', 'P', processes},
+   {'l', 'L', directory},
+   {'q', 'Q', shell_quit},
+   {'h', '?', help},
 
    /* Default action */
-   {0, none}};
+   {0,   0,   none}};
 /*-----------------------------------------------------------------------------------*/
 void
 shell_init(void)
