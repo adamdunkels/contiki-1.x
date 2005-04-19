@@ -29,19 +29,19 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ftp-dsc.c,v 1.3 2005/03/18 00:49:42 oliverschmidt Exp $
+ * $Id: ftp-dsc.c,v 1.4 2005/04/19 22:00:53 oliverschmidt Exp $
  *
  */
 
 #include "dsc.h"
 
-extern struct ctk_icon icon;
+extern struct ctk_icon ftp_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(ftp_dsc,
     "FTP client",
     "ftp.prg",
     ftp_init,
-    &icon);
+    &ftp_icon);
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_ICON_BITMAPS
 static unsigned char ftpicon_bitmap[3*3*8] = {
@@ -68,7 +68,7 @@ static char ftpicon_textmap[9] = {
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
 #if CTK_CONF_ICONS
-static struct ctk_icon icon =
+static struct ctk_icon ftp_icon =
   {CTK_ICON("FTP client", ftpicon_bitmap, ftpicon_textmap)};
 #endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/

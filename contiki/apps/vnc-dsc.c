@@ -29,19 +29,19 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: vnc-dsc.c,v 1.5 2005/03/18 00:49:42 oliverschmidt Exp $
+ * $Id: vnc-dsc.c,v 1.6 2005/04/19 22:00:54 oliverschmidt Exp $
  *
  */
 
 #include "dsc.h"
 
-extern struct ctk_icon icon;
+extern struct ctk_icon vnc_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(vnc_dsc,
     "Remote control your PC using Contiki",
     "vnc.prg",
     vnc_init,
-    &icon);
+    &vnc_icon);
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_ICON_BITMAPS
 static unsigned char vncicon_bitmap[3*3*8] = {
@@ -68,7 +68,7 @@ static char vncicon_textmap[9] = {
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
 #if CTK_CONF_ICONS
-static struct ctk_icon icon =
+static struct ctk_icon vnc_icon =
   {CTK_ICON("VNC viewer", vncicon_bitmap, vncicon_textmap)};
 #endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
