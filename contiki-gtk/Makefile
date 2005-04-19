@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.17 2005/04/18 23:09:53 oliverschmidt Exp $
+# $Id: Makefile,v 1.18 2005/04/19 22:18:48 oliverschmidt Exp $
 #
 
 all: contiki
@@ -70,7 +70,7 @@ contiki: contiki-main.o ek.o arg.o ek-service.o \
  $(FTP) ftp-dsc.o \
  $(EDITOR) editor-dsc.o \
  $(WWW) www-dsc.o \
- $(SHELL) shell-dsc.o \
+ $(SHELL_) shell-dsc.o \
  $(DHCP) dhcp-dsc.o  \
  processes.o processes-dsc.o \
  calc.o calc-dsc.o \
