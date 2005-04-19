@@ -29,19 +29,19 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: cgterm-dsc.c,v 1.2 2005/03/18 00:51:17 oliverschmidt Exp $
+ * $Id: cgterm-dsc.c,v 1.3 2005/04/19 22:01:53 oliverschmidt Exp $
  *
  */
 
 #include "dsc.h"
 
-extern struct ctk_icon icon;
+extern struct ctk_icon cgterm_icon;
 /*-----------------------------------------------------------------------------------*/
 DSC(cgterm_dsc,
     "Program for connecting to C64 Telnet BBSes",
     "cgterm.prg",
     cgterm_init,
-    &icon);
+    &cgterm_icon);
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_ICON_BITMAPS
 static unsigned char cgtermicon_bitmap[3*3*8] = {
@@ -68,7 +68,7 @@ static char cgtermicon_textmap[9] = {
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
 #if CTK_CONF_ICONS
-static struct ctk_icon icon =
+static struct ctk_icon cgterm_icon =
   {CTK_ICON("C/G terminal", cgtermicon_bitmap, cgtermicon_textmap)};
 #endif /* CTK_CONF_ICONS */
 /*-----------------------------------------------------------------------------------*/
