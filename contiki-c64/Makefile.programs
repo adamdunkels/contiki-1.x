@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.37 2005/04/18 23:09:17 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.38 2005/04/19 22:18:20 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -86,7 +86,7 @@ config.cfg:
 
 directory.prg: directory.o
 
-shell.prg: $(SHELL)
+shell.prg: $(SHELL_)
 
 telnetd.prg: $(TELNETD)
 
