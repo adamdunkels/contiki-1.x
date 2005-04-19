@@ -6,12 +6,9 @@
 ; int __fastcall__ kfs_close(int fd);
 ; char* kfs_getdir(void);
 ;
-; Be sure to keep the value priority of closeallfiles lower than that of
-; closeallstreams (which is the high level C file I/O counterpart and must be
-; called before closeallfiles).
 
 	.constructor	init_kfs
-        .destructor     done_kfs, 17
+        .destructor     done_kfs
 	.export		_kfs_open, _kfs_read, _kfs_close, _kfs_getdir
 	.import		_uip_buf, popax
 	.importzp 	ptr1
