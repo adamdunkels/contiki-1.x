@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs-win32.c,v 1.2 2005/04/10 19:24:08 oliverschmidt Exp $
+ * $Id: cfs-win32.c,v 1.3 2005/04/22 23:20:07 oliverschmidt Exp $
  */
 #include "contiki.h"
 
@@ -142,7 +142,7 @@ s_opendir(struct cfs_dir *p, const char *n)
   }
 
   dir->name = strdup(data.cFileName);
-  dir->size = data.nFileSizeLow;
+  dir->size = ((data.nFileSizeLow + 511) / 512) % 1000;
 
   return 0;
 }
@@ -167,7 +167,7 @@ s_readdir(struct cfs_dir *p, struct cfs_dirent *e)
   }
 
   dir->name = strdup(data.cFileName);
-  dir->size = data.nFileSizeLow;
+  dir->size = ((data.nFileSizeLow + 511) / 512) % 1000;
 
   return 0;
 }
