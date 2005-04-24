@@ -39,16 +39,12 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.9 2004/08/09 21:33:40 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.10 2005/04/24 22:01:02 oliverschmidt Exp $
  *
  */
 
 #include <stdlib.h>
 #include <modload.h>
-
-#ifndef NULL
-#define NULL (void *)0
-#endif /* NULL */
 
 #include "cfs.h"
 
