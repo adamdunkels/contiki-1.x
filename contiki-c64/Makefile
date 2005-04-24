@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.11 2005/04/18 21:49:58 oliverschmidt Exp $
+# $Id: Makefile,v 1.12 2005/04/24 23:09:31 oliverschmidt Exp $
 #
 
 CONTIKI=../contiki
@@ -62,3 +62,13 @@ CCDEPFLAGS=-D__CBM__ -D__C64__ -DCTK_HIRES -DWITH_UIP -DWITH_LOADER_ARCH -I/usr/
 
 include $(CONTIKICC65)/Makefile.cc65
 
+d64:	
+	c1541 -format contiki,00 d64 contiki.d64
+	c1541 -attach contiki.d64 -write contiki
+	c1541 -attach contiki.d64 -write config.cfg
+	c1541 -attach contiki.d64 $(foreach dsc, $(wildcard *.dsc), -write $(dsc))
+	c1541 -attach contiki.d64 $(foreach prg, $(wildcard *.prg), -write $(prg))
+	c1541 -attach contiki.d64 $(foreach sav, $(wildcard *.sav), -write $(sav))
+	c1541 -attach contiki.d64 $(foreach drv, $(wildcard *.drv), -write $(drv))
+	c1541 -attach contiki.d64 $(foreach ser, $(wildcard *.ser), -write $(ser))
+	c1541 -attach contiki.d64 -list
