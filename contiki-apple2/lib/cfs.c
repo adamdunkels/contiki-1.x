@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs.c,v 1.1 2005/04/18 21:41:07 oliverschmidt Exp $
+ * $Id: cfs.c,v 1.2 2005/04/24 13:43:14 oliverschmidt Exp $
  */
 
 
@@ -44,7 +44,7 @@
 #include "cfs.h"
 
 
-static char cwd[FILENAME_MAX+1];
+static char cwd[FILENAME_MAX];
 
 /*---------------------------------------------------------------------------*/
 int
