@@ -2,10 +2,9 @@ CC=cc65
 AS=ca65
 LD=ld65
 CL=cl65
-CFLAGSCOMMON=-I $(CONTIKICC65)/apps -I $(CONTIKICC65)/ctk \
-       -I $(CONTIKICC65)/lib -I $(CONTIKICC65)/uip \
-       -I $(CONTIKICC65)/conf -I $(CONTIKICC65)/loader \
-       -I apps -I ctk -I lib -I uip -I conf -I loader \
+CFLAGSCC65=-I apps -I ctk -I lib -I uip -I conf -I loader \
+       -I $(CONTIKICC65)/apps -I $(CONTIKICC65)/lib \
+       -I $(CONTIKICC65)/uip -I $(CONTIKICC65)/loader \
        -I $(CONTIKI)/apps -I $(CONTIKI)/ctk -I $(CONTIKI)/ek \
        -I $(CONTIKI)/lib -I $(CONTIKI)/uip \
        -t $(SYS) --add-source 
