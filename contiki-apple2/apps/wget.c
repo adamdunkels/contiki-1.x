@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.2 2005/04/12 21:56:30 oliverschmidt Exp $
+ * $Id: wget.c,v 1.3 2005/04/24 13:37:06 oliverschmidt Exp $
  *
  */
 
@@ -256,6 +256,8 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
     CTK_WIDGET_ADD(&window, &dskbutton);
     CTK_WIDGET_ADD(&window, &statustext);
 
+    CTK_WIDGET_FOCUS(&window, &urltextentry);
+
     dload_state = DLOAD_NONE;
       
     memset(savefilename, 0, sizeof(savefilename));
@@ -268,6 +270,8 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
     CTK_WIDGET_ADD(&dskdialog, &overwritebutton);
     CTK_WIDGET_ADD(&dskdialog, &cancelbutton);
     
+    CTK_WIDGET_FOCUS(&dskdialog, &cancelbutton);
+
     ctk_window_open(&window);
   } else if(ev == tcpip_event) {
     webclient_appcall(data);
