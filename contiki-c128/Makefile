@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.6 2005/04/18 22:44:12 oliverschmidt Exp $
+# $Id: Makefile,v 1.7 2005/04/24 23:24:05 oliverschmidt Exp $
 #
 
 all: contiki loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -42,7 +42,7 @@ include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
 include Makefile.depend
 
-CFLAGS=$(CFLAGSCOMMON) -DWITH_LOADER_ARCH
+CFLAGS=$(CFLAGSCC65) -DWITH_LOADER_ARCH
 
 contiki: contiki-main.o strncasecmp.o petsciiconv.o \
  ctk-conio.o ctk.o arg.o ek.o timer.o \
