@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64-wget,v 1.4 2005/04/18 22:06:45 oliverschmidt Exp $
+# $Id: Makefile.c64-wget,v 1.5 2005/04/24 23:24:24 oliverschmidt Exp $
 #
 
 all: contiki-exo
@@ -39,7 +39,7 @@ include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
 SYS=c64
 
-CFLAGS:=$(CFLAGSCOMMON) -t $(SYS) \
+CFLAGS:=$(CFLAGSCC65) -t $(SYS) \
         -DCTK_HIRES \
 	-DWITH_UIP -DWITH_RRNET -DWITH_ETHERNET \
         -DCONTIKI_VERSION_STRING='"Contiki 1.2-devel1 IRC/DHCP edition"'

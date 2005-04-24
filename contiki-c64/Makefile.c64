@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.c64,v 1.16 2005/04/18 22:06:44 oliverschmidt Exp $
+# $Id: Makefile.c64,v 1.17 2005/04/24 23:24:24 oliverschmidt Exp $
 #
 
 all: contiki contiki-labels.o
@@ -37,7 +37,7 @@ SYS=c64
 include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
 
-CFLAGS:=$(CFLAGSCOMMON) \
+CFLAGS:=$(CFLAGSCC65) \
         -DCTK_HIRES -DWITH_UIP -DWITH_LOADER_ARCH -DWITH_ETHERNET
 
 contiki:  main.o save-driveunit.o petsciiconv.o \

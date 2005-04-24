@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.38 2005/04/19 22:18:20 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.39 2005/04/24 23:24:24 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -74,7 +74,7 @@ SYS=c64
 include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
 
-CFLAGS:=$(CFLAGSCOMMON) \
+CFLAGS:=$(CFLAGSCC65) \
         -DCTK_HIRES \
 	-DWITH_LOADER_ARCH \
         -DWITH_UIP -DWITH_ETHERNET
