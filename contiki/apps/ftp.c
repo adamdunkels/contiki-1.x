@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ftp.c,v 1.6 2005/02/15 21:35:07 oliverschmidt Exp $
+ * $Id: ftp.c,v 1.7 2005/04/24 13:41:01 oliverschmidt Exp $
  */
 /* Note to self: It would be nice to have a "View" option in the download dialog. */
 
@@ -168,13 +168,14 @@ static unsigned char ptrstate;
 #define PTRSTATE_REMOTEFILES 1
 static unsigned char localptr, remoteptr;
 
-static int fd;
+static int fd = -1;
 
 /*---------------------------------------------------------------------------*/
 static void
 make_uploaddialog(void)
 {
   ctk_dialog_new(&dialog, 24, 13);
+
   CTK_WIDGET_ADD(&dialog, &uploadlabel);
   CTK_WIDGET_ADD(&dialog, &localfilenametextlabel);
   CTK_WIDGET_ADD(&dialog, &localfilenamelabel);
@@ -182,12 +183,15 @@ make_uploaddialog(void)
   CTK_WIDGET_ADD(&dialog, &remotefilenameentry);
   CTK_WIDGET_ADD(&dialog, &uploadbutton);
   CTK_WIDGET_ADD(&dialog, &cancelbutton);  
+
+  CTK_WIDGET_FOCUS(&dialog, &uploadbutton);
 }
 /*---------------------------------------------------------------------------*/
 static void
 make_downloaddialog(void)
 {
   ctk_dialog_new(&dialog, 24, 13);
+
   CTK_WIDGET_ADD(&dialog, &downloadlabel);
   CTK_WIDGET_ADD(&dialog, &localfilenametextlabel);
   CTK_WIDGET_ADD(&dialog, &localfilenameentry);
@@ -195,6 +199,8 @@ make_downloaddialog(void)
   CTK_WIDGET_ADD(&dialog, &remotefilenamelabel);
   CTK_WIDGET_ADD(&dialog, &downloadbutton);
   CTK_WIDGET_ADD(&dialog, &cancelbutton);
+
+  CTK_WIDGET_FOCUS(&dialog, &downloadbutton);
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -212,8 +218,18 @@ show_statustext(char *text1, char *text2)
 }
 /*---------------------------------------------------------------------------*/
 static void
+close_file(void)
+{
+  if(fd != -1) {
+    cfs_close(fd);
+    fd = -1;
+  }
+}
+/*---------------------------------------------------------------------------*/
+static void
 quit(void)
 {
+  close_file();
   ctk_window_close(&window);
   ek_exit();
   id = EK_ID_NONE;
@@ -289,6 +305,8 @@ make_connectionwindow(void)
     CTK_WIDGET_ADD(&connectionwindow, &closeconnectionbutton);
   }
   CTK_WIDGET_ADD(&connectionwindow, &closebutton);
+
+  CTK_WIDGET_FOCUS(&connectionwindow, &serverentry);
 }
 /*---------------------------------------------------------------------------*/
 EK_EVENTHANDLER(eventhandler, ev, data)
@@ -307,7 +325,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     memset(midptr, 0, sizeof(midptr));	    
     memset(rightptr, 0, sizeof(rightptr));
 
-    ptrstate = PTRSTATE_LOCALFILES;
+    ptrstate = PTRSTATE_REMOTEFILES;
     localptr = remoteptr = 0;
 
     connection = NULL;
@@ -328,9 +346,10 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     CTK_WIDGET_ADD(&window, &reloadbutton);
     CTK_WIDGET_ADD(&window, &connectionbutton);
     CTK_WIDGET_ADD(&window, &quitbutton);
-
     
     CTK_WIDGET_ADD(&window, &statuslabel);
+
+    CTK_WIDGET_FOCUS(&window, &connectionbutton);
     ctk_window_open(&window);
 
     showptr();
@@ -376,8 +395,9 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 	ctk_dialog_close();
       } else if((struct ctk_button *)data == &downloadbutton) {
 	ctk_dialog_close();
+	close_file();
 	fd = cfs_open(localfilename, CFS_WRITE);
-	if(fd > 0) {
+	if(fd != -1) {
 	  show_statustext("Downloading ", remotefilename);
 	  ftpc_get(connection, remotefilename);
 	} else {
@@ -418,13 +438,13 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 	ftpc_close(connection);
 	}*/
     } else if(ev == ctk_signal_keypress) {
-      if((ctk_arch_key_t)data == ' ') {
+      /* if((ctk_arch_key_t)data == ' ') {
 	if(ptrstate == PTRSTATE_LOCALFILES) {
 	  ptrstate = PTRSTATE_REMOTEFILES;
 	} else {
 	  ptrstate = PTRSTATE_LOCALFILES;
 	}
-      } else if((ctk_arch_key_t)data == CH_CURS_UP) {
+      } else */ if((ctk_arch_key_t)data == CH_CURS_UP) {
 	clearptr();
 	if(ptrstate == PTRSTATE_LOCALFILES) {
 	  if(localptr > 0) {
@@ -558,7 +578,7 @@ ftpc_data(u8_t *data, u16_t len)
 {
   if(data == NULL) {
     show_statustext("Download complete", "");
-    cfs_close(fd);
+    close_file();
     start_loaddir();
   } else {
     cfs_write(fd, data, len);
