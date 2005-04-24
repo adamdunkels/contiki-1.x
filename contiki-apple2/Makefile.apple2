@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.12 2005/04/19 23:00:01 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.13 2005/04/24 23:23:29 oliverschmidt Exp $
 #
 
 all: contiki
@@ -42,7 +42,7 @@ include $(CONTIKICC65)/Makefile.cc65
 
 AFLAGS:=-t $(SYS) -I lib -I $(CC65_INC)/../asminc
 
-CFLAGS:=$(CFLAGSCOMMON) --code-name CONTIKI \
+CFLAGS:=$(CFLAGSCC65) --code-name CONTIKI \
         -DWITH_ASCII -DWITH_UIP -DWITH_LOADER_ARCH -DWITH_ETHERNET
 
 ifeq ($(SYS),apple2enh)
