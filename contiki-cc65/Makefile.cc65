@@ -140,14 +140,3 @@ depend:
 
 codesize:
 	od65 --dump-segsize *.o | egrep '\.o|CODE'
-
-d64:	
-	c1541 -format contiki,00 d64 contiki.d64
-	c1541 -attach contiki.d64 -write contiki
-	c1541 -attach contiki.d64 -write config.cfg
-	c1541 -attach contiki.d64 $(foreach dsc, $(wildcard *.dsc), -write $(dsc))
-	c1541 -attach contiki.d64 $(foreach prg, $(wildcard *.prg), -write $(prg))
-	c1541 -attach contiki.d64 $(foreach sav, $(wildcard *.sav), -write $(sav))
-	c1541 -attach contiki.d64 $(foreach drv, $(wildcard *.drv), -write $(drv))
-	c1541 -attach contiki.d64 $(foreach ser, $(wildcard *.ser), -write $(ser))
-	c1541 -attach contiki.d64 -list
