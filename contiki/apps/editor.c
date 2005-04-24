@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: editor.c,v 1.3 2004/09/12 20:24:53 adamdunkels Exp $
+ * $Id: editor.c,v 1.4 2005/04/24 13:37:42 oliverschmidt Exp $
  */
 #define EDITOR_CONF_WIDTH 32
 #define EDITOR_CONF_HEIGHT 16
@@ -296,8 +296,11 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 		   EDITOR_CONF_WIDTH + 2,
 		   EDITOR_CONF_HEIGHT + 3,
 		   "Editor");
+
     CTK_WIDGET_ADD(&window, &openbutton);
     CTK_WIDGET_ADD(&window, &statuslabel);
+
+    CTK_WIDGET_FOCUS(&window, &openbutton);
 
     editor_start();
     

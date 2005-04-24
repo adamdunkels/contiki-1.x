@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: irc.c,v 1.6 2005/04/16 14:12:11 oliverschmidt Exp $
+ * $Id: irc.c,v 1.7 2005/04/24 13:37:42 oliverschmidt Exp $
  */
 
 #include "irc-conf.h"
@@ -223,6 +223,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     CTK_WIDGET_ADD(&setupwindow, &nickentry);
     CTK_WIDGET_ADD(&setupwindow, &connectbutton);
     CTK_WIDGET_ADD(&setupwindow, &quitbutton);
+
+    CTK_WIDGET_FOCUS(&setupwindow, &serverentry);
 
     ctk_window_open(&setupwindow);
 

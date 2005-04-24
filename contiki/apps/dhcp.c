@@ -106,9 +106,9 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 {
   if(ev == EK_EVENT_INIT) {
     ctk_window_new(&window, 28, 7, "DHCP");
+
     CTK_WIDGET_ADD(&window, &getbutton);
     CTK_WIDGET_ADD(&window, &statuslabel);
-    
     CTK_WIDGET_ADD(&window, &ipaddrlabel);
     CTK_WIDGET_ADD(&window, &ipaddrentry);
     CTK_WIDGET_ADD(&window, &netmasklabel);
@@ -118,6 +118,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     CTK_WIDGET_ADD(&window, &dnsserverlabel);
     CTK_WIDGET_ADD(&window, &dnsserverentry);
     
+    CTK_WIDGET_FOCUS(&window, &getbutton);
+
     ctk_window_open(&window);
     dhcpc_init();
   } else if(ev == ctk_signal_widget_activate) {
