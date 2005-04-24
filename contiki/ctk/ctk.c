@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.45 2005/03/15 15:51:17 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.46 2005/04/24 23:01:20 oliverschmidt Exp $
  *
  */
 
@@ -1180,8 +1180,6 @@ switch_menu_item(unsigned char updown)
 static unsigned char CC_FASTCALL 
 activate(CC_REGISTER_ARG struct ctk_widget *w)
 {
-  static unsigned char len;
-  
   if(w->type == CTK_WIDGET_BUTTON) {
     if(w == (struct ctk_widget *)&windows->closebutton) {
 #if CTK_CONF_WINDOWCLOSE
@@ -1210,9 +1208,9 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
   } else if(w->type == CTK_WIDGET_TEXTENTRY) {
     if(w->widget.textentry.state == CTK_TEXTENTRY_NORMAL) {      
       w->widget.textentry.state = CTK_TEXTENTRY_EDIT;
-      len = strlen(w->widget.textentry.text);
-      if(w->widget.textentry.xpos > len) {
-	w->widget.textentry.xpos = len;
+      w->widget.textentry.xpos = strlen(w->widget.textentry.text);
+      if(w->widget.textentry.xpos == w->widget.textentry.len) {
+	--w->widget.textentry.xpos;
       }
     } else if(w->widget.textentry.state == CTK_TEXTENTRY_EDIT) {
       w->widget.textentry.state = CTK_TEXTENTRY_NORMAL;
