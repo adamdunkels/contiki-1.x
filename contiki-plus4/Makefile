@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.4 2005/04/18 22:46:49 oliverschmidt Exp $
+# $Id: Makefile,v 1.5 2005/04/27 23:50:01 oliverschmidt Exp $
 #
 
 all: contiki loader-arch-module.o contiki-labels.o \
@@ -125,14 +125,6 @@ contiki: contiki-main.o strncasecmp.o petsciiconv.o \
 
 clean:
 	rm -f *.o *~ *core contiki *.s *.prg
-
-depend:
-	gcc -MM -Iapps -Ictk -Iuip -Iconf \
-	-I$(CONTIKI)/lib -I$(CONTIKI)/ek \
-	-I$(CONTIKI)/ctk -I$(CONTIKI)/apps -I$(CONTIKI)/uip \
-	*.c */*.c $(CONTIKI)/*/*.c > Makefile.depend
-
-include Makefile.depend
 
 codesize:
 	od65 --dump-segsize *.o | egrep '\.o|CODE'
