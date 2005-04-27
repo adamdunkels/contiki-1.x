@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.10 2005/04/24 23:24:57 oliverschmidt Exp $
+# $Id: Makefile,v 1.11 2005/04/27 23:49:41 oliverschmidt Exp $
 #
 
 all: contiki loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
@@ -44,7 +44,6 @@ SYS=vic20
 
 include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
-include Makefile.depend
 
 CFLAGS=$(CFLAGSCC65) -DWITH_LOADER_ARCH
 
