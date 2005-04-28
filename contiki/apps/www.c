@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.29 2005/03/13 22:42:31 oliverschmidt Exp $
+ * $Id: www.c,v 1.30 2005/04/28 21:15:44 oliverschmidt Exp $
  *
  */
 
@@ -662,6 +662,7 @@ webclient_datahandler(char *data, u16_t len)
     show_statustext("Done.");
     petsciiconv_topetscii(&webpage[(WWW_CONF_WEBPAGE_HEIGHT - 1) *
 				   WWW_CONF_WEBPAGE_WIDTH], WWW_CONF_WEBPAGE_WIDTH);
+    CTK_WIDGET_FOCUS(&mainwindow, &urlentry);
     redraw_window();
   }
 }
