@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: irc.c,v 1.7 2005/04/24 13:37:42 oliverschmidt Exp $
+ * $Id: irc.c,v 1.8 2005/04/28 20:57:36 oliverschmidt Exp $
  */
 
 #include "irc-conf.h"
@@ -193,10 +193,14 @@ parse_line(void)
 void
 ircc_sent(struct ircc_state *s)
 {
+  struct ctk_widget *focused;
+
   /*  ctk_textedit_init(&lineedit);*/
   CTK_TEXTENTRY_CLEAR(&lineedit);
-  CTK_WIDGET_REDRAW(&lineedit);
+  focused = window.focused;
   CTK_WIDGET_FOCUS(&window, &lineedit);
+  CTK_WIDGET_REDRAW(focused);
+  CTK_WIDGET_REDRAW(&lineedit);
 }
 /*---------------------------------------------------------------------------*/
 EK_EVENTHANDLER(eventhandler, ev, data)
