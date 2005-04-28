@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell-gui.c,v 1.11 2005/04/24 13:38:35 oliverschmidt Exp $
+ * $Id: shell-gui.c,v 1.12 2005/04/28 20:56:15 oliverschmidt Exp $
  *
  */
 
@@ -52,10 +52,10 @@ static struct ctk_window window;
 static char log[SHELL_GUI_CONF_XSIZE * SHELL_GUI_CONF_YSIZE];
 static struct ctk_label loglabel =
   {CTK_LABEL(0, 0, SHELL_GUI_CONF_XSIZE, SHELL_GUI_CONF_YSIZE, log)};
-static char command[SHELL_GUI_CONF_XSIZE + 1];
+static char command[SHELL_GUI_CONF_XSIZE - 1];
 static struct ctk_textentry commandentry =
   {CTK_TEXTENTRY(0, SHELL_GUI_CONF_YSIZE, SHELL_GUI_CONF_XSIZE - 2,
-		 1, command, SHELL_GUI_CONF_XSIZE)};
+		 1, command, SHELL_GUI_CONF_XSIZE - 2)};
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_PROCESS(p, "Command shell", EK_PRIO_NORMAL,
@@ -119,8 +119,8 @@ LOADER_INIT_FUNC(shell_gui_init, arg)
 /*-----------------------------------------------------------------------------------*/
 EK_EVENTHANDLER(eventhandler, ev, data)
 {
+  struct ctk_widget *focused;
   EK_EVENTHANDLER_ARGS(ev, data);
-
   
   if(ev == EK_EVENT_INIT) {
     ctk_window_new(&window, SHELL_GUI_CONF_XSIZE,
@@ -130,7 +130,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     CTK_WIDGET_ADD(&window, &commandentry);
     /*    CTK_WIDGET_SET_FLAG(&commandentry, CTK_WIDGET_FLAG_MONOSPACE);*/
     CTK_WIDGET_FOCUS(&window, &commandentry);
-    memset(log, ' ', sizeof(log));
+    memset(log, 0, sizeof(log));
     
     shell_init();
     ctk_window_open(&window);
@@ -140,7 +140,9 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     shell_output("> ", command);
     shell_input(command);
     CTK_TEXTENTRY_CLEAR(&commandentry);
+    focused = window.focused;
     CTK_WIDGET_FOCUS(&window, &commandentry);
+    CTK_WIDGET_REDRAW(focused);
     CTK_WIDGET_REDRAW(&commandentry);
   } else if(ev == ctk_signal_window_close ||
 	    ev == EK_EVENT_REQUEST_EXIT) {
