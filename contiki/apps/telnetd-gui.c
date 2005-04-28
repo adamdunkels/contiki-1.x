@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: telnetd-gui.c,v 1.4 2004/08/09 21:46:28 adamdunkels Exp $
+ * $Id: telnetd-gui.c,v 1.5 2005/04/28 21:16:37 oliverschmidt Exp $
  *
  */
 
@@ -90,7 +90,7 @@ telnetd_gui_init(void)
 {
   ctk_window_new(&window, XSIZE, YSIZE, "Shell server");
   CTK_WIDGET_ADD(&window, &loglabel);
-  memset(log, ' ', sizeof(log));
+  memset(log, 0, sizeof(log));
   ctk_window_open(&window);
 }
 /*-----------------------------------------------------------------------------------*/

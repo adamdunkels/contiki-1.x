@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-filedialog.c,v 1.3 2004/09/12 20:24:55 adamdunkels Exp $
+ * $Id: ctk-filedialog.c,v 1.4 2005/04/28 21:16:58 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -115,7 +115,7 @@ ctk_filedialog_open(register struct ctk_filedialog_state *s,
   memset(filename, 0, sizeof(filename));
   memset(leftptr, ' ', sizeof(leftptr));
   memset(rightptr, ' ', sizeof(rightptr));
-  memset(files, ' ', sizeof(files));
+  memset(files, 0, sizeof(files));
   
   fileptr = 0;
   dirfileptr = 0;
