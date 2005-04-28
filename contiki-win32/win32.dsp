@@ -385,15 +385,15 @@ SOURCE=..\contiki\apps\simpletelnet.h
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\apps\smtp-socket.c"
+# End Source File
+# Begin Source File
+
 SOURCE="..\contiki\apps\smtp-strings.c"
 # End Source File
 # Begin Source File
 
 SOURCE="..\contiki\apps\smtp-strings.h"
-# End Source File
-# Begin Source File
-
-SOURCE=..\contiki\apps\smtp.c
 # End Source File
 # Begin Source File
 
