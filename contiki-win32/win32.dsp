@@ -577,11 +577,11 @@ SOURCE="..\contiki\lib\ctk-filedialog.h"
 # End Source File
 # Begin Source File
 
-SOURCE="..\contiki\lib\ctk-textedit.c"
+SOURCE="..\contiki\lib\ctk-textentry-multiline.c"
 # End Source File
 # Begin Source File
 
-SOURCE="..\contiki\lib\ctk-textedit.h"
+SOURCE="..\contiki\lib\ctk-textentry-multiline.h"
 # End Source File
 # Begin Source File
 
@@ -955,6 +955,10 @@ SOURCE=".\conf\ppp-conf.h"
 # Begin Source File
 
 SOURCE=".\conf\program-handler-conf.h"
+# End Source File
+# Begin Source File
+
+SOURCE=".\conf\shell-gui-conf.h"
 # End Source File
 # Begin Source File
 
