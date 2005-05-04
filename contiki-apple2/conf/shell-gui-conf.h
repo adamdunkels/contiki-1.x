@@ -30,11 +30,12 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: program-handler-conf.h,v 1.2 2005/05/04 22:12:05 oliverschmidt Exp $
+ * $Id: shell-gui-conf.h,v 1.1 2005/05/04 22:12:05 oliverschmidt Exp $
  */
-#ifndef __PROGRAM_HANDLER_CONF_H__
-#define __PROGRAM_HANDLER_CONF_H__
+#ifndef __SHELL_GUI_CONF_H__
+#define __SHELL_GUI_CONF_H__
 
-#define PROGRAM_HANDLER_CONF_MAX_NUMDSCS 11
+#define SHELL_GUI_CONF_XSIZE 38
+#define SHELL_GUI_CONF_YSIZE 12
 
-#endif /* __PROGRAM_HANDLER_CONF_H__ */
+#endif /* __SHELL_GUI_CONF_H__ */
