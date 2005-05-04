@@ -4,7 +4,7 @@ DHCP=dhcp.o dhcpc.o
 
 EDITOR=editor.o memb.o ctk-filedialog.o
 
-EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textedit.o psock.o uipbuf.o memb.o
+EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textentry-multiline.o psock.o uipbuf.o memb.o
 
 FTP=ftp.o ftpc.o memb.o
 
