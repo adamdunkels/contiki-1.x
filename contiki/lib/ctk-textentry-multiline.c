@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk-textentry-multiline.c,v 1.1 2005/05/04 21:57:08 oliverschmidt Exp $
+ * $Id: ctk-textentry-multiline.c,v 1.2 2005/05/04 23:07:17 oliverschmidt Exp $
  *
  */
 
@@ -47,6 +47,13 @@ ctk_textentry_multiline_input(ctk_arch_key_t c,
   unsigned char len;
 
   switch(c) {
+  case 0:
+    t->xpos = strlen(&t->text[t->ypos * t->len]);
+    if(t->xpos == t->len) {
+      --t->xpos;
+    }
+    return 1;
+
   case CH_CURS_UP:
     if(t->ypos == 0) {
       t->xpos = 0;
