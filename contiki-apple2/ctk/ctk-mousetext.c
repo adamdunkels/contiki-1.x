@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.16 2005/04/17 22:40:11 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.17 2005/05/04 19:55:30 oliverschmidt Exp $
  *
  */
 
@@ -120,33 +120,21 @@ draw_widget(struct ctk_widget *w,
     }
     break;
   case CTK_WIDGET_BUTTON:
-    if(wfocus != 0) {
-      revers(1);
-    } else {
-      revers(0);
-    }
+    revers(wfocus != 0);
     cputcxy(xpos, ypos, '[');
     cputsn(w->widget.button.text, w->w);
     cputc(']');
     revers(0);
     break;
   case CTK_WIDGET_HYPERLINK:
-    if(wfocus != 0) {
-      revers(0);
-    } else {
-      revers(1);
-    }
+    revers(wfocus == 0);
     gotoxy(xpos, ypos);
     cputsn(w->widget.button.text, w->w);
     revers(0);
     break;
   case CTK_WIDGET_TEXTENTRY:
     text = w->widget.textentry.text;
-    if(wfocus != 0) {
-      revers(1);
-    } else {
-      revers(0);
-    }
+    revers(wfocus != 0);
     xscroll = 0;
     if(w->widget.textentry.xpos >= w->w - 1) {
       xscroll = w->widget.textentry.xpos - w->w + 1;
@@ -158,11 +146,7 @@ draw_widget(struct ctk_widget *w,
 	cputcxy(xpos, ypos, '>');
 	for(i = 0; i < w->w; ++i) {
 	  c = text[i + xscroll];
-	  if(i == w->widget.textentry.xpos - xscroll) {
-	    revers(1);
-	  } else {
-	    revers(0);
-	  }
+	  revers(i == w->widget.textentry.xpos - xscroll);
 	  if(c == 0) {
 	    cputc(' ');
 	  } else {
@@ -188,11 +172,7 @@ draw_widget(struct ctk_widget *w,
     break;
 #if CTK_CONF_ICONS
   case CTK_WIDGET_ICON:
-    if(wfocus != 0) {
-      revers(1);
-    } else {
-      revers(0);
-    }
+    revers(wfocus != 0);
 #if CTK_CONF_ICON_TEXTMAPS
     if(w->widget.icon.textmap != NULL) {
       for(i = 0; i < 3; ++i) {
