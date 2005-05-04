@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.48 2005/05/04 22:33:45 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.49 2005/05/04 23:05:37 oliverschmidt Exp $
  *
  */
 
@@ -187,6 +187,9 @@ unsigned short ctk_screensaver_timeout = (5*60);
 /*static ek_clock_t start, current;*/
 static struct timer timer;
 
+static void CC_FASTCALL 
+textentry_input(ctk_arch_key_t c,
+		CC_REGISTER_ARG struct ctk_textentry *t);
 #if CTK_CONF_MENUS
 /*-----------------------------------------------------------------------------------*/
 /**
@@ -1177,16 +1180,6 @@ switch_menu_item(unsigned char updown)
 }
 #endif /* CTK_CONF_MENUS */
 /*-----------------------------------------------------------------------------------*/
-static void CC_FASTCALL
-textentry_edit(CC_REGISTER_ARG struct ctk_textentry *t)
-{
-  t->state = CTK_TEXTENTRY_EDIT;
-  t->xpos = strlen(t->text);
-  if(t->xpos == t->len) {
-    --t->xpos;
-  }
-}
-/*-----------------------------------------------------------------------------------*/
 static unsigned char CC_FASTCALL 
 activate(CC_REGISTER_ARG struct ctk_widget *w)
 {
@@ -1217,7 +1210,8 @@ activate(CC_REGISTER_ARG struct ctk_widget *w)
     ek_post(EK_BROADCAST, ctk_signal_hyperlink_activate, w);
   } else if(w->type == CTK_WIDGET_TEXTENTRY) {
     if(w->widget.textentry.state == CTK_TEXTENTRY_NORMAL) {      
-      textentry_edit((struct ctk_textentry *)w);
+      w->widget.textentry.state = CTK_TEXTENTRY_EDIT;
+      textentry_input(0, (struct ctk_textentry *)w);
     } else {
       w->widget.textentry.state = CTK_TEXTENTRY_NORMAL;
       ek_post(w->window->owner, ctk_signal_widget_activate, w);
@@ -1264,6 +1258,7 @@ textentry_input(ctk_arch_key_t c,
     txpos = 0;
     break;
     
+  case 0:
   case CH_CURS_DOWN:
     txpos = strlen(t->text);
     if(txpos == tlen) {
@@ -1755,7 +1750,8 @@ EK_POLLHANDLER(ctk_poll)
 	    if(widget != NULL &&
 	       widget->type == CTK_WIDGET_TEXTENTRY) {
 	      if(widget->widget.textentry.state == CTK_TEXTENTRY_NORMAL) {
-		textentry_edit((struct ctk_textentry *)widget);
+		widget->widget.textentry.state = CTK_TEXTENTRY_EDIT;
+		textentry_input(0, (struct ctk_textentry *)widget);
 	      }
 	      textentry_input(c, (struct ctk_textentry *)widget);
 	      add_redrawwidget(widget);
