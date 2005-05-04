@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.22 2004/09/12 07:22:39 adamdunkels Exp $
+ * $Id: ctk.h,v 1.23 2005/05/04 21:50:17 oliverschmidt Exp $
  *
  */
 
@@ -229,7 +229,10 @@ struct ctk_hyperlink {
  *
  * \param e The text entry widget to be cleared.
  */
-#define CTK_TEXTENTRY_CLEAR(e) do {memset((e)->text, 0, (e)->len); (e)->xpos = 0;} while(0);
+#define CTK_TEXTENTRY_CLEAR(e) do {memset((e)->text, 0, (e)->len); (e)->xpos = 0; (e)->ypos = 0;} while(0);
+
+typedef unsigned char (* ctk_textentry_input)(ctk_arch_key_t c,
+					      struct ctk_textentry *t);
 
 /**
  * Instantiating macro for the ctk_textentry widget.
@@ -254,7 +257,10 @@ struct ctk_hyperlink {
  */
 #define CTK_TEXTENTRY(x, y, w, h, text, len) \
   NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, 1, CTK_WIDGET_FLAG_INITIALIZER(0) text, len, \
-  CTK_TEXTENTRY_NORMAL, 0, 0
+  CTK_TEXTENTRY_NORMAL, 0, 0, NULL
+#define CTK_TEXTENTRY_INPUT(x, y, w, h, text, len, input) \
+  NULL, NULL, x, y, CTK_WIDGET_TEXTENTRY, w, h, CTK_WIDGET_FLAG_INITIALIZER(0) text, len, \
+  CTK_TEXTENTRY_NORMAL, 0, 0, (ctk_textentry_input)input
 struct ctk_textentry {
   struct ctk_widget *next;
   struct ctk_window *window;
@@ -268,6 +274,7 @@ struct ctk_textentry {
   unsigned char len;
   unsigned char state;
   unsigned char xpos, ypos;
+  ctk_textentry_input input;
 };
 
 
@@ -377,6 +384,7 @@ struct ctk_widget_textentry {
   unsigned char len;
   unsigned char state;
   unsigned char xpos, ypos;
+  ctk_textentry_input input;
 };
 
 struct ctk_widget_icon {
@@ -851,14 +859,30 @@ void ctk_widget_redraw(struct ctk_widget *w);
  (widg)->x = (xxpos); \
  (widg)->y = (yypos); \
  (widg)->w = (width); \
+ (widg)->h = 1; \
+ (widg)->text = (textptr); \
+ (widg)->len = (textlen); \
+ (widg)->state = CTK_TEXTENTRY_NORMAL; \
+ (widg)->xpos = 0; \
+ (widg)->ypos = 0; \
+ (widg)->input = NULL; \
+ } while(0)
+
+#define CTK_TEXTENTRY_INPUT_NEW(widg, xxpos, yypos, width, height, textptr, textlen, iinput) \
+ do { (widg)->window = NULL; \
+ (widg)->next = NULL; \
+ (widg)->type = CTK_WIDGET_TEXTENTRY; \
+ (widg)->x = (xxpos); \
+ (widg)->y = (yypos); \
+ (widg)->w = (width); \
  (widg)->h = (height); \
  (widg)->text = (textptr); \
  (widg)->len = (textlen); \
  (widg)->state = CTK_TEXTENTRY_NORMAL; \
  (widg)->xpos = 0; \
  (widg)->ypos = 0; \
+ (widg)->input = (ctk_textentry_input)(iinput); \
  } while(0)
-
 
 #define CTK_HYPERLINK_NEW(widg, xpos, ypos, width, linktext, linkurl) \
  do { (widg)->window = NULL; \

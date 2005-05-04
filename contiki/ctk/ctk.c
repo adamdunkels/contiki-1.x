@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.46 2005/04/24 23:01:20 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.47 2005/05/04 21:50:17 oliverschmidt Exp $
  *
  */
 
@@ -1230,6 +1230,10 @@ textentry_input(ctk_arch_key_t c,
 {
   register char *cptr, *cptr2;
   static unsigned char len, txpos, typos, tlen;
+
+  if(t->input != NULL && t->input(c, t)) {
+    return;
+  }
 
   txpos = t->xpos;
   typos = t->ypos;
