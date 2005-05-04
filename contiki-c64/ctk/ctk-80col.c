@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-80col.c,v 1.13 2005/03/18 01:09:15 oliverschmidt Exp $
+ * $Id: ctk-80col.c,v 1.14 2005/05/04 22:06:05 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -688,11 +688,6 @@ draw_widget(struct ctk_widget *w,
     break;
   case CTK_WIDGET_TEXTENTRY:
     text = w->widget.textentry.text;
-    if(wfocus != 0) {
-      revers(1);
-    } else {
-      revers(0);
-    }
     xscroll = 0;
     if(w->widget.textentry.xpos >= w->w - 1) {
       xscroll = w->widget.textentry.xpos - w->w + 1;
@@ -719,6 +714,11 @@ draw_widget(struct ctk_widget *w,
 	  }
 	  cputc('<');
 	} else {
+	  if(wfocus != 0 && j == w->widget.textentry.ypos) {
+	    revers(1);
+	  } else {
+	    revers(0);
+	  }
 	  cvlinexy(xpos, ypos, 1);
 	  gotoxy(xpos + 1, ypos);          
 	  _cputsn(text, w->w);
