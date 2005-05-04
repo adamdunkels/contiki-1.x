@@ -30,15 +30,15 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: email-conf.h,v 1.1 2004/12/22 09:39:01 oliverschmidt Exp $
+ * $Id: email-conf.h,v 1.2 2005/05/04 23:49:37 oliverschmidt Exp $
  */
 #ifndef __EMAIL_CONF_H__
 #define __EMAIL_CONF_H__
 
 #ifdef __APPLE2__
-#define EMAIL_CONF_WIDTH 36
+#define EMAIL_CONF_WIDTH 37
 #else /* __APPLE2__ */
-#define EMAIL_CONF_WIDTH 76
+#define EMAIL_CONF_WIDTH 48
 #endif /* __APPLE2__ */
 #define EMAIL_CONF_HEIGHT 16
 
