@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: smtp-socket.c,v 1.3 2005/02/22 22:23:08 adamdunkels Exp $
+ * $Id: smtp-socket.c,v 1.4 2005/05/04 23:51:09 oliverschmidt Exp $
  */
 #include "smtp.h"
 
@@ -48,10 +48,13 @@ struct smtp_state {
   char inputbuffer[4];
   
   char *to;
+  char *cc;
   char *from;
   char *subject;
   char *msg;
-  u16_t msglen;  
+  u8_t msgwidth;
+  u8_t msgheight;
+  u8_t line;
 };
 
 static struct smtp_state s;
@@ -107,7 +110,7 @@ PT_THREAD(smtp_thread(void))
   }
 
   SEND_STRING(&s.psock, (char *)smtp_rcpt_to);
-  SEND_STRING(&s.psock, s.from);
+  SEND_STRING(&s.psock, s.to);
   SEND_STRING(&s.psock, (char *)smtp_crnl);
 
   PSOCK_READTO(&s.psock, ISO_nl);
@@ -130,6 +133,10 @@ PT_THREAD(smtp_thread(void))
   SEND_STRING(&s.psock, s.to);
   SEND_STRING(&s.psock, (char *)smtp_crnl);
   
+  SEND_STRING(&s.psock, (char *)smtp_cc);
+  SEND_STRING(&s.psock, s.cc);
+  SEND_STRING(&s.psock, (char *)smtp_crnl);
+  
   SEND_STRING(&s.psock, (char *)smtp_from);
   SEND_STRING(&s.psock, s.from);
   SEND_STRING(&s.psock, (char *)smtp_crnl);
@@ -138,7 +145,10 @@ PT_THREAD(smtp_thread(void))
   SEND_STRING(&s.psock, s.subject);
   SEND_STRING(&s.psock, (char *)smtp_crnl);
 
-  PSOCK_SEND(&s.psock, s.msg, s.msglen);
+  for(s.line = 0; s.line < s.msgheight; ++s.line) {
+    SEND_STRING(&s.psock, (char *)smtp_crnl);
+    SEND_STRING(&s.psock, &s.msg[s.line * s.msgwidth]);
+  }
   
   SEND_STRING(&s.psock, (char *)smtp_crnlperiodcrnl);
 
@@ -173,8 +183,8 @@ smtp_configure(char *lhostname, u16_t *server)
 }
 /*---------------------------------------------------------------------------*/
 unsigned char
-smtp_send(char *to, char *from, char *subject,
-	  char *msg, u16_t msglen)
+smtp_send(char *to, char *cc, char *from, char *subject,
+	  char *msg, u8_t msgwidth, u8_t msgheight)
 {
   struct uip_conn *conn;
 
@@ -184,10 +194,12 @@ smtp_send(char *to, char *from, char *subject,
   }
   s.connected = 1;
   s.to = to;
+  s.cc = cc;
   s.from = from;
   s.subject = subject;
   s.msg = msg;
-  s.msglen = msglen;
+  s.msgwidth = msgwidth;
+  s.msgheight = msgheight;
 
   PSOCK_INIT(&s.psock, s.inputbuffer, sizeof(s.inputbuffer));
   
