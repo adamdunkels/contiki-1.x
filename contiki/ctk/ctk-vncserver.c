@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.14 2005/03/18 01:08:35 oliverschmidt Exp $
+ * $Id: ctk-vncserver.c,v 1.15 2005/05/04 22:04:35 oliverschmidt Exp $
  *
  */
 
@@ -419,11 +419,6 @@ draw_widget(struct ctk_widget *w,
   case CTK_WIDGET_TEXTENTRY:
     textcolor(VNC_OUT_TEXTENTRYCOLOR + focus);
     text = w->widget.textentry.text;
-    if(focus & CTK_FOCUS_WIDGET) {
-      revers(1);
-    } else {
-      revers(0);
-    }
     xscroll = 0;
     if(w->widget.textentry.xpos >= w->w - 1) {
       xscroll = w->widget.textentry.xpos - w->w + 1;
@@ -452,6 +447,11 @@ draw_widget(struct ctk_widget *w,
 	  }
 	  cputc('<');
 	} else {
+	  if(focus & CTK_FOCUS_WIDGET && j == w->widget.textentry.ypos) {
+	    revers(1);
+	  } else {
+	    revers(0);
+	  }
 	  cvlinexy(xpos, ypos, 1);
 	  gotoxy(xpos + 1, ypos);          
 	  cputsn(text, w->w);

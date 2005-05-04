@@ -464,11 +464,6 @@ draw_widget(struct ctk_widget *w,
   case CTK_WIDGET_TEXTENTRY:
     textcolor((unsigned char)(TERM_TEXTENTRYCOLOR + focus));
     text = w->widget.textentry.text;
-    if(focus & CTK_FOCUS_WIDGET) {
-      revers(1);
-    } else {
-      revers(0);
-    }
     xscroll = 0;
     if(w->widget.textentry.xpos >= w->w - 1) {
       xscroll = w->widget.textentry.xpos - w->w + 1;
@@ -497,6 +492,11 @@ draw_widget(struct ctk_widget *w,
 	  }
 	  cputc('<');
 	} else {
+	  if(focus & CTK_FOCUS_WIDGET && j == w->widget.textentry.ypos) {
+	    revers(1);
+	  } else {
+	    revers(0);
+	  }
 	  cvlinexy(xpos, ypos, 1);
 	  gotoxy((unsigned char)(xpos + 1), ypos);          
 	  cputsn(text, w->w);
