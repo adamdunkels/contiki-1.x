@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.18 2005/02/07 23:13:00 oliverschmidt Exp $
+ * $Id: email.c,v 1.19 2005/05/04 23:47:39 oliverschmidt Exp $
  *
  */
 
@@ -42,7 +42,7 @@
 #include "loader.h"
 #include "tcpip.h"
 
-#include "ctk-textedit.h"
+#include "ctk-textentry-multiline.h"
 
 #include "email-conf.h"
 
@@ -51,14 +51,14 @@
 #define MAIL_WIDTH EMAIL_CONF_WIDTH
 #define MAIL_HEIGHT EMAIL_CONF_HEIGHT
 /*
-#define MAIL_WIDTH 36
+#define MAIL_WIDTH 37
 #define MAIL_HEIGHT 17
 */
 
-#if (MAIL_WIDTH - 10) < 38
-#define TEXTENTRY_WIDTH (MAIL_WIDTH - 10)
+#if (MAIL_WIDTH - 9) < 39
+#define TEXTENTRY_WIDTH (MAIL_WIDTH - 9)
 #else
-#define TEXTENTRY_WIDTH 38
+#define TEXTENTRY_WIDTH 39
 #endif
 
 static struct ctk_menu menu;
@@ -68,38 +68,39 @@ unsigned char menuitem_compose, menuitem_setup, menuitem_quit;
 static struct ctk_window composewindow;
 
 static struct ctk_separator sep1 =
- {CTK_SEPARATOR(0, MAIL_HEIGHT + 3, MAIL_WIDTH)};
+ {CTK_SEPARATOR(0, MAIL_HEIGHT + 3, MAIL_WIDTH + 1)};
 static struct ctk_label statuslabel =
- {CTK_LABEL(6, MAIL_HEIGHT + 4, MAIL_WIDTH - 13, 1, "")};
+ {CTK_LABEL(6, MAIL_HEIGHT + 4, MAIL_WIDTH - 12, 1, "")};
 
 
 static struct ctk_label tolabel =
   {CTK_LABEL(0, 0, 3, 1, "To:")};
 static char to[40];
 static struct ctk_textentry totextentry =
-  {CTK_TEXTENTRY(8, 0, TEXTENTRY_WIDTH, 1, to, 38)};
+  {CTK_TEXTENTRY(8, 0, TEXTENTRY_WIDTH, 1, to, 39)};
 
 static struct ctk_label cclabel =
   {CTK_LABEL(0, 1, 3, 1, "Cc:")};
 static char cc[40];
 static struct ctk_textentry cctextentry =
-  {CTK_TEXTENTRY(8, 1, TEXTENTRY_WIDTH, 1, cc, 38)};
+  {CTK_TEXTENTRY(8, 1, TEXTENTRY_WIDTH, 1, cc, 39)};
 
 static struct ctk_label subjectlabel =
   {CTK_LABEL(0, 2, 8, 1, "Subject:")};
 static char subject[40];
 static struct ctk_textentry subjecttextentry =
-  {CTK_TEXTENTRY(8, 2, TEXTENTRY_WIDTH, 1, subject, 38)};
+  {CTK_TEXTENTRY(8, 2, TEXTENTRY_WIDTH, 1, subject, 39)};
 
 static char mail[MAIL_WIDTH * MAIL_HEIGHT];
-struct ctk_textedit mailtextedit =
-  {CTK_TEXTEDIT(0, 3, MAIL_WIDTH, MAIL_HEIGHT, mail)};
+struct ctk_textentry mailtextentry =
+  {CTK_TEXTENTRY_INPUT(0, 3, MAIL_WIDTH - 1, MAIL_HEIGHT, mail, MAIL_WIDTH - 1, \
+		       ctk_textentry_multiline_input)};
 
 
 static struct ctk_button sendbutton =
   {CTK_BUTTON(0, MAIL_HEIGHT + 4, 4, "Send")};
 static struct ctk_button erasebutton =
-  {CTK_BUTTON(MAIL_WIDTH - 7, MAIL_HEIGHT + 4, 5, "Erase")};
+  {CTK_BUTTON(MAIL_WIDTH - 6, MAIL_HEIGHT + 4, 5, "Erase")};
 
 /* The "Really erase message?" dialog. */
 static struct ctk_window erasedialog;
@@ -118,31 +119,31 @@ static struct ctk_label fromaddresslabel =
   {CTK_LABEL(0, 0, 25, 1, "Name and e-mail address")};
 static char fromaddress[40];
 static struct ctk_textentry fromaddresstextentry =
-  {CTK_TEXTENTRY(0, 1, 25, 1, fromaddress, 39)};
+  {CTK_TEXTENTRY(0, 1, 26, 1, fromaddress, 39)};
 
 static struct ctk_label smtpserverlabel =
   {CTK_LABEL(0, 3, 20, 1, "Outgoing mailserver")};
 static char smtpserver[40];
 static struct ctk_textentry smtpservertextentry =
-  {CTK_TEXTENTRY(0, 4, 25, 1, smtpserver, 39)};
+  {CTK_TEXTENTRY(0, 4, 26, 1, smtpserver, 39)};
 
 static struct ctk_label pop3serverlabel =
   {CTK_LABEL(0, 6, 20, 1, "Incoming mailserver")};
 static char pop3server[40];
 static struct ctk_textentry pop3servertextentry =
-  {CTK_TEXTENTRY(0, 7, 25, 1, pop3server, 39)};
+  {CTK_TEXTENTRY(0, 7, 26, 1, pop3server, 39)};
 
 static struct ctk_label pop3userlabel =
   {CTK_LABEL(0, 9, 20, 1, "Mailserver username")};
 static char pop3user[40];
 static struct ctk_textentry pop3usertextentry =
-  {CTK_TEXTENTRY(0, 10, 25, 1, pop3user, 39)};
+  {CTK_TEXTENTRY(0, 10, 26, 1, pop3user, 39)};
   
 static struct ctk_label pop3passwordlabel =
   {CTK_LABEL(0, 12, 20, 1, "Mailserver password")};
 static char pop3password[40];
 static struct ctk_textentry pop3passwordtextentry =
-  {CTK_TEXTENTRY(0, 13, 25, 1, pop3password, 39)};
+  {CTK_TEXTENTRY(0, 13, 26, 1, pop3password, 39)};
 
 
 static struct ctk_button setupokbutton =
@@ -199,20 +200,20 @@ applyconfig(void)
 static void
 prepare_message(void)
 {
-  int i;
-
   /* Convert fields to ASCII. */
   petsciiconv_toascii(to, sizeof(to));
+  petsciiconv_toascii(cc, sizeof(cc));
   petsciiconv_toascii(subject, sizeof(subject));  
-  petsciiconv_toascii(mail, 255);
-  petsciiconv_toascii(mail + 255, sizeof(mail) - 255);
-
-  /* Insert line delimiters. */
-  subject[sizeof(subject) - 2] = 0x0a;
-  subject[sizeof(subject) - 1] = 0x00;
-  for(i = 0; i < MAIL_HEIGHT; ++i) {
-    mail[MAIL_WIDTH - 1 + MAIL_WIDTH * i] = 0x0a;
-  }
+  petsciiconv_toascii(mail, sizeof(mail));
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+erase_message(void)
+{
+  memset(to, 0, sizeof(to));
+  memset(cc, 0, sizeof(cc));
+  memset(subject, 0, sizeof(subject));
+  memset(mail, 0, sizeof(mail));
 }
 /*-----------------------------------------------------------------------------------*/
 /*static
@@ -221,8 +222,6 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
 {
   struct ctk_widget *w;
   EK_EVENTHANDLER_ARGS(ev, data);
-
-  ctk_textedit_eventhandler(&mailtextedit, ev, data);
 
   if(ev == tcpip_event) {
     smtp_appcall(data);
@@ -256,7 +255,7 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
 
     /* Create compose window. */
 
-    ctk_window_new(&composewindow, MAIL_WIDTH, MAIL_HEIGHT + 5, "Compose e-mail");
+    ctk_window_new(&composewindow, MAIL_WIDTH + 1, MAIL_HEIGHT + 5, "Compose e-mail");
     
     CTK_WIDGET_ADD(&composewindow, &tolabel);
     CTK_WIDGET_ADD(&composewindow, &cclabel);
@@ -267,7 +266,7 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
     CTK_WIDGET_ADD(&composewindow, &cctextentry);  
     CTK_WIDGET_ADD(&composewindow, &subjecttextentry);
     
-    ctk_textedit_add(&composewindow, &mailtextedit);
+    CTK_WIDGET_ADD(&composewindow, &mailtextentry);
     
     CTK_WIDGET_ADD(&composewindow, &sep1);
     CTK_WIDGET_ADD(&composewindow, &statuslabel);
@@ -275,7 +274,7 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
     CTK_WIDGET_ADD(&composewindow, &sendbutton);
     CTK_WIDGET_ADD(&composewindow, &erasebutton);
     
-    memset(mail, ' ', sizeof(mail));  
+    erase_message();
 
     /* Create and add the menu */
     ctk_menu_new(&menu, "E-mail");
@@ -298,16 +297,13 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
     w = (struct ctk_widget *)data;
     if(w == (struct ctk_widget *)&sendbutton) {
       prepare_message();
-      smtp_send(to, fromaddress, subject, mail, sizeof(mail));
+      smtp_send(to, cc, fromaddress, subject, mail, MAIL_WIDTH, MAIL_HEIGHT);
       ctk_label_set_text(&statuslabel, "Sending message...");
       CTK_WIDGET_REDRAW(&statuslabel);
     } else if(w == (struct ctk_widget *)&erasebutton) {
       ctk_dialog_open(&erasedialog);      
     } else if(w == (struct ctk_widget *)&eraseyesbutton) {
-      memset(to, ' ', sizeof(to));
-      memset(cc, ' ', sizeof(cc));
-      memset(subject, ' ', sizeof(subject));
-      memset(mail, ' ', sizeof(mail));
+      erase_message();
       ctk_dialog_close();
     } else if(w == (struct ctk_widget *)&erasenobutton) {
       ctk_dialog_close();
@@ -336,10 +332,7 @@ smtp_done(unsigned char error)
 {
   if(error == SMTP_ERR_OK) {
     ctk_label_set_text(&statuslabel, "Mail sent");
-    memset(to, ' ', sizeof(to));
-    memset(cc, ' ', sizeof(cc));
-    memset(subject, ' ', sizeof(subject));
-    memset(mail, ' ', sizeof(mail));
+    erase_message();
     ctk_window_open(&composewindow);
   } else {
     ctk_label_set_text(&statuslabel, "Mail error");
