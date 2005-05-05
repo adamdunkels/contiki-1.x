@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.19 2005/05/04 23:47:39 oliverschmidt Exp $
+ * $Id: email.c,v 1.20 2005/05/05 20:57:09 oliverschmidt Exp $
  *
  */
 
@@ -210,10 +210,10 @@ prepare_message(void)
 static void
 erase_message(void)
 {
-  memset(to, 0, sizeof(to));
-  memset(cc, 0, sizeof(cc));
-  memset(subject, 0, sizeof(subject));
-  memset(mail, 0, sizeof(mail));
+  CTK_TEXTENTRY_CLEAR(&totextentry);
+  CTK_TEXTENTRY_CLEAR(&cctextentry);
+  CTK_TEXTENTRY_CLEAR(&subjecttextentry);
+  CTK_TEXTENTRY_CLEAR(&mailtextentry);
 }
 /*-----------------------------------------------------------------------------------*/
 /*static
