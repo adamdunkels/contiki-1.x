@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: ctk.h,v 1.23 2005/05/04 21:50:17 oliverschmidt Exp $
+ * $Id: ctk.h,v 1.24 2005/05/05 20:54:16 oliverschmidt Exp $
  *
  */
 
@@ -229,7 +229,9 @@ struct ctk_hyperlink {
  *
  * \param e The text entry widget to be cleared.
  */
-#define CTK_TEXTENTRY_CLEAR(e) do {memset((e)->text, 0, (e)->len); (e)->xpos = 0; (e)->ypos = 0;} while(0);
+#define CTK_TEXTENTRY_CLEAR(e) \
+	do { memset((e)->text, 0, (e)->h * ((e)->len + 1)); \
+	     (e)->xpos = 0; (e)->ypos = 0; } while(0)
 
 typedef unsigned char (* ctk_textentry_input)(ctk_arch_key_t c,
 					      struct ctk_textentry *t);
@@ -668,7 +670,7 @@ void ctk_window_new(struct ctk_window *window,
 		    char *title);
 void ctk_window_clear(struct ctk_window *w);
 void ctk_window_open(struct ctk_window *w);
-#define ctk_window_move(w,xpos,ypos) do {(w)->x=xpos; (w)->y=ypos;}while(0)
+#define ctk_window_move(w,xpos,ypos) do { (w)->x=xpos; (w)->y=ypos; } while(0)
 void ctk_window_close(struct ctk_window *w);
 void ctk_window_redraw(struct ctk_window *w);
 #define ctk_window_isopen(w) ((w)->next != NULL)

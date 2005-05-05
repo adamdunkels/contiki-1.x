@@ -508,7 +508,7 @@ draw_widget(struct ctk_widget *w,
 	}
       }
       ++ypos;
-      text += w->w;
+      text += w->widget.textentry.len + 1;
     }
     revers(0);
     break;

@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki operating system.
  *
- * $Id: ctk.c,v 1.49 2005/05/04 23:05:37 oliverschmidt Exp $
+ * $Id: ctk.c,v 1.50 2005/05/05 20:54:16 oliverschmidt Exp $
  *
  */
 
@@ -1239,7 +1239,7 @@ textentry_input(ctk_arch_key_t c,
   typos = t->ypos;
   tlen = t->len;
 
-  cptr = &t->text[txpos + typos * tlen];
+  cptr = &t->text[txpos + typos * (tlen + 1)];
       
   switch(c) {
   case CH_CURS_LEFT:

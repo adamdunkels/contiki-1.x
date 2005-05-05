@@ -41,7 +41,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-vncserver.c,v 1.15 2005/05/04 22:04:35 oliverschmidt Exp $
+ * $Id: ctk-vncserver.c,v 1.16 2005/05/05 20:54:16 oliverschmidt Exp $
  *
  */
 
@@ -463,7 +463,7 @@ draw_widget(struct ctk_widget *w,
 	}
       }
       ++ypos;
-      text += w->w;
+      text += w->widget.textentry.len + 1;
     }
     revers(0);
     break;
