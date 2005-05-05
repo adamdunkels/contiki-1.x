@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-80col.c,v 1.14 2005/05/04 22:06:05 oliverschmidt Exp $
+ * $Id: ctk-80col.c,v 1.15 2005/05/05 20:55:26 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -730,7 +730,7 @@ draw_widget(struct ctk_widget *w,
 	}
       }
       ++ypos;
-      text += w->w;
+      text += w->widget.textentry.len + 1;
     }
     revers(0);
     break;
