@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: smtp-socket.c,v 1.4 2005/05/04 23:51:09 oliverschmidt Exp $
+ * $Id: smtp-socket.c,v 1.5 2005/05/05 22:15:19 oliverschmidt Exp $
  */
 #include "smtp.h"
 
@@ -84,6 +84,7 @@ PT_THREAD(smtp_thread(void))
    
   if(strncmp(s.inputbuffer, smtp_220, 3) != 0) {
     PSOCK_CLOSE(&s.psock);
+    smtp_done(2);
     PSOCK_EXIT(&s.psock);
   }
   
@@ -95,6 +96,7 @@ PT_THREAD(smtp_thread(void))
   
   if(s.inputbuffer[0] != ISO_2) {
     PSOCK_CLOSE(&s.psock);
+    smtp_done(3);
     PSOCK_EXIT(&s.psock);
   }  
 
@@ -106,6 +108,7 @@ PT_THREAD(smtp_thread(void))
   
   if(s.inputbuffer[0] != ISO_2) {
     PSOCK_CLOSE(&s.psock);
+    smtp_done(4);
     PSOCK_EXIT(&s.psock);
   }
 
@@ -117,6 +120,7 @@ PT_THREAD(smtp_thread(void))
   
   if(s.inputbuffer[0] != ISO_2) {
     PSOCK_CLOSE(&s.psock);
+    smtp_done(5);
     PSOCK_EXIT(&s.psock);
   }
   
@@ -126,6 +130,7 @@ PT_THREAD(smtp_thread(void))
   
   if(s.inputbuffer[0] != ISO_3) {
     PSOCK_CLOSE(&s.psock);
+    smtp_done(6);
     PSOCK_EXIT(&s.psock);
   }
 
@@ -155,23 +160,28 @@ PT_THREAD(smtp_thread(void))
   PSOCK_READTO(&s.psock, ISO_nl);
   if(s.inputbuffer[0] != ISO_2) {
     PSOCK_CLOSE(&s.psock);
+    smtp_done(7);
     PSOCK_EXIT(&s.psock);
   }
 
   SEND_STRING(&s.psock, (char *)smtp_quit);
-
+  smtp_done(SMTP_ERR_OK);
   PSOCK_END(&s.psock);
 }
 /*---------------------------------------------------------------------------*/
 void
 smtp_appcall(void *state)
 {
-  if(uip_closed() || uip_aborted() || uip_timedout()) {
+  if(uip_closed()) {
     s.connected = 0;
     return;
-  } else {
-    smtp_thread();
   }
+  if(uip_aborted() || uip_timedout()) {
+    s.connected = 0;
+    smtp_done(1);
+    return;
+  }
+  smtp_thread();
 }
 /*---------------------------------------------------------------------------*/
 void
