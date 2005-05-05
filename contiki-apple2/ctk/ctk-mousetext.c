@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.18 2005/05/04 22:05:37 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.19 2005/05/05 20:55:02 oliverschmidt Exp $
  *
  */
 
@@ -166,7 +166,7 @@ draw_widget(struct ctk_widget *w,
 	cvline(1);
       }
       ++ypos;
-      text += w->w;
+      text += w->widget.textentry.len + 1;
     }
     revers(0);
     break;
