@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: irc.c,v 1.8 2005/04/28 20:57:36 oliverschmidt Exp $
+ * $Id: irc.c,v 1.9 2005/05/05 23:32:01 oliverschmidt Exp $
  */
 
 #include "irc-conf.h"
@@ -41,6 +41,8 @@
 #include "ctk-textedit.h"
 
 #include "petsciiconv.h"
+
+#include "ctk-textentry-cmdline.h"
 
 #include <string.h>
 
@@ -61,7 +63,8 @@ static char line[LOG_WIDTH*2];
 static struct ctk_label loglabel =
   {CTK_LABEL(0, 0, LOG_WIDTH, LOG_HEIGHT, log)};
 static struct ctk_textentry lineedit =
-  {CTK_TEXTENTRY(0, LOG_HEIGHT, LOG_WIDTH - 2, 1, line, sizeof(line) - 1)};
+  {CTK_TEXTENTRY_INPUT(0, LOG_HEIGHT, LOG_WIDTH - 2, 1, line, sizeof(line) - 1,
+		       ctk_textentry_cmdline_input)};
 
 static struct ctk_window setupwindow;
 #define SETUPWINDOW_WIDTH 18
@@ -193,13 +196,8 @@ parse_line(void)
 void
 ircc_sent(struct ircc_state *s)
 {
-  struct ctk_widget *focused;
-
   /*  ctk_textedit_init(&lineedit);*/
   CTK_TEXTENTRY_CLEAR(&lineedit);
-  focused = window.focused;
-  CTK_WIDGET_FOCUS(&window, &lineedit);
-  CTK_WIDGET_REDRAW(focused);
   CTK_WIDGET_REDRAW(&lineedit);
 }
 /*---------------------------------------------------------------------------*/

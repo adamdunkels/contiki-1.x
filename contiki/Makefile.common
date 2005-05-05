@@ -8,9 +8,9 @@ EMAIL=email.o smtp-socket.o smtp-strings.o ctk-textentry-multiline.o psock.o uip
 
 FTP=ftp.o ftpc.o memb.o
 
-IRC=irc.o ircc.o psock.o uipbuf.o ircc-strings.o
+IRC=irc.o ircc.o psock.o uipbuf.o ircc-strings.o ctk-textentry-cmdline.o
 
-SHELL_=shell-gui.o shell.o
+SHELL_=shell-gui.o shell.o ctk-textentry-cmdline.o
 
 TELNET=simpletelnet.o telnet.o
 
