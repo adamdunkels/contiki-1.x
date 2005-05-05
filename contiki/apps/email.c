@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: email.c,v 1.20 2005/05/05 20:57:09 oliverschmidt Exp $
+ * $Id: email.c,v 1.21 2005/05/05 22:15:49 oliverschmidt Exp $
  *
  */
 
@@ -38,6 +38,7 @@
 #include "ctk.h"
 #include "smtp.h"
 #include "uiplib.h"
+#include "resolv.h"
 #include "petsciiconv.h"
 #include "loader.h"
 #include "tcpip.h"
@@ -70,7 +71,7 @@ static struct ctk_window composewindow;
 static struct ctk_separator sep1 =
  {CTK_SEPARATOR(0, MAIL_HEIGHT + 3, MAIL_WIDTH + 1)};
 static struct ctk_label statuslabel =
- {CTK_LABEL(6, MAIL_HEIGHT + 4, MAIL_WIDTH - 12, 1, "")};
+ {CTK_LABEL(7, MAIL_HEIGHT + 4, MAIL_WIDTH - 14, 1, "")};
 
 
 static struct ctk_label tolabel =
@@ -186,15 +187,22 @@ LOADER_INIT_FUNC(email_init, arg)
 static void
 applyconfig(void)
 {
-  u16_t addr[2];
+  u16_t addr[2], *addrptr;
   char *cptr;
 
   for(cptr = smtpserver; *cptr != ' ' && *cptr != 0; ++cptr);
   *cptr = 0;
   
-  if(uiplib_ipaddrconv(smtpserver, (unsigned char *)addr)) {
-    smtp_configure("contiki", addr);
+  addrptr = &addr[0];
+  if(uiplib_ipaddrconv(smtpserver, (unsigned char *)addr) == 0) {
+    addrptr = resolv_lookup(smtpserver);
+    if(addrptr == NULL) {
+      resolv_query(smtpserver);
+      ctk_label_set_text(&statuslabel, "Resolving host...");
+      return;
+    }
   }
+  smtp_configure("contiki", addrptr);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -242,11 +250,11 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
     CTK_WIDGET_ADD(&setupwindow, &fromaddresstextentry);
     CTK_WIDGET_ADD(&setupwindow, &smtpserverlabel);
     CTK_WIDGET_ADD(&setupwindow, &smtpservertextentry);
-    CTK_WIDGET_ADD(&setupwindow, &pop3serverlabel);
+    /*	  CTK_WIDGET_ADD(&setupwindow, &pop3serverlabel);*/
     /*    CTK_WIDGET_ADD(&setupwindow, &pop3servertextentry);*/
-    CTK_WIDGET_ADD(&setupwindow, &pop3userlabel);
+    /*	  CTK_WIDGET_ADD(&setupwindow, &pop3userlabel);*/
     /*    CTK_WIDGET_ADD(&setupwindow, &pop3usertextentry);*/
-    CTK_WIDGET_ADD(&setupwindow, &pop3passwordlabel);
+    /*    CTK_WIDGET_ADD(&setupwindow, &pop3passwordlabel);*/
     /*    CTK_WIDGET_ADD(&setupwindow, &pop3passwordtextentry);*/
     CTK_WIDGET_ADD(&setupwindow, &setupokbutton);
 
@@ -321,6 +329,16 @@ EK_EVENTHANDLER(email_eventhandler, ev, data)
       } else if(menu.active == menuitem_quit) {
 	email_quit();
       }
+    }
+  } else if(ev == resolv_event_found) {
+    if(strcmp(data, smtpserver) == 0) {
+      if(resolv_lookup(smtpserver) != NULL) {
+	applyconfig();
+	ctk_label_set_text(&statuslabel, "");
+      } else {
+	ctk_label_set_text(&statuslabel, "Host not found");
+      }
+      CTK_WIDGET_REDRAW(&statuslabel);  
     }
   } else if(ev == EK_EVENT_REQUEST_EXIT) {
     email_quit();
