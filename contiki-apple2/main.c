@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.10 2005/04/19 23:00:00 oliverschmidt Exp $
+ * $Id: main.c,v 1.11 2005/05/05 00:14:16 oliverschmidt Exp $
  *
  */
 
@@ -51,6 +51,7 @@
 #include "calc-dsc.h"
 #include "configedit-dsc.h"
 #include "dhcp-dsc.h"
+#include "email-dsc.h"
 #include "ftp-dsc.h"
 #include "irc-dsc.h"
 #include "memstat-dsc.h"
@@ -115,9 +116,10 @@ main(void)
   program_handler_init();
 
   program_handler_add(&www_dsc,        "Web browser",   1);
+  program_handler_add(&email_dsc,      "E-mail",        1);
   program_handler_add(&ftp_dsc,        "FTP client",    1);
   program_handler_add(&irc_dsc,        "IRC client",    1);
-  program_handler_add(&telnet_dsc,     "Telnet",        1);
+  program_handler_add(&telnet_dsc,     "Telnet",        0);
   program_handler_add(&dhcp_dsc,       "DHCP client",   0);
   program_handler_add(&configedit_dsc, "Configuration", 0);
   program_handler_add(&memstat_dsc,    "Memory stats",  0);

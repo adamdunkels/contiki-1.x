@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.12 2005/04/24 23:23:29 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.13 2005/05/05 00:14:16 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o contiki-labels.o \
@@ -38,6 +38,7 @@ all: loader-arch-module.o contiki-labels.o \
      config.prg \
      configedit.prg \
      dhcp.prg \
+     email.prg \
      ftp.prg \
      irc.prg \
      memstat.prg \
@@ -63,6 +64,8 @@ lancegs.drv: lancegs-drv.o lan91c96.o uip_arp.o
 uther.drv: uther-drv.o cs8900a.o uther-drv-asm.o uip_arp.o
 
 dhcp.prg: $(DHCP) lc-asm.o
+
+email.prg: $(EMAIL) lc-asm.o
 
 ftp.prg: $(FTP) cfs.o
 
