@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: smtp-socket.c,v 1.5 2005/05/05 22:15:19 oliverschmidt Exp $
+ * $Id: smtp-socket.c,v 1.6 2005/05/05 23:02:01 oliverschmidt Exp $
  */
 #include "smtp.h"
 
@@ -124,13 +124,27 @@ PT_THREAD(smtp_thread(void))
     PSOCK_EXIT(&s.psock);
   }
   
+  if(*s.cc != 0) {
+    SEND_STRING(&s.psock, (char *)smtp_rcpt_to);
+    SEND_STRING(&s.psock, s.cc);
+    SEND_STRING(&s.psock, (char *)smtp_crnl);
+
+    PSOCK_READTO(&s.psock, ISO_nl);
+  
+    if(s.inputbuffer[0] != ISO_2) {
+      PSOCK_CLOSE(&s.psock);
+      smtp_done(6);
+      PSOCK_EXIT(&s.psock);
+    }
+  }
+  
   SEND_STRING(&s.psock, (char *)smtp_data);
   
   PSOCK_READTO(&s.psock, ISO_nl);
   
   if(s.inputbuffer[0] != ISO_3) {
     PSOCK_CLOSE(&s.psock);
-    smtp_done(6);
+    smtp_done(7);
     PSOCK_EXIT(&s.psock);
   }
 
@@ -138,9 +152,11 @@ PT_THREAD(smtp_thread(void))
   SEND_STRING(&s.psock, s.to);
   SEND_STRING(&s.psock, (char *)smtp_crnl);
   
-  SEND_STRING(&s.psock, (char *)smtp_cc);
-  SEND_STRING(&s.psock, s.cc);
-  SEND_STRING(&s.psock, (char *)smtp_crnl);
+  if(*s.cc != 0) {
+    SEND_STRING(&s.psock, (char *)smtp_cc);
+    SEND_STRING(&s.psock, s.cc);
+    SEND_STRING(&s.psock, (char *)smtp_crnl);
+  }
   
   SEND_STRING(&s.psock, (char *)smtp_from);
   SEND_STRING(&s.psock, s.from);
@@ -160,7 +176,7 @@ PT_THREAD(smtp_thread(void))
   PSOCK_READTO(&s.psock, ISO_nl);
   if(s.inputbuffer[0] != ISO_2) {
     PSOCK_CLOSE(&s.psock);
-    smtp_done(7);
+    smtp_done(8);
     PSOCK_EXIT(&s.psock);
   }
 

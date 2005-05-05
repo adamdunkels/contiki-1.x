@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: smtp-strings.c,v 1.5 2005/04/28 22:36:07 oliverschmidt Exp $
+ * $Id: smtp-strings.c,v 1.6 2005/05/05 23:02:02 oliverschmidt Exp $
  */
 const char smtp_220[4] = 
 /* "220" */
@@ -51,8 +51,8 @@ const char smtp_to[5] =
 /* "To: " */
 {0x54, 0x6f, 0x3a, 0x20, };
 const char smtp_cc[5] = 
-/* "cc: " */
-{0x63, 0x63, 0x3a, 0x20, };
+/* "Cc: " */
+{0x43, 0x63, 0x3a, 0x20, };
 const char smtp_from[7] = 
 /* "From: " */
 {0x46, 0x72, 0x6f, 0x6d, 0x3a, 0x20, };
