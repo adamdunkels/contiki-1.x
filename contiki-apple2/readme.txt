@@ -18,23 +18,40 @@ Installation
 
    a2 in b      dos33.dsk CONTIKI.SYSTEM loader~1.sys
    a2 in -r b   dos33.dsk CONTIKI        contiki
-   a2 in b.0000 dos33.dsk LANCEGS.DRV    lancegs.drv
-   a2 in b.0000 dos33.dsk TFE.DRV        tfe.drv
    a2 in b.0000 dos33.dsk ABOUT.PRG      about.prg
+   a2 in b.0000 dos33.dsk ABOUT.DSC      about.dsc
    a2 in b.0000 dos33.dsk CALC.PRG       calc.prg
+   a2 in b.0000 dos33.dsk CALC.DSC       calc.dsc
    a2 in b.0000 dos33.dsk CONFIG.PRG     config.prg
    a2 in b.0000 dos33.dsk CONFIGEDIT.PRG config~1.prg
-   a2 in b.0000 dos33.dsk EMAIL.PRG      email.prg
+   a2 in b.0000 dos33.dsk CONFIGEDIT.DSC config~1.dsc
    a2 in b.0000 dos33.dsk DHCP.PRG       dhcp.prg
+   a2 in b.0000 dos33.dsk DHCP.DSC       dhcp.dsc
+   a2 in b.0000 dos33.dsk DIRECTORY.PRG  direct~1.prg
+   a2 in b.0000 dos33.dsk DIRECTORY.DSC  direct~1.dsc
+   a2 in b.0000 dos33.dsk EMAIL.PRG      email.prg
+   a2 in b.0000 dos33.dsk EMAIL.DSC      email.dsc
    a2 in b.0000 dos33.dsk FTP.PRG        ftp.prg
+   a2 in b.0000 dos33.dsk FTP.DSC        ftp.dsc
    a2 in b.0000 dos33.dsk IRC.PRG        irc.prg
+   a2 in b.0000 dos33.dsk IRC.DSC        irc.dsc
    a2 in b.0000 dos33.dsk MEMSTAT.PRG    memstat.prg
+   a2 in b.0000 dos33.dsk MEMSTAT.DSC    memstat.dsc
    a2 in b.0000 dos33.dsk PROCESSES.PRG  proces~1.prg
+   a2 in b.0000 dos33.dsk PROCESSES.DSC  proces~1.dsc
    a2 in b.0000 dos33.dsk SHELL.PRG      shell.prg
+   a2 in b.0000 dos33.dsk SHELL.DSC      shell.dsc
    a2 in b.0000 dos33.dsk TELNET.PRG     telnet.prg
+   a2 in b.0000 dos33.dsk TELNET.DSC     telnet.dsc
    a2 in b.0000 dos33.dsk WELCOME.PRG    welcome.prg
    a2 in b.0000 dos33.dsk WGET.PRG       wget.prg
+   a2 in b.0000 dos33.dsk WGET.DSC       wget.dsc
    a2 in b.0000 dos33.dsk WWW.PRG        www.prg
+   a2 in b.0000 dos33.dsk WWW.DSC        www.dsc
+   a2 in b.0000 dos33.dsk LANCEGS.DRV    lancegs.drv
+   a2 in b.0000 dos33.dsk LANCEGS.DSC    lancegs.dsc
+   a2 in b.0000 dos33.dsk UTHER.DRV      uther.drv
+   a2 in b.0000 dos33.dsk UTHER.DSC      uther.dsc
 
 
 4. Use any ProDOS 8 file utility program capable of reading DOS 3.3 files to

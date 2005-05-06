@@ -27,27 +27,28 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.14 2005/05/06 00:06:06 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.15 2005/05/06 22:38:17 oliverschmidt Exp $
 #
 
-all: loader-arch-module.o contiki-labels.o \
-     lancegs.drv \
-     uther.drv \
-     about.prg \
-     calc.prg \
+all: loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
+     about.prg about.dsc \
+     calc.prg calc.dsc \
      config.prg \
-     configedit.prg \
-     dhcp.prg \
-     email.prg \
-     ftp.prg \
-     irc.prg \
-     memstat.prg \
-     processes.prg \
-     shell.prg \
-     telnet.prg \
+     configedit.prg configedit.dsc \
+     dhcp.prg dhcp.dsc \
+     directory.prg directory.dsc \
+     email.prg email.dsc \
+     ftp.prg ftp.dsc \
+     irc.prg irc.dsc \
+     memstat.prg memstat.dsc \
+     processes.prg processes.dsc \
+     shell.prg shell.dsc \
+     telnet.prg telnet.dsc \
      welcome.prg \
-     wget.prg \
-     www.prg
+     wget.prg wget.dsc \
+     www.prg www.dsc \
+     lancegs.drv lancegs.dsc \
+     uther.drv uther.dsc
 
 SYS=apple2enh
 
@@ -59,11 +60,9 @@ AFLAGS:=-t $(SYS)
 CFLAGS:=$(CFLAGSCC65) \
         -DWITH_ASCII -DWITH_UIP -DWITH_LOADER_ARCH -DWITH_ETHERNET
 
-lancegs.drv: lancegs-drv.o lan91c96.o uip_arp.o
-
-uther.drv: uther-drv.o cs8900a.o uther-drv-asm.o uip_arp.o
-
 configedit.prg: configedit.o ctk-textentry-checkbox.o
+
+directory.prg: directory.o cfs.o
 
 dhcp.prg: $(DHCP) lc-asm.o
 
@@ -80,3 +79,7 @@ telnet.prg: $(TELNET)
 wget.prg: $(WGET)
 
 www.prg: $(WWW)
+
+lancegs.drv: lancegs-drv.o lan91c96.o uip_arp.o
+
+uther.drv: uther-drv.o cs8900a.o uther-drv-asm.o uip_arp.o

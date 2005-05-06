@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.11 2005/05/05 00:14:16 oliverschmidt Exp $
+ * $Id: main.c,v 1.12 2005/05/06 22:38:17 oliverschmidt Exp $
  *
  */
 
@@ -47,18 +47,10 @@
 
 #include "resolv.h"
 
-#include "about-dsc.h"
-#include "calc-dsc.h"
-#include "configedit-dsc.h"
-#include "dhcp-dsc.h"
+#include "www-dsc.h"
 #include "email-dsc.h"
 #include "ftp-dsc.h"
-#include "irc-dsc.h"
-#include "memstat-dsc.h"
-#include "telnet-dsc.h"
-#include "shell-dsc.h"
-#include "processes-dsc.h"
-#include "www-dsc.h"
+#include "directory-dsc.h"
 
 #include "clock.h"
 
@@ -115,18 +107,10 @@ main(void)
   
   program_handler_init();
 
-  program_handler_add(&www_dsc,        "Web browser",   1);
-  program_handler_add(&email_dsc,      "E-mail",        1);
-  program_handler_add(&ftp_dsc,        "FTP client",    1);
-  program_handler_add(&irc_dsc,        "IRC client",    1);
-  program_handler_add(&telnet_dsc,     "Telnet",        0);
-  program_handler_add(&dhcp_dsc,       "DHCP client",   0);
-  program_handler_add(&configedit_dsc, "Configuration", 0);
-  program_handler_add(&memstat_dsc,    "Memory stats",  0);
-  program_handler_add(&processes_dsc,  "Processes",     0);
-  program_handler_add(&calc_dsc,       "Calculator",    0);
-  program_handler_add(&shell_dsc,      "Command shell", 0);
-  program_handler_add(&about_dsc,      "About Contiki", 0);
+  program_handler_add(&www_dsc,       "Web browser", 1);
+  program_handler_add(&email_dsc,     "E-mail",      1);
+  program_handler_add(&ftp_dsc,       "FTP client",  1);
+  program_handler_add(&directory_dsc, "Directory",   1);
 
   while(1) {
     if(ek_run() == 0) {
