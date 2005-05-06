@@ -29,12 +29,11 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: directory.c,v 1.1 2004/08/09 20:07:18 adamdunkels Exp $
+ * $Id: directory.c,v 1.2 2005/05/06 22:33:05 oliverschmidt Exp $
  *
  */
 
 #include <stdlib.h>
-#include <cbm.h>
 #include <string.h>
 
 #include "ctk.h"
@@ -136,12 +135,13 @@ makewindow(unsigned char i)
     CTK_WIDGET_SET_YPOS(dscs[i]->icon, y);
     CTK_WIDGET_ADD(&window, dscs[i]->icon);
 
-    x += strlen(dscs[i]->icon->title) + 1;
+    x += strlen(dscs[i]->icon->title) + 2;
   }
   CTK_WIDGET_SET_YPOS(&autoexitbutton, height - 2);
   CTK_WIDGET_ADD(&window, &autoexitbutton);
   CTK_WIDGET_SET_YPOS(&autoexitlabel, height - 2);
   CTK_WIDGET_ADD(&window, &autoexitlabel);
+  CTK_WIDGET_FOCUS(&window, &autoexitbutton);
 
   if(i != morestart) {
     CTK_WIDGET_SET_YPOS(&backbutton, height - 1);
@@ -162,8 +162,8 @@ LOADER_INIT_FUNC(directory_init, arg)
   if(id == EK_ID_NONE) {
     id = ek_start(&p);
 
-    width = ctk_draw_width() - 4;
-    height = ctk_draw_height() - 4;
+    width = ctk_draw_width() - 2;
+    height = ctk_draw_height() - 3;
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -193,7 +193,7 @@ read_dirent(void)
       cfs_closedir(&dir);
       loading = LOADING_DSC;
       filenameptr = 0;
-    } else if(strcmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {
+    } else if(strcasecmp(&dirent.name[strlen(dirent.name) - 4], ".dsc") == 0) {
       strncpy(filenames[numfiles], dirent.name, FILENAMELEN);
       ++numfiles;
       if(numfiles == MAX_NUMFILES) {
