@@ -39,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.10 2005/04/24 22:01:02 oliverschmidt Exp $
+ * $Id: loader-arch.c,v 1.11 2005/05/06 22:57:37 oliverschmidt Exp $
  *
  */
 
@@ -163,19 +163,3 @@ loader_arch_load_dsc(const char *name)
   return NULL;
 }
 /*-----------------------------------------------------------------------------------*/
-/**
- * Deallocate memory previously allocated by the loader.
- *
- * The loader allocates memory when it loads programs or DSC
- * files. All such memory must be deallocated with this function. Memory for programs is automatically deallocated when calling the LOADER_UNLOAD() function, but memory for DSCs must be explicitly deallcated with this function.
- *
- * \param addr A pointer to memory allocated by the loader.
- */
-/*-----------------------------------------------------------------------------------*/
-void
-loader_arch_free(void *addr)
-{
-  mod_free(addr);
-}
-/*-----------------------------------------------------------------------------------*/
-
