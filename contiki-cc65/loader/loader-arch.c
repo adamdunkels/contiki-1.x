@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.6 2004/09/12 20:28:47 adamdunkels Exp $
+ * $Id: loader-arch.c,v 1.7 2005/05/06 22:54:57 oliverschmidt Exp $
  *
  */
 
@@ -127,10 +127,3 @@ loader_arch_load_dsc(const char *name)
   return NULL;
 }
 /*-----------------------------------------------------------------------------------*/
-void
-loader_arch_free(void *addr)
-{
-  mod_free(addr);
-}
-/*-----------------------------------------------------------------------------------*/
-
