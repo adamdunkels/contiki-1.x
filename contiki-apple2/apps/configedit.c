@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.5 2005/04/12 21:54:08 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.6 2005/05/06 00:05:46 oliverschmidt Exp $
  *
  */
 
@@ -48,6 +48,8 @@
 #include "kfs.h"
 #include "cfs.h"
 
+#include "ctk-textentry-checkbox.h"
+
 #include "config.h"
 
 
@@ -60,7 +62,7 @@ static struct ctk_label backgroundlabel =
   {CTK_LABEL(0, 1, 10, 1, "Background")};
 static char bkgnd[2];
 static struct ctk_textentry backgroundtextentry =
-  {CTK_TEXTENTRY(11, 1, 1, 1, bkgnd, 1)};
+  {CTK_TEXTENTRY_INPUT(11, 1, 1, 1, bkgnd, 1, ctk_textentry_checkbox_input)};
 static struct ctk_label backgrounddescr =
   {CTK_LABEL(16, 1, 12, 1, "('x' or ' ')")};
 
@@ -246,9 +248,7 @@ makeconfig(void)
 
 #ifdef __APPLE2ENH__
 
-  if(*bkgnd == 'x' || *bkgnd == 'X') {
-    config.bkgnd = 1;
-  }
+  config.bkgnd = (*bkgnd == 'x');
 
 #endif /* __APPLE2ENH__ */
 
