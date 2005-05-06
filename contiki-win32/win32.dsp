@@ -577,6 +577,14 @@ SOURCE="..\contiki\lib\ctk-filedialog.h"
 # End Source File
 # Begin Source File
 
+SOURCE="..\contiki\lib\ctk-textentry-cmdline.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\contiki\lib\ctk-textentry-cmdline.h"
+# End Source File
+# Begin Source File
+
 SOURCE="..\contiki\lib\ctk-textentry-multiline.c"
 # End Source File
 # Begin Source File
