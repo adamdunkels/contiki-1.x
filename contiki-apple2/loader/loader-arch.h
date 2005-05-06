@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.h,v 1.1 2005/04/12 21:48:15 oliverschmidt Exp $
+ * $Id: loader-arch.h,v 1.2 2005/05/06 22:35:37 oliverschmidt Exp $
  *
  */
 #ifndef __LOADER_ARCH_H__
@@ -39,11 +39,13 @@
 #include <modload.h>
 
 unsigned char loader_arch_load(const char *name, char *arg);
-void loader_arch_free(void *addr);
+struct dsc *loader_arch_load_dsc(const char *name);
 
 extern void *loader_arch_loadaddr;
 
 #define LOADER_LOAD(name, arg) loader_arch_load(name, arg)
-#define LOADER_UNLOAD() loader_arch_free(&loader_arch_loadaddr)
+#define LOADER_LOAD_DSC(name)  loader_arch_load_dsc(name)
+#define LOADER_UNLOAD()        mod_free(&loader_arch_loadaddr)
+#define LOADER_UNLOAD_DSC(dsc) mod_free(dsc)
 
 #endif /* __LOADER_ARCH_H__ */
