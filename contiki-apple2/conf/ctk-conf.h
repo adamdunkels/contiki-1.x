@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.9 2005/05/06 22:39:15 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.10 2005/05/06 22:53:29 oliverschmidt Exp $
  *
  */
 
@@ -64,21 +64,13 @@ architecture specific files to work). */
 #define CTK_CONF_MOUSE_SUPPORT        0 /* 1342 bytes */
 
 /* Toggles support for icons. */
-#ifdef __APPLE2__
-#define CTK_CONF_ICONS                0 /* 107 bytes */
-#else /* __APPLE2__ */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
-#endif /* __APPLE2__ */
 
 /* Toggles support for icon bitmaps. */
 #define CTK_CONF_ICON_BITMAPS         0
 
 /* Toggles support for icon textmaps. */
-#ifdef __APPLE2__
-#define CTK_CONF_ICON_TEXTMAPS        0
-#else /* __APPLE2__ */
 #define CTK_CONF_ICON_TEXTMAPS        1
-#endif /* __APPLE2__ */
 
 /* Toggles support for movable windows. */
 #ifdef __APPLE2__
