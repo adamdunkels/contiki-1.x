@@ -27,10 +27,10 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.8 2005/04/27 23:51:07 oliverschmidt Exp $
+# $Id: Makefile,v 1.9 2005/05/07 13:29:39 oliverschmidt Exp $
 #
 
-all: contiki loader-arch-module.o loader-arch-dsc.o contiki-labels.o \
+all: contiki loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
      about.prg about.dsc processes.prg processes.dsc \
      netconf.prg netconf.dsc memstat.prg memstat.dsc 
 
