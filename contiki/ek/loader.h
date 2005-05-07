@@ -44,7 +44,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader.h,v 1.9 2004/06/06 06:23:57 adamdunkels Exp $
+ * $Id: loader.h,v 1.10 2005/05/07 14:24:59 oliverschmidt Exp $
  *
  */
 #ifndef __LOADER_H__
@@ -65,6 +65,7 @@
 
 #ifdef WITH_LOADER_ARCH
 #include "loader-arch.h"
+#include "loader-arch-dsc.h"
 #define LOADER_INIT_FUNC(name, arg) void loader_appinit(char *arg)
 #else /* WITH_LOADER_ARCH */
 #define LOADER_INIT_FUNC(name, arg) void name(char *arg)
