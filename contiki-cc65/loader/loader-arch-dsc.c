@@ -29,87 +29,28 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.8 2005/05/07 14:24:38 oliverschmidt Exp $
+ * $Id: loader-arch-dsc.c,v 1.1 2005/05/07 14:24:37 oliverschmidt Exp $
  *
  */
 
-#include <stdlib.h>
 #include <modload.h>
-#include <fcntl.h>
-#include <unistd.h>
 
 #include "loader.h"
 
-struct mod_ctrl ctrl = {
-  read            /* Read from disk */
-};
+extern struct mod_ctrl ctrl;
 
-struct loader_arch_hdr {
-  char arch[8];
-  char version[8];
-
-  char initfunc[1];
-};
+unsigned char load(const char *name);
 
 /*-----------------------------------------------------------------------------------*/
-/* load(name)
- *
- * Loads a program from disk and executes it. Code originally written by
- * Ullrich von Bassewitz.
- */
-/*-----------------------------------------------------------------------------------*/
-unsigned char
-load(const char *name)
-{
-  unsigned char res;
-  
-  /* Now open the file */
-  ctrl.callerdata = open(name, O_RDONLY);
-  if(ctrl.callerdata < 0) {
-    /* Could not open the file, display an error and return */
-    /* ### */
-    return LOADER_ERR_OPEN;
-  }
-
-  /* Load the module */
-  res = mod_load(&ctrl);
-  
-  /* Close the input file */
-  close(ctrl.callerdata);
-  
-  /* Check the return code */
-  if(res != MLOAD_OK) {
-    /* Wrong module, out of memory or whatever. Print an error
-     * message and return.
-     */
-    /* ### */
-    return res;
-  }
-  
-  /* We've successfully loaded the module. */
-  
-  return LOADER_OK;
-}
-/*-----------------------------------------------------------------------------------*/
-unsigned char
-loader_arch_load(const char *name, char *arg)
+struct dsc *
+loader_arch_load_dsc(const char *name)
 {
   unsigned char r;
-  struct loader_arch_hdr *hdr;
-  
+
   r = load(name);
-  if(r != MLOAD_OK) {
-    return r;
+  if(r == MLOAD_OK) {
+    return (struct dsc *)ctrl.module;    
   }
-  hdr = (struct loader_arch_hdr *)ctrl.module;
-  
-  /* Check the program header and see that version and architecture
-     matches. */
-  
-  /* Call the init function. */
-
-  ((void (*)(char *))hdr->initfunc)(arg);
-
-  return LOADER_OK;
+  return NULL;
 }
 /*-----------------------------------------------------------------------------------*/
