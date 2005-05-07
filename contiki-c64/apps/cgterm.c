@@ -7,7 +7,7 @@
 #include <string.h>
 
 static struct {
-  struct socket sout, sin;
+  struct psock sout, sin;
   struct pt inpt, outpt;
   char outputbuf[200];
   char inputbuf[200];
