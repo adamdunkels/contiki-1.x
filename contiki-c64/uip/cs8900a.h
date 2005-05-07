@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cs8900a.h,v 1.2 2004/09/12 20:30:04 adamdunkels Exp $
+ * $Id: cs8900a.h,v 1.3 2005/05/07 14:22:00 oliverschmidt Exp $
  */
 #ifndef __CS8900A_H__
 #define __CS8900A_H__
@@ -39,6 +39,6 @@
 
 void cs8900a_init(void);
 void cs8900a_send(void);
-u8_t cs8900a_poll(void);
+u16_t cs8900a_poll(void);
 
 #endif /* __CS8900A_H__ */
