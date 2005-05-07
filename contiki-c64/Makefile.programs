@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.40 2005/05/07 13:29:58 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.41 2005/05/07 14:30:02 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
@@ -84,7 +84,7 @@ config.cfg:
 	echo T CTK-80COL.DRV >> config.cfg
 	echo . >> config.cfg
 
-directory.prg: directory.o
+directory.prg: $(DIRECTORY)
 
 shell.prg: $(SHELL_)
 

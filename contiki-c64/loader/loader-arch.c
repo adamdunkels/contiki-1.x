@@ -39,7 +39,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.11 2005/05/06 22:57:37 oliverschmidt Exp $
+ * $Id: loader-arch.c,v 1.12 2005/05/07 14:26:11 oliverschmidt Exp $
  *
  */
 
@@ -58,7 +58,7 @@ do_read(int f, char *buf, unsigned int len)
   return cfs_read(f, buf, len);
 }
   
-static struct mod_ctrl ctrl = {
+struct mod_ctrl ctrl = {
   (void *)do_read            /* Read from disk */
 };
 
@@ -72,13 +72,12 @@ struct loader_arch_hdr {
 
 /*-----------------------------------------------------------------------------------*/
 /**
- * \internal
  * Load a program from disk and execute it.
  *
  * Code originally written by Ullrich von Bassewitz.
  */
 /*-----------------------------------------------------------------------------------*/
-static unsigned char
+unsigned char
 load(const char *name)
 {
   unsigned char res;
@@ -137,29 +136,5 @@ loader_arch_load(const char *name, char *arg)
   ((void (*)(char *))hdr->initfunc)(arg);
 
   return LOADER_OK;
-}
-/*-----------------------------------------------------------------------------------*/
-/**
- * Load a DSC file into memory.
- *
- * The memory must be deallocated with the loader_arch_free() function
- * after is has been used.
- *
- * \param name The name of the DSC file.
- *
- * \return A pointer to the struct dsc or NULL if the DSC file could
- * not be loaded.
- */
-/*-----------------------------------------------------------------------------------*/
-struct dsc *
-loader_arch_load_dsc(const char *name)
-{
-  unsigned char r;
-
-  r = load(name);
-  if(r == MLOAD_OK) {
-    return (struct dsc *)ctrl.module;
-  }
-  return NULL;
 }
 /*-----------------------------------------------------------------------------------*/
