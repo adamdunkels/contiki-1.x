@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: loader-arch.c,v 1.2 2005/05/06 22:35:37 oliverschmidt Exp $
+ * $Id: loader-arch.c,v 1.3 2005/05/07 14:25:47 oliverschmidt Exp $
  *
  */
 
@@ -38,9 +38,7 @@
 #include "loader.h"
 #include "kfs.h"
 
-#include "loader-arch.h"
-
-static struct mod_ctrl ctrl = {
+struct mod_ctrl ctrl = {
   kfs_read
 };
 
@@ -58,7 +56,7 @@ struct loader_arch_hdr {
  * Ullrich von Bassewitz.
  */
 /*-----------------------------------------------------------------------------------*/
-static unsigned char
+unsigned char
 load(const char *name)
 {
   unsigned char res;
@@ -111,17 +109,5 @@ loader_arch_load(const char *name, char *arg)
   ((void (*)(char *))hdr->initfunc)(arg);
 
   return LOADER_OK;
-}
-/*-----------------------------------------------------------------------------------*/
-struct dsc *
-loader_arch_load_dsc(const char *name)
-{
-  unsigned char r;
-
-  r = load(name);
-  if(r == MLOAD_OK) {
-    return (struct dsc *)ctrl.module;    
-  }
-  return NULL;
 }
 /*-----------------------------------------------------------------------------------*/

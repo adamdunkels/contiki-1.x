@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.16 2005/05/07 13:29:18 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.17 2005/05/07 14:30:35 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
@@ -62,9 +62,9 @@ CFLAGS:=$(CFLAGSCC65) \
 
 configedit.prg: configedit.o ctk-textentry-checkbox.o
 
-directory.prg: directory.o cfs.o
-
 dhcp.prg: $(DHCP) lc-asm.o
+
+directory.prg: $(DIRECTORY) cfs.o
 
 email.prg: $(EMAIL) lc-asm.o
 
