@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: shell.c,v 1.2 2005/04/19 23:01:13 oliverschmidt Exp $
+ * $Id: shell.c,v 1.3 2005/05/08 10:39:08 oliverschmidt Exp $
  *
  */
 
@@ -205,7 +205,7 @@ help(char *str)
 static void
 directory(char *str)
 {
-  if(cfs_opendir(&dir, "/") != 0) {
+  if(cfs_opendir(&dir, ".") != 0) {
     shell_output("Cannot open directory", "");
     showingdir = 0;
   } else {

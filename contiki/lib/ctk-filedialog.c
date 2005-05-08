@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ctk-filedialog.c,v 1.4 2005/04/28 21:16:58 oliverschmidt Exp $
+ * $Id: ctk-filedialog.c,v 1.5 2005/05/08 10:40:10 oliverschmidt Exp $
  */
 
 #include "contiki.h"
@@ -120,7 +120,7 @@ ctk_filedialog_open(register struct ctk_filedialog_state *s,
   fileptr = 0;
   dirfileptr = 0;
   showptr();
-  cfs_opendir(&dir, "/");
+  cfs_opendir(&dir, ".");
   ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_CONTINUE, s);
 }
 /*---------------------------------------------------------------------------*/

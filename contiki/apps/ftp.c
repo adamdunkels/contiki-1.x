@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ftp.c,v 1.7 2005/04/24 13:41:01 oliverschmidt Exp $
+ * $Id: ftp.c,v 1.8 2005/05/08 10:39:08 oliverschmidt Exp $
  */
 /* Note to self: It would be nice to have a "View" option in the download dialog. */
 
@@ -270,7 +270,7 @@ start_loaddir(void)
 {
   memset(localfiles, 0, sizeof(localfiles));
   localfileptr = 0;
-  cfs_opendir(&dir, "/");
+  cfs_opendir(&dir, ".");
   ek_post(EK_PROC_ID(EK_CURRENT()), EK_EVENT_CONTINUE, NULL);
 }
 /*---------------------------------------------------------------------------*/
