@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs-win32.c,v 1.3 2005/04/22 23:20:07 oliverschmidt Exp $
+ * $Id: cfs-win32.c,v 1.4 2005/05/08 10:40:32 oliverschmidt Exp $
  */
 #include "contiki.h"
 
@@ -133,7 +133,7 @@ s_opendir(struct cfs_dir *p, const char *n)
   if(n == NULL) {
     n = "";
   }
-  sprintf(dirname, ".%s*", n);
+  sprintf(dirname, "%s/*", n);
   
   dir->handle = FindFirstFile(dirname, &data);
   if(dir->handle == INVALID_HANDLE_VALUE) {
