@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs.c,v 1.2 2005/04/24 13:43:14 oliverschmidt Exp $
+ * $Id: cfs.c,v 1.3 2005/05/08 11:44:17 oliverschmidt Exp $
  */
 
 
@@ -40,6 +40,7 @@
 #include <stdio.h>
 
 #include "contiki.h"
+#include "kfs.h"
 
 #include "cfs.h"
 
@@ -50,9 +51,14 @@ static char cwd[FILENAME_MAX];
 int
 cfs_opendir(struct cfs_dir *dirp, const char *name)
 {
-  char *openname = strcmp(name, "/") ? (char *)name : getcwd(cwd, sizeof(cwd));
+  if(strcmp(name, ".") == 0) {
+    name = getcwd(cwd, sizeof(cwd));
+  }
+  if(strcmp(name, "/") == 0) {
+    name = kfs_getdir();
+  }
 
-  if((dirp->fd = cfs_open(openname, CFS_READ)) != -1) {
+  if((dirp->fd = cfs_open(name, CFS_READ)) != -1) {
     if(cfs_read(dirp->fd,
 		dirp->block.bytes,
 		sizeof(dirp->block)) == sizeof(dirp->block)) {
@@ -69,7 +75,7 @@ cfs_opendir(struct cfs_dir *dirp, const char *name)
 int
 cfs_readdir(struct cfs_dir *dirp, struct cfs_dirent *dirent)
 {
-  char* entry;
+  char *entry;
 
   do {
     if(dirp->current_entry == dirp->entries_per_block) {
