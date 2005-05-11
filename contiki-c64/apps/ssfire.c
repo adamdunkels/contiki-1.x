@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ssfire.c,v 1.6 2004/07/18 13:22:26 oliverschmidt Exp $
+ * $Id: ssfire.c,v 1.7 2005/05/11 22:23:08 oliverschmidt Exp $
  *
  */
 
@@ -60,14 +60,11 @@ static unsigned char flames[8*17];
 
 
 static const unsigned char flamecolors[16] =
-  {COLOR_BLACK,  COLOR_BLACK, COLOR_BLACK,
-   COLOR_RED,    COLOR_LIGHTRED,   COLOR_YELLOW, COLOR_WHITE,
-   COLOR_WHITE,  COLOR_WHITE, COLOR_WHITE,    COLOR_WHITE,
-   COLOR_WHITE,  COLOR_WHITE, COLOR_WHITE,    COLOR_WHITE,
-   COLOR_WHITE};
+  {COLOR_BLACK,    COLOR_BLACK,  COLOR_BLACK, COLOR_RED,
+   COLOR_LIGHTRED, COLOR_YELLOW, COLOR_WHITE, COLOR_WHITE,
+   COLOR_WHITE,    COLOR_WHITE,  COLOR_WHITE, COLOR_WHITE,
+   COLOR_WHITE,    COLOR_WHITE,  COLOR_WHITE, COLOR_WHITE};
    
-
-static void fire_init(void);
 
 /*-----------------------------------------------------------------------------------*/
 LOADER_INIT_FUNC(ssfire_init, arg)
@@ -111,7 +108,6 @@ fire_init(void)
   VIC.bordercolor = 0x00; /* $D020 */
   VIC.bgcolor0 = 0x00; /* $D021 */  
   CIA2.pra  = 0x03;  /* $DD00 */
-
 }
 /*-----------------------------------------------------------------------------------*/
 EK_EVENTHANDLER(ssfire_eventhandler, ev, data)
@@ -130,44 +126,51 @@ EK_EVENTHANDLER(ssfire_eventhandler, ev, data)
   }
 }
 /*-----------------------------------------------------------------------------------*/
+#pragma optimize(push, off)
+static void
+fire_burn(void)
+{
+  /* Calculate new flames. */
+  asm("ldy #$00");
+loop1:
+  asm("lda %v+7,y", flames);
+  asm("clc");
+  asm("adc %v+8,y", flames);
+  asm("adc %v+9,y", flames);
+  asm("adc %v+16,y", flames);
+  asm("lsr");
+  asm("lsr");
+  asm("sta %v,y", flames);
+  asm("iny");
+  asm("cpy #(8*15)");
+  asm("bne %g", loop1);
+
+  /* Fill last line with pseudo-random data from noise generator on
+     voice 3. */
+  asm("ldy #$05");
+loop2:
+  asm("ldx #$20");
+delay:
+  asm("dex");
+  asm("bne %g", delay);
+  asm("lda $D41B");
+  asm("and #$0F");
+  asm("sta %v+8*15+1,y", flames);
+  asm("dey");
+  asm("bpl %g", loop2);
+}
+#pragma optimize(pop)
+/*-----------------------------------------------------------------------------------*/
 static unsigned char *flameptr, *colorptr1, *colorptr2;
 static unsigned char x, y;
 
-#pragma optimize(push, off)
 EK_POLLHANDLER(ssfire_pollhandler)
 {
 
   if(ctk_mode_get() == CTK_MODE_SCREENSAVER) {
   
-    /* Calculate new flames. */
-    asm("ldx #0");
-    asm("loop:");
-    asm("lda _flames+7,x");
-    asm("clc");
-    asm("adc _flames+8,x");
-    asm("adc _flames+9,x");
-    asm("adc _flames+16,x");
-    asm("lsr");
-    asm("lsr");
-    asm("sta _flames,x");
-    asm("inx");
-    asm("cpx #(8*15)");
-    asm("bne loop");
-
-    /* Fill last line with pseudo-random data from noise generator on
-       voice 3. */
-    asm("ldx #$05");
-    asm("loop2:");
-    asm("ldy #$20");
-    asm("delay:");
-    asm("dey");
-    asm("bne delay");
-    asm("lda $d41b");
-    asm("and #$0f");
-    asm("sta _flames+8*15+1,x");
-    asm("dex");
-    asm("bpl loop2");
-
+    fire_burn();
+  
     /* Display flames on screen. */  
     flameptr = flames;
     colorptr1 = COLOR_RAM + 40*10;
@@ -180,9 +183,6 @@ EK_POLLHANDLER(ssfire_pollhandler)
       colorptr2 += 0x28;
       flameptr += 8;
     }
-  
   }
 }
-#pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
-
