@@ -52,6 +52,10 @@ Installation
    a2 in b.0000 dos33.dsk LANCEGS.DSC    lancegs.dsc
    a2 in b.0000 dos33.dsk UTHER.DRV      uther.drv
    a2 in b.0000 dos33.dsk UTHER.DSC      uther.dsc
+   a2 in b.0000 dos33.dsk PLASMA.SAV     plasma.sav
+   a2 in b.0000 dos33.dsk PLASMA.DSC     plasma.dsc
+   a2 in b.0000 dos33.dsk SSFIRE.SAV     ssfire.sav
+   a2 in b.0000 dos33.dsk SSFIRE.DSC     ssfire.dsc
 
 
 4. Use any ProDOS 8 file utility program capable of reading DOS 3.3 files to
