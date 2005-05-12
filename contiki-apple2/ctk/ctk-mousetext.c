@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.19 2005/05/05 20:55:02 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.20 2005/05/12 23:57:37 oliverschmidt Exp $
  *
  */
 
@@ -325,7 +325,7 @@ ctk_draw_clear(unsigned char y1, unsigned char y2)
   }
 
   for(i = 1; i < 24; ++i) {
-    gotoxy(0, i);
+    gotoy(i);
     *(char *)0xC055 = 0;
     memset(*(char **)0x28, c1, 40);
     *(char *)0xC054 = 0;
