@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: plasma.c,v 1.3 2004/07/04 18:33:07 adamdunkels Exp $
+ * $Id: plasma.c,v 1.4 2005/05/12 21:07:22 oliverschmidt Exp $
  *
  */
 
@@ -59,21 +59,21 @@ static unsigned char sinetab1[256] = {
   176, 174, 171, 168, 165, 162, 159, 156, 
   152, 149, 146, 143, 140, 137, 134, 131, 
   128, 124, 121, 118, 115, 112, 109, 106, 
-  103, 99, 96, 93, 90, 87, 84, 81, 
-  79, 76, 73, 70, 67, 64, 62, 59, 
-  56, 54, 51, 49, 46, 44, 42, 39, 
-  37, 35, 33, 31, 29, 27, 25, 23, 
-  21, 19, 18, 16, 15, 13, 12, 10, 
-  9, 8, 7, 6, 5, 4, 3, 3, 
-  2, 1, 1, 0, 0, 0, 0, 0, 
-  0, 0, 0, 0, 0, 0, 1, 1, 
-  2, 3, 3, 4, 5, 6, 7, 8, 
-  9, 10, 12, 13, 15, 16, 18, 19, 
-  21, 23, 25, 27, 29, 31, 33, 35, 
-  37, 39, 42, 44, 46, 49, 51, 54, 
-  56, 59, 62, 64, 67, 70, 73, 76, 
-  78, 81, 84, 87, 90, 93, 96, 99, 
-  103, 106, 109, 112, 115, 118, 121, 124,
+  103,  99,  96,  93,  90,  87,  84,  81, 
+   79,  76,  73,  70,  67,  64,  62,  59, 
+   56,  54,  51,  49,  46,  44,  42,  39, 
+   37,  35,  33,  31,  29,  27,  25,  23, 
+   21,  19,  18,  16,  15,  13,  12,  10, 
+    9,   8,   7,   6,   5,   4,   3,   3, 
+    2,   1,   1,   0,   0,   0,   0,   0, 
+    0,   0,   0,   0,   0,   0,   1,   1, 
+    2,   3,   3,   4,   5,   6,   7,   8, 
+    9,  10,  12,  13,  15,  16,  18,  19, 
+   21,  23,  25,  27,  29,  31,  33,  35, 
+   37,  39,  42,  44,  46,  49,  51,  54, 
+   56,  59,  62,  64,  67,  70,  73,  76, 
+   78,  81,  84,  87,  90,  93,  96,  99, 
+  103, 106, 109, 112, 115, 118, 121, 124, 
 };
 
 static unsigned char sinetab2[256];
@@ -89,29 +89,31 @@ static unsigned char colors[16] =
     0x02, 0x09, 0x00, 0x00,
   };
 
-#define XSIZE 24
+#define XSIZE 25
 #define YSIZE 25
+
+#define XADD01 0xfe
+#define YADD01 0x05
+
+#define XADD1 0x04
+#define YADD1 0x02
+#define XADD2 0xfc
+#define YADD2 0xf9
+
+#define XADD 0x03
+#define YADD 0xfe
+
+#define MOVADD 0xfb
 
 static unsigned char xplasma[XSIZE], yplasma[YSIZE];
 static unsigned char xcnt, ycnt;
 static unsigned char xcnt01, xcnt02, xcnt1, xcnt2;
 static unsigned char ycnt01, ycnt02, ycnt1, ycnt2;
 
-static unsigned char xadd01 = 0xfe;
-static unsigned char yadd01 = 0x05;
 static unsigned char xadd02 = 0x01;
 static unsigned char yadd02 = 0xfb;
 
-static unsigned char xadd1 = 0x04;
-static unsigned char yadd1 = 0x02;
-static unsigned char xadd2 = 0xfc;
-static unsigned char yadd2 = 0xf9;
-
-static unsigned char xadd = 0x03;
-static unsigned char yadd = 0xfe;
-
 static unsigned char movcnt;
-static unsigned char movadd = 0xfb;
 
 /*static DISPATCHER_SIGHANDLER(sighandler, s, data);
 static void idle(void);
@@ -184,8 +186,8 @@ EK_POLLHANDLER(pollhandler)
     
     for(i = 0; i < XSIZE; ++i) {
       xplasma[i] = sinetab1[xcnt1] + sinetab2[xcnt2];
-      xcnt1 += xadd1;
-      xcnt2 += xadd2;
+      xcnt1 += XADD1;
+      xcnt2 += XADD2;
     }
 
     ycnt1 = ycnt01;
@@ -193,24 +195,24 @@ EK_POLLHANDLER(pollhandler)
     
     for(i = 0; i < YSIZE; ++i) {
       yplasma[i] = sinetab1[ycnt1] + sinetab3[ycnt2];
-      ycnt1 += yadd1;
-      ycnt2 += yadd2;
+      ycnt1 += YADD1;
+      ycnt2 += YADD2;
     }
 
-    xcnt01 += xadd01;
+    xcnt01 += XADD01;
     xcnt02 += xadd02;
-    ycnt01 += yadd01;
+    ycnt01 += YADD01;
     ycnt02 += yadd02;
 
     
     yadd02 = sinetab3[ycnt] / 4;
     xadd02 = sinetab3[xcnt] / 4;
 
-    ycnt += yadd;
-    xcnt += xadd;
+    ycnt += YADD;
+    xcnt += XADD;
 
-    movcnt += movadd;
-    cptr = (unsigned char *)(0xd800 + sinetab1[movcnt]/16);
+    movcnt += MOVADD;
+    cptr = (unsigned char *)(COLOR_RAM + sinetab1[movcnt]/16);
     for(y = 0; y < YSIZE; ++y) {
       for(x = 0; x < XSIZE; ++x) {
 	*cptr = colortab[(xplasma[x] + yplasma[y]) & 0xff];
