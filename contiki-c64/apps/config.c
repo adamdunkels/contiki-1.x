@@ -28,7 +28,7 @@
  *
  * This file is part of the Contiki desktop OS.
  *
- * $Id: config.c,v 1.10 2004/09/12 13:36:02 adamdunkels Exp $
+ * $Id: config.c,v 1.11 2005/05/12 21:26:46 oliverschmidt Exp $
  *
  */
 
@@ -129,7 +129,7 @@ screensaverconf(char *str)
   char *nt;
   
   nt = nullterminate(str);
-  program_handler_screensaver(str);
+  program_handler_setscreensaver(str);
 
   return nt + 1;
 }
@@ -239,7 +239,7 @@ configscript(void)
 LOADER_INIT_FUNC(config_init, arg)
 {
   arg_free(arg);
-  program_handler_screensaver(NULL);  
+  program_handler_setscreensaver(NULL);  
   configscript();
   LOADER_UNLOAD();
 }

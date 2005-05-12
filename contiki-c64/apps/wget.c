@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: wget.c,v 1.13 2004/09/19 18:58:48 adamdunkels Exp $
+ * $Id: wget.c,v 1.14 2005/05/12 21:26:46 oliverschmidt Exp $
  *
  */
 
@@ -305,7 +305,7 @@ EK_EVENTHANDLER(wget_eventhandler, ev, data)
       ctk_dialog_close();
 
       /* Turn of screensaver. */
-      program_handler_screensaver(NULL);
+      program_handler_setscreensaver(NULL);
       
       strncpy(url, urledit, sizeof(url));
       petsciiconv_toascii(url, sizeof(url));
