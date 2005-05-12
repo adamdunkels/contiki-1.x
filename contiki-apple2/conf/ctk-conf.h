@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.10 2005/05/06 22:53:29 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.11 2005/05/12 23:57:02 oliverschmidt Exp $
  *
  */
 
@@ -91,6 +91,6 @@ architecture specific files to work). */
 #define CTK_CONF_MAXMENUITEMS         5
 
 /* Toggles support for screen savers. */
-#define CTK_CONF_SCREENSAVER          0
+#define CTK_CONF_SCREENSAVER          1
 
 #endif /* __CTK_CONF_H__ */
