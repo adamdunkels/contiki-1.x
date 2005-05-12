@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.29 2005/05/12 21:27:20 oliverschmidt Exp $
+ * $Id: program-handler.c,v 1.30 2005/05/12 23:55:18 oliverschmidt Exp $
  *
  */
 
@@ -134,7 +134,7 @@ static const char * const errormsgs[] = {
 static char *displayname;
 
 #if CTK_CONF_SCREENSAVER
-static char screensaver[20];
+char program_handler_screensaver[20];
 #endif /* CTK_CONF_SCREENSAVER */
 
 /*-----------------------------------------------------------------------------------*/
@@ -256,9 +256,9 @@ void
 program_handler_setscreensaver(char *name)
 {
   if(name == NULL) {
-    screensaver[0] = 0;
+    program_handler_screensaver[0] = 0;
   } else {
-    strncpy(screensaver, name, sizeof(screensaver));
+    strncpy(program_handler_screensaver, name, sizeof(program_handler_screensaver));
   }
 }
 #endif /* CTK_CONF_SCREENSAVER */
@@ -314,7 +314,7 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
     displayname = NULL;
 
 #if CTK_CONF_SCREENSAVER
-    screensaver[0] = 0;
+    program_handler_screensaver[0] = 0;
 #endif /* CTK_CONF_SCREENSAVER */
 
   } else if(ev == ctk_signal_button_activate) {
@@ -358,8 +358,8 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
 #if CTK_CONF_SCREENSAVER
   } else if(ev == ctk_signal_screensaver_start) {
 #if WITH_LOADER_ARCH
-    if(screensaver[0] != 0) {
-      program_handler_load(screensaver, NULL);
+    if(program_handler_screensaver[0] != 0) {
+      program_handler_load(program_handler_screensaver, NULL);
     }
 #endif /* WITH_LOADER_ARCH */
 #endif /* CTK_CONF_SCREENSAVER */

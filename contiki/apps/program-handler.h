@@ -29,13 +29,17 @@
  *
  * This file is part of the Contiki desktop environment for the C64.
  *
- * $Id: program-handler.h,v 1.7 2005/05/12 21:27:20 oliverschmidt Exp $
+ * $Id: program-handler.h,v 1.8 2005/05/12 23:55:18 oliverschmidt Exp $
  *
  */
 #ifndef __PROGRAM_HANDLER_H__
 #define __PROGRAM_HANDLER_H__
 
 #include "dsc.h"
+
+#define program_handler_getscreensaver() program_handler_screensaver
+
+extern char program_handler_screensaver[];
 
 void program_handler_init(void);
 void program_handler_load(char *name, char *arg);
