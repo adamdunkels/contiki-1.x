@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.28 2005/02/15 14:31:52 oliverschmidt Exp $
+ * $Id: program-handler.c,v 1.29 2005/05/12 21:27:20 oliverschmidt Exp $
  *
  */
 
@@ -253,7 +253,7 @@ program_handler_load(char *name, char *arg)
 /*-----------------------------------------------------------------------------------*/
 #if CTK_CONF_SCREENSAVER
 void
-program_handler_screensaver(char *name)
+program_handler_setscreensaver(char *name)
 {
   if(name == NULL) {
     screensaver[0] = 0;
