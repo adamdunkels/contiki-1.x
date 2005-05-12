@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: plasma-dsc.c,v 1.3 2005/03/18 00:51:17 oliverschmidt Exp $
+ * $Id: plasma-dsc.c,v 1.4 2005/05/12 21:08:26 oliverschmidt Exp $
  *
  */
 
@@ -62,8 +62,8 @@ static unsigned char plasmaicon_bitmap[3*3*8] = {
 #if CTK_CONF_ICON_TEXTMAPS
 static char plasmaicon_textmap[9] = {
   '.', ' ', '.',
-  'o', ' ', 'o',
-  'O', ' ', 'O'
+  ' ', 'O', ' ',
+  '.', ' ', '.'
 };
 #endif /* CTK_CONF_ICON_TEXTMAPS */
 
