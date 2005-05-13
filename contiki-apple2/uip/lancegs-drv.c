@@ -28,9 +28,11 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: lancegs-drv.c,v 1.2 2005/03/17 21:51:45 oliverschmidt Exp $
+ * $Id: lancegs-drv.c,v 1.3 2005/05/13 00:01:56 oliverschmidt Exp $
  *
  */
+
+#include <string.h>
 
 #include "packet-service.h"
 
@@ -40,9 +42,9 @@
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
-/* 00:80:0F is the OUI of Standard Microsystems, A2:A2:A2 just means Apple2 */
+/* 00:80:0F is the OUI of Standard Microsystems, A2:A2 just means Apple2 */
 static const struct uip_eth_addr addr =
-  {{0x00,0x80,0x0f,0xa2,0xa2,0xa2}};
+  {{0x00,0x80,0x0f,0xa2,0xa2,0x00}};
 
 static const struct packet_service_state state =
   {
@@ -74,7 +76,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
-    uip_setethaddr(addr);
+    /* Don't overwrite LSB */
+    memcpy(&uip_ethaddr, &addr, 5);
     lan91c96_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:

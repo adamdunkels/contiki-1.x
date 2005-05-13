@@ -28,9 +28,11 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uther-drv.c,v 1.1 2005/03/13 22:19:21 oliverschmidt Exp $
+ * $Id: uther-drv.c,v 1.2 2005/05/13 00:01:56 oliverschmidt Exp $
  *
  */
+
+#include <string.h>
 
 #include "packet-service.h"
 
@@ -40,9 +42,9 @@
 
 static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
 
-/* 00:0E:3A is the OUI of Cirrus Logic, A2:A2:A2 just means Apple2 */
+/* 00:0E:3A is the OUI of Cirrus Logic, A2:A2 just means Apple2 */
 static const struct uip_eth_addr addr =
-  {{0x00,0x0e,0x3a,0xa2,0xa2,0xa2}};
+  {{0x00,0x0e,0x3a,0xa2,0xa2,0x00}};
 
 static const struct packet_service_state state =
   {
@@ -74,7 +76,8 @@ EK_EVENTHANDLER(eventhandler, ev, data)
   switch(ev) {
   case EK_EVENT_INIT:
   case EK_EVENT_REPLACE:
-    uip_setethaddr(addr);
+    /* Don't overwrite LSB */
+    memcpy(&uip_ethaddr, &addr, 5);
     cs8900a_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:
