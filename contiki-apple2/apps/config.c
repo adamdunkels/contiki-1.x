@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.7 2005/04/12 21:50:57 oliverschmidt Exp $
+ * $Id: config.c,v 1.8 2005/05/13 00:00:16 oliverschmidt Exp $
  *
  */
 
@@ -41,6 +41,7 @@
 
 #include "uiplib.h"
 #include "resolv.h"
+#include "uip_arp.h"
 
 #include "program-handler.h"
 #include "kfs.h"
@@ -48,7 +49,12 @@
 #include "config.h"
 
 
-static config_t config = {0, 4, "LANceGS.drv"};
+static config_t config = {0,
+			  "SSFire.sav", 5,
+			  "LANceGS.drv", 4,
+			  {0xA8C0, 0x8000}, {0xFFFF, 0x00FF},
+			  {0xA8C0, 0x0100}, {0xA8C0, 0x0100},
+			  0xA2};
 
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -73,6 +79,10 @@ config_apply(void)
 
 #endif /* __APPLE2ENH__ */
 
+  program_handler_setscreensaver(config.screensaver);
+
+  CTK_SCREENSAVER_SET_TIMEOUT(config.timeout * 60);
+
   config_setlanslot(config.slot);
 
   if(*config.driver) {
@@ -87,6 +97,7 @@ config_apply(void)
 
   uip_setnetmask(config.netmask);
   uip_setdraddr(config.gateway);
+  uip_ethaddr.addr[5] = config.maclsb;
 
 #endif /* WITH_ETHERNET */
 

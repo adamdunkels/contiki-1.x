@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.6 2005/05/06 00:05:46 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.7 2005/05/13 00:00:17 oliverschmidt Exp $
  *
  */
 
@@ -41,6 +41,7 @@
 
 #include "uiplib.h"
 #include "resolv.h"
+#include "uip_arp.h"
 #include "ctk.h"
 
 #include "program-handler.h"
@@ -59,69 +60,89 @@ static struct ctk_window window;
 #ifdef __APPLE2ENH__
 
 static struct ctk_label backgroundlabel =
-  {CTK_LABEL(0, 1, 10, 1, "Background")};
+  {CTK_LABEL(0, 1, 11, 1, "Background")};
 static char bkgnd[2];
 static struct ctk_textentry backgroundtextentry =
-  {CTK_TEXTENTRY_INPUT(11, 1, 1, 1, bkgnd, 1, ctk_textentry_checkbox_input)};
+  {CTK_TEXTENTRY_INPUT(12, 1, 1, 1, bkgnd, 1, ctk_textentry_checkbox_input)};
 static struct ctk_label backgrounddescr =
   {CTK_LABEL(16, 1, 12, 1, "('x' or ' ')")};
 
 #endif /* __APPLE2ENH__ */
 
-static struct ctk_label slotlabel =
-  {CTK_LABEL(0, 3, 10, 1, "LAN slot")};
-static char slot[2];
-static struct ctk_textentry slottextentry =
-  {CTK_TEXTENTRY(11, 3, 1, 1, slot, 1)};
-static struct ctk_label slotdescr =
-  {CTK_LABEL(16, 3, 12, 1, "('1' to '7')")};
+static struct ctk_label screensaverlabel =
+  {CTK_LABEL(0, 3, 11, 1, "Screensaver")};
+static char screensaver[16];
+static struct ctk_textentry screensavertextentry =
+  {CTK_TEXTENTRY(12, 3, 15, 1, screensaver, 15)};
+
+static struct ctk_label timeoutlabel =
+  {CTK_LABEL(0, 4, 11, 1, "Timeout")};
+static char timeout[2];
+static struct ctk_textentry timeouttextentry =
+  {CTK_TEXTENTRY(12, 4, 1, 1, timeout, 1)};
+static struct ctk_label timeoutdescr =
+  {CTK_LABEL(16, 4, 12, 1, "(in Minutes)")};
 
 static struct ctk_label driverlabel =
-  {CTK_LABEL(0, 5, 10, 1, "LAN driver")};
+  {CTK_LABEL(0, 6, 11, 1, "LAN driver")};
 static char driver[16];
 static struct ctk_textentry drivertextentry =
-  {CTK_TEXTENTRY(11, 5, 15, 1, driver, 15)};
+  {CTK_TEXTENTRY(12, 6, 15, 1, driver, 15)};
+
+static struct ctk_label slotlabel =
+  {CTK_LABEL(0, 7, 11, 1, "LAN slot")};
+static char slot[2];
+static struct ctk_textentry slottextentry =
+  {CTK_TEXTENTRY(12, 7, 1, 1, slot, 1)};
+static struct ctk_label slotdescr =
+  {CTK_LABEL(16, 7, 12, 1, "('1' to '7')")};
 
 static struct ctk_label ipaddrlabel =
-  {CTK_LABEL(0, 7, 10, 1, "IP address")};
+  {CTK_LABEL(0, 9, 10, 1, "IP address")};
 static char ipaddr[16];
 static struct ctk_textentry ipaddrtextentry =
-  {CTK_TEXTENTRY(11, 7, 15, 1, ipaddr, 15)};
+  {CTK_TEXTENTRY(12, 9, 15, 1, ipaddr, 15)};
 
 #ifdef WITH_ETHERNET
 
 static struct ctk_label netmasklabel =
-  {CTK_LABEL(0, 9, 10, 1, "Netmask")};
+  {CTK_LABEL(0, 10, 11, 1, "Netmask")};
 static char netmask[16];
 static struct ctk_textentry netmasktextentry =
-  {CTK_TEXTENTRY(11, 9, 15, 1, netmask, 15)};
+  {CTK_TEXTENTRY(12, 10, 15, 1, netmask, 15)};
 
 static struct ctk_label gatewaylabel =
-  {CTK_LABEL(0, 11, 10, 1, "Gateway")};
+  {CTK_LABEL(0, 11, 11, 1, "Gateway")};
 static char gateway[16];
 static struct ctk_textentry gatewaytextentry =
-  {CTK_TEXTENTRY(11, 11, 15, 1, gateway, 15)};
+  {CTK_TEXTENTRY(12, 11, 15, 1, gateway, 15)};
 
 static struct ctk_label dnsserverlabel =
-  {CTK_LABEL(0, 13, 10, 1, "DNS server")};
+  {CTK_LABEL(0, 12, 11, 1, "DNS server")};
 static char dnsserver[16];
 static struct ctk_textentry dnsservertextentry =
-  {CTK_TEXTENTRY(11, 13, 15, 1, dnsserver, 15)};
+  {CTK_TEXTENTRY(12, 12, 15, 1, dnsserver, 15)};
+
+static struct ctk_label maclsblabel =
+  {CTK_LABEL(0, 14, 11, 1, "MAC LSB")};
+static char maclsb[4];
+static struct ctk_textentry maclsbtextentry =
+  {CTK_TEXTENTRY(12, 14, 3, 1, maclsb, 3)};
 
 #else /* WITH_ETHERNET */
 
 static struct ctk_label dnsserverlabel =
-  {CTK_LABEL(0, 9, 10, 1, "DNS server")};
+  {CTK_LABEL(0, 10, 11, 1, "DNS server")};
 static char dnsserver[16];
 static struct ctk_textentry dnsservertextentry =
-  {CTK_TEXTENTRY(11, 9, 15, 1, dnsserver, 15)};
+  {CTK_TEXTENTRY(12, 10, 15, 1, dnsserver, 15)};
 
 #endif /* WITH_ETHERNET */
 
 static struct ctk_button okbutton =
-  {CTK_BUTTON(0, 15, 12, "Save & close")};
+  {CTK_BUTTON(0, 16, 12, "Save & close")};
 static struct ctk_button cancelbutton =
-  {CTK_BUTTON(21, 15, 6, "Cancel")};
+  {CTK_BUTTON(22, 16, 6, "Cancel")};
 
 EK_EVENTHANDLER(config_eventhandler, ev, data);
 EK_PROCESS(p, "Configuration", EK_PRIO_NORMAL,
@@ -199,7 +220,9 @@ makestrings(void)
 
 #endif /* __APPLE2ENH__ */
 
-  *slot = config_getlanslot() + '0';
+  strncpy(screensaver, program_handler_getscreensaver(), sizeof(screensaver));
+
+  *timeout = (CTK_SCREENSAVER_TIMEOUT() / 60) % 10 + '0';
 
   for(p = EK_PROCS(); p != NULL; p = p->next) {
     if(makedriver(p->name, driver)) {
@@ -207,6 +230,8 @@ makestrings(void)
       break;
     }
   }
+
+  *slot = config_getlanslot() + '0';
 
 #ifdef WITH_UIP
 
@@ -220,6 +245,8 @@ makestrings(void)
   
   uip_getdraddr(addr);
   makeaddr(addr, gateway);
+
+  makebyte(uip_ethaddr.addr[5], maclsb);
 
 #endif /* WITH_ETHERNET */
 
@@ -245,6 +272,8 @@ static void
 makeconfig(void)
 {
   u16_t addr[2];
+  char *cptr;
+  u8_t tmp;
 
 #ifdef __APPLE2ENH__
 
@@ -252,12 +281,19 @@ makeconfig(void)
 
 #endif /* __APPLE2ENH__ */
 
-  if(*slot >= '1' && *slot <= '7') {
-    config.slot = *slot - '0';
+  nullterminate(screensaver);
+  strcpy(config.screensaver, screensaver);
+
+  if(*timeout >= '1' && *timeout <= '9') {
+    config.timeout = *timeout - '0';
   }
 
   nullterminate(driver);
   strcpy(config.driver, driver);
+
+  if(*slot >= '1' && *slot <= '7') {
+    config.slot = *slot - '0';
+  }
 
 #ifdef WITH_UIP
 
@@ -281,6 +317,15 @@ makeconfig(void)
     config.gateway[1] = addr[1];
   }
 
+  *(char *)0x02FF = 0;
+  tmp = 0;
+  for(cptr = maclsb; *cptr >= '0' && *cptr <= '9'; ++cptr) {
+    tmp = (tmp * 10) + (*cptr - '0');
+  }
+  if(tmp != 0) {
+    config.maclsb = tmp;
+  }
+
 #endif /* WITH_ETHERNET */
   
   nullterminate(dnsserver);
@@ -301,6 +346,10 @@ config_apply(void)
 
 #endif /* __APPLE2ENH__ */
 
+  program_handler_setscreensaver(config.screensaver);
+
+  CTK_SCREENSAVER_SET_TIMEOUT(config.timeout * 60);
+
   if(driverid != EK_ID_NONE) {
     ek_post(driverid, EK_EVENT_REQUEST_EXIT, NULL);
   }
@@ -319,6 +368,7 @@ config_apply(void)
 
   uip_setnetmask(config.netmask);
   uip_setdraddr(config.gateway);
+  uip_ethaddr.addr[5] = config.maclsb;
 
 #endif /* WITH_ETHERNET */
 
@@ -345,17 +395,22 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
   EK_EVENTHANDLER_ARGS(ev, data);
   
   if(ev == EK_EVENT_INIT) {
-    ctk_window_new(&window, 29, 16, "Config editor");
+    ctk_window_new(&window, 30, 17, "Config editor");
 #ifdef __APPLE2ENH__
     CTK_WIDGET_ADD(&window, &backgroundlabel);
     CTK_WIDGET_ADD(&window, &backgroundtextentry);
     CTK_WIDGET_ADD(&window, &backgrounddescr);
 #endif /* __APPLE2ENH__ */
+    CTK_WIDGET_ADD(&window, &screensaverlabel);
+    CTK_WIDGET_ADD(&window, &screensavertextentry);
+    CTK_WIDGET_ADD(&window, &timeoutlabel);
+    CTK_WIDGET_ADD(&window, &timeouttextentry);
+    CTK_WIDGET_ADD(&window, &timeoutdescr);
+    CTK_WIDGET_ADD(&window, &driverlabel);
+    CTK_WIDGET_ADD(&window, &drivertextentry);
     CTK_WIDGET_ADD(&window, &slotlabel);
     CTK_WIDGET_ADD(&window, &slottextentry);
     CTK_WIDGET_ADD(&window, &slotdescr);
-    CTK_WIDGET_ADD(&window, &driverlabel);
-    CTK_WIDGET_ADD(&window, &drivertextentry);
     CTK_WIDGET_ADD(&window, &ipaddrlabel);
     CTK_WIDGET_ADD(&window, &ipaddrtextentry);
 #ifdef WITH_ETHERNET
@@ -366,12 +421,16 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
 #endif /* WITH_ETHERNET */
     CTK_WIDGET_ADD(&window, &dnsserverlabel);
     CTK_WIDGET_ADD(&window, &dnsservertextentry);
+#ifdef WITH_ETHERNET
+    CTK_WIDGET_ADD(&window, &maclsblabel);
+    CTK_WIDGET_ADD(&window, &maclsbtextentry);
+#endif /* WITH_ETHERNET */
     CTK_WIDGET_ADD(&window, &okbutton);
     CTK_WIDGET_ADD(&window, &cancelbutton);
 #ifdef __APPLE2ENH__
     CTK_WIDGET_FOCUS(&window, &backgroundtextentry);
 #else /* __APPLE2ENH__ */
-    CTK_WIDGET_FOCUS(&window, &slottextentry);
+    CTK_WIDGET_FOCUS(&window, &screensavertextentry);
 #endif /* __APPLE2ENH__ */
 
     /* Fill the configuration strings with values from the current

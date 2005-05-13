@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: config.h,v 1.4 2005/01/26 21:33:29 oliverschmidt Exp $
+ * $Id: config.h,v 1.5 2005/05/13 00:00:17 oliverschmidt Exp $
  *
  */
 #ifndef __CONFIG_H__
@@ -40,12 +40,15 @@
 
 typedef struct {
   unsigned char bkgnd;
-  unsigned char slot;
+  char screensaver[16];
+  unsigned char timeout;
   char driver[16];
+  unsigned char slot;
   u16_t ipaddr[2];
   u16_t netmask[2];
   u16_t gateway[2];
   u16_t dnsserver[2];
+  unsigned char maclsb;
 } config_t;
 
 extern unsigned char lanslot;
