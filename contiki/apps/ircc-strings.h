@@ -14,4 +14,4 @@ extern const char ircc_strings_action[9];
 extern const char ircc_strings_version[9];
 extern const char ircc_strings_version_query[10];
 extern const char ircc_strings_ctcpcrnl[4];
-extern const char ircc_strings_version_string[21];
+extern const char ircc_strings_version_string[14];
