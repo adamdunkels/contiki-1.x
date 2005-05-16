@@ -3,6 +3,6 @@
 
 typedef unsigned short clock_time_t;
 
-#define CLOCK_CONF_SECOND 500
+#define CLOCK_CONF_SECOND 2
 
 #endif /* __CLOCK_CONF_H__ */

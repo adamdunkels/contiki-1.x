@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.12 2005/05/06 22:38:17 oliverschmidt Exp $
+ * $Id: main.c,v 1.13 2005/05/16 21:18:47 oliverschmidt Exp $
  *
  */
 
@@ -53,7 +53,7 @@
 #include "directory-dsc.h"
 
 #include "clock.h"
-
+#include "clock-arch.h"
 
 unsigned char lanslot;
 
@@ -89,9 +89,16 @@ EK_PROCESS(init, "Init", EK_PRIO_LOWEST,
 clock_time_t
 clock_time(void)
 {
-  static clock_time_t counter;
+  static clock_time_t count, clock;
 
-  return ++counter;
+  count += tick;
+
+  if(count == 4200) {
+    count = 0;
+    ++clock;
+  }
+
+  return clock;
 }
 /*-----------------------------------------------------------------------------------*/
 void
