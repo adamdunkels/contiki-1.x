@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.7 2005/05/13 00:00:17 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.8 2005/05/16 12:56:14 oliverschmidt Exp $
  *
  */
 
@@ -124,10 +124,12 @@ static struct ctk_textentry dnsservertextentry =
   {CTK_TEXTENTRY(12, 12, 15, 1, dnsserver, 15)};
 
 static struct ctk_label maclsblabel =
-  {CTK_LABEL(0, 14, 11, 1, "MAC LSB")};
+  {CTK_LABEL(0, 14, 11, 1, "MAC address")};
 static char maclsb[4];
 static struct ctk_textentry maclsbtextentry =
   {CTK_TEXTENTRY(12, 14, 3, 1, maclsb, 3)};
+static struct ctk_label maclsbdescr =
+  {CTK_LABEL(18, 14, 10, 1, "(LSB only)")};
 
 #else /* WITH_ETHERNET */
 
@@ -424,6 +426,7 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
 #ifdef WITH_ETHERNET
     CTK_WIDGET_ADD(&window, &maclsblabel);
     CTK_WIDGET_ADD(&window, &maclsbtextentry);
+    CTK_WIDGET_ADD(&window, &maclsbdescr);
 #endif /* WITH_ETHERNET */
     CTK_WIDGET_ADD(&window, &okbutton);
     CTK_WIDGET_ADD(&window, &cancelbutton);
