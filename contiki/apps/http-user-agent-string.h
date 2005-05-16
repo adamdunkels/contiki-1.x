@@ -30,6 +30,6 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: http-user-agent-string.h,v 1.3 2004/09/12 20:24:54 adamdunkels Exp $
+ * $Id: http-user-agent-string.h,v 1.4 2005/05/16 22:00:43 oliverschmidt Exp $
  */
-extern const char http_user_agent_fields[84];
+extern const char http_user_agent_fields[85];
