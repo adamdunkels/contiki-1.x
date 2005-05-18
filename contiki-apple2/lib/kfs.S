@@ -16,6 +16,7 @@
 PATHNAME	:= $0280
 MLI		:= $BF00
 
+GET_PREFIX_CALL	= $C7
 OPEN_CALL	= $C8
 READ_CALL	= $CA
 CLOSE_CALL	= $CC
@@ -52,11 +53,44 @@ CLOSE_FD:	.byte	$00		;REF_NUM
 	.segment	"INIT"
 
 init_kfs:
+        ; Check for full pathname
+	lda	PATHNAME+1
+	cmp	#'/'
+	beq	prefix
+
+	; Save name incl. length
+	ldx	PATHNAME
+:	lda	PATHNAME,x
+	sta	_uip_buf,x
+	dex
+	bpl	:-
+
+	jsr	MLI
+	.byte	GET_PREFIX_CALL
+	.addr	GET_PREFIX_PARAM
+
+	; Append name to prefix
 	lda	PATHNAME
+	clc
+	adc	_uip_buf
+	sta	PATHNAME
+	tax
+	ldy	_uip_buf
+:	lda	_uip_buf,y
+	sta	PATHNAME,x
+	dex
+	dey
+	bne	:-
+
+prefix:	lda	PATHNAME
 	sec
 	sbc	#.strlen("CONTIKI")
 	sta	PREFIX
 	rts
+
+GET_PREFIX_PARAM:
+		.byte	$01		; PARAM_COUNT
+		.addr	PATHNAME	; DATA_BUFFER
 
 ; ------------------------------------------------------------------------
 
