@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.c,v 1.8 2005/05/20 20:49:30 oliverschmidt Exp $
+ * $Id: htmlparser.c,v 1.9 2005/05/20 21:49:54 oliverschmidt Exp $
  *
  */
 
@@ -70,7 +70,7 @@ G * (<br>, <p>, <h>), the <li> tag (but does not even try to
 #include <string.h>
 
 #if 1
-#define PRINTF(x)
+#define PRINTF(x) debug_printf x
 #else
 #include <stdio.h>
 #define PRINTF(x) printf x
@@ -395,6 +395,7 @@ parse_tag(void)
   case TAG_SLASHSCRIPT:
   case TAG_SLASHSTYLE:
   case TAG_SLASHSELECT:
+    do_word();
     switch_majorstate(s.lastmajorstate);
     break;
   case TAG_BODY:
