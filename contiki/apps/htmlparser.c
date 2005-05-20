@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.c,v 1.9 2005/05/20 21:49:54 oliverschmidt Exp $
+ * $Id: htmlparser.c,v 1.10 2005/05/20 21:53:21 oliverschmidt Exp $
  *
  */
 
@@ -70,7 +70,7 @@ G * (<br>, <p>, <h>), the <li> tag (but does not even try to
 #include <string.h>
 
 #if 1
-#define PRINTF(x) debug_printf x
+#define PRINTF(x)
 #else
 #include <stdio.h>
 #define PRINTF(x) printf x
