@@ -28,7 +28,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * $Id: lan91c96.c,v 1.5 2005/04/05 08:18:01 oliverschmidt Exp $
+ * $Id: lan91c96.c,v 1.6 2005/05/22 14:04:21 oliverschmidt Exp $
  *
  */
 
@@ -93,6 +93,7 @@ static u16_t packet_length;
 void lan91c96_init(void)
 {
   asm("lda %v", lanslot);
+  asm("beq %g", L1);
   asm("asl");
   asm("asl");
   asm("asl");
@@ -145,7 +146,6 @@ void lan91c96_init(void)
   BANK(2);
   asm("lda #%%00000000");        /* No interrupts */
   asm("sta %w,x", ETHMSK);
-
 L1:
 }
 #pragma optimize(pop)

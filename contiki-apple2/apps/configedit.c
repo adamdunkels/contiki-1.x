@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.8 2005/05/16 12:56:14 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.9 2005/05/22 14:04:01 oliverschmidt Exp $
  *
  */
 
@@ -146,6 +146,15 @@ static struct ctk_button okbutton =
 static struct ctk_button cancelbutton =
   {CTK_BUTTON(22, 16, 6, "Cancel")};
 
+
+static struct ctk_window errordialog;
+
+static struct ctk_label errormsg =
+  {CTK_LABEL(0, 1, 19, 1, "Error saving config")};
+static struct ctk_button errorokbutton =
+  {CTK_BUTTON(7, 3, 2, "Ok")};
+
+
 EK_EVENTHANDLER(config_eventhandler, ev, data);
 EK_PROCESS(p, "Configuration", EK_PRIO_NORMAL,
 	   config_eventhandler, NULL, NULL);
@@ -233,7 +242,9 @@ makestrings(void)
     }
   }
 
-  *slot = config_getlanslot() + '0';
+  if(config_getlanslot() != 0) {
+    *slot = config_getlanslot() + '0';
+  }
 
 #ifdef WITH_UIP
 
@@ -295,6 +306,8 @@ makeconfig(void)
 
   if(*slot >= '1' && *slot <= '7') {
     config.slot = *slot - '0';
+  } else {
+    config.slot = 0;
   }
 
 #ifdef WITH_UIP
@@ -379,17 +392,17 @@ config_apply(void)
 #endif /* WITH_UIP */
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static int
 config_save(void)
 {
-  int fd;
+  int fd, written = 0;
 
   fd = cfs_open(strcat(kfs_getdir(), "contiki.cfg"), CFS_WRITE);
-  if(fd == -1) {
-    return;
+  if(fd != -1) {
+    written = cfs_write(fd, &config, sizeof(config));
+    cfs_close(fd);
   }
-  cfs_write(fd, &config, sizeof(config));
-  cfs_close(fd);
+  return written == sizeof(config);
 }
 /*-----------------------------------------------------------------------------------*/
 EK_EVENTHANDLER(config_eventhandler, ev, data)
@@ -436,6 +449,11 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
     CTK_WIDGET_FOCUS(&window, &screensavertextentry);
 #endif /* __APPLE2ENH__ */
 
+    ctk_dialog_new(&errordialog, 19, 5);
+    CTK_WIDGET_ADD(&errordialog, &errormsg);
+    CTK_WIDGET_ADD(&errordialog, &errorokbutton);
+    CTK_WIDGET_FOCUS(&errordialog, &errorokbutton);
+
     /* Fill the configuration strings with values from the current
        configuration */
     makestrings();
@@ -446,8 +464,13 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
       /* Fill the configuration with values from the current
          configuration strings */
       makeconfig();
-      config_apply();
-      config_save();
+      if(config_save()) {
+        config_apply();
+	goto quit;
+      }
+      ctk_dialog_open(&errordialog);
+    } else if(data == (ek_data_t)&errorokbutton) {
+      ctk_dialog_close();
       goto quit;
     } else if(data == (ek_data_t)&cancelbutton) {
       goto quit;

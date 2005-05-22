@@ -28,7 +28,7 @@
  *
  * This file is part of the C64 RealAudio server demo project.
  *
- * $Id: cs8900a.c,v 1.7 2005/03/16 22:38:54 oliverschmidt Exp $
+ * $Id: cs8900a.c,v 1.8 2005/05/22 14:04:21 oliverschmidt Exp $
  *
  */
 
@@ -57,6 +57,7 @@ void
 cs8900a_init(void)
 {
   asm("lda %v", lanslot);
+  asm("beq %g", bailout);
   asm("asl");
   asm("asl");
   asm("asl");
@@ -121,6 +122,7 @@ cs8900a_init(void)
   asm("sta %v,x", cs8900a_ppdata);
   asm("lda %v+5", uip_ethaddr);
   asm("sta %v+1,x", cs8900a_ppdata);
+bailout:
 }
 #pragma optimize(pop)
 /*-----------------------------------------------------------------------------------*/
@@ -129,6 +131,7 @@ void
 cs8900a_send(void)
 {
   asm("ldx %v", idx);
+  asm("beq %g", bailout);
 
   /* Transmit command. */
   asm("lda #$c0");
@@ -162,6 +165,7 @@ tryagain:
 
   asm("dey");
   asm("bne %g", tryagain);
+bailout:
   return;
 
   /* Send the frame. */
