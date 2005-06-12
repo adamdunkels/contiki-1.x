@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: www.c,v 1.30 2005/04/28 21:15:44 oliverschmidt Exp $
+ * $Id: www.c,v 1.31 2005/06/12 23:44:30 oliverschmidt Exp $
  *
  */
 
@@ -895,17 +895,15 @@ htmlparser_submitbutton(char *text, char *name,
     strncpy(form->inputname, name, WWW_CONF_MAX_INPUTNAMELEN);
     form->inputtype = FORMINPUTTYPE_SUBMITBUTTON;
   }
-
-
 }
 /*-----------------------------------------------------------------------------------*/
 void
-htmlparser_inputfield(char *text, char *name,
+htmlparser_inputfield(unsigned char size, char *text, char *name,
 		      char *formname, char *formaction)
 {
   register struct formattribs *form;
 
-  form = add_pagewidget(text, strlen(text), CTK_WIDGET_TEXTENTRY, 1);
+  form = add_pagewidget(text, size, CTK_WIDGET_TEXTENTRY, 1);
   if(form != NULL) {
     strncpy(form->formaction, formaction, WWW_CONF_MAX_FORMACTIONLEN);
     strncpy(form->formname, formname, WWW_CONF_MAX_FORMNAMELEN);

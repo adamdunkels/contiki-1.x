@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.c,v 1.10 2005/05/20 21:53:21 oliverschmidt Exp $
+ * $Id: htmlparser.c,v 1.11 2005/06/12 23:44:29 oliverschmidt Exp $
  *
  */
 
@@ -359,7 +359,7 @@ static void
 parse_tag(void)
 {
   static char *tagattrparam;
-  static unsigned char size, i;
+  static unsigned char size;
 
   static char dummy;
   
@@ -474,14 +474,8 @@ parse_tag(void)
 	switch(s.inputtype) {
 	case HTMLPARSER_INPUTTYPE_NONE:
 	case HTMLPARSER_INPUTTYPE_TEXT:
-	  for(i = 0; i < s.inputvaluesize; ++i) {
-	    if(s.inputvalue[i] == 0) {
-	      memset(&s.inputvalue[i], ISO_space, s.inputvaluesize - i);
-	      s.inputvalue[s.inputvaluesize] = 0;
-	      break;
-	    }
-	  }	  
-	  htmlparser_inputfield(s.inputvalue, s.inputname,
+	  s.inputvalue[s.inputvaluesize] = 0;
+	  htmlparser_inputfield(s.inputvaluesize, s.inputvalue, s.inputname,
 				s.formname, s.formaction);
 	  break;
 	case HTMLPARSER_INPUTTYPE_SUBMIT:

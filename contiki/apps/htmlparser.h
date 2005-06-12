@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: htmlparser.h,v 1.3 2004/09/03 09:55:22 adamdunkels Exp $
+ * $Id: htmlparser.h,v 1.4 2005/06/12 23:44:30 oliverschmidt Exp $
  *
  */
 #ifndef __HTMLPARSER_H__
@@ -43,7 +43,8 @@ void htmlparser_submitbutton(char *value,
 			     char *name,
 			     char *formname,
 			     char *formaction);
-void htmlparser_inputfield(char *value,
+void htmlparser_inputfield(unsigned char size,
+			   char *value,
 			   char *name,
 			   char *formname,
 			   char *formaction);
