@@ -7,18 +7,10 @@
 	.segment	"CONTIKI"
 
 VTABZ:
-	.ifdef __APPLE2__
-	sei
-	.endif
-
 	; Switch in ROM and call VTABZ
 	bit	$C082
 	jsr	$FC24
 
-	; Switch in LC bank 2 for R/O
+	; Switch in LC bank 2 for R/O and return
 	bit	$C080
-
-	.ifdef __APPLE2__
-	cli
-	.endif
 	rts
