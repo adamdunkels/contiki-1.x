@@ -9,7 +9,7 @@ CL=cl65
 
 PORTDIRS=apps conf ctk lib loader uip
 CONTIKIDIRS=${addprefix $(CONTIKI)/, apps ctk ek lib uip}
-CONTIKICC65DIRS=${addprefix $(CONTIKICC65)/, apps lib loader uip}
+CONTIKICC65DIRS=${addprefix $(CONTIKICC65)/, apps ctk lib loader uip}
 
 CFLAGSCC65=${addprefix -I,$(PORTDIRS)} \
            ${addprefix -I,$(CONTIKICC65DIRS)} \
