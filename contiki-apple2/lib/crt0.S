@@ -6,10 +6,13 @@
 
 	.export		_exit
 	.import	   	zerobss, initlib, callmain, donelib
-       	.import	       	__STARTUP_RUN__, __BOOT_SIZE__	; Linker generated
-       	.import	       	__BSS_RUN__, __BSS_SIZE__	; Linker generated
-       	.import	       	__INIT_RUN__, __INIT_SIZE__	; Linker generated
-       	.import	       	__CODE_RUN__, __CODE_SIZE__	; Linker generated
+.ifdef  __APPLE2ENH__
+	.import		callirq
+.endif
+	.import	       	__STARTUP_RUN__, __BOOT_SIZE__	; Linker generated
+	.import	       	__BSS_RUN__, __BSS_SIZE__	; Linker generated
+	.import	       	__INIT_RUN__, __INIT_SIZE__	; Linker generated
+	.import	       	__CODE_RUN__, __CODE_SIZE__	; Linker generated
 	.importzp	sp
 	.linecont	+
 
@@ -18,8 +21,8 @@
 
 .segment	"EXEHDR"
 
-       	.word  	__STARTUP_RUN__				; Start address
-       	.word  	__BSS_RUN__   + __BOOT_SIZE__ +		\
+	.word  	__STARTUP_RUN__				; Start address
+	.word  	__BSS_RUN__   + __BOOT_SIZE__ +		\
 		__INIT_SIZE__ + __CODE_SIZE__ -		\
 		__STARTUP_RUN__				; Size
 
@@ -31,6 +34,46 @@
 ; Forward control to the code in the "BOOT" segment
 
 	jmp	__BSS_RUN__
+
+.ifdef  __APPLE2ENH__
+
+; ProDOS TechRefMan, chapter 6.2:
+; "Each installed routine must begin with a CLD instruction."
+
+intrpt: cld
+
+; Switch in LC bank 2 for R/O
+
+	bit	$C080
+
+; Call interruptors
+
+	jsr     callirq
+	
+; Switch in LC bank 1 for R/W
+
+	bit	$C08B
+	bit	$C08B
+
+; Check for success
+
+	bcc	:+
+
+; ProDOS TechRefMan, chapter 6.2:
+; "When the routine that can process the interrupt is called, it
+;  should ... return (via an RTS) with the carry flag clear."
+
+	clc
+	rts
+
+; ProDOS TechRefMan, chapter 6.2:
+; "When a routine that cannot process the interrupt is called,
+;  it should return (via an RTS) with the cary flag set ..."
+
+:       sec
+	rts
+
+.endif
 
 ; Avoid re-entrance of donelib. This is also the _exit entry
 
@@ -48,6 +91,17 @@ _exit:	ldx	#$02
 
 	jsr	donelib
 
+.ifdef  __APPLE2ENH__
+
+; Deallocate interrupt vector table entry
+
+	dec     params		; Adjust parameter count
+	jsr     $BF00
+	.byte   $41		; Dealloc interrupt
+	.addr   params
+
+.endif
+
 ; Switch in ROM
 
 	bit	$C082
@@ -61,19 +115,27 @@ _exit:	ldx	#$02
 
 .segment	"BOOT"
 
+.ifdef  __APPLE2ENH__
+
+; Allocate interrupt vector table entry
+
+	jsr     $BF00
+	.byte   $40		; Alloc interrupt
+	.addr   params
+
 ; Switch to 80 column mode
 
-	.ifdef __APPLE2ENH__
 	lda	#$0D
 	jsr	$C300
-	.endif
+
+.endif
 
 ; Setup the stack at HIMEM
 
 	lda    	$73
 	ldx	$73+1
 	sta	sp
-       	stx	sp+1
+	stx	sp+1
 
 ; Save the original RESET vector
 
@@ -182,3 +244,11 @@ init:	jsr	zerobss
 .data
 
 rvsave:	.res	3
+
+.ifdef  __APPLE2ENH__
+
+params: .byte   $02		; Parameter count
+	.byte   $00		; Interrupt number
+	.addr   intrpt		; Interrupt handler
+
+.endif
