@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-conf.h,v 1.11 2005/05/12 23:57:02 oliverschmidt Exp $
+ * $Id: ctk-conf.h,v 1.12 2006/04/09 16:48:22 oliverschmidt Exp $
  *
  */
 
@@ -61,7 +61,11 @@
 
 /* Toggles mouse support (must have support functions in the
 architecture specific files to work). */
+#ifdef __APPLE2__
 #define CTK_CONF_MOUSE_SUPPORT        0 /* 1342 bytes */
+#else /* __APPLE2__ */
+#define CTK_CONF_MOUSE_SUPPORT        1 /* 1342 bytes */
+#endif /* __APPLE2__ */
 
 /* Toggles support for icons. */
 #define CTK_CONF_ICONS                1 /* 107 bytes */
