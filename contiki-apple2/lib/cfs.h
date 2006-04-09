@@ -30,13 +30,14 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: cfs.h,v 1.3 2005/04/18 21:41:07 oliverschmidt Exp $
+ * $Id: cfs.h,v 1.4 2006/04/09 23:28:10 oliverschmidt Exp $
  */
 #ifndef __CFS_H__
 #define __CFS_H__
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 
 #define CFS_READ  (O_RDONLY)
 #define CFS_WRITE (O_WRONLY | O_CREAT | O_TRUNC)
@@ -47,18 +48,7 @@
 #define cfs_write write
 
 struct cfs_dir {
-  int fd;
-  unsigned char entry_length;
-  unsigned char entries_per_block;
-  unsigned char current_entry;
-  union {
-    unsigned char bytes[512];
-    struct {
-      unsigned prev_block;
-      unsigned next_block;
-      char entries[1];
-    } content;
-  } block;
+  DIR *dir;
 };
 
 struct cfs_dirent {
@@ -67,7 +57,7 @@ struct cfs_dirent {
 };
 
 int cfs_opendir(struct cfs_dir *dirp, const char *name);
-int cfs_readdir(struct cfs_dir *dirp, struct cfs_dirent *dirent);
+int cfs_readdir(struct cfs_dir *dirp, struct cfs_dirent *direntp);
 int cfs_closedir(struct cfs_dir *dirp);
 
 #endif /* __CFS_H__ */
