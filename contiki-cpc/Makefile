@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile,v 1.1 2006/04/17 14:39:05 kthacker Exp $
+# $Id: Makefile,v 1.2 2006/04/17 14:42:28 kthacker Exp $
 #
 
 CONTIKI=../contiki
