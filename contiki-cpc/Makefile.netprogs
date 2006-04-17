@@ -1,0 +1,242 @@
+# Copyright (c) 2003, Adam Dunkels.
+# All rights reserved. 
+#
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions 
+# are met: 
+# 1. Redistributions of source code must retain the above copyright 
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright 
+#    notice, this list of conditions and the following disclaimer in the 
+#    documentation and/or other materials provided with the distribution. 
+# 3. All advertising materials mentioning features or use of this software
+#    must display the following acknowledgement:
+#      This product includes software developed by Adam Dunkels.
+# 4. The name of the author may not be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.  
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+#
+# This file is part of the Contiki desktop environment
+#
+# $Id: Makefile.netprogs,v 1.1 2006/04/17 14:39:07 kthacker Exp $
+#
+# convert to cpc
+
+UIP_PRGS = ../contiki/apps/www.prg ../contiki/apps/www.dsc \
+	../contiki/apps/websrv.prg ../contiki/apps/websrv.dsc \
+	../contiki/apps/stelnet.prg ../contiki/apps/stelnet.dsc \
+	../contiki/apps/ftp.prg ../contiki/apps/ftp.dsc \
+	../contiki/apps/email.prg ../contiki/apps/email.dsc \
+	../contiki/apps/dhcp.prg ../contiki/apps/dhcp.dsc \
+	../contiki/apps/wget.dsc \
+	../contiki/apps/vnc.prg ../contiki/apps/vnc.dsc \
+#	../contiki/apps/irc.prg ../contiki/apps/irc.dsc 
+#	../contiki/apps/wget.prg 
+#	../contiki/apps/telnetd.prg ../contiki/apps/telnetd.dsc \
+
+
+
+all: 	./arch/crt0-dsc.o \
+	./arch/crt0-prg.o \
+	./arch/contiki_labels.o \
+	./loader/loader-arch-module.o \
+	$(UIP_PRGS)
+
+SYS=cpc
+
+include Makefile.common 
+
+CFLAGS:=$(CFLAGSCOMMON) --compile-only \
+	-DWITH_ASCII \
+	-DWITH_CONIO \
+	-DWITH_LOADER_ARCH
+
+
+# conversion of intel hex record to binary, cpc binary with header, then inject into disc image
+define MAKE_DSC
+	bin/makelnk -r -o $@.ihx arch/crt0-prg.o $< > $@.lnk
+	$(LD) -f $@.lnk
+	bin/makebin -p -b 0 -s 65535 < $@.ihx > $@.bin
+	bin/addhead  $@.bin $@.bin.ams
+	bin/cpcxfs contiki.dsk -f -b -p $@.bin.ams $(@F)
+endef	
+
+%.dsc: %-dsc.o 
+	$(MAKE_DSC)
+
+define MAKE_PRG
+	bin/makelnk -r -m -o $@.ihx -k /usr/local/share/sdcc/lib/z80 -l z80 arch/crt0-prg.o loader/loader-arch-module.o arch/contiki_labels.o $^ > $@.lnk
+	$(LD) -f $@.lnk
+	bin/makebin -p -b 0 -s 65535 < $@.ihx > $@.bin
+	bin/addhead  $@.bin $@.bin.ams
+	bin/cpcxfs contiki.dsk -f -b -p $@.bin.ams $(@F)
+endef	
+
+../contiki/apps/irc.prg: ../contiki/apps/ircc.o ../contiki/apps/ircc-strings.o \
+	../contiki/apps/irc.o ../contiki/uip/socket.o ../contiki/uip/uipbuf.o
+	$(MAKE_PRG)
+
+../contiki/apps/irc.dsc: ../contiki/apps/irc-dsc.o
+	$(MAKE_DSC)
+
+./apps/config.prg: apps/config.o
+	$(MAKE_PRG)
+
+./apps/confedit.prg: apps/configedit.o
+	$(MAKE_PRG)
+
+./apps/confedit.dsc: apps/configedit-dsc.o
+	$(MAKE_DSC)
+
+./apps/welcome.prg: apps/welcome.o
+	$(MAKE_PRG)
+
+../contiki/apps/about.prg: ../contiki/apps/about.o
+	$(MAKE_PRG)
+
+../contiki/apps/calc.prg: ../contiki/apps/calc.o
+	$(MAKE_PRG)
+
+./apps/cgterm.prg: ./apps/cgterm.o \
+	../contiki/uip/socket.o \
+	../contiki/uip/uipbuf.o	\
+	lib/lc-asm.o
+	$(MAKE_PRG)
+
+./apps/cgterm.dsc: ./apps/cgterm-dsc.o 
+	$(MAKE_DSC)
+
+../contiki/apps/dhcp.prg: ../contiki/apps/dhcp.o ../contiki/uip/dhcpc.o ./lib/lc-asm.o
+	$(MAKE_PRG)
+
+../contiki/apps/editor.prg: ../contiki/apps/editor.o \
+	../contiki/lib/ctk-filedialog.o \
+	../contiki/lib/memb.o
+	$(MAKE_PRG)
+
+../contiki/apps/email.prg: ../contiki/apps/email.o \
+	../contiki/lib/ctk-textedit.o \
+	../contiki/apps/smtp-socket.o \
+	../contiki/apps/smtp-strings.o \
+	../contiki/uip/socket.o \
+	../contiki/uip/uipbuf.o \
+	./lib/lc-asm.o 
+	$(MAKE_PRG)
+
+../contiki/apps/ftp.prg: ../contiki/apps/ftp.o \
+	../contiki/apps/ftpc.o \
+	../contiki/lib/memb.o
+	$(MAKE_PRG)
+
+../contiki/apps/netconf.prg: ../contiki/apps/netconf.o
+	$(MAKE_PRG)
+
+../contiki/apps/process.prg: ../contiki/apps/processes.o
+	$(MAKE_PRG)
+
+../contiki/apps/process.dsc: ../contiki/apps/processes-dsc.o
+	$(MAKE_DSC)
+
+../contiki/apps/dir.prg: ../contiki/apps/directory.o
+	$(MAKE_PRG)
+
+./apps/dir.dsc: ./apps/directory-dsc.o
+	$(MAKE_DSC)
+
+../contiki/apps/shell.prg: ../contiki/apps/shell-gui.o ./apps/shell.o
+	$(MAKE_PRG)
+
+../contiki/apps/telnetd.prg: ../contiki/apps/telnetd.o \
+ 	../contiki/apps/shell.o \
+	../contiki/lib/memb.o \
+	../contiki/apps/telnetd-gui.o
+	$(MAKE_PRG)
+
+../contiki/apps/telnetd.dsc: telnetd-dsc.o 
+	$(MAKE_DSC)
+
+../contiki/apps/www.prg: $(WWW)
+	$(MAKE_PRG)
+
+../contiki/apps/websrv.prg: $(WEBSERVER)
+	$(MAKE_PRG)
+
+../contiki/apps/websrv.dsc: ../contiki/apps/webserver-dsc.o
+	$(MAKE_DSC)
+
+../contiki/apps/stelnet.prg: $(TELNET)
+	$(MAKE_PRG)
+
+../contiki/apps/stelnet.dsc: ../contiki/apps/telnet-dsc.o
+	$(MAKE_DSC)
+
+../contiki/apps/wget.prg: $(WGET)
+	$(MAKE_PRG)
+
+../contiki/apps/wget.dsc: apps/wget-dsc.o
+	$(MAKE_DSC)
+
+../contiki/apps/splip.drv: slip-drv.o rs232dev.o
+
+
+VNC=../contiki/apps/vnc.o \
+	../contiki/apps/vnc-viewer.o \
+	./apps/vnc-draw.o 
+
+../contiki/apps/conio.prg: \
+	../contiki/ctk/ctk-conio-service.o \
+	./arch/conio.o
+	$(MAKE_PRG)
+
+#ctk-text.drv: ctk-conio-service.o
+
+ctk-80col.drv: ctk-80col.o 
+
+ctk-default.drv: ctk-hires-service.o
+
+default.prg: themeloader.o ctk-hires-theme-default.o
+
+
+
+../contiki/apps/vnc.prg: $(VNC)
+	$(MAKE_PRG)
+
+#blueround.prg: themeloader.o ctk-hires-theme-blueround.o contiki-labels.o
+#	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
+#default.prg: themeloader.o ctk-hires-theme-default.o contiki-labels.o
+#	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+#enabler.prg: themeloader.o ctk-hires-theme-enabler.o contiki-labels.o
+#	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+#springlight.prg: themeloader.o ctk-hires-theme-springlight.o contiki-labels.o
+#	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+#ravenpine.prg: themeloader.o ctk-hires-theme-ravenpine.o contiki-labels.o
+#	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+
+
+
+./apps/memstat.prg: apps/memstat.o
+	$(MAKE_PRG)
+
+./apps/memstat.dsc: apps/memstat-dsc.o
+	$(MAKE_DSC)
+
+mtest.prg: mtest.o mtp.o mt.o mtarch.o mtarch-asm.o
+
+lc-test: lc-test.o lc-asm.o

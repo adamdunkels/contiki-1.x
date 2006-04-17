@@ -1,0 +1,112 @@
+# Copyright (c) 2002, Adam Dunkels.
+# All rights reserved. 
+#
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions 
+# are met: 
+# 1. Redistributions of source code must retain the above copyright 
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright 
+#    notice, this list of conditions and the following disclaimer in the 
+#    documentation and/or other materials provided with the distribution. 
+# 3. All advertising materials mentioning features or use of this software
+#    must display the following acknowledgement:
+#      This product includes software developed by Adam Dunkels.
+# 4. The name of the author may not be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.  
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+#
+# This file is part of the Contiki desktop environment
+#
+# $Id: Makefile.cpc-net,v 1.1 2006/04/17 14:39:07 kthacker Exp $
+#
+
+all: contikin
+
+include Makefile.common
+
+CFLAGS:=$(CFLAGSCOMMON) --compile-only \
+        -DWITH_ASCII \
+	-DCTK_CONIO \
+	-DWITH_LOADER_ARCH \
+	-DWITH_LOADER_ARCH=1
+
+UIP_OBJ = ../contiki/uip/dhcpc.o \
+	../contiki/uip/resolv.o \
+	../contiki/uip/slipdev.o \
+	../contiki/uip/socket.o \
+	../contiki/uip/tcpdump.o \
+	../contiki/uip/tcpip.o \
+	../contiki/uip/uip-fw.o \
+	../contiki/uip/uip-fw-service.o \
+	../contiki/uip/uip-split.o \
+	../contiki/uip/uip.o \
+	../contiki/uip/uip_arp.o \
+	../contiki/uip/uiplib.o \
+	./uip/uip_arch.o \
+	./lib/lc-asm.o
+
+
+CONTIKI_OBJ= ./arch/crt0.o \
+	./loader/rel.o \
+	./arch/key.o \
+	./arch/mem.o \
+	./arch/malloc.o \
+	./arch/clock.o \
+	./loader/dir.o \
+	./loader/loader-arch-cpc.o \
+	./arch/putchar.o \
+	./arch/uip.o \
+	./arch/conio.o \
+	./apps/configedit.o \
+	./apps/configedit-dsc.o \
+	../contiki/apps/directory.o \
+	./apps/directory-dsc.o \
+	../contiki/apps/processes.o \
+	../contiki/apps/processes-dsc.o \
+	../contiki/apps/program-handler.o \
+	../contiki/ctk/ctk.o \
+	../contiki/ctk/ctk-conio-service.o \
+	../contiki/ctk/ctk-draw.o \
+	../contiki/ctk/ctk-term-in.o \
+	../contiki/ctk/ctk-term-out.o \
+	../contiki/ctk/ctk-term.o \
+	../contiki/ctk/ctk-termtelnet.o \
+	../contiki/ctk/ctk-vncfont.o \
+	../contiki/ctk/vnc-server.o \
+	../contiki/ek/ek-service.o \
+	../contiki/ek/ek.o \
+	../contiki/ek/arg.o \
+	../contiki/ek/mt.o \
+	../contiki/lib/cfs.o \
+	../contiki/lib/ctk-filedialog.o \
+	../contiki/lib/ctk-textedit.o \
+	../contiki/lib/list.o \
+	../contiki/lib/memb.o \
+	../contiki/lib/timer.o \
+	../contiki/lib/strncasecmp.o \
+	./loader/cfs-cpc.o \
+	./arch/main.o \
+	./arch/arch.o \
+	$(UIP)
+
+
+contikin: $(CONTIKI_OBJ)
+	$(LD) -f arch/contiki-uip.lnk
+	./bin/make_labels -a _CODE -a _DATA -x _main -x __clock -x _exit contiki.map arch/contiki_labels.s
+	./bin/makebin -p -b 256 -s 65535 < contiki.ihx > temp/contiki.bin
+	./bin/addhead -s 256 -t "binary" -x 256 temp/contiki.bin temp/contiki_ams.bin
+	./bin/cpcxfs contiki.dsk -f -b -p temp/contiki_ams.bin contiki.bin
+
