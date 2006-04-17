@@ -1,0 +1,35 @@
+-im contiki
+-k /usr/local/share/sdcc/lib/z80
+-b _CODE=0x0100
+-l z80
+./arch/crt0.o
+./arch/key.o
+./arch/mem.o
+./arch/malloc.o
+./arch/clock.o
+./loader/loader-arch-cpc.o
+./loader/rel.o
+./loader/cfs-cpc.o
+../contiki/lib/cfs.o
+./loader/dir.o
+../contiki/apps/program-handler.o
+../contiki/ctk/ctk.o
+../contiki/ctk/ctk-draw.o
+../contiki/ek/ek-service.o
+../contiki/ek/ek.o
+../contiki/ek/arg.o
+../contiki/lib/cfs.o
+../contiki/lib/list.o
+../contiki/lib/timer.o
+../contiki/uip/tcpip.o
+../contiki/uip/uip.o
+../contiki/uip/resolv.o
+../contiki/uip/uiplib.o
+./uip/uip_arch.o
+./apps/directory-dsc.o
+./apps/configedit-dsc.o
+../contiki/apps/processes-dsc.o
+./arch/main.o
+./arch/arch.o
+./arch/uip.o
+-e
