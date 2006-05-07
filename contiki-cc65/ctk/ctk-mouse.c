@@ -29,10 +29,11 @@
  *
  * This file is part of the "ctk" GUI toolkit for cc65
  *
- * $Id: ctk-mouse.c,v 1.1 2006/04/09 15:34:11 oliverschmidt Exp $
+ * $Id: ctk-mouse.c,v 1.2 2006/05/07 23:05:57 oliverschmidt Exp $
  *
  */
 
+#include <stdlib.h>
 #include <mouse.h>
 
 #include "ctk.h"
@@ -57,7 +58,9 @@ ctk_mouse_init(void)
   okay = load(MOUSE_CONF_DRIVER) == LOADER_OK;
   if(okay) {
     okay = mouse_install(&mouse_def_callbacks, ctrl.module) == MOUSE_ERR_OK;
-    if(!okay) {
+    if(okay) {
+      atexit((void (*)(void))mouse_uninstall);
+    } else {
       mod_free(ctrl.module);
     }
   }
