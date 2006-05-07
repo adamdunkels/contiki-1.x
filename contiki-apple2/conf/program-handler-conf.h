@@ -30,11 +30,16 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: program-handler-conf.h,v 1.4 2005/05/06 22:39:15 oliverschmidt Exp $
+ * $Id: program-handler-conf.h,v 1.5 2006/05/07 23:07:42 oliverschmidt Exp $
  */
 #ifndef __PROGRAM_HANDLER_CONF_H__
 #define __PROGRAM_HANDLER_CONF_H__
 
 #define PROGRAM_HANDLER_CONF_MAX_NUMDSCS 4
+#ifdef __APPLE2__
+#define PROGRAM_HANDLER_CONF_QUIT_MENU   0
+#else /* __APPLE2__ */
+#define PROGRAM_HANDLER_CONF_QUIT_MENU   1
+#endif /* __APPLE2__ */
 
 #endif /* __PROGRAM_HANDLER_CONF_H__ */
