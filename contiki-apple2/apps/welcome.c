@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: welcome.c,v 1.1 2004/12/26 14:13:34 oliverschmidt Exp $
+ * $Id: welcome.c,v 1.2 2006/05/07 23:30:50 oliverschmidt Exp $
  *
  */
 
@@ -55,13 +55,13 @@ static struct ctk_label welcomelabel7 =
   {CTK_LABEL(2, 14, 30, 1, "Ctrl-D     - delete character")};
 static struct ctk_label welcomelabel8 =
   {CTK_LABEL(2, 16, 30, 1, "Ctrl-Reset - quit Contiki")};
-static struct ctk_label welcomelabel9 =
-  {CTK_LABEL(4, 19, 25, 1, "Press any key to continue")};
+static struct ctk_label welcomeclose =
+  {CTK_BUTTON(13, 19, 5, "Close")};
 #else /* __APPLE2__ */
 static struct ctk_label welcomelabel7 =
   {CTK_LABEL(2, 14, 30, 1, "Ctrl-Reset - quit Contiki")};
-static struct ctk_label welcomelabel8 =
-  {CTK_LABEL(4, 17, 25, 1, "Press any key to continue")};
+static struct ctk_label welcomeclose =
+  {CTK_BUTTON(13, 17, 5, "Close")};
 #endif /* __APPLE2__ */
 
 
@@ -107,15 +107,16 @@ EK_EVENTHANDLER(welcome_eventhandler, ev, data)
     CTK_WIDGET_ADD(&welcomedialog, &welcomelabel5);
     CTK_WIDGET_ADD(&welcomedialog, &welcomelabel6);
     CTK_WIDGET_ADD(&welcomedialog, &welcomelabel7);
-    CTK_WIDGET_ADD(&welcomedialog, &welcomelabel8);
 #ifdef __APPLE2__
-    CTK_WIDGET_ADD(&welcomedialog, &welcomelabel9);
+    CTK_WIDGET_ADD(&welcomedialog, &welcomelabel8);
 #endif /* __APPLE2__ */
+    CTK_WIDGET_ADD(&welcomedialog, &welcomeclose);
+    CTK_WIDGET_FOCUS(&welcomedialog, &welcomeclose);
     
     ctk_dialog_open(&welcomedialog);
     
   } else if(ev == EK_EVENT_REQUEST_EXIT ||
-	    ev == ctk_signal_keypress) {
+	    ev == ctk_signal_button_activate) {
     welcome_quit();
   }
 }
