@@ -43,11 +43,12 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.30 2005/05/12 23:55:18 oliverschmidt Exp $
+ * $Id: program-handler.c,v 1.31 2006/05/07 23:02:54 oliverschmidt Exp $
  *
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "ek.h"
 #include "petsciiconv.h"
@@ -75,7 +76,29 @@ static struct ctk_menu contikimenu;
 static struct dsc *contikidsc[MAX_NUMDSCS];
 static unsigned char contikidsclast = 0;
 
+#ifndef PROGRAM_HANDLER_CONF_QUIT_MENU
+#define QUIT_MENU 0
+#else /* PROGRAM_HANDLER_CONF_QUIT_MENU */
+#define QUIT_MENU PROGRAM_HANDLER_CONF_QUIT_MENU
+#endif /* PROGRAM_HANDLER_CONF_QUIT_MENU */
+
+#if QUIT_MENU
+
+static unsigned char quitmenuitem;
+
+/* The "Really quit Contiki?" dialog. */
+static struct ctk_window quitdialog;
+static struct ctk_label quitdialoglabel =
+  {CTK_LABEL(2, 1, 20, 1, "Really quit Contiki?")};
+static struct ctk_button quityesbutton =
+  {CTK_BUTTON(4, 3, 3, "Yes")};
+static struct ctk_button quitnobutton =
+  {CTK_BUTTON(16, 3, 2, "No")};
+
+#endif /* QUIT_MENU */
+
 #if WITH_LOADER_ARCH
+
 /* "Run..." window */
 static struct ctk_window runwindow;
 static unsigned char runmenuitem;
@@ -104,7 +127,6 @@ static struct ctk_label errortype =
 static struct ctk_button errorokbutton =
   {CTK_BUTTON(9, 7, 2, "Ok")};
 
-
 #endif /* WITH_LOADER_ARCH */
 
 /*static DISPATCHER_SIGHANDLER(program_handler_sighandler, s, data);
@@ -115,7 +137,6 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data);
 EK_PROCESS(p, "Program handler", EK_PRIO_NORMAL,
 	   program_handler_eventhandler, NULL, NULL);
 static ek_id_t id = EK_ID_NONE;
-
 
 static const char * const errormsgs[] = {
   "Ok",
@@ -309,7 +330,9 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
 
     make_windows();
 #endif /* WITH_LOADER_ARCH */
-    
+#if QUIT_MENU
+    quitmenuitem = ctk_menuitem_add(&contikimenu, "Quit");
+#endif /* QUIT_MENU */
     
     displayname = NULL;
 
@@ -326,6 +349,14 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
       ctk_dialog_close();
     }
 #endif /* WITH_LOADER_ARCH */
+#if QUIT_MENU
+    if(data == (ek_data_t)&quityesbutton) {
+      ctk_draw_init();
+      exit(EXIT_SUCCESS);
+    } else if(data == (ek_data_t)&quitnobutton) {
+      ctk_dialog_close();
+    }
+#endif /* QUIT_MENU */
     dscp = &contikidsc[0];
     for(i = 0; i < CTK_CONF_MAXMENUITEMS; ++i) {    
       if(*dscp != NULL &&
@@ -354,6 +385,16 @@ EK_EVENTHANDLER(program_handler_eventhandler, ev, data)
 	    NULL);
       }
 #endif /* WITH_LOADER_ARCH */
+#if QUIT_MENU
+      if(contikimenu.active == quitmenuitem) {
+	ctk_dialog_new(&quitdialog, 24, 5);
+	CTK_WIDGET_ADD(&quitdialog, &quitdialoglabel);
+	CTK_WIDGET_ADD(&quitdialog, &quityesbutton);
+	CTK_WIDGET_ADD(&quitdialog, &quitnobutton);
+	CTK_WIDGET_FOCUS(&quitdialog, &quitnobutton);
+	ctk_dialog_open(&quitdialog);      
+      }
+#endif /* QUIT_MENU */
     }
 #if CTK_CONF_SCREENSAVER
   } else if(ev == ctk_signal_screensaver_start) {
