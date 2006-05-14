@@ -43,7 +43,7 @@
  *
  * This file is part of the Contiki desktop OS
  *
- * $Id: program-handler.c,v 1.31 2006/05/07 23:02:54 oliverschmidt Exp $
+ * $Id: program-handler.c,v 1.32 2006/05/14 23:23:30 oliverschmidt Exp $
  *
  */
 
@@ -86,7 +86,7 @@ static unsigned char contikidsclast = 0;
 
 static unsigned char quitmenuitem;
 
-/* The "Really quit Contiki?" dialog. */
+/* "Quit" dialog */
 static struct ctk_window quitdialog;
 static struct ctk_label quitdialoglabel =
   {CTK_LABEL(2, 1, 20, 1, "Really quit Contiki?")};
