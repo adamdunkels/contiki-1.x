@@ -7,12 +7,13 @@
 	.export		_exit
 	.import	   	zerobss, initlib, callmain, donelib
 .ifdef  __APPLE2ENH__
-	.import		callirq
+	.import		_uip_buf, callirq
 .endif
-	.import	       	__STARTUP_RUN__, __BOOT_SIZE__	; Linker generated
+	.import	       	__STARTUP_RUN__			; Linker generated
 	.import	       	__BSS_RUN__, __BSS_SIZE__	; Linker generated
 	.import	       	__INIT_RUN__, __INIT_SIZE__	; Linker generated
 	.import	       	__CODE_RUN__, __CODE_SIZE__	; Linker generated
+	.import	       	__BOOT_SIZE__, __UIP_SIZE__	; Linker generated
 	.importzp	sp
 	.linecont	+
 
@@ -23,8 +24,8 @@
 
 	.word  	__STARTUP_RUN__				; Start address
 	.word  	__BSS_RUN__   + __BOOT_SIZE__ +		\
-		__INIT_SIZE__ + __CODE_SIZE__ -		\
-		__STARTUP_RUN__				; Size
+		__INIT_SIZE__ + __CODE_SIZE__ +		\
+		__UIP_SIZE__ - __STARTUP_RUN__		; Size
 
 ; ------------------------------------------------------------------------
 ; Place the startup code in a special segment.
@@ -40,7 +41,7 @@
 ; ProDOS TechRefMan, chapter 6.2:
 ; "Each installed routine must begin with a CLD instruction."
 
-intrpt: cld
+irq:	cld
 
 ; Switch in LC bank 2 for R/O
 
@@ -95,10 +96,10 @@ _exit:	ldx	#$02
 
 ; Deallocate interrupt vector table entry
 
-	dec     params		; Adjust parameter count
+	dec     intrpt		; Adjust parameter count
 	jsr     $BF00
 	.byte   $41		; Dealloc interrupt
-	.addr   params
+	.addr   intrpt
 
 .endif
 
@@ -111,24 +112,12 @@ _exit:	ldx	#$02
 	jmp	$03D0
 
 ; ------------------------------------------------------------------------
-; The linker doesn't calculate where this code runs so it has to be PIC
+; The linker doesn't understand that the "BOOT" segment overlays the "BSS"
+; segment so the automatic fixup of references to the "BOOT" segment does
+; not work. Therefore references to this segment have to be expressed as
+; offsets to __BSS_RUN__.
 
 .segment	"BOOT"
-
-.ifdef  __APPLE2ENH__
-
-; Allocate interrupt vector table entry
-
-	jsr     $BF00
-	.byte   $40		; Alloc interrupt
-	.addr   params
-
-; Switch to 80 column mode
-
-	lda	#$0D
-	jsr	$C300
-
-.endif
 
 ; Setup the stack at HIMEM
 
@@ -156,6 +145,48 @@ _exit:	ldx	#$02
 	eor	#$A5
 	sta	$03F4
 		
+.ifdef  __APPLE2ENH__
+
+; Allocate interrupt vector table entry
+
+	jsr     $BF00
+	.byte   $40		; Alloc interrupt
+	.addr   intrpt
+
+; Switch to 80 column mode here to show some progress
+
+	lda	#$0D
+	jsr	$C300
+	
+; ProDOS TechRefMan, chapter 5.2.2.1:
+; "... you may protect those areas of auxiliary memory. If you save a
+;  dummy 8K file as the first entry in /RAM, it will always be saved
+;  at $2000 to $3FFF."
+;
+; Relocate the "UIP" segment by writing it to /RAM as the first file.
+
+	jsr     $BF00
+	.byte   $C0		; Create file
+	.addr   create
+
+	jsr     $BF00
+	.byte   $C8		; Open file
+	.addr   open
+	
+	lda	o_ref
+	sta	w_ref
+	sta	c_ref
+
+	jsr     $BF00
+	.byte   $CB		; Write file
+	.addr   write
+
+	jsr     $BF00
+	.byte   $CC		; Close file
+	.addr   close
+
+.endif
+
 ; Switch in LC bank 2 for W/O
 
 	bit	$C081
@@ -220,6 +251,47 @@ _exit:	ldx	#$02
 ; Forward control to code in the "INIT" segment
 
 	jmp	init
+	
+.ifdef  __APPLE2ENH__
+
+create	= __BSS_RUN__ + *
+	.byte	$07		; Parameter count
+	.addr	name		; Pathname
+	.byte	%11000011	; Access:	Standard full access
+	.byte	$00		; File type:	Typeless file
+	.word	$0000		; Aux type:	N/A
+	.byte	$01		; Storage type:	Standard seedling file
+	.word	$0000		; Create date:	Current date
+	.word	$0000		; Create time:	Current time
+
+open	= __BSS_RUN__ + *
+	.byte	$03		; Parameter count
+	.addr	name		; Pathname
+	.addr	_uip_buf	; IO buffer
+o_ref	= __BSS_RUN__ + *
+	.byte	$00		; Reference number
+
+write	= __BSS_RUN__ + *
+	.byte	$04		; Parameter count
+w_ref	= __BSS_RUN__ + *
+	.byte	$00		; Reference number
+	.addr	__BSS_RUN__ + \
+		__BOOT_SIZE__ + \
+		__INIT_SIZE__ + \
+		__CODE_SIZE__	; Data buffer
+	.word	__UIP_SIZE__	; Requested count
+	.word	$0000		; Transfered count
+
+close	= __BSS_RUN__ + *
+	.byte	$01		; Parameter count
+c_ref	= __BSS_RUN__ + *
+	.byte	$00		; Reference number
+
+name	= __BSS_RUN__ + *
+	.byte	14
+	.byte	"/RAM/CONTIKI.1"
+
+.endif
 
 ; ------------------------------------------------------------------------
 ; The "INIT" segment will be overwritten by the heap
@@ -247,8 +319,8 @@ rvsave:	.res	3
 
 .ifdef  __APPLE2ENH__
 
-params: .byte   $02		; Parameter count
+intrpt: .byte   $02		; Parameter count
 	.byte   $00		; Interrupt number
-	.addr   intrpt		; Interrupt handler
+	.addr   irq		; Interrupt handler
 
 .endif

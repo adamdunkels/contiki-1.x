@@ -30,7 +30,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.18 2006/04/09 16:32:44 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.19 2006/05/17 15:55:29 oliverschmidt Exp $
 #
 
 all: contiki
@@ -45,14 +45,21 @@ AFLAGS:=-t $(SYS) -I lib -I $(CC65_INC)/../asminc
 CFLAGS:=$(CFLAGSCC65) --code-name CONTIKI \
         -DWITH_ASCII -DWITH_UIP -DWITH_LOADER_ARCH -DWITH_ETHERNET
 
-ifeq ($(SYS),apple2enh)
-CTK=ctk.o ctk-mousetext.o ctk-mouse.o
-else
+ifeq ($(SYS),apple2)
+
 CTK=ctk.o ctk-conio.o
-endif
+
+else # apple2
+
+CTK=ctk.o ctk-mousetext.o ctk-mouse.o
+
+uip.s uip_arch.s uiplib.s tcpip.s: %.s: %.c
+	$(CC) $(CFLAGS) $(OPT) -DUIP_CODE -o $(notdir $@) $<
+
+endif # apple2
 
 contiki:crt0.o main.o ek.o ek-service.o timer.o program-handler.o arg.o \
-	$(CTK) $(UIP) loader-arch.o clock-arch.o bank.o kfs.o import.o \
+	loader-arch.o clock-arch.o bank.o kfs.o import.o $(CTK) $(UIP) \
 	www-dsc.o \
 	email-dsc.o \
 	ftp-dsc.o \

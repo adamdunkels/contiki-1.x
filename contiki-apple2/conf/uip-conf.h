@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki Destop OS
  *
- * $Id: uip-conf.h,v 1.3 2005/03/16 22:37:01 oliverschmidt Exp $
+ * $Id: uip-conf.h,v 1.4 2006/05/17 15:55:29 oliverschmidt Exp $
  *
  */
 #ifndef __UIP_CONF_H__
@@ -41,8 +41,49 @@
 #define UIP_CONF_MAX_LISTENPORTS 10
 #define UIP_CONF_BUFFER_SIZE     1024 - 2
 #define UIP_CONF_RECEIVE_WINDOW  UIP_TCP_MSS
+#define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
 #define UIP_CONF_EXTERNAL_BUFFER
 
-#define UIP_CONF_BYTE_ORDER      LITTLE_ENDIAN
+#ifdef UIP_CODE
+
+#pragma codeseg("UIP");
+
+#include "ek-conf.h"
+
+#undef  EK_PROCESS_INIT
+#define EK_PROCESS_INIT(name, arg)					\
+  void _tcpip_init(void *arg)
+
+#undef  EK_EVENTHANDLER
+#define EK_EVENTHANDLER(name, ev, data)					\
+  void _tcpip_eventhandler(ek_event_t ev, ek_data_t data)
+
+#undef  EK_POLLHANDLER
+#define EK_POLLHANDLER(name)						\
+  void _tcpip_pollhandler(void)
+
+#undef  EK_PROCESS
+#define EK_PROCESS(name, strname, prio, eventh, pollh, stateptr)	\
+  void tcpip_eventhandler(ek_event_t ev, ek_data_t data);		\
+  void tcpip_pollhandler(void);						\
+  static struct ek_proc name = {NULL, EK_ID_NONE, strname, prio, tcpip_eventhandler, tcpip_pollhandler, stateptr}
+
+#define htons                _htons
+#define uiplib_ipaddrconv    _uiplib_ipaddrconv
+#define tcp_markconn         _tcp_markconn
+#define tcp_listen           _tcp_listen
+#define tcp_unlisten         _tcp_unlisten
+#define tcp_connect          _tcp_connect
+#define udp_new              _udp_new
+#define tcpip_set_forwarding _tcpip_set_forwarding
+#define tcpip_input          _tcpip_input
+#define tcpip_output         _tcpip_output
+#define tcpip_poll_tcp       _tcpip_poll_tcp
+#define tcpip_poll_udp       _tcpip_poll_udp
+
+#define ek_post_synch        _ek_post_synch
+void _ek_post_synch(ek_id_t id, ek_event_t ev, ek_data_t data);
+
+#endif /* UIP_CODE */
 
 #endif /* __UIP_CONF_H__ */
