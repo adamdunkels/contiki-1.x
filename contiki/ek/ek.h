@@ -42,7 +42,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: ek.h,v 1.8 2005/02/22 22:46:33 adamdunkels Exp $
+ * $Id: ek.h,v 1.9 2006/05/17 15:27:43 oliverschmidt Exp $
  */
 #ifndef __EK_H__
 #define __EK_H__
@@ -183,8 +183,10 @@ typedef unsigned char ek_err_t;
  *
  * \hideinitializer
  */
+#ifndef EK_PROCESS
 #define EK_PROCESS(name, strname, prio, eventh, pollh, stateptr)	\
   static struct ek_proc name = {NULL, EK_ID_NONE, strname, prio, eventh, pollh, stateptr}
+#endif /* EK_PROCESS */
 
 struct ek_proc {
   struct ek_proc *next;
@@ -299,14 +301,20 @@ struct ek_proc *ek_process(ek_id_t id);
  *
  * \hideinitializer 
  */
+#ifndef EK_EVENTHANDLER
 #define EK_EVENTHANDLER(name, ev, data) \
         static void name(ek_event_t ev, ek_data_t data)
+#endif /* EK_EVENTHANDLER */
 
+#ifndef EK_POLLHANDLER
 #define EK_POLLHANDLER(name) \
         static void name(void)
+#endif /* EK_POLLHANDLER */
 
+#ifndef EK_PROCESS_INIT
 #define EK_PROCESS_INIT(name, arg) \
         void name(void *arg)
+#endif /* EK_PROCESS_INIT */
 
 #define EK_PROC_STATE(p) ((p)->procstate)
 #define EK_PROC_ID(p)    ((p)->id)
