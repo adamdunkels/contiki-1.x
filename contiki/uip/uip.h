@@ -45,7 +45,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: uip.h,v 1.19 2005/03/09 10:21:04 adamdunkels Exp $
+ * $Id: uip.h,v 1.20 2006/05/17 15:25:15 oliverschmidt Exp $
  *
  */
 
@@ -988,9 +988,7 @@ struct uip_udp_conn *uip_udp_new(u16_t *ripaddr, u16_t rport);
  * byte order to network byte order. For converting constants to
  * network byte order, use the HTONS() macro instead.
  */
-#ifndef htons
 u16_t htons(u16_t val);
-#endif /* htons */
 
 /** @} */
 
