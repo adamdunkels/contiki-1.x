@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.14 2006/05/18 16:20:08 oliverschmidt Exp $
+ * $Id: main.c,v 1.15 2006/05/18 16:31:58 oliverschmidt Exp $
  *
  */
 
@@ -103,6 +103,27 @@ clock_time(void)
   return clock;
 }
 /*-----------------------------------------------------------------------------------*/
+#define STACK_SIZE 0
+#if STACK_SIZE
+#include <conio.h>
+#include <stdlib.h>
+void
+stack_size(void)
+{
+  static unsigned char *c;
+  static unsigned int s;
+  c = (unsigned char *)(0xBF00 - STACK_SIZE);
+  while(*c++ == 0xA2) {
+  }
+  s = (unsigned char *)0xBF00 - c;
+  clrscr();
+  cputc('0' + s / 100 % 10);
+  cputc('0' + s / 10  % 10);
+  cputc('0' + s       % 10);
+  cgetc();
+}
+#endif /* STACK_SIZE */
+/*-----------------------------------------------------------------------------------*/
 void
 #ifdef __APPLE2__
 main(void)
@@ -110,6 +131,13 @@ main(void)
 main(int argc, char *argv[])
 #endif /* __APPLE2__ */
 {
+
+#if STACK_SIZE
+  memset((void *)(0xBF00 - STACK_SIZE),
+         0xA2, STACK_SIZE - (0xBF00 - *(unsigned int *)0x80) - 10);
+  atexit(stack_size);
+#endif /* STACK_SIZE */
+
   ek_init();
   ek_start(&init);
 
