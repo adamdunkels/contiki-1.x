@@ -28,7 +28,7 @@
 		__UIP_SIZE__ - __STARTUP_RUN__		; Size
 
 ; ------------------------------------------------------------------------
-; Place the startup code in a special segment.
+; Place the startup code in a special segment
 
 .segment       	"STARTUP"
 
@@ -158,12 +158,21 @@ _exit:	ldx	#$02
 	lda	#$0D
 	jsr	$C300
 	
+; Save potential command line arguments from being overwritten by
+; slot-based realtime clock being called by ProDOS on file I/O
+
+	ldx	#$7F
+:	lda	$200,x
+	sta	$100,x
+	dex
+	bpl	:-
+
 ; ProDOS TechRefMan, chapter 5.2.2.1:
 ; "... you may protect those areas of auxiliary memory. If you save a
 ;  dummy 8K file as the first entry in /RAM, it will always be saved
 ;  at $2000 to $3FFF."
 ;
-; Relocate the "UIP" segment by writing it to /RAM as the first file.
+; Relocate the "UIP" segment by writing it to /RAM as the first file
 
 	jsr     $BF00
 	.byte   $C0		; Create file
@@ -184,6 +193,14 @@ _exit:	ldx	#$02
 	jsr     $BF00
 	.byte   $CC		; Close file
 	.addr   close
+
+; Restore potential command line arguments
+
+	ldx	#$7F
+:	lda	$100,x
+	sta	$200,x
+	dex
+	bpl	:-
 
 .endif
 

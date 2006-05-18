@@ -32,9 +32,11 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.13 2005/05/16 21:18:47 oliverschmidt Exp $
+ * $Id: main.c,v 1.14 2006/05/18 16:20:08 oliverschmidt Exp $
  *
  */
+
+#include <string.h>
 
 #include "ctk.h"
 #include "ctk-draw.h"
@@ -102,7 +104,11 @@ clock_time(void)
 }
 /*-----------------------------------------------------------------------------------*/
 void
+#ifdef __APPLE2__
 main(void)
+#else /* __APPLE2__ */
+main(int argc, char *argv[])
+#endif /* __APPLE2__ */
 {
   ek_init();
   ek_start(&init);
@@ -121,7 +127,28 @@ main(void)
 
   while(1) {
     if(ek_run() == 0) {
+
+#ifdef __APPLE2__
+
       program_handler_load("welcome.prg", NULL);
+
+#else /* __APPLE2__ */
+
+      static char *startup;
+      static char *slash;
+
+      if(argc == 1) {
+        startup = "welcome.prg";
+      } else {
+	startup = argv[1];
+	while(slash = strchr(startup, '/')) {
+	  startup = slash + 1;
+	}
+      }
+      program_handler_load(startup, NULL);
+
+#endif /* __APPLE2__ */
+
       break;
     }
   }
