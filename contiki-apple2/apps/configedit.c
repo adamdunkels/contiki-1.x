@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.9 2005/05/22 14:04:01 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.10 2006/05/25 00:11:10 oliverschmidt Exp $
  *
  */
 
@@ -97,25 +97,47 @@ static struct ctk_textentry slottextentry =
 static struct ctk_label slotdescr =
   {CTK_LABEL(16, 7, 12, 1, "('1' to '7')")};
 
+static struct ctk_label prefixlabel =
+  {CTK_LABEL(0, 9, 11, 1, "DOS Prefix")};
+static char prefix[65];
+static struct ctk_textentry prefixtextentry =
+  {CTK_TEXTENTRY(12, 9, 15, 1, prefix, 65)};
+
 static struct ctk_label ipaddrlabel =
-  {CTK_LABEL(0, 9, 10, 1, "IP address")};
+  {CTK_LABEL(0, 11, 10, 1, "IP address")};
 static char ipaddr[16];
 static struct ctk_textentry ipaddrtextentry =
-  {CTK_TEXTENTRY(12, 9, 15, 1, ipaddr, 15)};
+  {CTK_TEXTENTRY(12, 11, 15, 1, ipaddr, 15)};
 
 #ifdef WITH_ETHERNET
 
 static struct ctk_label netmasklabel =
-  {CTK_LABEL(0, 10, 11, 1, "Netmask")};
+  {CTK_LABEL(0, 12, 11, 1, "Netmask")};
 static char netmask[16];
 static struct ctk_textentry netmasktextentry =
-  {CTK_TEXTENTRY(12, 10, 15, 1, netmask, 15)};
+  {CTK_TEXTENTRY(12, 12, 15, 1, netmask, 15)};
 
 static struct ctk_label gatewaylabel =
-  {CTK_LABEL(0, 11, 11, 1, "Gateway")};
+  {CTK_LABEL(0, 13, 11, 1, "Gateway")};
 static char gateway[16];
 static struct ctk_textentry gatewaytextentry =
-  {CTK_TEXTENTRY(12, 11, 15, 1, gateway, 15)};
+  {CTK_TEXTENTRY(12, 13, 15, 1, gateway, 15)};
+
+static struct ctk_label dnsserverlabel =
+  {CTK_LABEL(0, 14, 11, 1, "DNS server")};
+static char dnsserver[16];
+static struct ctk_textentry dnsservertextentry =
+  {CTK_TEXTENTRY(12, 14, 15, 1, dnsserver, 15)};
+
+static struct ctk_label maclsblabel =
+  {CTK_LABEL(0, 16, 11, 1, "MAC address")};
+static char maclsb[4];
+static struct ctk_textentry maclsbtextentry =
+  {CTK_TEXTENTRY(12, 16, 3, 1, maclsb, 3)};
+static struct ctk_label maclsbdescr =
+  {CTK_LABEL(18, 16, 10, 1, "(LSB only)")};
+
+#else /* WITH_ETHERNET */
 
 static struct ctk_label dnsserverlabel =
   {CTK_LABEL(0, 12, 11, 1, "DNS server")};
@@ -123,28 +145,12 @@ static char dnsserver[16];
 static struct ctk_textentry dnsservertextentry =
   {CTK_TEXTENTRY(12, 12, 15, 1, dnsserver, 15)};
 
-static struct ctk_label maclsblabel =
-  {CTK_LABEL(0, 14, 11, 1, "MAC address")};
-static char maclsb[4];
-static struct ctk_textentry maclsbtextentry =
-  {CTK_TEXTENTRY(12, 14, 3, 1, maclsb, 3)};
-static struct ctk_label maclsbdescr =
-  {CTK_LABEL(18, 14, 10, 1, "(LSB only)")};
-
-#else /* WITH_ETHERNET */
-
-static struct ctk_label dnsserverlabel =
-  {CTK_LABEL(0, 10, 11, 1, "DNS server")};
-static char dnsserver[16];
-static struct ctk_textentry dnsservertextentry =
-  {CTK_TEXTENTRY(12, 10, 15, 1, dnsserver, 15)};
-
 #endif /* WITH_ETHERNET */
 
 static struct ctk_button okbutton =
-  {CTK_BUTTON(0, 16, 12, "Save & close")};
+  {CTK_BUTTON(0, 18, 12, "Save & close")};
 static struct ctk_button cancelbutton =
-  {CTK_BUTTON(22, 16, 6, "Cancel")};
+  {CTK_BUTTON(22, 18, 6, "Cancel")};
 
 
 static struct ctk_window errordialog;
@@ -246,6 +252,10 @@ makestrings(void)
     *slot = config_getlanslot() + '0';
   }
 
+  if(config_getprefixok()) {
+    getcwd(prefix, sizeof(prefix));
+  }
+
 #ifdef WITH_UIP
 
   uip_gethostaddr(addr);
@@ -269,7 +279,6 @@ makestrings(void)
   }
   
 #endif /* WITH_UIP */
-
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -309,6 +318,9 @@ makeconfig(void)
   } else {
     config.slot = 0;
   }
+
+  nullterminate(prefix);
+  strcpy(config.prefix, prefix);
 
 #ifdef WITH_UIP
 
@@ -375,6 +387,11 @@ config_apply(void)
     program_handler_load(config.driver, NULL);
   }
 
+  config_setprefixok(*config.prefix);
+  if(*config.prefix) {
+    chdir(config.prefix);
+  }
+
 #ifdef WITH_UIP
 
   uip_sethostaddr(config.ipaddr);
@@ -410,7 +427,7 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
   EK_EVENTHANDLER_ARGS(ev, data);
   
   if(ev == EK_EVENT_INIT) {
-    ctk_window_new(&window, 30, 17, "Config editor");
+    ctk_window_new(&window, 30, 19, "Config editor");
 #ifdef __APPLE2ENH__
     CTK_WIDGET_ADD(&window, &backgroundlabel);
     CTK_WIDGET_ADD(&window, &backgroundtextentry);
@@ -426,6 +443,8 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
     CTK_WIDGET_ADD(&window, &slotlabel);
     CTK_WIDGET_ADD(&window, &slottextentry);
     CTK_WIDGET_ADD(&window, &slotdescr);
+    CTK_WIDGET_ADD(&window, &prefixlabel);
+    CTK_WIDGET_ADD(&window, &prefixtextentry);
     CTK_WIDGET_ADD(&window, &ipaddrlabel);
     CTK_WIDGET_ADD(&window, &ipaddrtextentry);
 #ifdef WITH_ETHERNET

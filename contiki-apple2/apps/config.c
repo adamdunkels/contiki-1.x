@@ -32,12 +32,13 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.9 2005/05/22 14:04:00 oliverschmidt Exp $
+ * $Id: config.c,v 1.10 2006/05/25 00:11:10 oliverschmidt Exp $
  *
  */
 
 
 #include <string.h>
+#include <unistd.h>
 
 #include "uiplib.h"
 #include "resolv.h"
@@ -52,6 +53,7 @@
 static config_t config = {0,
 			  "SSFire.sav", 5,
 			  "Uther.drv", 0,
+			  "",
 			  {0xA8C0, 0x8000}, {0xFFFF, 0x00FF},
 			  {0xA8C0, 0x0100}, {0xA8C0, 0x0100},
 			  0xA2};
@@ -70,7 +72,7 @@ config_load(void)
   kfs_close(fd);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static void 
 config_apply(void)
 {
 #ifdef __APPLE2ENH__
@@ -87,6 +89,11 @@ config_apply(void)
 
   if(*config.driver) {
     program_handler_load(config.driver, NULL);
+  }
+
+  config_setprefixok(*config.prefix);
+  if(*config.prefix) {
+    chdir(config.prefix);
   }
 
 #ifdef WITH_UIP

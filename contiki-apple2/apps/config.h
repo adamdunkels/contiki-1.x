@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: config.h,v 1.5 2005/05/13 00:00:17 oliverschmidt Exp $
+ * $Id: config.h,v 1.6 2006/05/25 00:11:10 oliverschmidt Exp $
  *
  */
 #ifndef __CONFIG_H__
@@ -44,6 +44,7 @@ typedef struct {
   unsigned char timeout;
   char driver[16];
   unsigned char slot;
+  char prefix[65];
   u16_t ipaddr[2];
   u16_t netmask[2];
   u16_t gateway[2];
@@ -52,8 +53,12 @@ typedef struct {
 } config_t;
 
 extern unsigned char lanslot;
+extern char prefixok;
 
-#define config_getlanslot()	lanslot
-#define config_setlanslot(slot)	lanslot = (slot)
+#define config_getlanslot()	    lanslot
+#define config_setlanslot(slot)	    lanslot = (slot)
+
+#define config_getprefixok()	    prefixok
+#define config_setprefixok(prefix)  prefixok = (prefix)
 
 #endif /* __CONFIG_H__ */
