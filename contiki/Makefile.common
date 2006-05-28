@@ -20,7 +20,7 @@ TELNETD=telnetd.o shell.o memb.o telnetd-gui.o
 
 VNCVIEWER=vnc.o vnc-viewer.o vnc-draw.o
 
-WEBSERVER=webserver.o httpd.o http-strings.o psock.o uipbuf.o memb.o httpd-fs.o
+WEBSERVER=webserver.o httpd.o http-strings.o psock.o uipbuf.o memb.o httpd-fs.o httpd-cgi.o
 
 WGET=wget.o webclient.o http-strings.o http-user-agent-string.o 
 
