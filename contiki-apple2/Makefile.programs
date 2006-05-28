@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.18 2005/05/12 21:14:20 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.19 2006/05/28 23:22:29 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
@@ -44,6 +44,7 @@ all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
      processes.prg processes.dsc \
      shell.prg shell.dsc \
      telnet.prg telnet.dsc \
+     webserver.prg webserver.dsc \
      welcome.prg \
      wget.prg wget.dsc \
      www.prg www.dsc \
@@ -77,6 +78,8 @@ irc.prg: $(IRC) lc-asm.o
 shell.prg: $(SHELL_) cfs.o
 
 telnet.prg: $(TELNET)
+
+webserver.prg: $(WEBSERVER) lc-asm.o
 
 wget.prg: $(WGET)
 
