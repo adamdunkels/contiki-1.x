@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.15 2006/05/18 16:31:58 oliverschmidt Exp $
+ * $Id: main.c,v 1.16 2006/05/28 23:23:22 oliverschmidt Exp $
  *
  */
 
@@ -58,6 +58,7 @@
 #include "clock-arch.h"
 
 unsigned char lanslot;
+unsigned char prefixlen;
 
 #pragma bssseg(push, "UIPBUF");
 u8_t uip_buf[UIP_BUFSIZE + 2];
