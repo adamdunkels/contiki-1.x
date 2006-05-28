@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.10 2006/05/25 00:11:10 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.11 2006/05/28 20:50:13 oliverschmidt Exp $
  *
  */
 
@@ -252,8 +252,13 @@ makestrings(void)
     *slot = config_getlanslot() + '0';
   }
 
-  if(config_getprefixok()) {
+  if(config_getprefixlen()) {
+    static unsigned char diff;
     getcwd(prefix, sizeof(prefix));
+    diff = strlen(prefix) - config_getprefixlen();
+    if(diff) {
+      strcpy(prefix, prefix + diff);
+    }
   }
 
 #ifdef WITH_UIP
@@ -344,7 +349,6 @@ makeconfig(void)
     config.gateway[1] = addr[1];
   }
 
-  *(char *)0x02FF = 0;
   tmp = 0;
   for(cptr = maclsb; *cptr >= '0' && *cptr <= '9'; ++cptr) {
     tmp = (tmp * 10) + (*cptr - '0');
@@ -387,9 +391,12 @@ config_apply(void)
     program_handler_load(config.driver, NULL);
   }
 
-  config_setprefixok(*config.prefix);
   if(*config.prefix) {
-    chdir(config.prefix);
+    if(chdir(config.prefix) == 0) {
+      config_setprefixlen(strlen(config.prefix));
+    } else {
+      config_setprefixlen(0);
+    }
   }
 
 #ifdef WITH_UIP
@@ -483,8 +490,8 @@ EK_EVENTHANDLER(config_eventhandler, ev, data)
       /* Fill the configuration with values from the current
          configuration strings */
       makeconfig();
+      config_apply();
       if(config_save()) {
-        config_apply();
 	goto quit;
       }
       ctk_dialog_open(&errordialog);
