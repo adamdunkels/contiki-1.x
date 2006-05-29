@@ -29,7 +29,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-mousetext.c,v 1.21 2006/05/28 20:38:48 oliverschmidt Exp $
+ * $Id: ctk-mousetext.c,v 1.22 2006/05/29 20:57:32 oliverschmidt Exp $
  *
  */
 
@@ -264,6 +264,8 @@ draw_window_contents(struct ctk_window *window, unsigned char focus,
   }
 }
 /*-----------------------------------------------------------------------------------*/
+#pragma codeseg(push, "CODE");
+/*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_window(struct ctk_window *window, unsigned char focus,
 		unsigned char clipy1, unsigned char clipy2,
@@ -312,6 +314,8 @@ ctk_draw_dialog(struct ctk_window *dialog)
 
   draw_window_contents(dialog, CTK_FOCUS_DIALOG, x1, x2, y1, y2);
 }
+/*-----------------------------------------------------------------------------------*/
+#pragma codeseg(pop);
 /*-----------------------------------------------------------------------------------*/
 void
 ctk_draw_clear(unsigned char y1, unsigned char y2)
