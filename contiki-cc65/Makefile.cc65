@@ -36,16 +36,16 @@ vpath %.c $(PORTDIRS) $(CONTIKICC65DIRS) $(CONTIKIDIRS)
 vpath %.S $(PORTDIRS) $(CONTIKICC65DIRS) $(CONTIKIDIRS)
 
 %.sav:  %.o contiki-labels.o
-	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+	cl65 --module -t $(SYS) -m $(@:.sav=.map) -o $@ loader-arch-module.o $^
 
 %.prg:  %.o contiki-labels.o
-	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+	cl65 --module -t $(SYS) -m $(@:.prg=.map) -o $@ loader-arch-module.o $^
 
 %.drv:  %-drv.o contiki-labels.o
-	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+	cl65 --module -t $(SYS) -m $(@:.drv=.map) -o $@ loader-arch-module.o $^
 
 %.drv:  %.o contiki-labels.o
-	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+	cl65 --module -t $(SYS) -m $(@:.drv=.map) -o $@ loader-arch-module.o $^
 
 %.dsc:  %-dsc.o contiki-labels.o
 	cl65 --module -t $(SYS) -o $@ loader-arch-module-dsc.o $^
