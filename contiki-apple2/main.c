@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.16 2006/05/28 23:23:22 oliverschmidt Exp $
+ * $Id: main.c,v 1.17 2006/05/29 21:07:53 oliverschmidt Exp $
  *
  */
 
@@ -56,6 +56,12 @@
 
 #include "clock.h"
 #include "clock-arch.h"
+
+#if CTK_CONF_MOUSE_SUPPORT
+#define TICK_COUNT 2800
+#else
+#define TICK_COUNT 4200
+#endif
 
 unsigned char lanslot;
 unsigned char prefixlen;
@@ -96,7 +102,7 @@ clock_time(void)
 
   count += tick;
 
-  if(count == 4200) {
+  if(count == TICK_COUNT) {
     count = 0;
     ++clock;
   }
