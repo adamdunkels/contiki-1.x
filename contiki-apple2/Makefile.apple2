@@ -30,12 +30,10 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.apple2,v 1.19 2006/05/17 15:55:29 oliverschmidt Exp $
+# $Id: Makefile.apple2,v 1.20 2006/05/30 20:51:01 oliverschmidt Exp $
 #
 
 all: contiki
-
-SYS=apple2enh
 
 include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65

@@ -27,7 +27,7 @@
 #
 # This file is part of the Contiki desktop environment
 #
-# $Id: Makefile.programs,v 1.19 2006/05/28 23:22:29 oliverschmidt Exp $
+# $Id: Makefile.programs,v 1.20 2006/05/30 20:51:01 oliverschmidt Exp $
 #
 
 all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
@@ -44,7 +44,6 @@ all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
      processes.prg processes.dsc \
      shell.prg shell.dsc \
      telnet.prg telnet.dsc \
-     webserver.prg webserver.dsc \
      welcome.prg \
      wget.prg wget.dsc \
      www.prg www.dsc \
@@ -53,7 +52,12 @@ all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
      plasma.sav plasma.dsc \
      ssfire.sav ssfire.dsc
 
-SYS=apple2enh
+ifeq ($(SYS),apple2enh)
+
+all: webserver.prg webserver.dsc \
+     bounce.sav bounce.dsc
+
+endif # apple2enh
 
 include $(CONTIKI)/Makefile.common
 include $(CONTIKICC65)/Makefile.cc65
