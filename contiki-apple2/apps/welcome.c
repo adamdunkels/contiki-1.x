@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: welcome.c,v 1.2 2006/05/07 23:30:50 oliverschmidt Exp $
+ * $Id: welcome.c,v 1.3 2006/05/30 21:02:32 oliverschmidt Exp $
  *
  */
 
@@ -39,7 +39,7 @@
 
 static struct ctk_window welcomedialog;
 static struct ctk_label welcomelabel1 =
-  {CTK_LABEL(2, 1, 30, 1, "Welcome to " CONTIKI_VERSION_STRING "!")};
+  {CTK_LABEL(2, 1, 30, 1, "Welcome to " CONTIKI_VERSION_STRING " !")};
 static struct ctk_label welcomelabel2 =
   {CTK_LABEL(2, 4, 30, 1, "Esc        - open menus")};
 static struct ctk_label welcomelabel3 =
