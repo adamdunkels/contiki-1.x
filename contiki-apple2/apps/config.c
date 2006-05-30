@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.11 2006/05/28 20:50:13 oliverschmidt Exp $
+ * $Id: config.c,v 1.12 2006/05/30 20:57:35 oliverschmidt Exp $
  *
  */
 
@@ -51,7 +51,11 @@
 
 
 static config_t config = {0,
+#ifdef __APPLE2__
 			  "SSFire.sav", 5,
+#else /* __APPLE2__ */
+			  "Bounce.sav", 5,
+#endif /* __APPLE2__ */
 			  "Uther.drv", 0,
 			  "",
 			  {0xA8C0, 0x8000}, {0xFFFF, 0x00FF},
