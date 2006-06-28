@@ -97,7 +97,7 @@ _exit:	ldx	#$02
 ; Switch in $2000-$3FFF from aux memory
 
 	lda	$C018		; 80Store ?
-	sta	save80
+	pha
 	sta	$C001		; 80Store On
 	
 	bit	$C055		; Page2
@@ -112,7 +112,7 @@ _exit:	ldx	#$02
 	bit	$C056		; LoRes
 	bit	$C054		; Page1
 	
-	lda	save80
+	pla
 	bmi	:+
 	sta	$C000		; 80Store Off
 
@@ -551,8 +551,6 @@ init:	jsr	zerobss
 rvsave:	.res	3
 
 .ifdef  __APPLE2ENH__
-
-save80:	.res	1
 
 intrpt: .byte   $02		; Parameter count
 	.byte   $00		; Interrupt number
