@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: config.c,v 1.12 2006/05/30 20:57:35 oliverschmidt Exp $
+ * $Id: config.c,v 1.13 2006/06/28 23:10:44 oliverschmidt Exp $
  *
  */
 
@@ -95,10 +95,8 @@ config_apply(void)
     program_handler_load(config.driver, NULL);
   }
 
-  if(*config.prefix) {
-    if(chdir(config.prefix) == 0) {
-      config_setprefixlen(strlen(config.prefix));
-    }
+  if(*config.prefix == '/') {
+    config_setprefixok(chdir(config.prefix) == 0);
   }
 
 #ifdef WITH_UIP

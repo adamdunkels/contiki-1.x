@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: configedit.c,v 1.11 2006/05/28 20:50:13 oliverschmidt Exp $
+ * $Id: configedit.c,v 1.12 2006/06/28 23:10:45 oliverschmidt Exp $
  *
  */
 
@@ -252,13 +252,8 @@ makestrings(void)
     *slot = config_getlanslot() + '0';
   }
 
-  if(config_getprefixlen()) {
-    static unsigned char diff;
+  if(config_getprefixok()) {
     getcwd(prefix, sizeof(prefix));
-    diff = strlen(prefix) - config_getprefixlen();
-    if(diff) {
-      strcpy(prefix, prefix + diff);
-    }
   }
 
 #ifdef WITH_UIP
@@ -391,12 +386,8 @@ config_apply(void)
     program_handler_load(config.driver, NULL);
   }
 
-  if(*config.prefix) {
-    if(chdir(config.prefix) == 0) {
-      config_setprefixlen(strlen(config.prefix));
-    } else {
-      config_setprefixlen(0);
-    }
+  if(*config.prefix == '/') {
+    config_setprefixok(chdir(config.prefix) == 0);
   }
 
 #ifdef WITH_UIP
