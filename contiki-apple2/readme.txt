@@ -167,7 +167,7 @@ Implementation Notes
    of the time the 8kB are just kept mapped in when the uIP code calls other
    code. This is possible because the only memory not reachable from the uIP
    code are the corresponding 8kB of Main memory - and the Contiki kernel
-   objects are linked in an order in which makes only CTK code (which is never
+   objects are linked in an order which makes only CTK code (which is never
    called by uIP code) use that 8kB of Main memory. The only call from uIP code
    that triggers mapping out the 8kB of Aux memory is the uIP upcall into a
    program for processing incoming IP data as some program may potentially call
