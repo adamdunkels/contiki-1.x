@@ -35,11 +35,13 @@ static DWORD (WINAPI *DeleteProxyArpEntry)(DWORD, DWORD, DWORD);
 
 #pragma pack(pop)
 
-#define htons
+#define htons contiki_htons /* htons is defined in winsock2 */
 #include "uip.h"
+#undef htons
 #include "tcpip.h"
 #include "ctk.h"
-#undef htons
+
+#define SOCKIO_(ON,CMD) sockio_(ON,CMD,"ioctlsocket("#CMD") error: %d\n")
 
 #define BUF ((uip_tcpip_hdr *)uip_buf)
 
@@ -48,7 +50,26 @@ void debug_printf(char *format, ...);
 static DWORD  interfaceindex;
 static DWORD  proxyaddr;
 static SOCKET rawsock = INVALID_SOCKET;
+static unsigned long off = 0;
+static unsigned long on  = 1;
 
+static const int recv_filt[] = {WSAEWOULDBLOCK,WSAEMSGSIZE};
+static const int send_filt[] = {WSAEADDRNOTAVAIL,WSAEHOSTUNREACH};
+
+static void sockio_(unsigned long on, long cmd, char *cmd_err_fmt);
+static u16_t filt_err(int e, const int *head, const int *const tail);
+static void update_proxy_arp(void);
+static u16_t filter_recv(int value);
+static u16_t filter_send(int value);
+/*-----------------------------------------------------------------------------------*/
+static int match(const int x, const int *head, const int *const tail)
+{
+  for( ;tail != head; ++head)
+  {
+    if(*head == x) return 1;
+  }
+  return 0;
+}
 /*-----------------------------------------------------------------------------------*/
 static void
 create_proxyarp(void)
@@ -78,18 +99,18 @@ delete_proxyarp(void)
   debug_printf("DeleteProxyArpEntry(%s): %d\n", inet_ntoa(addr), retval);
 }
 /*-----------------------------------------------------------------------------------*/
-static void
+static int
 error_exit(char *message, int value)
 {
   console_exit();
   cprintf(message, value);
   exit(EXIT_FAILURE);
+  return 0;
 }
 /*-----------------------------------------------------------------------------------*/
 void
 rawsock_init(void)
 {
-  static unsigned long on = 1;
   DWORD                hostaddr;
   HMODULE              iphlpapi;
   MIB_IPADDRTABLE      *addrtable;
@@ -172,13 +193,8 @@ rawsock_init(void)
     error_exit("setsockopt(IP_HDRINCL) error: %d\n", WSAGetLastError());
   }
 
-  if(ioctlsocket(rawsock, SIO_RCVALL, &on) == SOCKET_ERROR) {
-    error_exit("ioctlsocket(SIO_RCVALL) error: %d\n", WSAGetLastError());
-  }
-
-  if(ioctlsocket(rawsock, FIONBIO, &on) == SOCKET_ERROR) {
-    error_exit("ioctlsocket(FIONBIO) error: %d\n", WSAGetLastError());
-  }
+  SOCKIO_(on, SIO_RCVALL);
+  SOCKIO_(on, FIONBIO);
 
   if(atexit(delete_proxyarp) != 0) {
     error_exit("atexit() error\n", 0);
@@ -186,60 +202,62 @@ rawsock_init(void)
 }
 /*-----------------------------------------------------------------------------------*/
 void
-rawsock_send(void)
+rawsock_send(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
 {
-  static unsigned long off = 0;
-  static unsigned long on  = 1;
   struct sockaddr_in   addr;
-  DWORD                dummy;
-  WSABUF               sendbuf[2] = {{          UIP_TCPIP_HLEN, uip_buf},
-				     {uip_len - UIP_TCPIP_HLEN, uip_appdata}};
+  DWORD  dummy;
+  WSABUF sendbuf[2] = {{hdrlen, hdr},{datalen, data}};
 
-  if(ioctlsocket(rawsock, FIONBIO, &off) == SOCKET_ERROR) {
-    error_exit("ioctlsocket(!FIONBIO) error: %d\n", WSAGetLastError());
-  }
+  SOCKIO_(off, FIONBIO); /* switch Non-blocking I/O off */
 
   addr.sin_family      = AF_INET;
   addr.sin_addr.s_addr = *(unsigned long *)BUF->destipaddr;
   addr.sin_port        = 0;
-  if(WSASendTo(rawsock, sendbuf, 2, &dummy, 0, (struct sockaddr *)&addr,
-	       sizeof(addr), NULL, NULL) == SOCKET_ERROR) {
+  filter_send(WSASendTo(rawsock, sendbuf, 2, &dummy, 0
+    , (struct sockaddr *)&addr, sizeof(addr), NULL, NULL));
 
-    if(WSAGetLastError() != WSAEADDRNOTAVAIL &&
-       WSAGetLastError() != WSAEHOSTUNREACH) {
-      error_exit("sendto() error: %d\n", WSAGetLastError());
-    }
-  }
-
-  if(ioctlsocket(rawsock, FIONBIO, &on) == SOCKET_ERROR) {
-    error_exit("ioctlsocket(FIONBIO) error: %d\n", WSAGetLastError());
-  }
+  SOCKIO_(on, FIONBIO); /* switch Non-blocking I/O on */
 }  
 /*-----------------------------------------------------------------------------------*/
 u16_t
 rawsock_poll(void)
 {
-  int received;
-
-  if(rawsock == INVALID_SOCKET) {
-    return 0;
-  }
-
+  return INVALID_SOCKET == rawsock ? 0 :
+    filter_recv((update_proxy_arp(), recv(rawsock, uip_buf, UIP_BUFSIZE, 0)));
+}
+/*-----------------------------------------------------------------------------------*/
+u16_t filter_recv(int value)
+{
+  return SOCKET_ERROR == value
+    ? filt_err(WSAGetLastError(), recv_filt, recv_filt + 2) : value;
+}
+/*-----------------------------------------------------------------------------------*/
+u16_t filter_send(int value)
+{
+  return SOCKET_ERROR == value
+    ? filt_err(WSAGetLastError(), send_filt, send_filt + 2) : value;
+}
+/*-----------------------------------------------------------------------------------*/
+u16_t filt_err(int v, const int *hd, const int *const tl)
+{
+  return match(v, hd, tl) ? v : error_exit("send/recv() error: %d\n", v);
+}
+/*-----------------------------------------------------------------------------------*/
+void
+update_proxy_arp(void)
+{
   if(proxyaddr != *(DWORD *)uip_hostaddr) {
     delete_proxyarp();
     proxyaddr = *(DWORD *)uip_hostaddr;
     create_proxyarp();
   }
-
-  received = recv(rawsock, uip_buf, UIP_BUFSIZE, 0);
-  if(received == SOCKET_ERROR) {
-
-    if(WSAGetLastError() != WSAEWOULDBLOCK &&
-       WSAGetLastError() != WSAEMSGSIZE) {
-      error_exit("recv() error: %d\n", WSAGetLastError());
-    }
-    return 0;
+}
+/*-----------------------------------------------------------------------------------*/
+void
+sockio_(unsigned long on, long cmd, char *cmd_err_fmt)
+{
+  if(SOCKET_ERROR == ioctlsocket(rawsock, cmd, &on)) {
+    error_exit(cmd_err_fmt, WSAGetLastError());
   }
-  return received;
 }
 /*-----------------------------------------------------------------------------------*/

@@ -1,30 +1,18 @@
-
 #include "packet-service.h"
 #include "rawsock.h"
 
-static void output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen);
-
-static const struct packet_service_state state =
-  {
-    PACKET_SERVICE_VERSION,
-    output
-  };
+static const struct packet_service_state
+state = {PACKET_SERVICE_VERSION, rawsock_send};
 
 EK_EVENTHANDLER(eventhandler, ev, data);
 EK_POLLHANDLER(pollhandler);
 EK_PROCESS(proc, PACKET_SERVICE_NAME, EK_PRIO_NORMAL,
-	   eventhandler, pollhandler, (void *)&state);
+	   eventhandler, pollhandler, &state);
 
 /*---------------------------------------------------------------------------*/
 EK_PROCESS_INIT(packet_service_init, arg)
 {
   ek_service_start(PACKET_SERVICE_NAME, &proc);
-}
-/*---------------------------------------------------------------------------*/
-static void
-output(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
-{
-  rawsock_send();
 }
 /*---------------------------------------------------------------------------*/
 EK_EVENTHANDLER(eventhandler, ev, data)
@@ -35,7 +23,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     rawsock_init();
     break;
   case EK_EVENT_REQUEST_REPLACE:
-    ek_replace((struct ek_proc *)data, NULL);
+    ek_replace(data, NULL);
     LOADER_UNLOAD();
     break;
   case EK_EVENT_REQUEST_EXIT:
@@ -50,8 +38,6 @@ EK_EVENTHANDLER(eventhandler, ev, data)
 EK_POLLHANDLER(pollhandler)
 {
   uip_len = rawsock_poll();
-  if(uip_len > 0) {
-    tcpip_input();
-  }
+  if(0 < uip_len) tcpip_input();
 }
 /*---------------------------------------------------------------------------*/
