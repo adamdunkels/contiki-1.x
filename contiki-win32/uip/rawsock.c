@@ -12,26 +12,19 @@
 
 #pragma pack(push, 4)
 
-typedef struct {
-  DWORD          dwAddr;
-  DWORD          dwIndex;
-  DWORD          dwMask;
-  DWORD          dwBCastAddr;
-  DWORD          dwReasmSize;
-  unsigned short unused1;
-  unsigned short unused2;
+typedef struct mib_ipaddrrow_t {
+  DWORD dwAddr;
+  DWORD dwIndex;
+  DWORD dwMask;
+  DWORD dwBCastAddr;
+  DWORD dwReasmSize;
+  DWORD unused;
 } MIB_IPADDRROW;
 
-typedef struct {
+typedef struct mib_ipaddrtable_t {
   DWORD         dwNumEntries;
   MIB_IPADDRROW table[0];
 } MIB_IPADDRTABLE;
-
-static DWORD (WINAPI *GetIpAddrTable)(MIB_IPADDRTABLE *, DWORD *, BOOL);
-
-static DWORD (WINAPI *CreateProxyArpEntry)(DWORD, DWORD, DWORD);
-
-static DWORD (WINAPI *DeleteProxyArpEntry)(DWORD, DWORD, DWORD);
 
 #pragma pack(pop)
 
@@ -41,223 +34,175 @@ static DWORD (WINAPI *DeleteProxyArpEntry)(DWORD, DWORD, DWORD);
 #include "tcpip.h"
 #include "ctk.h"
 
-#define SOCKIO_(ON,CMD) sockio_(ON,CMD,"ioctlsocket("#CMD") error: %d\n")
-
 #define BUF ((uip_tcpip_hdr *)uip_buf)
 
-void debug_printf(char *format, ...);
+typedef DWORD (WINAPI *ARPFUNC)(DWORD, DWORD, DWORD);
+
+extern void debug_printf(char *format, ...);
+
+static void error_exit(const char *message, int value);
+static void create_proxyarp(void);
+static void delete_proxyarp(void);
 
 static DWORD  interfaceindex;
 static DWORD  proxyaddr;
 static SOCKET rawsock = INVALID_SOCKET;
-static unsigned long off = 0;
-static unsigned long on  = 1;
 
-static const int recv_filt[] = {WSAEWOULDBLOCK,WSAEMSGSIZE};
-static const int send_filt[] = {WSAEADDRNOTAVAIL,WSAEHOSTUNREACH};
 
-static void sockio_(unsigned long on, long cmd, char *cmd_err_fmt);
-static u16_t filt_err(int e, const int *head, const int *const tail);
-static void update_proxy_arp(void);
-static u16_t filter_recv(int value);
-static u16_t filter_send(int value);
+#define END_OF(ARRAY) (ARRAY + sizeof(ARRAY)/sizeof(ARRAY[0]))
+#define HOSTADDR() (*(DWORD*)uip_hostaddr)
+#define NETMASK() (*(DWORD*)uip_netmask)
+
+#define DELAY_LOAD(NAME,MODULE) \
+( GetProcAddress(GetModuleHandle(MODULE), NAME) \
+  ? GetProcAddress(GetModuleHandle(MODULE), NAME) \
+  : (error_exit("GetProcAddress("#NAME") error: %d\n", GetLastError()), 0))
+
+#define SOCKCTL_(ON,CMD) \
+{ unsigned long on = ON; if (SOCKET_ERROR == \
+  ioctlsocket(rawsock, CMD, &on)) \
+    error_exit("ioctlsocket("#CMD") error: %d\n", WSAGetLastError()); }
+
+#define SOCKOPT_ON_(OPT,LAYER) \
+{ unsigned long on = 1; if (SOCKET_ERROR == \
+  setsockopt(rawsock, LAYER, OPT, (char*)&on, sizeof(on))) \
+    error_exit("setsockopt("#OPT") error: %d\n", WSAGetLastError()); }
+
+#define TRAP(ERR,HEAD,TAIL) \
+( match(ERR,HEAD,TAIL) ? ERR : (error_exit("send/recv() error: %d\n",ERR),0) )
+
 /*-----------------------------------------------------------------------------------*/
 static int match(const int x, const int *head, const int *const tail)
 {
-  for( ;tail != head; ++head)
-  {
-    if(*head == x) return 1;
-  }
+  for( ;tail != head; ++head) if(*head == x) return 1;
   return 0;
 }
 /*-----------------------------------------------------------------------------------*/
 static void
-create_proxyarp(void)
-{
-  DWORD          retval;
-  struct in_addr addr;
-
-  if(proxyaddr == 0) {
-    return;
-  }
-  retval = CreateProxyArpEntry(proxyaddr, 0xFFFFFFFF, interfaceindex);
-  addr.S_un.S_addr = proxyaddr;
-  debug_printf("CreateProxyArpEntry(%s): %d\n", inet_ntoa(addr), retval);
-}
-/*-----------------------------------------------------------------------------------*/
-static void
-delete_proxyarp(void)
-{
-  DWORD          retval;
-  struct in_addr addr;
-
-  if(proxyaddr == 0) {
-    return;
-  }
-  retval = DeleteProxyArpEntry(proxyaddr, 0xFFFFFFFF, interfaceindex);
-  addr.S_un.S_addr = proxyaddr;
-  debug_printf("DeleteProxyArpEntry(%s): %d\n", inet_ntoa(addr), retval);
-}
-/*-----------------------------------------------------------------------------------*/
-static int
-error_exit(char *message, int value)
+error_exit(const char *message, int value)
 {
   console_exit();
   cprintf(message, value);
   exit(EXIT_FAILURE);
-  return 0;
+}
+/*-----------------------------------------------------------------------------------*/
+static DWORD
+get_interface_index_for_(DWORD ip)
+{
+  DWORD (WINAPI *Table)(MIB_IPADDRTABLE *, DWORD *, BOOL);
+  DWORD                retval;
+  DWORD                size = sizeof(MIB_IPADDRROW);
+  MIB_IPADDRTABLE     *d = 0;
+  MIB_IPADDRROW       *r;
+
+  (FARPROC)Table = DELAY_LOAD("GetIpAddrTable","iphlpapi");
+  do { d = realloc(d, size *= 2); }
+  while(ERROR_INSUFFICIENT_BUFFER == (retval = Table(d, &size, TRUE)));
+  if(NO_ERROR != retval) error_exit("GetIpAddrTable error: %d\n", retval);
+
+  for(r = d->table; r != d->table + d->dwNumEntries; ++r)
+    if(r->dwAddr == ip) return retval = r->dwIndex, realloc(d,0), retval;
+  return error_exit("Parameter error: Unknown host IP address\n", 0), 0;
+}
+/*-----------------------------------------------------------------------------------*/
+static void*
+sock_in_addr(unsigned long ipaddr, u16_t port)
+{
+  static struct sockaddr_in addr;
+  addr.sin_family      = AF_INET;
+  addr.sin_port        = port;
+  addr.sin_addr.s_addr = ipaddr;
+  return &addr;
 }
 /*-----------------------------------------------------------------------------------*/
 void
 rawsock_init(void)
 {
   DWORD                hostaddr;
-  HMODULE              iphlpapi;
-  MIB_IPADDRTABLE      *addrtable;
-  DWORD                addrtablesize = 0;
-  DWORD                retval;
-  DWORD                entry = 0;
   WSADATA              wsadata;
-  struct sockaddr_in   addr;
+
+  if(WSAStartup(2, &wsadata) != 0) {
+    error_exit("WSAStartup() error\n", 0);
+  }
 
   hostaddr = inet_addr(__argv[1]);
   if(hostaddr == INADDR_NONE) {
     error_exit("Parameter error: Invalid host IP address\n", 0);
   }
 
-  iphlpapi = LoadLibrary("iphlpapi.dll");
-  if(iphlpapi == NULL) {
-    error_exit("LoadLibrary(iphlpapi.dll) error: %d\n", GetLastError());
-  }
-
-  (FARPROC)GetIpAddrTable = GetProcAddress(iphlpapi, "GetIpAddrTable");
-  if(GetIpAddrTable == NULL) {
-    error_exit("GetProcAddress(GetIpAddrTable) error: %d\n", GetLastError());
-  }
-
-  (FARPROC)CreateProxyArpEntry = GetProcAddress(iphlpapi, "CreateProxyArpEntry");
-  if(GetIpAddrTable == NULL) {
-    error_exit("GetProcAddress(CreateProxyArpEntry) error: %d\n", GetLastError());
-  }
-
-  (FARPROC)DeleteProxyArpEntry = GetProcAddress(iphlpapi, "DeleteProxyArpEntry");
-  if(GetIpAddrTable == NULL) {
-    error_exit("GetProcAddress(DeleteProxyArpEntry) error: %d\n", GetLastError());
-  }
-
-  retval = GetIpAddrTable(NULL, &addrtablesize, TRUE);
-  if(retval != ERROR_INSUFFICIENT_BUFFER) {
-    error_exit("GetIpAddrTable(NULL) error: %d\n", retval);
-  }
-
-  addrtable = alloca(addrtablesize);
-  retval = GetIpAddrTable(addrtable, &addrtablesize, TRUE);
-  if(retval != NO_ERROR) {
-    error_exit("GetIpAddrTable(ptr) error: %d\n", retval);
-  }
-
-  while(1) {
-    if(entry == addrtable->dwNumEntries) {
-      error_exit("Parameter error: Unknown host IP address\n", 0);
-    }
-    if(addrtable->table[entry].dwAddr == hostaddr) {
-      interfaceindex = addrtable->table[entry].dwIndex;
-      break;
-    }
-    entry++;
-  }
-
-  if(WSAStartup(2, &wsadata) != 0) {
-    error_exit("WSAStartup() error\n", 0);
-  }
-
-  rawsock = socket(PF_INET, SOCK_RAW, IPPROTO_RAW);
+  rawsock = socket(PF_INET, SOCK_RAW, IPPROTO_IP);
   if(rawsock == INVALID_SOCKET) {
     error_exit("socket() error: %d\n", WSAGetLastError());
   }
 
-  addr.sin_family      = AF_INET;
-  addr.sin_addr.s_addr = hostaddr;
-  addr.sin_port        = 0;
-  if(bind(rawsock, (struct sockaddr *)&addr, sizeof(addr)) == SOCKET_ERROR) {
+  if(bind(rawsock, sock_in_addr(hostaddr,0), sizeof(struct sockaddr)) == SOCKET_ERROR) {
     error_exit("bind() error: %d\n", WSAGetLastError());
   }
 
-  if(setsockopt(rawsock, SOL_SOCKET, SO_BROADCAST,
-		(char *)&on, sizeof(on)) == SOCKET_ERROR) {
-    error_exit("setsockopt(SO_BROADCAST) error: %d\n", WSAGetLastError());
-  }
+  SOCKOPT_ON_(SO_BROADCAST, SOL_SOCKET);
+  SOCKOPT_ON_(IP_HDRINCL, IPPROTO_IP);
+  SOCKCTL_(1, SIO_RCVALL);
+  SOCKCTL_(1, FIONBIO);
 
-  if(setsockopt(rawsock, IPPROTO_IP, IP_HDRINCL,
-		(char *)&on, sizeof(on)) == SOCKET_ERROR) {
-    error_exit("setsockopt(IP_HDRINCL) error: %d\n", WSAGetLastError());
-  }
-
-  SOCKIO_(on, SIO_RCVALL);
-  SOCKIO_(on, FIONBIO);
-
-  if(atexit(delete_proxyarp) != 0) {
-    error_exit("atexit() error\n", 0);
-  }
+  LoadLibrary("iphlpapi"); /* map iphlpapi.dll to process address space */
+  if(atexit(delete_proxyarp)) error_exit("atexit() error\n", 0);
+  interfaceindex = get_interface_index_for_(hostaddr);
+}
+/*-----------------------------------------------------------------------------------*/
+void
+rawsock_fini(void)
+{
+  delete_proxyarp();
+  closesocket(rawsock);
+  rawsock = INVALID_SOCKET;
+  FreeLibrary(GetModuleHandle("iphlpapi"));
+  WSACleanup();
 }
 /*-----------------------------------------------------------------------------------*/
 void
 rawsock_send(u8_t *hdr, u16_t hdrlen, u8_t *data, u16_t datalen)
 {
-  struct sockaddr_in   addr;
-  DWORD  dummy;
+  static const int ignore[] = {WSAEADDRNOTAVAIL,WSAEHOSTUNREACH};
   WSABUF sendbuf[2] = {{hdrlen, hdr},{datalen, data}};
+  DWORD  value;
 
-  SOCKIO_(off, FIONBIO); /* switch Non-blocking I/O off */
+  SOCKCTL_(0, FIONBIO); /* switch Non-blocking I/O off */
 
-  addr.sin_family      = AF_INET;
-  addr.sin_addr.s_addr = *(unsigned long *)BUF->destipaddr;
-  addr.sin_port        = 0;
-  filter_send(WSASendTo(rawsock, sendbuf, 2, &dummy, 0
-    , (struct sockaddr *)&addr, sizeof(addr), NULL, NULL));
+  value = WSASendTo(rawsock, sendbuf, 2, &value, 0
+    , sock_in_addr(*(unsigned*)BUF->destipaddr,0), sizeof(struct sockaddr_in)
+	, NULL, NULL);
+  if(SOCKET_ERROR == value) TRAP(WSAGetLastError(), ignore, END_OF(ignore));
 
-  SOCKIO_(on, FIONBIO); /* switch Non-blocking I/O on */
+  SOCKCTL_(1, FIONBIO); /* switch Non-blocking I/O on */
 }  
 /*-----------------------------------------------------------------------------------*/
 u16_t
 rawsock_poll(void)
 {
-  return INVALID_SOCKET == rawsock ? 0 :
-    filter_recv((update_proxy_arp(), recv(rawsock, uip_buf, UIP_BUFSIZE, 0)));
-}
-/*-----------------------------------------------------------------------------------*/
-u16_t filter_recv(int value)
-{
-  return SOCKET_ERROR == value
-    ? filt_err(WSAGetLastError(), recv_filt, recv_filt + 2) : value;
-}
-/*-----------------------------------------------------------------------------------*/
-u16_t filter_send(int value)
-{
-  return SOCKET_ERROR == value
-    ? filt_err(WSAGetLastError(), send_filt, send_filt + 2) : value;
-}
-/*-----------------------------------------------------------------------------------*/
-u16_t filt_err(int v, const int *hd, const int *const tl)
-{
-  return match(v, hd, tl) ? v : error_exit("send/recv() error: %d\n", v);
+  static const int ignore[] = {WSAEWOULDBLOCK,WSAEMSGSIZE,WSANOTINITIALISED};
+  const int nr = (create_proxyarp(),recv(rawsock, uip_buf, UIP_BUFSIZE, 0));
+  return SOCKET_ERROR != nr ? nr : TRAP(WSAGetLastError(), ignore, END_OF(ignore));
 }
 /*-----------------------------------------------------------------------------------*/
 void
-update_proxy_arp(void)
+create_proxyarp(void)
 {
-  if(proxyaddr != *(DWORD *)uip_hostaddr) {
-    delete_proxyarp();
-    proxyaddr = *(DWORD *)uip_hostaddr;
-    create_proxyarp();
+  if(proxyaddr != HOSTADDR()) {
+    FARPROC f = DELAY_LOAD("CreateProxyArpEntry","iphlpapi");
+    DWORD retval = (delete_proxyarp(),((ARPFUNC)f)(HOSTADDR(), NETMASK(), interfaceindex));
+    proxyaddr = HOSTADDR();
+    debug_printf("CreateProxyArpEntry(%s): %d\n", inet_ntoa(*(struct in_addr*)&proxyaddr), retval);
   }
 }
 /*-----------------------------------------------------------------------------------*/
 void
-sockio_(unsigned long on, long cmd, char *cmd_err_fmt)
+delete_proxyarp(void)
 {
-  if(SOCKET_ERROR == ioctlsocket(rawsock, cmd, &on)) {
-    error_exit(cmd_err_fmt, WSAGetLastError());
+  if(proxyaddr) {
+    FARPROC f = DELAY_LOAD("DeleteProxyArpEntry","iphlpapi");
+    DWORD retval = ((ARPFUNC)f)(HOSTADDR(), NETMASK(), interfaceindex);
+    debug_printf("DeleteProxyArpEntry(%s): %d\n", inet_ntoa(*(struct in_addr*)&proxyaddr), retval);
+    proxyaddr = 0;
   }
 }
 /*-----------------------------------------------------------------------------------*/

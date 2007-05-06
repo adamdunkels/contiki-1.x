@@ -1,7 +1,7 @@
 #include "packet-service.h"
 #include "rawsock.h"
 
-static const struct packet_service_state
+static struct packet_service_state
 state = {PACKET_SERVICE_VERSION, rawsock_send};
 
 EK_EVENTHANDLER(eventhandler, ev, data);
@@ -27,6 +27,7 @@ EK_EVENTHANDLER(eventhandler, ev, data)
     LOADER_UNLOAD();
     break;
   case EK_EVENT_REQUEST_EXIT:
+    rawsock_fini();
     ek_exit();
     LOADER_UNLOAD();
     break;
