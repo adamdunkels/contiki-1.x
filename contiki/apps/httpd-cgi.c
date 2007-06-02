@@ -28,7 +28,7 @@
  *
  * This file is part of the uIP TCP/IP stack.
  *
- * $Id: httpd-cgi.c,v 1.9 2005/02/27 09:33:51 adamdunkels Exp $
+ * $Id: httpd-cgi.c,v 1.10 2007/06/02 07:32:06 ryohji Exp $
  *
  */
 
@@ -202,7 +202,7 @@ make_processes(void *s)
 static
 PT_THREAD(processes(struct httpd_state *s, char *ptr))
 {
-  struct ek_proc *p;
+  static struct ek_proc *p;
   
   PSOCK_BEGIN(&s->sout);
 

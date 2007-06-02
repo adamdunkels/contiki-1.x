@@ -30,7 +30,7 @@
  * 
  * Author: Adam Dunkels <adam@sics.se>
  *
- * $Id: httpd.c,v 1.9 2005/02/27 09:33:51 adamdunkels Exp $
+ * $Id: httpd.c,v 1.10 2007/06/02 07:32:06 ryohji Exp $
  */
 
 #include "contiki.h"
@@ -169,7 +169,7 @@ PT_THREAD(handle_script(struct httpd_state *s))
 static
 PT_THREAD(send_headers(struct httpd_state *s, const char *statushdr))
 {
-  char *ptr;
+  static char *ptr;
 
   PSOCK_BEGIN(&s->sout);
 

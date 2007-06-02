@@ -120,7 +120,7 @@
  *
  * This file is part of the "ek" event kernel.
  *
- * $Id: ek.c,v 1.8 2005/02/22 22:46:33 adamdunkels Exp $
+ * $Id: ek.c,v 1.9 2007/06/02 07:32:05 ryohji Exp $
  *
  */
 
@@ -255,7 +255,7 @@ ek_start(CC_REGISTER_ARG struct ek_proc *p)
 {
   ek_id_t id;
 
-  for(id = 1; id < EK_CONF_MAXPROCS; ++id) {
+  for(id = 0; id < EK_CONF_MAXPROCS; ++id) {
     if(ek_proclist[id] == NULL) {
       break;
     }
