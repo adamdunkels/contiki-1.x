@@ -32,7 +32,7 @@
  *
  * This file is part of the "ctk" console GUI toolkit for cc65
  *
- * $Id: ctk-arch.h,v 1.3 2004/08/12 22:09:34 oliverschmidt Exp $
+ * $Id: ctk-arch.h,v 1.4 2007/09/05 12:43:20 oliverschmidt Exp $
  *
  */
 #ifndef __CTK_ARCH_H__
@@ -45,10 +45,10 @@
 #define CH_CURS_RIGHT	-6
 #define CH_CURS_DOWN	-7
 
-#define CH_ULCORNER	0xDA
-#define CH_URCORNER	0xBF
-#define CH_LLCORNER	0xC0
-#define CH_LRCORNER	0xD9
+#define CH_ULCORNER	'+'
+#define CH_URCORNER	'+'
+#define CH_LLCORNER	'+'
+#define CH_LRCORNER	'+'
 
 #include "ctk-conio.h"
 #include "ctk-console.h"

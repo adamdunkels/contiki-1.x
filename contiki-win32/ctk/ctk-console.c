@@ -29,7 +29,7 @@
  *
  * This file is part of the Contiki desktop environment
  *
- * $Id: ctk-console.c,v 1.6 2005/02/06 21:13:59 oliverschmidt Exp $
+ * $Id: ctk-console.c,v 1.7 2007/09/05 12:43:20 oliverschmidt Exp $
  *
  */
 
@@ -177,7 +177,7 @@ chline(unsigned char length)
   unsigned char i;
 
   for(i = 0; i < length; ++i) {
-    putch(0xC4);
+    putch('-');
   }
 }
 /*-----------------------------------------------------------------------------------*/
@@ -190,7 +190,7 @@ cvline(unsigned char length)
   y = wherey();
 
   for(i = 0; i < length; ++i) {
-    cputcxy(x, (unsigned char)(y + i), (char)0xB3);
+    cputcxy(x, (unsigned char)(y + i), '|');
   }
 }
 /*-----------------------------------------------------------------------------------*/
