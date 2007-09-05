@@ -5,19 +5,19 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug PPP|Win32 = Debug PPP|Win32
-		Debug RawSock|Win32 = Debug RawSock|Win32
+		Debug WPCAP|Win32 = Debug WPCAP|Win32
 		Release PPP|Win32 = Release PPP|Win32
-		Release RawSock|Win32 = Release RawSock|Win32
+		Release WPCAP|Win32 = Release WPCAP|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{29C0B44D-61E9-407E-9133-6B68612624FF}.Debug PPP|Win32.ActiveCfg = Debug PPP|Win32
 		{29C0B44D-61E9-407E-9133-6B68612624FF}.Debug PPP|Win32.Build.0 = Debug PPP|Win32
-		{29C0B44D-61E9-407E-9133-6B68612624FF}.Debug RawSock|Win32.ActiveCfg = Debug RawSock|Win32
-		{29C0B44D-61E9-407E-9133-6B68612624FF}.Debug RawSock|Win32.Build.0 = Debug RawSock|Win32
+		{29C0B44D-61E9-407E-9133-6B68612624FF}.Debug WPCAP|Win32.ActiveCfg = Debug WPCAP|Win32
+		{29C0B44D-61E9-407E-9133-6B68612624FF}.Debug WPCAP|Win32.Build.0 = Debug WPCAP|Win32
 		{29C0B44D-61E9-407E-9133-6B68612624FF}.Release PPP|Win32.ActiveCfg = Release PPP|Win32
 		{29C0B44D-61E9-407E-9133-6B68612624FF}.Release PPP|Win32.Build.0 = Release PPP|Win32
-		{29C0B44D-61E9-407E-9133-6B68612624FF}.Release RawSock|Win32.ActiveCfg = Release RawSock|Win32
-		{29C0B44D-61E9-407E-9133-6B68612624FF}.Release RawSock|Win32.Build.0 = Release RawSock|Win32
+		{29C0B44D-61E9-407E-9133-6B68612624FF}.Release WPCAP|Win32.ActiveCfg = Release WPCAP|Win32
+		{29C0B44D-61E9-407E-9133-6B68612624FF}.Release WPCAP|Win32.Build.0 = Release WPCAP|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,7 +32,7 @@
  *
  * This file is part of the Contiki desktop environment 
  *
- * $Id: main.c,v 1.12 2005/04/19 23:07:15 oliverschmidt Exp $
+ * $Id: main.c,v 1.13 2007/09/05 16:11:04 oliverschmidt Exp $
  *
  */
 
@@ -81,25 +81,6 @@ main(int argc)
 {
   u16_t addr[2];
 
-#ifdef WITH_RAWSOCK
-  if(argc != 2) {
-    cprintf("\n"
-            "usage: Contiki <addr>\n"
-            "\n"
-            "  <addr> Host IP address of interface to be used by Contiki\n"
-	    "\n"
-            "notes:\n"
-	    "\n"
-            "  - Contiki needs Windows 2000 or later to run.\n"
-	    "\n"
-            "  - Contiki needs administrative rights to run.\n"
-	    "\n"
-            "  - The IP address to be used by Contiki has to be different from the Host IP\n"
-            "    address specified here.\n");
-    exit(EXIT_FAILURE);
-  }
-#endif /* WITH_RAWSOCK */
-
   ek_init();
 
   tcpip_init(NULL);
@@ -113,16 +94,22 @@ main(int argc)
   program_handler_init();
 
 #if 0
-  uip_ipaddr(addr, 192,168,0,3);
+  uip_ipaddr(addr, 192,168,0,2);
   uip_sethostaddr(addr);
  
+  uip_ipaddr(addr, 255,255,255,0);
+  uip_setnetmask(addr);
+
+  uip_ipaddr(addr, 192,168,0,1);
+  uip_setdraddr(addr);
+
   uip_ipaddr(addr, 192,168,0,1);
   resolv_conf(addr);
 #endif
 
-#ifdef WITH_RAWSOCK
+#ifdef WITH_WPCAP
   packet_service_init(NULL);
-#endif /* WITH_RAWSOCK */
+#endif /* WITH_WPCAP */
 
 #ifdef WITH_PPP
   ppp_arch_init();
