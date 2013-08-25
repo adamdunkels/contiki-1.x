@@ -1,0 +1,60 @@
+-include *.u
+
+.SECONDARY:
+
+CC=cc65
+AS=ca65
+LD=ld65
+CL=cl65
+
+PORTDIRS=apps conf ctk lib loader uip
+CONTIKIDIRS=${addprefix $(CONTIKI)/, apps ctk ek lib uip}
+CONTIKICC65DIRS=${addprefix $(CONTIKICC65)/, apps ctk lib loader uip}
+
+CFLAGSCC65=${addprefix -I,$(PORTDIRS)} \
+           ${addprefix -I,$(CONTIKICC65DIRS)} \
+           ${addprefix -I,$(CONTIKIDIRS)} \
+          -t $(SYS) --add-source --create-dep
+
+CLFLAGS=-Ln contiki-labels
+
+OPT=-Or
+
+%.o: %.c
+
+%.s: %.c
+	$(CC) $(CFLAGS) $(OPT) -o $(notdir $@) $<
+
+%.o: %.s
+	$(AS) $(AFLAGS) -o $@ $<
+
+%.o: %.S
+	$(AS) $(AFLAGS) -o $@ $<
+
+vpath %.c $(PORTDIRS) $(CONTIKICC65DIRS) $(CONTIKIDIRS)
+
+vpath %.S $(PORTDIRS) $(CONTIKICC65DIRS) $(CONTIKIDIRS)
+
+%.sav:  %.o contiki-labels.o
+	cl65 --module -t $(SYS) -m $(@:.sav=.map) -o $@ loader-arch-module.o $^
+
+%.prg:  %.o contiki-labels.o
+	cl65 --module -t $(SYS) -m $(@:.prg=.map) -o $@ loader-arch-module.o $^
+
+%.drv:  %-drv.o contiki-labels.o
+	cl65 --module -t $(SYS) -m $(@:.drv=.map) -o $@ loader-arch-module.o $^
+
+%.drv:  %.o contiki-labels.o
+	cl65 --module -t $(SYS) -m $(@:.drv=.map) -o $@ loader-arch-module.o $^
+
+%.dsc:  %-dsc.o contiki-labels.o
+	cl65 --module -t $(SYS) -o $@ loader-arch-module-dsc.o $^
+
+contiki-labels.s: contiki
+	./$(CONTIKICC65)/make-labels
+
+clean:
+	rm -f *.o *~ *core contiki *.map *.s *.u *.dsc *.prg *.drv *.sav contiki-labels
+
+codesize:
+	od65 --dump-segsize *.o | egrep '\.o|CODE'
