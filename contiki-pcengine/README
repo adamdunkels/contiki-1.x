@@ -1,0 +1,16 @@
+This is the PCEngine port of Contiki, maintained by Groepaz/Hitmen
+<groepaz@gmx.net>.
+
+compiler: cc65, www.cc65.org
+
+PCE specific stuff is enclosed into #ifdef __PCENGINE__
+
+NEC PC-Engine (PCE): [using cc65]
+- conio library functions work
+- contiki crashes :(
+TODO: further development on cc65 libraries...might be a problem with
+the 65C02 code generator also
+WANTED: someone who owns a PCE and also some kind of development hardware,
+so he can try out contiki on the real thing.
+
+have fun, groepaz/hitmen (groepaz@gmx.net)
