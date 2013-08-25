@@ -1,0 +1,171 @@
+# Copyright (c) 2003, Adam Dunkels.
+# All rights reserved. 
+#
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions 
+# are met: 
+# 1. Redistributions of source code must retain the above copyright 
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright 
+#    notice, this list of conditions and the following disclaimer in the 
+#    documentation and/or other materials provided with the distribution. 
+# 3. The name of the author may not be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.  
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+#
+# This file is part of the Contiki desktop environment
+#
+# $Id: Makefile.programs,v 1.42 2005/05/07 14:36:47 oliverschmidt Exp $
+#
+
+all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
+     welcome.prg \
+     about.prg about.dsc \
+     netconf.prg netconf.dsc \
+     processes.prg processes.dsc \
+     www.prg www.dsc \
+     telnet.prg telnet.dsc \
+     memstat.prg memstat.dsc \
+     webserver.prg webserver.dsc \
+     wget.prg wget.dsc \
+     directory.prg directory.dsc \
+     ssfire.sav ssfire.dsc \
+     plasma.sav plasma.dsc \
+     rrnet.drv rrnet.dsc rrnet-dump.drv \
+     tfe.drv tfe.dsc \
+     eth64.drv eth64.dsc eth64-dump.drv \
+     config.prg configedit.prg configedit.dsc config.cfg \
+     shell.prg shell.dsc \
+     telnetd.prg telnetd.dsc \
+     ftp.prg ftp.dsc \
+     editor.prg editor.dsc \
+     cfs-cbm.drv \
+     email.prg \
+     ctk-text.drv ctk-default.drv ctk-80col.drv \
+     irc.prg irc.dsc \
+     slip.drv slip.dsc \
+     cgterm.prg cgterm.dsc \
+     dhcp.prg dhcp.dsc
+#     vnc.prg  \
+#     mtest.prg warmboot.prg lc-test
+#     blueround.prg blueround.dsc \
+#     enabler.prg enabler.dsc \
+#     springlight.prg springlight.dsc \
+#     default.prg default.dsc \
+#     ravenpine.prg ravenpine.dsc \
+#     slip-ss.drv \
+#     calc.prg \
+#     ssconfig.prg \
+
+SYS=c64
+
+include $(CONTIKI)/Makefile.common
+include $(CONTIKICC65)/Makefile.cc65
+
+CFLAGS:=$(CFLAGSCC65) \
+        -DCTK_HIRES \
+	-DWITH_LOADER_ARCH \
+        -DWITH_UIP -DWITH_ETHERNET
+
+config.cfg:
+	echo C CFS-CBM.DRV > config.cfg
+	echo T CTK-80COL.DRV >> config.cfg
+	echo . >> config.cfg
+
+directory.prg: $(DIRECTORY)
+
+shell.prg: $(SHELL_)
+
+telnetd.prg: $(TELNETD)
+
+configedit.prg: configedit.o #c64-fs-write.o
+
+email.prg: $(EMAIL) lc-asm.o
+
+www.prg: $(WWW)
+
+irc.prg: $(IRC) lc-asm.o
+
+cgterm.prg: cgterm.o psock.o uipbuf.o lc-asm.o
+
+dhcp.prg: $(DHCP) lc-asm.o
+
+webserver.prg: $(WEBSERVER) lc-asm.o #c64-fs-raw.o
+
+telnet.prg: $(TELNET)
+
+tfe.drv: tfe-drv.o cs8900a.o tfe-drv-asm.o uip_arp.o
+
+rrnet.drv: rrnet-drv.o cs8900a.o rrnet-drv-asm.o uip_arp.o
+
+rrnet-dump.drv: rrnet-dump-drv.o cs8900a.o rrnet-drv-asm.o uip_arp.o tcpdump.o
+
+eth64.drv: eth64-drv.o lan91c96.o uip_arp.o
+
+eth64-dump.drv: eth64-dump-drv.o lan91c96.o uip_arp.o tcpdump.o
+
+slip.drv: slip-drv.o rs232dev.o
+
+slip-dump.drv: tcpdump.o slip-dump-drv.o rs232dev.o
+
+slip-ss.drv: slip-drv.o rs232dev-ss.o rs232silversurfer.o contiki-labels.o
+	cl65 --module -t $(SYS) -o $@ loader-arch-module.o $^
+
+
+wget.prg: wget.o webclient.o http-strings.o http-user-agent-string.o c64-dio.o c64-dio-asm.o
+
+ftp.prg: $(FTP)
+
+ftp.dsc: ftp-dsc.o
+
+editor.prg: $(EDITOR)
+
+VNC=vnc.o vnc-viewer.o vnc-draw.o vnc-draw-asm.o
+vnc.prg: $(VNC)
+
+ctk-vnc.drv: ctk-vncserver-service.o libconio.o vnc-server.o vnc-out.o ctk-vncfont.o contiki-labels.o
+	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
+ctk-text.drv: ctk-conio-service.o contiki-labels.o
+	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
+ctk-80col.drv: ctk-80col.o ctk-80col-asm.o contiki-labels.o
+	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
+ctk-default.drv: ctk-hires-service.o ctk-hires-asm.o ctk-hires-theme-default.o contiki-labels.o
+	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
+blueround.prg: themeloader.o ctk-hires-theme-blueround.o contiki-labels.o
+	cl65 --module -t c64 -o $@ loader-arch-module.o $^
+
+default.prg: themeloader.o ctk-hires-theme-default.o contiki-labels.o
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+enabler.prg: themeloader.o ctk-hires-theme-enabler.o contiki-labels.o
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+springlight.prg: themeloader.o ctk-hires-theme-springlight.o contiki-labels.o
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+ravenpine.prg: themeloader.o ctk-hires-theme-ravenpine.o contiki-labels.o
+	cl65 -Ln default-prg.labels --module -t c64 -o $@ loader-arch-module.o $^
+
+
+memstat.prg: memstat.o
+
+mtest.prg: mtest.o mtp.o mt.o mtarch.o mtarch-asm.o
+
+lc-test: lc-test.o lc-asm.o
+	cl65 -o lc-test -t c64 $^

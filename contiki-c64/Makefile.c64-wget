@@ -1,0 +1,60 @@
+# Copyright (c) 2002, Adam Dunkels.
+# All rights reserved. 
+#
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions 
+# are met: 
+# 1. Redistributions of source code must retain the above copyright 
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright 
+#    notice, this list of conditions and the following disclaimer in the 
+#    documentation and/or other materials provided with the distribution. 
+# 3. All advertising materials mentioning features or use of this software
+#    must display the following acknowledgement:
+#      This product includes software developed by Adam Dunkels.
+# 4. The name of the author may not be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.  
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+#
+# This file is part of the Contiki desktop environment
+#
+# $Id: Makefile.c64-wget,v 1.5 2005/04/24 23:24:24 oliverschmidt Exp $
+#
+
+all: contiki-exo
+
+include $(CONTIKI)/Makefile.common
+include $(CONTIKICC65)/Makefile.cc65
+SYS=c64
+
+CFLAGS:=$(CFLAGSCC65) -t $(SYS) \
+        -DCTK_HIRES \
+	-DWITH_UIP -DWITH_RRNET -DWITH_ETHERNET \
+        -DCONTIKI_VERSION_STRING='"Contiki 1.2-devel1 IRC/DHCP edition"'
+
+contiki:  main-rrnet.o petsciiconv.o \
+ ctk.o ek.o ek.o ek-service.o arg.o timer.o \
+ program-handler.o \
+ $(UIP) uip_arp.o cs8900a.o rrnet-drv.o rrnet-drv-asm.o \
+ ctk-80col.o ctk-80col-asm.o ctk-draw.o \
+ netconf.o netconf-dsc.o \
+ dhcp-dsc.o dhcp.o dhcpc.o lc-asm.o \
+ irc.o ircc.o ircc-strings.o socket.o uipbuf.o  irc-dsc.o \
+# $(WGET) wget-dsc.o c64-dio.o c64-dio-asm.o
+	cl65 -Ln labels -o contiki -t $(SYS) $^
+
+contiki-exo: contiki
+	exomizer -s sys -o contiki-exo contiki
+	
