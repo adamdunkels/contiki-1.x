@@ -1,0 +1,74 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>Welcome to the Contiki-demo server!</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">  
+  </head>
+  <body bgcolor="#fffeec" text="black">
+
+  <div class="menublock">
+
+  <div class="menu">
+  <p class="border-title">Menu</p>
+  <p class="menu">
+  
+  <a href="/">Front page</a><br>
+  <a href="/vnc.html">Remote display</a><br>
+  <a href="/cgi/files">File statistics</a><br>
+  <a href="/cgi/tcp">Network connections</a><br>
+  <a href="/cgi/processes">System processes</a><br>
+
+  </p>
+  </div>
+  </div>
+
+  <div class="contentblock">
+  <p class="border-title">
+  Welcome to the <a href="http://www.sics.se/~adam/contiki/">Contiki</a> 
+  demo server!
+  </p>
+	      
+	  <p class="intro">
+	    The web pages you are watching are served by a <a
+	    href="http://www.sics.se/~adam/contiki/apps/webserver.html">web
+	    server</a> running under the <a
+	    href="http://www.sics.se/~adam/contiki/">Contiki operating
+	    system</a> on an an <a
+	    href="http://www.ethernut.de/en/">Ethernut</a> embedded
+	    Ethernet board, which consists of a 14 MHz AVR Atmega128
+	    microcontroller with 32 kilobytes of RAM and 128 kilobytes
+	    of flash ROM, and a RealTek RTL8019AS Ethernet chip.
+	  </p>
+
+	      <p class="clink">
+	    <a href="http://contiki-demo.sics.se"><b><tt>http://contiki-demo.sics.se/</tt></b></a>
+	  </p>
+	  
+	  
+	  <h2>Remote display</h2>
+	  <p>
+	    It it possible to remotely access the Contiki desktop of
+	    this server directly from your web browser! See the <a
+	    href="vnc.html">remote display</a> page.
+	  </p>
+	  <h2>Screenshot</h2>
+	  <p>
+	    This is what the virtual desktop of this server looks
+	    like:
+	  </p>
+	  <center>
+	    <img src="/img/screenshot.png" alt="Screenshot">
+	  </center>
+	  <h2>Memory usage</h2>
+	  <p>
+	    The entire Contiki AVR system uses slightly more than 20 k
+	    RAM, of which 6 k is used for the virtual display 8 k for
+	    	    the web browser. All code and these web pages are stored
+	    in the microcontroller's on-chip flash ROM.
+	  </p>
+	  <p align="right">
+	    /<a href="http://www.sics.se/%7eadam/">Adam Dunkels</a>
+	  </p>
+    
+  </body>
+</html>

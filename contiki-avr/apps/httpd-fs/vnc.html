@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <title>Welcome to the Contiki-demo server!</title>
+    <link rel="stylesheet" type="text/css" href="/style.css">  
+  </head>
+  <body bgcolor="#fffeec" text="black">
+
+  <div class="menublock">
+
+  <div class="menu">
+  <p class="border-title">Menu</p>
+  <p class="menu">
+  
+  <a href="/">Front page</a><br>
+  <a href="/vnc.html">Remote display</a><br>
+  <a href="/cgi/files">File statistics</a><br>
+  <a href="/cgi/tcp">Network connections</a><br>
+  <a href="/cgi/processes">System processes</a><br>
+
+  </p>
+  </div>
+  </div>
+
+  <div class="contentblock">
+  <p class="border-title">
+  Welcome to the <a href="http://www.sics.se/~adam/contiki/">Contiki</a> 
+  demo server!
+  </p>
+
+		  <p class="intro">
+	    The Contiki VNC server lets you access the desktop from
+	    the Contiki server in your web browser, from anywhere in
+	    the world. Note that the device on which this is running
+	    does not have any monitor or any other kind of display; in
+	    fact, it does not even have a graphics chip.
+	  </p>
+
+	  <h3>Java client</h3>
+	  <p>
+	    The Java client makes it possible to access the virtual
+	    Contiki display directly from the web browser. It requires
+	    Java to be turned on in the browser.
+	  </p>
+	  <p>
+	    When asked for a password, just click the "Ok" button
+	    without typing in any password.
+	  </p>
+	  <center>
+	    <b><a href="#" onClick='window.open("vncjava.html",
+	    "Contiki",
+	    "toolbar=no,location=no,status=yes,menubar=no,scrollbars=yes,resizable=yes");'>Click
+	    here to launch in new window</a></b></center>
+	  <br>
+	    <center><b><a href="vncjava.html">Click here to launch in
+	    this window</a></b>
+	    </center>
+
+	    <p>
+	      The server is able to keep 8 connections up. In order to
+	      avoid monopolization of the connections, each user is
+	      only allowed to use the display for a short while.
+	    </p>
+	    
+	    <h3>Download VNC client</h3>
+	    <p>
+	      If you don't have Java installed, you can download a
+	      free VNC client program from <a
+	      href="http://www.realvnc.com">RealVNC</a>. Start the
+	      program with <b>contiki-demo.sics.se:0</b> as the
+	      display.
+	    </p>
+	   
+	   <h3>Unix/X clients</h3>
+ 	   <p>
+	     Unix/X VNC clients need the <tt>-bgr233</tt> option
+	     to work. Use the following command:
+	   </p>
+	   <center><tt>vncviewer -bgr233 contiki-demo.sics.se:0</tt></center>
+	  <p align="right">
+	    /<a href="http://dunkels.com/adam/">Adam Dunkels</a>
+	  </p>
+  </body>
+</html>
