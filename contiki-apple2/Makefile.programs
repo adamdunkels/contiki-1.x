@@ -1,0 +1,94 @@
+# Copyright (c) 2003, Adam Dunkels.
+# All rights reserved. 
+#
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following conditions 
+# are met: 
+# 1. Redistributions of source code must retain the above copyright 
+#    notice, this list of conditions and the following disclaimer. 
+# 2. Redistributions in binary form must reproduce the above copyright 
+#    notice, this list of conditions and the following disclaimer in the 
+#    documentation and/or other materials provided with the distribution. 
+# 3. The name of the author may not be used to endorse or promote
+#    products derived from this software without specific prior
+#    written permission.  
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+# OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+# GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+#
+# This file is part of the Contiki desktop environment
+#
+# $Id: Makefile.programs,v 1.20 2006/05/30 20:51:01 oliverschmidt Exp $
+#
+
+all: loader-arch-module.o loader-arch-module-dsc.o contiki-labels.o \
+     about.prg about.dsc \
+     calc.prg calc.dsc \
+     config.prg \
+     configedit.prg configedit.dsc \
+     dhcp.prg dhcp.dsc \
+     directory.prg directory.dsc \
+     email.prg email.dsc \
+     ftp.prg ftp.dsc \
+     irc.prg irc.dsc \
+     memstat.prg memstat.dsc \
+     processes.prg processes.dsc \
+     shell.prg shell.dsc \
+     telnet.prg telnet.dsc \
+     welcome.prg \
+     wget.prg wget.dsc \
+     www.prg www.dsc \
+     lancegs.drv lancegs.dsc \
+     uther.drv uther.dsc \
+     plasma.sav plasma.dsc \
+     ssfire.sav ssfire.dsc
+
+ifeq ($(SYS),apple2enh)
+
+all: webserver.prg webserver.dsc \
+     bounce.sav bounce.dsc
+
+endif # apple2enh
+
+include $(CONTIKI)/Makefile.common
+include $(CONTIKICC65)/Makefile.cc65
+
+AFLAGS:=-t $(SYS)
+
+CFLAGS:=$(CFLAGSCC65) \
+        -DWITH_ASCII -DWITH_UIP -DWITH_LOADER_ARCH -DWITH_ETHERNET
+
+configedit.prg: configedit.o ctk-textentry-checkbox.o
+
+dhcp.prg: $(DHCP) lc-asm.o
+
+directory.prg: $(DIRECTORY) cfs.o
+
+email.prg: $(EMAIL) lc-asm.o
+
+ftp.prg: $(FTP) cfs.o
+
+irc.prg: $(IRC) lc-asm.o
+
+shell.prg: $(SHELL_) cfs.o
+
+telnet.prg: $(TELNET)
+
+webserver.prg: $(WEBSERVER) lc-asm.o
+
+wget.prg: $(WGET)
+
+www.prg: $(WWW)
+
+lancegs.drv: lancegs-drv.o lan91c96.o uip_arp.o
+
+uther.drv: uther-drv.o cs8900a.o uther-drv-asm.o uip_arp.o
