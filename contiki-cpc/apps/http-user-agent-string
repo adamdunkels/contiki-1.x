@@ -1,0 +1,1 @@
+http_user_agent_fields "Connection: close\r\nUser-Agent: Contiki/1.1-rc0 (Commodore 64; http://dunkels.com/adam/contiki/)\r\n\r\n"

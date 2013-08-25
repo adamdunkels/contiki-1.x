@@ -1,0 +1,162 @@
+CC=sdcc
+AS=as-z80
+CL=link-z80
+LD=link-z80
+
+CFLAGSCOMMON= \
+	-I apps \
+	-I conf \
+	-I ctk \
+	-I lib \
+	-I loader \
+	-I uip \
+	-I arch \
+	-I $(CONTIKI)/apps \
+	-I $(CONTIKI)/ctk \
+	-I $(CONTIKI)/ek \
+	-I $(CONTIKI)/lib \
+	-I $(CONTIKI)/ppp \
+	-I $(CONTIKI)/uip \
+	-mz80 -D__fastcall__=/**/ -D__CPC__ -DCLK_TCK=16384 \
+	--no-std-crt0 --opt-code-size --peep-file ~/peeph/peep.def
+
+CLFLAGS= 
+OPT=
+AFLAGS = -o -g
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(OPT) -o $*.o $<
+
+%.o: %.s
+	$(AS) $(AFLAGS) $*.o $<
+
+UIP=	../contiki/uip/uip.o \
+	uip/uip_arch.o \
+	../contiki/uip/resolv.o \
+	../contiki/uip/tcpip.o \
+	../contiki/uip/uiplib.o 
+
+
+#	../contiki/uip/uip-signal.o
+#	../contiki/uip/uip_main.o \
+
+
+WWW=	../contiki/apps/www.o \
+	../contiki/apps/webclient.o \
+	../contiki/apps/http-strings.o \
+	../contiki/apps/http-user-agent-string.o \
+	../contiki/apps/htmlparser.o \
+	../contiki/apps/html-strings.o 
+
+EMAIL= ../contiki/apps/email.o \
+	../contiki/apps/smtp-socket.o \
+	../contiki/apps/smtp-strings.o \
+	../contiki/ctk-textedit.o \
+	../contiki/uip/socket.o \
+	./lib/lc-asm.o \
+	../lib/memb.o 
+
+WEBSERVER= ../contiki/apps/webserver.o ../contiki/apps/httpd.o \
+	../contiki/apps/http-strings.o \
+	../contiki/apps/httpd-fs.o \
+	../contiki/uip/socket.o \
+	../contiki/uip/uipbuf.o \
+	../contiki/apps/httpd-cgi.o \
+	../contiki/lib/memb.o \
+	./lib/lc-asm.o 
+
+TELNET= ../contiki/apps/simpletelnet.o ../contiki/apps/telnet.o 
+
+WGET= apps/wget.o ../contiki/apps/webclient.o \
+	../contiki/apps/http-strings.o \
+	../contiki/apps/http-user-agent-string.o 
+
+clean: 
+	rm -f ../arch/*.o
+	rm -f ../loader/*.o
+	rm -f ../contiki/ctk/*.o 
+	rm -f ../contiki/ctk/*.asm
+	rm -f ../contiki/ctk/*.lst
+	rm -f ../contiki/ctk/*.map
+	rm -f ../contiki/ctk/*.sym
+	rm -f ../contiki/ctk/*.rst
+	rm -f ../contiki/ek/*.o 
+	rm -f ../contiki/ek/*.asm 
+	rm -f ../contiki/ek/*.lst
+	rm -f ../contiki/ek/*.map
+	rm -f ../contiki/ek/*.sym
+	rm -f ../contiki/ek/*.rst
+	rm -f ../contiki/lib/*.o 
+	rm -f ../contiki/lib/*.asm 
+	rm -f ../contiki/lib/*.lst
+	rm -f ../contiki/lib/*.map
+	rm -f ../contiki/lib/*.sym
+	rm -f ../contiki/lib/*.rst
+	rm -f ../contiki/apps/*.o 
+	rm -f ../contiki/apps/*.ihx
+	rm -f ../contiki/apps/*.lnk 
+	rm -f ../contiki/apps/*.asm 
+	rm -f ../contiki/apps/*.lst
+	rm -f ../contiki/apps/*.sym
+	rm -f ../contiki/apps/*.prg
+	rm -f ../contiki/apps/*.dsc
+	rm -f ../contiki/apps/*.ams
+	rm -f ../contiki/apps/*.bin
+	rm -f ../contiki/apps/*.map
+	rm -f ../contiki/apps/*.rst
+	rm -f ../contiki/uip/*.o 
+	rm -f ../contiki/uip/*.ihx
+	rm -f ../contiki/uip/*.lnk 
+	rm -f ../contiki/uip/*.asm 
+	rm -f ../contiki/uip/*.lst
+	rm -f ../contiki/uip/*.sym
+	rm -f ../contiki/uip/*.prg
+	rm -f ../contiki/uip/*.dsc
+	rm -f ../contiki/uip/*.ams
+	rm -f ../contiki/uip/*.bin
+	rm -f ./apps/*.o 
+	rm -f ./apps/*.ihx
+	rm -f ./apps/*.lnk 
+	rm -f ./apps/*.asm 
+	rm -f ./apps/*.lst
+	rm -f ./apps/*.sym
+	rm -f ./apps/*.prg
+	rm -f ./apps/*.dsc
+	rm -f ./apps/*.ams
+	rm -f ./apps/*.bin
+	rm -f ./apps/*.map
+	rm -f ./apps/*.rst
+	rm -f ./ctk/*.o 
+	rm -f ./ctk/*.ihx
+	rm -f ./ctk/*.lnk 
+	rm -f ./ctk/*.asm 
+	rm -f ./ctk/*.lst
+	rm -f ./ctk/*.sym
+	rm -f ./ctk/*.prg
+	rm -f ./ctk/*.dsc
+	rm -f ./ctk/*.ams
+	rm -f ./ctk/*.bin
+	rm -f ./ctk/*.map
+	rm -f ./ctk/*.rst
+	rm -f lib/*.o 
+	rm -f lib/*.asm 
+	rm -f lib/*.lst
+	rm -f lib/*.map
+	rm -f lib/*.sym
+	rm -f loader/*.o 
+	rm -f loader/*.asm 
+	rm -f loader/*.lst
+	rm -f loader/*.map
+	rm -f loader/*.sym
+	rm -f uip/*.o 
+	rm -f uip/*.asm 
+	rm -f uip/*.lst
+	rm -f uip/*.map
+	rm -f uip/*.sym
+	rm -f arch/*.o 
+	rm -f arch/*.asm 
+	rm -f arch/*.lst
+	rm -f arch/*.map
+	rm -f arch/*.sym
+
+

@@ -1,0 +1,30 @@
+The contiki/conf/ directory contains example configuration
+files.
+
+cc-conf.h.example
+
+  An example configuration file for C compiler tweaks.
+
+clock-conf.h.example
+
+  An example configuration file for the clock module.
+
+ctk-conf.h.example
+
+  An example configuration file for the CTK GUI module.
+
+ek-conf.h.example
+
+  An example configuration file for the Contiki event kernel.
+
+telnetd-conf.h.example
+
+  An example configuration file for the telnet server.
+
+uip-conf.h.example
+
+  An example configuration file for the uIP TCP/IP stack.
+
+www-conf.h.example
+
+  An example configuration file for the web browser.
