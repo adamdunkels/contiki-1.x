@@ -1,0 +1,621 @@
+contiki-main.o: contiki-main.c ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ctk/ctk-vncserver.h \
+ ../contiki/ctk/ctk-termtelnet.h ../contiki/lib/cfs-posix.h \
+ ../contiki/uip/uip-fw.h ../contiki/apps/about-dsc.h \
+ ../contiki/ek/dsc.h ../contiki/apps/calc-dsc.h \
+ ../contiki/apps/dhcp-dsc.h ../contiki/apps/editor-dsc.h \
+ ../contiki/apps/email-dsc.h ../contiki/apps/ftp-dsc.h \
+ ../contiki/apps/irc-dsc.h ../contiki/apps/netconf-dsc.h \
+ ../contiki/apps/processes-dsc.h ../contiki/apps/shell-dsc.h \
+ ../contiki/apps/vnc-dsc.h ../contiki/apps/www-dsc.h \
+ ../contiki/apps/cmdd.h ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h
+html-test.o: html-test.c ../contiki/apps/htmlparser.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h
+pt-test-cpp.o: pt-test-cpp.c
+pt-test.o: pt-test.c ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h
+pttest.o: pttest.c ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h
+smtp-pre.o: smtp-pre.c
+smtp-pre2.o: smtp-pre2.c
+smtp-socket-2.o: smtp-socket-2.c ../contiki/apps/smtp.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/apps/smtp-strings.h \
+ ../contiki/uip/socket-2.h ../contiki/ek/pt-2.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h ../contiki/uip/uipbuf.h \
+ ../contiki/lib/memb.h
+test-sem.o: test-sem.c ../contiki/ek/pt-sem.h ../contiki/ek/pt.h \
+ ../contiki/ek/lc.h ../contiki/ek/lc-switch.h
+test-stack.o: test-stack.c lib/lc.h
+codeprop.o: apps/codeprop.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h apps/codeprop.h
+http-user-agent-string.o: apps/http-user-agent-string.c
+httpd-fsdata.o: apps/httpd-fsdata.c
+nntpc-strings.o: apps/nntpc-strings.c
+nntpd-strings.o: apps/nntpd-strings.c
+nntpd.o: apps/nntpd.c ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ conf/uip-conf.h ../contiki/uip/tcpip.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h apps/nntpd-strings.h apps/nntpd.h
+presenter-dsc.o: apps/presenter-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+presenter-parser.o: apps/presenter-parser.c apps/presenter-parser.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+shell.o: apps/shell.c ../contiki/apps/program-handler.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/lib/cfs.h \
+ ../contiki/lib/cfs-service.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uip_arp.h \
+ ../contiki/uip/resolv.h ../contiki/apps/shell.h
+sidcomposer.o: apps/sidcomposer.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h
+test-httpd.o: apps/test-httpd.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/ek/pt.h \
+ ../contiki/ek/lc.h ../contiki/ek/lc-switch.h
+test-proto.o: apps/test-proto.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/ek/pt.h \
+ ../contiki/ek/lc.h ../contiki/ek/lc-switch.h apps/filecache.h
+vnc-draw.o: apps/vnc-draw.c ../contiki/apps/vnc-draw.h uip/uip_arch.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h conf/vnc-conf.h
+wget-dsc.o: apps/wget-dsc.c ../contiki/ek/dsc.h ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h
+ctk-gtksim-conio.o: ctk/ctk-gtksim-conio.c ../contiki/lib/libconio.h \
+ conf/libconio-conf.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h
+ctk-gtksim-draw.o: ctk/ctk-gtksim-draw.c ctk/ctk-gtksim.h \
+ ctk/ctk-gtksim-draw.h
+ctk-gtksim-service.o: ctk/ctk-gtksim-service.c \
+ ../contiki/ctk/ctk-draw-service.h ../contiki/ek/ek-service.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ctk/ctk-gtksim-draw.h
+ctk-gtksim.o: ctk/ctk-gtksim.c ../contiki/lib/libconio.h \
+ conf/libconio-conf.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ctk/ctk-mouse.h
+lc.o: lib/lc.c lib/lc.h
+mtarch.o: lib/mtarch.c ../contiki/ek/mt.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h lib/mtarch.h
+tapdev-service.o: uip/tapdev-service.c ../contiki/uip/packet-service.h \
+ ../contiki/ek/ek-service.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ conf/uip-conf.h ../contiki/uip/tcpip.h uip/tapdev.h \
+ ../contiki/uip/uip_arp.h
+tapdev.o: uip/tapdev.c ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ conf/uip-conf.h ../contiki/uip/tcpip.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/uip/uip_arp.h
+uip_arch.o: uip/uip_arch.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h uip/uip_arch.h
+about-dsc.o: ../contiki/apps/about-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+calc-dsc.o: ../contiki/apps/calc-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+calc.o: ../contiki/apps/calc.c ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h
+cmdd.o: ../contiki/apps/cmdd.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/uip/psock.h \
+ ../contiki/ek/pt.h ../contiki/ek/lc.h ../contiki/ek/lc-switch.h \
+ ../contiki/uip/uipbuf.h
+dhcp-dsc.o: ../contiki/apps/dhcp-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+dhcp.o: ../contiki/apps/dhcp.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/uip/dhcpc.h
+directory.o: ../contiki/apps/directory.c ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h ../contiki/lib/cfs.h \
+ ../contiki/lib/cfs-service.h ../contiki/ek/ek-service.h \
+ ../contiki/apps/program-handler.h ../contiki/ek/dsc.h
+editor-dsc.o: ../contiki/apps/editor-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+editor.o: ../contiki/apps/editor.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/lib/cfs.h \
+ ../contiki/lib/cfs-service.h ../contiki/lib/ctk-filedialog.h
+email-dsc.o: ../contiki/apps/email-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+ftp-dsc.o: ../contiki/apps/ftp-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+ftp.o: ../contiki/apps/ftp.c ../contiki/apps/ftpc.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/lib/cfs.h ../contiki/lib/cfs-service.h
+ftpc-socket.o: ../contiki/apps/ftpc-socket.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/apps/ftpc.h
+ftpc.o: ../contiki/apps/ftpc.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/apps/ftpc.h
+html-strings.o: ../contiki/apps/html-strings.c
+htmlparser.o: ../contiki/apps/htmlparser.c \
+ ../contiki/apps/htmlparser.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki/apps/html-strings.h conf/www-conf.h
+http-strings.o: ../contiki/apps/http-strings.c
+http-user-agent-string.o: ../contiki/apps/http-user-agent-string.c
+httpd-fs.o: ../contiki/apps/httpd-fs.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/apps/httpd.h \
+ ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
+ ../contiki/ek/ek-service.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/uip/psock.h \
+ ../contiki/ek/pt.h ../contiki/ek/lc.h ../contiki/ek/lc-switch.h \
+ ../contiki/uip/uipbuf.h ../contiki/apps/httpd-fs.h \
+ ../contiki/apps/httpd-fsdata.h ../contiki/apps/httpd-fsdata.c
+httpd-fsdata.o: ../contiki/apps/httpd-fsdata.c
+httpd.o: ../contiki/apps/httpd.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/apps/httpd.h \
+ ../contiki/uip/psock.h ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h ../contiki/uip/uipbuf.h \
+ ../contiki/apps/httpd-fs.h ../contiki/apps/httpd-cgi.h
+irc-dsc.o: ../contiki/apps/irc-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+ircc-strings.o: ../contiki/apps/ircc-strings.c
+netconf-dsc.o: ../contiki/apps/netconf-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+netconf.o: ../contiki/apps/netconf.c ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ conf/uip-conf.h ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/uip_arp.h ../contiki/uip/resolv.h ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ctk/ctk-draw.h
+pop.o: ../contiki/apps/pop.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/apps/popc.h \
+ ../contiki/uip/psock.h ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h ../contiki/uip/uipbuf.h
+popc-strings.o: ../contiki/apps/popc-strings.c
+popc.o: ../contiki/apps/popc.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/apps/popc.h \
+ ../contiki/uip/psock.h ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h ../contiki/uip/uipbuf.h \
+ ../contiki/apps/popc-strings.h
+processes-dsc.o: ../contiki/apps/processes-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+processes.o: ../contiki/apps/processes.c ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h
+program-handler.o: ../contiki/apps/program-handler.c \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ctk/ctk-draw.h ../contiki/ek/log.h conf/log-conf.h \
+ ../contiki/apps/program-handler.h ../contiki/ek/dsc.h \
+ conf/program-handler-conf.h
+shell-dsc.o: ../contiki/apps/shell-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+shell-gui.o: ../contiki/apps/shell-gui.c ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/apps/program-handler.h \
+ ../contiki/ek/dsc.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uip_arp.h ../contiki/uip/resolv.h \
+ ../contiki/apps/shell.h conf/shell-gui-conf.h
+smtp-socket.o: ../contiki/apps/smtp-socket.c ../contiki/apps/smtp.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/apps/smtp-strings.h \
+ ../contiki/uip/psock.h ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h ../contiki/uip/uipbuf.h \
+ ../contiki/lib/memb.h
+smtp-strings.o: ../contiki/apps/smtp-strings.c
+smtp.o: ../contiki/apps/smtp.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/apps/smtp.h \
+ ../contiki/apps/smtp-strings.h
+telnet-dsc.o: ../contiki/apps/telnet-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+telnet.o: ../contiki/apps/telnet.c ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/apps/telnet.h
+telnetd-dsc.o: ../contiki/apps/telnetd-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+vnc-dsc.o: ../contiki/apps/vnc-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+vnc-viewer.o: ../contiki/apps/vnc-viewer.c ../contiki/apps/vnc-draw.h \
+ uip/uip_arch.h ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ conf/uip-conf.h ../contiki/uip/tcpip.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/apps/vnc-viewer.h
+webclient.o: ../contiki/apps/webclient.c ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/uip/tcpip.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/apps/webclient.h \
+ ../contiki/apps/http-strings.h \
+ ../contiki/apps/http-user-agent-string.h ../contiki/uip/resolv.h \
+ ../contiki/uip/uiplib.h conf/www-conf.h
+webserver-dsc.o: ../contiki/apps/webserver-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+webserver.o: ../contiki/apps/webserver.c ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/apps/http-strings.h \
+ ../contiki/apps/webserver.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/apps/httpd.h ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/uip/psock.h ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h ../contiki/uip/uipbuf.h \
+ ../contiki/apps/httpd-fs.h
+www-dsc.o: ../contiki/apps/www-dsc.c ../contiki/ek/dsc.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+ctk-conio-service.o: ../contiki/ctk/ctk-conio-service.c \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ctk/ctk-draw-service.h ../contiki/ek/ek-service.h \
+ conf/ctk-conio-conf.h
+ctk-conio.o: ../contiki/ctk/ctk-conio.c ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h \
+ conf/ctk-conio-conf.h
+ctk-draw.o: ../contiki/ctk/ctk-draw.c ../contiki/ek/ek-service.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ctk/ctk-draw-service.h
+ctk-mouse.o: ../contiki/ctk/ctk-mouse.c ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ctk/ctk-mouse.h
+ctk-term-in.o: ../contiki/ctk/ctk-term-in.c ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk-term.h \
+ ../contiki/ctk/ctk-term-int.h ../contiki/ctk/ctk-term-ascii.h
+ctk-term-out.o: ../contiki/ctk/ctk-term-out.c \
+ ../contiki/lib/libconio.h conf/libconio-conf.h \
+ ../contiki/ctk/ctk-term-int.h
+ctk-term.o: ../contiki/ctk/ctk-term.c ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
+ ../contiki/ek/ek-service.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/ctk/ctk-term.h ../contiki/ctk/ctk-term-int.h \
+ ../contiki/ctk/ctk-term-out.h conf/ctk-term-conf.h \
+ ../contiki/lib/libconio.h conf/libconio-conf.h
+ctk-termtelnet.o: ../contiki/ctk/ctk-termtelnet.c \
+ ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/ctk/ctk-term.h \
+ conf/ctk-term-conf.h
+ctk-vncfont.o: ../contiki/ctk/ctk-vncfont.c
+ctk-vncserver-service.o: ../contiki/ctk/ctk-vncserver-service.c \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ctk/ctk-draw-service.h ../contiki/ek/ek-service.h \
+ ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/ctk/vnc-server.h \
+ ../contiki/ctk/vnc-out.h ../contiki/ctk/ctk-vncfont.h \
+ ../contiki/ctk/ctk-vncserver.h conf/ctk-vncserver-conf.h
+ctk-vncserver.o: ../contiki/ctk/ctk-vncserver.c ../contiki/ctk/ctk.h \
+ conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
+ ../contiki/ek/ek-service.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uiplib.h ../contiki/uip/resolv.h ../contiki/lib/memb.h \
+ ../contiki/lib/timer.h ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/ctk/vnc-server.h ../contiki/ctk/vnc-out.h \
+ ../contiki/ctk/ctk-vncfont.h ../contiki/ctk/ctk-vncserver.h \
+ conf/ctk-vncserver-conf.h ../contiki/lib/libconio.h \
+ conf/libconio-conf.h
+ctk.o: ../contiki/ctk/ctk.c ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ctk/ctk-draw.h \
+ ../contiki/ctk/ctk-mouse.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h
+vnc-out.o: ../contiki/ctk/vnc-out.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki/ctk/vnc-server.h ../contiki/ctk/vnc-out.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h \
+ ../contiki/lib/libconio.h conf/libconio-conf.h \
+ conf/ctk-vncserver-conf.h ../contiki/ctk/ctk-vncfont.h \
+ ../contiki/ctk/ctk-mouse.h
+vnc-server.o: ../contiki/ctk/vnc-server.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h \
+ ../contiki/ctk/vnc-server.h ../contiki/ctk/vnc-out.h \
+ ../contiki/ctk/ctk.h conf/ctk-conf.h ctk/ctk-arch.h ctk/ctk-gtksim.h
+arg.o: ../contiki/ek/arg.c ../contiki/ek/arg.h
+ek-service.o: ../contiki/ek/ek-service.c ../contiki/ek/ek-service.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ek/log.h \
+ conf/log-conf.h
+ek.o: ../contiki/ek/ek.c ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h
+mt.o: ../contiki/ek/mt.c ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/mt.h lib/mtarch.h
+cfs-posix.o: ../contiki/lib/cfs-posix.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/lib/cfs.h \
+ ../contiki/lib/cfs-service.h
+cfs.o: ../contiki/lib/cfs.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/lib/cfs.h \
+ ../contiki/lib/cfs-service.h
+conio-portlib.o: ../contiki/lib/conio-portlib.c
+ctk-filedialog.o: ../contiki/lib/ctk-filedialog.c \
+ ../contiki/ek/contiki.h ../contiki/ek/contiki-version.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h \
+ ../contiki/lib/ctk-filedialog.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/lib/cfs.h \
+ ../contiki/lib/cfs-service.h
+ctk-textedit.o: ../contiki/lib/ctk-textedit.c \
+ ../contiki/lib/ctk-textedit.h ../contiki/ctk/ctk.h conf/ctk-conf.h \
+ ctk/ctk-arch.h ctk/ctk-gtksim.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h
+libconio.o: ../contiki/lib/libconio.c ../contiki/lib/libconio.h \
+ conf/libconio-conf.h
+list.o: ../contiki/lib/list.c ../contiki/lib/list.h
+memb.o: ../contiki/lib/memb.c ../contiki/lib/memb.h
+petsciiconv.o: ../contiki/lib/petsciiconv.c
+readelf.o: ../contiki/lib/readelf.c
+strncasecmp.o: ../contiki/lib/strncasecmp.c
+timer.o: ../contiki/lib/timer.c ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h
+dhcpc.o: ../contiki/uip/dhcpc.c ../contiki/ek/contiki.h \
+ ../contiki/ek/contiki-version.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/uip/uiplib.h \
+ ../contiki/uip/resolv.h ../contiki/lib/memb.h ../contiki/lib/timer.h \
+ ../contiki/lib/clock.h conf/clock-conf.h ../contiki/uip/dhcpc.h \
+ ../contiki/uip/uip_arp.h ../contiki/ek/pt.h ../contiki/ek/lc.h \
+ ../contiki/ek/lc-switch.h
+psock.o: ../contiki/uip/psock.c ../contiki/uip/psock.h \
+ ../contiki/ek/pt.h ../contiki/ek/lc.h ../contiki/ek/lc-switch.h \
+ ../contiki/uip/uipbuf.h ../contiki/uip/uip.h ../contiki/uip/uipopt.h \
+ conf/uip-conf.h ../contiki/uip/tcpip.h ../contiki/ek/ek.h \
+ conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/lib/memb.h
+resolv.o: ../contiki/uip/resolv.c ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/uip/tcpip.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/resolv.h
+slipdev.o: ../contiki/uip/slipdev.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip-fw.h \
+ ../contiki/uip/slipdev.h
+tcpdump.o: ../contiki/uip/tcpdump.c ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h
+tcpip.o: ../contiki/uip/tcpip.c ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/ek/ek-service.h \
+ ../contiki/uip/uip-fw.h ../contiki/lib/timer.h ../contiki/lib/clock.h \
+ conf/clock-conf.h ../contiki/uip/packet-service.h \
+ ../contiki/uip/uip-split.h
+uip-fw-service.o: ../contiki/uip/uip-fw-service.c \
+ ../contiki/uip/packet-service.h ../contiki/ek/ek-service.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/uip/uip-fw.h
+uip-fw.o: ../contiki/uip/uip-fw.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip_arch.h \
+ ../contiki/uip/uip-fw.h
+uip-pt.o: ../contiki/uip/uip-pt.c
+uip-split.o: ../contiki/uip/uip-split.c ../contiki/uip/uip-split.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h ../contiki/uip/uip-fw.h \
+ ../contiki/uip/uip_arch.h
+uip.o: ../contiki/uip/uip.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip_arch.h
+uip_arp.o: ../contiki/uip/uip_arp.c ../contiki/uip/uip_arp.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h
+uipbuf.o: ../contiki/uip/uipbuf.c ../contiki/uip/uipbuf.h \
+ ../contiki/uip/uip.h ../contiki/uip/uipopt.h conf/uip-conf.h \
+ ../contiki/uip/tcpip.h ../contiki/ek/ek.h conf/ek-conf.h \
+ ../contiki/lib/cc.h conf/cc-conf.h ../contiki/ek/arg.h \
+ ../contiki/ek/loader.h
+uiplib.o: ../contiki/uip/uiplib.c ../contiki/uip/uip.h \
+ ../contiki/uip/uipopt.h conf/uip-conf.h ../contiki/uip/tcpip.h \
+ ../contiki/ek/ek.h conf/ek-conf.h ../contiki/lib/cc.h conf/cc-conf.h \
+ ../contiki/ek/arg.h ../contiki/ek/loader.h ../contiki/uip/uip_arp.h \
+ ../contiki/uip/uiplib.h
